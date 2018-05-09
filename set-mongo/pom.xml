@@ -13,7 +13,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<artifactId>set-mongo</artifactId>
 	<name>Europeana (User) Sets  - Mongo based persistance </name>
 	<url>http://www.europeanalabs.eu</url>
@@ -31,17 +31,30 @@
 			<artifactId>set-definitions</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
 			<version>${version.setApi}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>eu.europeana.api.commons</groupId>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
 			<version>${version.commonsApi}</version>
 			<artifactId>commons-nosql</artifactId>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${version.commonsLang3}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIo}</version>
 		</dependency>
 		
 		<dependency>
@@ -50,8 +63,8 @@
 			<version>${version.junit}</version>
 			<scope>test</scope>
 		</dependency>
-		
-		<!--  overwrite   -->
+
+		<!-- overwrite -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
@@ -62,24 +75,22 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>${version.spring}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 			<version>${version.spring}</version>
 		</dependency>
-		
+
 		<!-- TESTING PURPOSES -->
-		
+
 		<dependency>
 			<scope>test</scope>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<!-- 
-			<version>${version.springCore}</version>
-			 -->
+			<!-- <version>${version.springCore}</version> -->
 			<version>${version.spring}</version>
 		</dependency>
 	</dependencies>
-	
+
 </project>

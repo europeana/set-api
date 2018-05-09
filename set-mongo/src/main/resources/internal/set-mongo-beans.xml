@@ -24,8 +24,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	">
 
-
-	<bean name="annotation_mongo_contextcontainer" class="eu.europeana.annotation.mongo.ApplicationContextContainer"/>
+	<bean name="set_mongo_contextcontainer" class="eu.europeana.api.commons.nosql.context.ApplicationContextContainer"/>
 
 	<!-- simple cache manager -->
 	<!--

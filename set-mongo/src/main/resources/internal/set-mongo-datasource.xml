@@ -34,13 +34,9 @@
 
 	<bean id="set_db_morphia_datastore_set" factory-bean="set_db_mongoConnector" factory-method="createDatastore">
 		<constructor-arg value="#{setProperties['mongodb.set.connectionUrl']}" type="java.lang.String" />
-		<!--  not used anymore, dbname taken from connection URL 
-		<constructor-arg value="#{setProperties['mongodb.set.dbname']}" type="java.lang.String" />
-		-->
-		<!--
 		<constructor-arg value="#{setProperties['mongodb.set.truststore']}" type="java.lang.String" />
 		<constructor-arg value="#{setProperties['mongodb.set.truststorepass']}" type="java.lang.String" />
-		-->
+
 	
 	</bean>
 	

@@ -29,6 +29,8 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 	
+	<import resource="set-common-context.xml"/>
+	
 	<!-- INTERNAL DEFINITIONS -->
 	<import resource="internal/set-mongo-datasource.xml"/>
 	<import resource="internal/set-mongo-beans.xml"/>
@@ -39,12 +41,5 @@
 	<bean name="set_db_setService" class="eu.europeana.set.mongo.service.PersistentUserSetServiceImpl"
 		p:dao-ref="set_db_setDao">
 	</bean>
-		
-	<!--
-	<bean name="annotation_db_clientService" class="eu.europeana.set.mongo.service.PersistentClientServiceImpl"
-		p:dao-ref="annotation_db_clientDao"/>
-		-->
-		
-	
 			
 </beans>
