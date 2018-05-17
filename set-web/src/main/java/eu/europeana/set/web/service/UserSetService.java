@@ -1,7 +1,11 @@
 package eu.europeana.set.web.service;
 
+import com.fasterxml.jackson.core.JsonParseException;
+
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 
 public interface UserSetService {
 
@@ -36,7 +40,7 @@ public interface UserSetService {
 	 * @param
 	 * @return UserSet object
 	 */
-//	public UserSet getUserSetById(UserSetId annoId) throws UserSetNotFoundException, UserAuthorizationException;
+	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; //, UserAuthorizationException;
 		
 	/**
 	 * Search for UserSets by the given text query.
@@ -63,5 +67,13 @@ public interface UserSetService {
 	 */
 //	public boolean existsInDb(UserSetId annoId); 
 	
+	/**
+	 * This methods converts user set object from JsonLd string format to a UserSet object
+	 * @param userSetJsonLdStr
+	 * @return a UserSet object
+	 * @throws JsonParseException
+	 * @throws HttpException
+	 */
+	public UserSet parseUserSetLd(String userSetJsonLdStr) throws JsonParseException, HttpException;
 	
 }

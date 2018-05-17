@@ -16,8 +16,7 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 	@Id
 	private ObjectId id;
 
-	private String identifier;
-
+	
     public ObjectId getObjectId() {
 		return id;
 	}
@@ -25,16 +24,8 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 	public void setObjectId(ObjectId id) {
 		this.id = id;
 	}
-	
-	public String getIdentifier() {
-		return identifier;
-	}
-	
-	public void setIdentifier(String sequenceIdentifier) {
-		this.identifier = sequenceIdentifier;
-	}
-	
-		@Override
+		
+	@Override
 	public String toString() {
 		return "PersistentUserSet [Title:" + getTitle() + ", created:" + getCreated() + 
 				", Id:" + getObjectId() + ", Identifier:" + getIdentifier() + 

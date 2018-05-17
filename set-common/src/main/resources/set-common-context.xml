@@ -32,7 +32,7 @@
 		location="classpath:config/set.properties" />
 		
     <!--  configuration bean -->
-	<beans:bean id="configuration" class="eu.europeana.set.config.UserSetConfigurationImpl">
+	<beans:bean id="configuration" class="eu.europeana.set.definitions.config.UserSetConfigurationImpl">
 		<beans:property name="setProperties" ref="setProperties"/> 	
     </beans:bean>
    

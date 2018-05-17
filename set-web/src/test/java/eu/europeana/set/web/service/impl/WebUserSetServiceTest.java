@@ -17,16 +17,15 @@
 package eu.europeana.set.web.service.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.stanbol.commons.exception.JsonParseException;
+//import org.apache.commons.lang.StringUtils;
+//import org.apache.stanbol.commons.exception.JsonParseException;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,31 +36,77 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
+import eu.europeana.set.mongo.model.PersistentUserSetImpl;
+import eu.europeana.set.utils.JsonUtils;
+import eu.europeana.set.utils.serialize.UserSetLdSerializer;
+import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
 
 /**
  * Unit test for the Web UserSet service
- * @deprecated adapt to use UserSetLdParser and UserSetLdDeserializerDeprecated
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/userset-web-context.xml", "/userset-mongo-test.xml"
+//@ContextConfiguration({ "/set-mongo-context.xml", "/set-mongo-test.xml"
+@ContextConfiguration({ "/set-web-context.xml", "/set-mongo-context.xml", "/set-mongo-test.xml"
 	})
-public class WebUserSetServiceTest extends UserSetTestObjectBuilder{
+public class WebUserSetServiceTest { //extends UserSetTestDataBuilder {//UserSetTestObjectBuilder{
 
-	public static String TEST_RO_VALUE = "Vlad Tepes";
-	public static String TEST_EN_VALUE = "Vlad the Impaler";
+	String baseUserSetUrl = null;
+	
+	public void setBaseUserSetUrl(String baseUserSetUrl) {
+		this.baseUserSetUrl = baseUserSetUrl;
+	}
+
+
+	public String getBaseUserSetUrl() {
+		return baseUserSetUrl;
+	}
+	
+//	public WebUserSetServiceTest(String baseUserSetUrl) {
+//		this.baseUserSetUrl = baseUserSetUrl;
+////		super(baseUserSetUrl);
+//	}
+
+//	public static String TEST_RO_VALUE = "Vlad Tepes";
+//	public static String TEST_EN_VALUE = "Vlad the Impaler";
 	
 	@Resource 
 	UserSetService webUserSetService;
 	
+	UserSetTestObjectBuilder objectBuilder;
+	
+	public UserSetTestObjectBuilder getObjectBuilder() {
+		return objectBuilder;
+	}
+
+	public void setObjectBuilder(UserSetTestObjectBuilder objectBuilder) {
+		this.objectBuilder = objectBuilder;
+	}
+	
+//	@Resource 
+//	UserSetConfiguration configuration;
+	
 	@Rule public ExpectedException thrown= ExpectedException.none();
+	
+	/**
+	 * Initialize the testing session
+	 * 
+	 * @throws IOException
+	 */
+	@Before
+	public void setup() throws IOException {
+//		setBaseUserSetUrl(configuration.getUserSetBaseUrl());
+		objectBuilder = new UserSetTestObjectBuilder();
+	}
 	
 	@Test
 	public void testStoreUserSetInDbRetrieveAndSerialize() 
-			throws MalformedURLException, IOException, UserSetServiceException {//, JsonParseException {
+			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {//, JsonParseException {
 		
-		UserSet testUserSet = createTestUserSetInstance();		
-
+		UserSet userSet = new PersistentUserSetImpl();
+		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet);
+		
 		/**
 		 * Serialize an original UserSet test object.
 		 */
@@ -79,11 +124,10 @@ public class WebUserSetServiceTest extends UserSetTestObjectBuilder{
 		/**
 		 * Store UserSet in database.
 		 */
-		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
-		
-//		if (StringUtils.isBlank(webUserSet.getType())) {
-//			webUserSet.setType(UserSetTypes.OBJECT_TAG.name());
-//		}
+//		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+//		String userSetId = "http://localhost:8080/set34";
+		String userSetId = "36";
+		UserSet webUserSet = webUserSetService.getUserSetById(userSetId);
 		
 		System.out.println("testUserSet: " + testUserSet.toString());
 		System.out.println("webUserSet: " + webUserSet.toString());
@@ -96,29 +140,27 @@ public class WebUserSetServiceTest extends UserSetTestObjectBuilder{
 		 * Serialize UserSet object that was retrieved from a database.
 		 */
 //		(JsonLd) webUserSet
-//		UserSetLdSerializer serializer = new UserSetLdSerializer(webUserSet);
+		UserSetLdSerializer serializer = new UserSetLdSerializer(); //webUserSet);
 //        UserSetLdParser parser = new UserSetLdParser();
+//        JsonUtils parser = new JsonUtils();
         
-//        String actual = serializer.toString();
-//        System.out.println(actual);
-////        UserSetLd.toConsole("", actual);
-//        
+        String userSetJsonLdStr = serializer.serialize(webUserSet); //serializer.toString();
+        System.out.println(userSetJsonLdStr);
+//        UserSetLd.toConsole("", actual);
+        
 //        String actualIndent = serializer.toString(4);
 //        UserSetLd.toConsole("", actualIndent);
         
         /**
          * read UserSet object from the serialized UserSetLd object.
          */
-//        UserSet UserSetFromUserSetLd = parser.parseUserSet(null, actualIndent);
+//        UserSet userSetFromUserSetLd = parser.parseUserSet(WebUserSetImpl.class, userSetJsonLdStr);
+        UserSet userSetFromUserSetLd = JsonUtils.toUserSetObject(userSetJsonLdStr, WebUserSetImpl.class);
         
         /**
          * Compare original UserSet object with retrieved serialized UserSet object.
          */     
-        // Original object does not have EuropeanaUri
-//        UserSetFromUserSetLd.setUserSetId(testUserSet.getUserSetId());
-//        //TODO: update test criteria
-//        assertEquals(UserSetFromUserSetLd.getTarget(), testUserSet.getTarget());
-//        assertEquals(UserSetFromUserSetLd.getBody(), testUserSet.getBody());
+        assertEquals(userSetFromUserSetLd.getTitle(), testUserSet.getTitle());
 	}
 		
 }

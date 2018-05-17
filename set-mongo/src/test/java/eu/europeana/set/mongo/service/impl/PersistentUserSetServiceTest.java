@@ -15,9 +15,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import eu.europeana.api.commons.nosql.dao.NosqlDao;
-import eu.europeana.set.config.UserSetConfiguration;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
+import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
@@ -41,6 +42,16 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	@Resource(name = "set_db_setDao")
 	NosqlDao<PersistentUserSet, UserSetId> userSetDao;
 
+	UserSetTestObjectBuilder objectBuilder;
+	
+	public UserSetTestObjectBuilder getObjectBuilder() {
+		return objectBuilder;
+	}
+
+	public void setObjectBuilder(UserSetTestObjectBuilder objectBuilder) {
+		this.objectBuilder = objectBuilder;
+	}
+
 	/**
 	 * Initialize the testing session
 	 * 
@@ -50,7 +61,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	public void setup() throws IOException {
 		userSetDao.getCollection().drop();
 		setBaseUserSetUrl(configuration.getUserSetBaseUrl());
-		
+		objectBuilder = new UserSetTestObjectBuilder();
 	}
 
 	/**
@@ -66,19 +77,14 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	@Test
 	public void testStoreUserSet() {
 
-		UserSet persistentUserSet = buildUserSet();
-
-		UserSet storedUserSet = userSetService.store(persistentUserSet); 
-		checkUserSet(persistentUserSet, storedUserSet);
-
+		UserSet storedUserSet = storeUserSet(); 
 		assertTrue(storedUserSet instanceof UserSet);
 	}
 		 
 	@Test
 	public void testGetUserSetById() {
 
-		UserSet persistentUserSet = buildUserSet();
-		UserSet storedUserSet = userSetService.store(persistentUserSet); 
+		UserSet storedUserSet = storeUserSet(); 
 		UserSet foundUserSet = userSetService
 				.findByID(((PersistentUserSetImpl) storedUserSet).getObjectId().toString());
 		checkUserSet(foundUserSet, storedUserSet);
@@ -87,12 +93,19 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 		assertEquals(((PersistentUserSetImpl) storedUserSet).getObjectId().toString(),
 				((PersistentUserSetImpl) foundUserSet).getObjectId().toString());
 	}
+
+	private UserSet storeUserSet() {
+		UserSet userSet = new PersistentUserSetImpl();
+		UserSet persistentUserSet = getObjectBuilder().buildUserSet(userSet);
+		UserSet storedUserSet = userSetService.store(persistentUserSet);
+		checkUserSet(persistentUserSet, storedUserSet);
+		return storedUserSet;
+	}
 		 
 	@Test
 	public void testGetUserSetByIdentifier() {
 
-		UserSet persistentUserSet = buildUserSet();
-		UserSet storedUserSet = userSetService.store(persistentUserSet); 
+		UserSet storedUserSet = storeUserSet(); 
 		UserSet foundUserSet = userSetService
 				.getByIdentifier(((PersistentUserSetImpl) storedUserSet).getIdentifier());
 		checkUserSet(foundUserSet, storedUserSet);

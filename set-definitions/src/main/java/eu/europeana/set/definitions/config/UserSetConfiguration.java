@@ -1,4 +1,4 @@
-package eu.europeana.set.config;
+package eu.europeana.set.definitions.config;
 
 public interface UserSetConfiguration {
 

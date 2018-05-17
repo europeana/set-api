@@ -11,7 +11,7 @@ import org.mongodb.morphia.query.Query;
 import org.springframework.stereotype.Component;
 
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
-import eu.europeana.set.config.UserSetConfiguration;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
@@ -62,7 +62,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 			throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);
 
 		long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER); //initializeUserSetId(object);
-		object.setIdentifier(getConfiguration().getUserSetBaseUrl() + sequenceId);
+//		object.setIdentifier(getConfiguration().getUserSetBaseUrl() + sequenceId);
+		object.setIdentifier("" + sequenceId);
 
 		// validate user set ID
 		if (StringUtils.isBlank(object.getIdentifier()) 

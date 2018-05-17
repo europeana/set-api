@@ -10,7 +10,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
-import eu.europeana.set.config.UserSetConfiguration;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.mongo.model.internal.GeneratedUserSetIdImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 

@@ -2,6 +2,7 @@ package eu.europeana.set.definitions.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 
@@ -11,13 +12,13 @@ public interface UserSet {
 
 	void setType(String type);
 
-	String getTitle();
+	Map<String, String> getTitle();
 
-	void setTitle(String title);
+	void setTitle(Map<String, String> title);
 
-	String getDescription();
+	Map<String, String> getDescription();
 
-	void setDescription(String description);
+	void setDescription(Map<String, String> setDescription);
 
 	String getItemType();
 
@@ -47,13 +48,13 @@ public interface UserSet {
 
 	void setModified(Date modified);
 
-	int getFirst();
+	String getFirst();
 
-	void setFirst(int first);
+	void setFirst(String first);
 
-	int getLast();
+	String getLast();
 
-	void setLast(int last);
+	void setLast(String last);
 
 	int getTotal();
 
@@ -78,4 +79,13 @@ public interface UserSet {
 	String getPartOf();
 
 	void setPartOf(String partOf);
+	
+	public String getIdentifier();
+	
+	public void setIdentifier(String sequenceIdentifier);
+	
+	public String getContext();
+	
+	public void setContext(String context);
+	
 }
