@@ -30,6 +30,9 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<PersistentUserSet, String>
 		implements PersistentUserSetService {
 
+	final String NOT_PERSISTENT_OBJECT = 
+			"User set object in not an instance of persistent user set.";
+
 	protected final Logger logger = Logger.getLogger(this.getClass());
 	
 	@Resource
@@ -61,8 +64,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		if (object.getCreator() == null)
 			throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);
 
-		long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER); //initializeUserSetId(object);
-//		object.setIdentifier(getConfiguration().getUserSetBaseUrl() + sequenceId);
+		long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER); 
 		object.setIdentifier("" + sequenceId);
 
 		// validate user set ID
@@ -92,10 +94,18 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@Override
 	public UserSet store(UserSet userSet) {
-		validatePersistentUserSet((PersistentUserSet) userSet);
-		return this.store((PersistentUserSetImpl) userSet);
+		
+		PersistentUserSet persistentObject = null;
+		
+		if (userSet instanceof PersistentUserSet) {
+			persistentObject = (PersistentUserSetImpl) userSet;
+		}else {
+    	    throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);			
+		}
+		
+		validatePersistentUserSet(persistentObject);
+		return this.store(persistentObject);
 	}
-
 
 	protected PersistentUserSetDao<PersistentUserSet, String> getUserSetDao() {
 		return (PersistentUserSetDao<PersistentUserSet, String>) getDao();

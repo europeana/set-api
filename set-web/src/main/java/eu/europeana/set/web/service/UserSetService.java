@@ -9,8 +9,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 
 public interface UserSetService {
 
-	public String getComponentName();
-	
 	/**
 	 * This method stores UserSet object in database and in Solr.
 	 * @param UserSet

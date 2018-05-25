@@ -16,19 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonParseException;
 
-//import eu.europeana.annotation.definitions.model.search.Query;
-//import eu.europeana.annotation.definitions.model.search.SearchProfiles;
-//import eu.europeana.annotation.definitions.model.search.result.AnnotationPage;
-//import eu.europeana.annotation.definitions.model.vocabulary.WebAnnotationFields;
-//import eu.europeana.annotation.solr.vocabulary.search.SortFields;
-//import eu.europeana.annotation.solr.vocabulary.search.SortOrder;
-//import eu.europeana.annotation.utils.serialize.AnnotationPageSerializer;
-//import eu.europeana.annotation.web.exception.InternalServerException;
-//import eu.europeana.annotation.web.exception.request.ParamValidationException;
-//import eu.europeana.annotation.web.http.AnnotationHttpHeaders;
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
-//import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
@@ -36,6 +25,8 @@ import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationExcep
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
@@ -49,13 +40,12 @@ import io.swagger.annotations.ApiOperation;
  * This class implements the User Set - REST API
  */
 
+@SuppressWarnings({ "unused" })
 @Controller
 @SwaggerSelect
 @Api(tags = "Web User Set API", description = " ")
 public class WebUserSetRest extends BaseRest {
 	
-	private static Logger logger = Logger.getRootLogger();
-
 	@RequestMapping(value = "/set/", method = RequestMethod.POST, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
@@ -82,49 +72,32 @@ public class WebUserSetRest extends BaseRest {
 	protected ResponseEntity<String> storeUserSet(String wsKey, String userSetJsonLdStr, String userToken) throws HttpException {
 		try {
 
-			// SET DEFAULTS
-//			Application app = getAuthenticationService().getByApiKey(wsKey);
-
-			// 0. annotation id
-//			AnnotationId annoId = buildAnnotationId(provider, identifier);
-
-			// 1. authorize user
-//			Agent user = getAuthorizationService().authorizeUser(userToken, wsKey, annoId, Operations.CREATE);
-
 			// parse
 			UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
+			// validate
+			// check whether user set with the given title already exist in the database
+
+			// validate user set properties
+			
+			// 1. authorize user
+//			Agent user = getAuthorizationService().authorizeUser(userToken, wsKey, annoId, Operations.CREATE);
+			Agent user = new SoftwareAgent();
+			user.setName("test agent");			
+			
 			// SET DEFAULTS
-//			if (webUserSet.getCreator() == null)
-//				webUserSet.setCreator(user);
-
-			// 2. validate
-			// check whether annotation with the given provider and identifier
-			// already exist in the database
-//			if (annoId.getIdentifier() != null && getAnnotationService().existsInDb(annoId))
-//				throw new ParamValidationException(ParamValidationException.MESSAGE_ANNOTATION_ID_EXISTS,
-//						I18nConstants.ANNOTATION_VALIDATION,
-//						new String[]{"/provider/identifier", annoId.toRelativeUri()});
-			// 2.1 validate annotation properties
-//			getAnnotationService().validateWebAnnotation(webAnnotation);
-
-			// 3-6 create ID and annotation + backend validation
-//			webAnnotation.setAnnotationId(annoId);
-
-			// validate api key ... and request limit only if the request is
-			// correct (avoid useless DB requests)
-			// Done in authorize user
-			// validateApiKey(wsKey);
-
-//			Annotation storedAnnotation = getAnnotationService().storeAnnotation(webAnnotation, indexOnCreate);
+			if (webUserSet.getCreator() == null)
+				webUserSet.setCreator(user);
+			
+            // store
+			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 
 			//** serialize to JsonLd
 			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-	        String serializedUserSetJsonLdStr = serializer.serialize(webUserSet); 
+	        String serializedUserSetJsonLdStr = serializer.serialize(storedUserSet); 
 
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-//			headers.add(HttpHeaders.ETAG, "" + storedAnnotation.getLastUpdate().hashCode());
 			headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_POST);
 
