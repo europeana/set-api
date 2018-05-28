@@ -60,6 +60,11 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 			object.setCreated(now);
 		}
 
+		if (object.getModified() == null) {
+			Date now = new Date();
+			object.setModified(now);
+		}
+
 		// check creator
 		if (object.getCreator() == null)
 			throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);

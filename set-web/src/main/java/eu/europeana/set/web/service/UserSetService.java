@@ -3,6 +3,7 @@ package eu.europeana.set.web.service;
 import com.fasterxml.jackson.core.JsonParseException;
 
 import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -15,14 +16,6 @@ public interface UserSetService {
 	 * @return UserSet object
 	 */
 	public UserSet storeUserSet(UserSet UserSet);
-
-	/**
-	 * This method stores UserSet object in database and in Solr if 'indexing' is true.
-	 * @param UserSet
-	 * @param indexing
-	 * @return UserSet object
-	 */
-//	public UserSet storeUserSet(UserSet UserSet, boolean indexing);
 
 	/**
 	 * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
@@ -38,33 +31,8 @@ public interface UserSetService {
 	 * @param
 	 * @return UserSet object
 	 */
-	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; //, UserAuthorizationException;
+	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
 		
-	/**
-	 * Search for UserSets by the given text query.
-	 * @param query
-	 * @return
-	 * @throws UserSetServiceException 
-	 */
-//	public List<? extends UserSet> searchUserSets(String query) throws UserSetServiceException;
-	
-	/**
-	 * Search for UserSets by the given text query, row start position and rows limit. 	 
-	 * @param query
-	 * @param startOn
-	 * @param limit
-	 * @return
-	 * @throws UserSetServiceException 
-	 */
-	//TODO: change parameters to integers
-//	public List<? extends UserSet> searchUserSets(String query, String startOn, String limit) 
-//			throws UserSetServiceException;
-	
-	/**
-	 * Check whether UserSet for given provider and identifier already exist in database.
-	 */
-//	public boolean existsInDb(UserSetId annoId); 
-	
 	/**
 	 * This methods converts user set object from JsonLd string format to a UserSet object
 	 * @param userSetJsonLdStr
@@ -73,5 +41,13 @@ public interface UserSetService {
 	 * @throws HttpException
 	 */
 	public UserSet parseUserSetLd(String userSetJsonLdStr) throws JsonParseException, HttpException;
+
+	/**
+	 * This method validates and processes the Set description for format and mandatory fields
+     * if false responds with HTTP 400
+	 * @param webUserSet
+	 * @throws ParamValidationException
+	 */
+	public void validateWebUserSet(UserSet webUserSet) throws ParamValidationException;
 	
 }

@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import eu.europeana.set.web.exception.response.BatchUploadException;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.web.controller.exception.AbstractExceptionHandlingController;
 import eu.europeana.api.commons.web.model.ApiResponse;
@@ -33,9 +32,9 @@ public class GlobalExceptionHandler extends AbstractExceptionHandlingController 
 	protected ApiResponse getErrorReport(String apiKey, String action, Throwable th, boolean includeErrorStack) {
 		// TODO Auto-generated method stub
 		UserSetOperationResponse response = (UserSetOperationResponse) super.getErrorReport(apiKey, action, th, includeErrorStack);
-		
-		if(th instanceof BatchUploadException)
-			response.setOperationReport(((BatchUploadException)th).getOperationReport());
+		//TODO check is super implementation can be used here
+//		if(th instanceof BatchUploadException)
+//			response.setOperationReport(((BatchUploadException)th).getOperationReport());
 
 		return response;
 	}

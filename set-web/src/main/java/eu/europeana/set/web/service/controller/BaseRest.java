@@ -12,25 +12,16 @@ import org.springframework.util.MultiValueMap;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
-import eu.europeana.api.commons.utils.JsonWebUtils;
 import eu.europeana.api.commons.web.controller.ApiResponseBuilder;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
-import eu.europeana.set.web.model.UserSetOperationResponse;
 import eu.europeana.set.web.service.UserSetService;
 
 
 public class BaseRest extends ApiResponseBuilder {
-
-    /**
-     * API key cache map contains apiKeys as a key and last response time as a value.
-     * We only add keys if API key client responded with "204" - valid apikey.
-     */
-//    private static Map<String, Long> apyKeyCache = new HashMap<String, Long>();
-    
 
 	@Resource
 	UserSetConfiguration configuration;
@@ -38,12 +29,6 @@ public class BaseRest extends ApiResponseBuilder {
 	@Resource
 	private UserSetService userSetService;
 
-//	@Resource
-//	AuthenticationService authenticationService;
-//	
-//	@Resource
-//	AuthorizationService authorizationService;
-	
 	@Resource
 	I18nService i18nService;
 
@@ -64,33 +49,6 @@ public class BaseRest extends ApiResponseBuilder {
 		return logger;
 	}
 
-//	public AuthenticationService getAuthenticationService() {
-//		return authenticationService;
-//	}
-//		
-//	public void setAuthenticationService(AuthenticationService authenticationService) {
-//		this.authenticationService = authenticationService;
-//	}
-
-//	protected UserSetBuilder userSetBuilder = new UserSetBuilder();
-//	protected UserSetIdHelper userSetIdHelper;
-
-//	public UserSetIdHelper getUserSetIdHelper() {
-//		if (UserSetIdHelper == null)
-//			UserSetIdHelper = new UserSetIdHelper();
-//		return UserSetIdHelper;
-//	}
-
-//	TypeUtils typeUtils = new TypeUtils();
-//
-//	public BaseRest() {
-//		super();
-//	}
-//
-//	protected TypeUtils getTypeUtils() {
-//		return typeUtils;
-//	}
-
 	protected UserSetConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -107,130 +65,9 @@ public class BaseRest extends ApiResponseBuilder {
 		this.configuration = configuration;
 	}
 
-//	protected UserSetBuilder getUserSetBuilder() {
-//		return userSetBuilder;
-//	}
-
 	public String toResourceId(String collection, String object) {
 		return "/" + collection + "/" + object;
 	}
-
-//	public UserSetSearchResults<AbstractUserSet> buildSearchResponse(List<? extends UserSet> UserSets,
-//			String apiKey, String action) {
-//		UserSetSearchResults<AbstractUserSet> response = new UserSetSearchResults<AbstractUserSet>(apiKey,
-//				action);
-//		response.items = new ArrayList<AbstractUserSet>(UserSets.size());
-//
-//		AbstractUserSet webUserSet;
-//		for (UserSet UserSet : UserSets) {
-//			webUserSet = getUserSetBuilder().copyIntoWebUserSet(UserSet);
-//			response.items.add(webUserSet);
-//		}
-//		response.itemsCount = response.items.size();
-//		response.totalResults = UserSets.size();
-//		return response;
-//	}
-//
-//	public UserSetSearchResults<AbstractUserSet> buildSearchErrorResponse(String apiKey, String action,
-//			Throwable th) {
-//
-//		UserSetSearchResults<AbstractUserSet> response = new UserSetSearchResults<AbstractUserSet>(apiKey,
-//				action);
-//		response.success = false;
-//		response.error = th.getMessage();
-//		// response.requestNumber = 0L;
-//
-//		return response;
-//	}
-
-//	protected UserSetId buildUserSetId(String provider, String identifier) throws ParamValidationException {
-//
-//		return buildUserSetId(provider, identifier, true);
-//	}
-//
-//	protected UserSetId buildUserSetId(String provider, String identifier, boolean validation) throws ParamValidationException {
-//
-//		UserSetId annoId = new BaseUserSetId(getConfiguration().getUserSetBaseUrl(), provider, identifier);
-//
-//		if(validation)
-//			UserSetService.validateUserSetId(annoId);
-//
-//		return annoId;
-//	}
-
-	
-	/**
-	 * This method is employed when identifier is an URL and contains provider.
-	 * e.g. identifier 'http://data.europeana.eu/annotaion/base/1'
-	 * 
-	 * @param identifier
-	 * @return UserSetId
-	 * @throws ParamValidationException
-	 */
-//	protected UserSetId buildUserSetId(String identifier) throws ParamValidationException {
-//
-//		if (identifier.split(WebUserSetFields.SLASH).length < ParamValidationException.MIN_IDENTIFIER_LEN)
-//			return null;
-//
-//		UserSetId annoId = getUserSetIdHelper().parseUserSetId(identifier);
-//
-//		// UserSetService.validateUserSetId(annoId);
-//
-//		return annoId;
-//	}
-		
-    /**
-     * This method employs API key client library for API key validation
-     * @param apiKey The API key e.g. ApiKey1
-     * @param method The method e.g. read, write, delete...
-     * @return true if API key is valid
-     * @throws ApplicationAuthenticationException 
-     */
-//    public boolean validateApiKeyUsingClient(String apiKey, String method) throws ApplicationAuthenticationException {
-//    	
-//    	boolean res = false;
-//    	
-//    	// check in cache if there is a valid value
-//    	// if yes - return true
-//    	long currentTime = System.currentTimeMillis();
-//    	Long cacheTime = apyKeyCache.get(apiKey);
-//    	if (cacheTime != null) {
-//    	    long diff = currentTime - cacheTime.longValue();
-//    	    long configCacheTime = getConfiguration().getApiKeyCachingTime();
-//    	    if (diff < configCacheTime) 
-//    	    	return true; // we already have recent positive response from the client 
-//    	} 
-//    	
-//        ValidationRequest request = new ValidationRequest(
-//        		getConfiguration().getValidationAdminApiKey() // the admin API key
-//        		, getConfiguration().getValidationAdminSecretKey() // the admin secret key
-//        		, apiKey
-//        		, getConfiguration().getValidationApi() // the name of API e.g. search, entity, UserSet...
-//        		);
-//        
-//        if (StringUtils.isNotBlank(method)) request.setMethod(method);
-//        res = getAdminService().validateApiKey(request, method);
-//        if (res) {
-//        	apyKeyCache.put(apiKey, currentTime);
-//        } else {
-//        	//remove invalid from cache if exists
-//        	if (apyKeyCache.containsKey(apiKey)) 
-//        		apyKeyCache.remove(apiKey);
-//   			
-//        	throw new ApplicationAuthenticationException(null, I18nConstants.INVALID_APIKEY, new String[]{apiKey});
-//        }
-//        return res;
-//    }
-
-//	protected void validateApiKey(String wsKey, String method) throws ApplicationAuthenticationException {
-//		
-//		//TODO: will not be included in the 0.2.8-RELEASE, enable in 0.2.9
-////		validateApiKeyUsingClient(wsKey, method);
-//		
-//		// throws exception if the wskey is not found
-//		getAuthenticationService().getByApiKey(wsKey);
-//	}
-
 	
 	protected ResponseEntity <String> buildResponseEntityForJsonString(String jsonStr) {
 		
@@ -240,7 +77,6 @@ public class BaseRest extends ApiResponseBuilder {
 		return response;		
 	}
 	
-
 	protected ResponseEntity<String> buildResponseEntityForJsonString(String jsonStr, HttpStatus httpStatus) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
@@ -250,14 +86,6 @@ public class BaseRest extends ApiResponseBuilder {
 		ResponseEntity<String> response = new ResponseEntity<String>(jsonStr, headers, httpStatus);
 		return response;
 	}
-
-//	public AuthorizationService getAuthorizationService() {
-//		return authorizationService;
-//	}
-//
-//	public void setAuthorizationService(AuthorizationService authorizationService) {
-//		this.authorizationService = authorizationService;
-//	}
 
 	/**
 	 * This method performs decoding of base64 string
@@ -320,58 +148,5 @@ public class BaseRest extends ApiResponseBuilder {
 		}
 		return userToken;
 	}
-	
-	
-    /**
-     * Validate private key (by cipher a constant string with the public key and decipher with the private), 
-     * if false respond with HTTP 401.
-     * @param publicKey
-     * @param privateKey
-     * @return true if validation ok
-     * @throws ApplicationAuthenticationException
-     */
-//    public boolean validatePrivateKey(String publicKey, String privateKey) 
-//    		throws ApplicationAuthenticationException {
-//    	
-//    	boolean res = false;
-//    	
-//   	    String validationString = getConfiguration().getValidationString();
-//    	
-//        if (StringUtils.isBlank(publicKey)) 
-//        	throw new ApplicationAuthenticationException(
-//        			null, I18nConstants.INVALID_APIKEY, new String[]{publicKey});
-//
-//        if (StringUtils.isNotBlank(privateKey)) {
-//            //res = getAdminService().validatePrivateKey(publicKey, privateKey, validationString); // TODO
-//        	res = true;
-//        } else {
-//        	throw new ApplicationAuthenticationException(
-//        			null, I18nConstants.INVALID_PRIVATE_KEY, new String[]{privateKey});
-//        }
-//        return res;
-//    }
-
-    
-    /**
-     * This method generates custom UserSet operation response.
-     * @param wsKey
-     * @param action
-     * @param message
-     * @return response entity
-     */
-    public ResponseEntity<String> buildUserSetOperationResponse(String wsKey, String action, String message) {
-    	eu.europeana.set.web.service.controller.ApiResponseBuilder arb = 
-    			new eu.europeana.set.web.service.controller.ApiResponseBuilder();
-		UserSetOperationResponse aor = arb.getValidationReport(
-				wsKey
-				, action
-				, message
-				, null
-				, false
-				);
-		String jsonStr = JsonWebUtils.toJson(aor, null);
-		HttpStatus httpStatus = aor.success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
-		return buildResponseEntityForJsonString(jsonStr, httpStatus);			    	
-    }
 	
 }

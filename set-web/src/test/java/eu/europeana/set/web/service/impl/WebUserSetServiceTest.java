@@ -92,7 +92,7 @@ public class WebUserSetServiceTest {
 		 * Store UserSet in database.
 		 */
 //		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
-		String userSetId = "36";
+		String userSetId = "51";
 		UserSet webUserSet = webUserSetService.getUserSetById(userSetId);
 		
 		System.out.println("testUserSet: " + testUserSet.toString());
@@ -104,16 +104,6 @@ public class WebUserSetServiceTest {
 		UserSetLdSerializer serializer = new UserSetLdSerializer();         
         String userSetJsonLdStr = serializer.serialize(webUserSet); 
         System.out.println(userSetJsonLdStr);
-        
-        /**
-         * read UserSet object from the serialized UserSetLd object.
-         */
-       // UserSet userSetFromUserSetLd = JsonUtils.toUserSetObject(userSetJsonLdStr, WebUserSetImpl.class);
-        
-        /**
-         * Compare original UserSet object with retrieved serialized UserSet object.
-         */     
-        //assertEquals(userSetFromUserSetLd.getTitle(), testUserSet.getTitle());
 	}
 		
 }

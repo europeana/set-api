@@ -16,17 +16,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String PARAM_WSKEY = "wskey";
 	public static final String PATH_PARAM_SET_ID = "identifier";
 	public static final String USER_TOKEN = "userToken";
-
-	/**
-	 * Validation definitions
-	 */
-	public static final String ANNOTAION_API = "annotation";
-	public static final String ENTITY_API = "entity";
-	public static final String SEARCH_API = "search";
-	public static final String READ_METHOD = "read";
-	public static final String WRITE_METHOD = "write";
-	public static final String DELETE_METHOD = "delete";
-	public static final String CLIENT_VALIDATION_API_KEY = "ApiKey1";
+	public static final String USER_ANONYMOUNS = "anonymous";
 		
 	/**
 	 * Mongo
