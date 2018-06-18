@@ -81,7 +81,7 @@ public class WebUserSetServiceTest {
 		objectBuilder = new UserSetTestObjectBuilder();
 	}
 	
-	@Test
+//	@Test
 	public void testStoreUserSetInDbRetrieveAndSerialize() 
 			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {//, JsonParseException {
 		
@@ -104,6 +104,25 @@ public class WebUserSetServiceTest {
 		UserSetLdSerializer serializer = new UserSetLdSerializer();         
         String userSetJsonLdStr = serializer.serialize(webUserSet); 
         System.out.println(userSetJsonLdStr);
+	}
+		
+	@Test(expected = UserSetNotFoundException.class)
+	public void testDeleteUserSet() 
+			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
+		
+		UserSet userSet = new PersistentUserSetImpl();
+		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet);
+		       		
+		// store user set in database
+		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+		String userSetId = webUserSet.getIdentifier();
+		System.out.println("testUserSet id: " + userSetId);
+
+		// delete stored user set from database
+		webUserSetService.deleteUserSet(userSetId);
+
+		// verify that user set with given id is deleted from database
+		webUserSetService.getUserSetById(userSetId);		
 	}
 		
 }

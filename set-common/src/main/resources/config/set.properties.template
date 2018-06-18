@@ -51,7 +51,8 @@ annotation.environment.vcap.provider = pivotal
 # disable profiling
 # profiler.expression=within(none.*)
 # profile all service method invocations
-profiler.expression=execution(* eu.europeana.annotation.*.service..*.*(..)) 
+###profiler.expression=execution(* eu.europeana.annotation.*.service..*.*(..)) 
+profiler.expression=execution(* eu.europeana.set.*.service..*.*(..)) 
 
 # mongoDB settings
 ### annotation database ###

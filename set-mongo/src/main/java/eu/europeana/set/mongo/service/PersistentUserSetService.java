@@ -7,6 +7,12 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
 
+	/**
+	 * This method stores user set in a database
+	 * @param object
+	 * @return
+	 * @throws UserSetValidationException
+	 */
 	public abstract UserSet store(UserSet object) throws UserSetValidationException;
 		
 	/**
@@ -17,17 +23,24 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	public abstract PersistentUserSet getByIdentifier(String identifier);
 	
 	/** 
-	 * This method retrieves user set from database by database ObjectId provided as a string
-	 * @param objectId The database object ID e.g. ObjectId("5af1ccab5a398b254c93855a")
+	 * This method retrieves user set from database by database Id provided as a string
+	 * @param objectId The database object ID e.g. "15"
 	 * @return user set object
 	 */
-	public abstract PersistentUserSet findByID(String objectId);
+	public abstract PersistentUserSet findByID(String identifier);
 	
 	/**
-	 * This method performs update for the passed annotation object
-	 * @param annotation
+	 * This method performs update for the passed user set object
+	 * @param user set
 	 */
-	public PersistentUserSet update(PersistentUserSet annotation) throws UserSetValidationException;
+	public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException;
 
+	/** 
+	 * This method removes user set from database by database Id provided as a string
+	 * @param objectId The database object ID e.g. "15"
+	 * @return user set object
+	 */
+	public abstract void remove(String identifier);
+	
 }
 

@@ -45,4 +45,9 @@ public interface UserSetConfiguration {
 	
 	public String getValidationString();
 	
+	/**
+	 * checks annotation.environment=production property
+	 */
+	public boolean isProductionEnvironment();
+	
 }

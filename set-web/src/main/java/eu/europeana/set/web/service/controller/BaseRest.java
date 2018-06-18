@@ -19,6 +19,8 @@ import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.UserSetService;
+import eu.europeana.set.web.service.authentication.AuthenticationService;
+import eu.europeana.set.web.service.authorization.AuthorizationService;
 
 
 public class BaseRest extends ApiResponseBuilder {
@@ -29,6 +31,12 @@ public class BaseRest extends ApiResponseBuilder {
 	@Resource
 	private UserSetService userSetService;
 
+	@Resource
+	AuthenticationService authenticationService;
+	
+	@Resource
+	AuthorizationService authorizationService;
+	
 	@Resource
 	I18nService i18nService;
 
@@ -65,6 +73,22 @@ public class BaseRest extends ApiResponseBuilder {
 		this.configuration = configuration;
 	}
 
+	public AuthenticationService getAuthenticationService() {
+		return authenticationService;
+	}
+		
+	public void setAuthenticationService(AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
+
+	public AuthorizationService getAuthorizationService() {
+		return authorizationService;
+	}
+
+	public void setAuthorizationService(AuthorizationService authorizationService) {
+		this.authorizationService = authorizationService;
+	}
+	
 	public String toResourceId(String collection, String object) {
 		return "/" + collection + "/" + object;
 	}
@@ -131,10 +155,11 @@ public class BaseRest extends ApiResponseBuilder {
 						I18nConstants.INVALID_HEADER_FORMAT, I18nConstants.INVALID_HEADER_FORMAT, null);
 
 			String userTokenType = headerElems[USER_TOKEN_TYPE_POS];
-			if (!UserSetHttpHeaders.BEARER.equals(userTokenType))
+			if (!UserSetHttpHeaders.BEARER.equals(userTokenType)) {
 				throw new ApplicationAuthenticationException(
 						I18nConstants.UNSUPPORTED_TOKEN_TYPE, I18nConstants.UNSUPPORTED_TOKEN_TYPE,
 						new String[] {userTokenType});
+			}
 
 			String encodedUserToken = headerElems[BASE64_ENCODED_STRING_POS];
 			
@@ -147,6 +172,31 @@ public class BaseRest extends ApiResponseBuilder {
 			userToken = paramUserToken;
 		}
 		return userToken;
+	}
+	
+	/**
+	 * This method checks timestamp if provided within the "If-Match" HTTP header, if false responds with HTTP 412
+	 * @param request
+	 * @param modified
+	 * @throws ApplicationAuthenticationException
+	 */
+	public void checkHeaderTimestamp(HttpServletRequest request, int modified) throws ApplicationAuthenticationException {
+		String ifMatchHeader = request.getHeader(HttpHeaders.IF_MATCH);
+		if (ifMatchHeader != null) {
+			logger.trace("'If-Match' header value: " + ifMatchHeader);	
+			String modifiedStr = String.valueOf(modified);
+			if (!ifMatchHeader.equals(modifiedStr)) {
+				throw new ApplicationAuthenticationException(
+						I18nConstants.INVALID_IF_MATCH_TIMESTAMP, I18nConstants.INVALID_IF_MATCH_TIMESTAMP,
+						new String[] {modifiedStr}, HttpStatus.PRECONDITION_FAILED, null);
+			}
+		}
+	}
+	
+	protected void validateApiKey(String wsKey, String method) throws ApplicationAuthenticationException {
+		
+		// throws exception if the wskey is not found
+		getAuthenticationService().getByApiKey(wsKey);
 	}
 	
 }

@@ -1,6 +1,7 @@
 package eu.europeana.set.definitions.model.factory.impl;
 
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.agent.impl.Person;
 //import eu.europeana.set.definitions.model.agent.impl.Organization;
 //import eu.europeana.set.definitions.model.agent.impl.Person;
 import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
@@ -39,10 +40,10 @@ public class AgentObjectFactory extends
 		Class<? extends Agent> returnType = null;
 		AgentTypes agentType = AgentTypes.valueOf(modelType.name());
 		switch (agentType) {
-//		case PERSON:
-//			returnType = Person.class;
-//			break;
-//
+		case PERSON:
+			returnType = Person.class;
+			break;
+
 //		case ORGANIZATION:
 //			returnType = Organization.class;
 //			break;

@@ -78,17 +78,23 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @param updatedWebUserSet
 	 */
 	private void mergeUserSetProperties(PersistentUserSet UserSet, UserSet updatedWebUserSet) {
-		if (updatedWebUserSet.getType() != null)
+		if (updatedWebUserSet.getType() != null) {
 			UserSet.setType(updatedWebUserSet.getType());
+		}
 
-		if (updatedWebUserSet.getTitle() != null)
+		if (updatedWebUserSet.getTitle() != null) {
 			UserSet.setTitle(updatedWebUserSet.getTitle());
+		}
 		
-		if (updatedWebUserSet.getCreator() != null)
+		if (updatedWebUserSet.getCreator() != null) {
 			UserSet.setCreator(updatedWebUserSet.getCreator());
+		}
 			
-		if (updatedWebUserSet.getCreated() != null)
+		if (updatedWebUserSet.getCreated() != null) {
 			UserSet.setCreated(updatedWebUserSet.getCreated());
+		}
+
+		UserSet.setDisabled(updatedWebUserSet.isDisabled());
 	}
 
 	@Override
@@ -134,6 +140,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 					I18nConstants.USERSET_VALIDATION,
 					null);
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.web.service.UserSetService#deleteUserSet(java.lang.String)
+	 */
+	public void deleteUserSet(String userSetId) throws UserSetNotFoundException {
+
+		getMongoPersistence().remove(userSetId);
 	}
 	
 }

@@ -41,5 +41,5 @@
 	<bean name="set_db_setService" class="eu.europeana.set.mongo.service.PersistentUserSetServiceImpl"
 		p:dao-ref="set_db_setDao">
 	</bean>
-			
+					
 </beans>

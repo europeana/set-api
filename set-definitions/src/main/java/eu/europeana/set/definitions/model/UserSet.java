@@ -88,4 +88,7 @@ public interface UserSet {
 	
 	public void setContext(String context);
 	
+	boolean isDisabled();
+
+	void setDisabled(boolean disabled);
 }

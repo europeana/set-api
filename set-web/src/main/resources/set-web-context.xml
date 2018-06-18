@@ -47,17 +47,13 @@
 	 -->
 	 		
     <!--  AuthenticationService -->
-   	<!--
-	<beans:bean name="annotation_authenticationService" class="eu.europeana.annotation.web.service.authentication.mock.BridgeAuthenticationManagerAdapter"/>
-	<beans:bean name="annotation_authorizationService" class="eu.europeana.annotation.web.service.authorization.AuthorizationServiceImpl">
-	-->
+   	<beans:bean name="set_authenticationService" class="eu.europeana.set.web.service.authentication.mock.BridgeAuthenticationManagerAdapter"/>
+	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.AuthorizationServiceImpl">
 		<!-- 
 		<beans:property name="configuration" ref="configuration"/>
     	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
-    	 --> 
-    <!--  	 	
+    	 -->       	 
     </beans:bean>
-    -->
     
     
     <!--  java api bean -->
@@ -77,7 +73,7 @@
     <beans:bean id="setSearchService" class="eu.europeana.set.web.service.impl.UserSetSearchServiceImpl">
     </beans:bean>
      -->
-     
+         
     <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans -->
     <context:component-scan base-package="eu.europeana.set.web.service" />
     <!-- Activates various annotations to be detected in bean classes e.g: @Autowired -->

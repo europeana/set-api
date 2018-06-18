@@ -38,6 +38,5 @@
 	<bean id="set_db_setDao" parent="db_nosql_set_dao" class="eu.europeana.set.mongo.dao.PersistentUserSetDaoImpl">
 		<constructor-arg type="java.lang.Class" value="eu.europeana.set.web.model.WebUserSetImpl" />
 	</bean>
-	
-		
+			
 </beans>

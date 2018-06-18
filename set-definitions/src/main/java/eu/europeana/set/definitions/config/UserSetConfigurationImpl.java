@@ -57,4 +57,9 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 		return getSetProperties().getProperty(VALIDATION_STRING);
 	}
 	
+	@Override
+	public boolean isProductionEnvironment() {
+		return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());
+	}
+	
 }

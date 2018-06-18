@@ -50,4 +50,11 @@ public interface UserSetService {
 	 */
 	public void validateWebUserSet(UserSet webUserSet) throws ParamValidationException;
 	
+	/**
+	 * This method deletes user set by user set Id value.
+	 * @param userSetId The id of the user set
+	 * @throws UserSetNotFoundException 
+	 */
+	public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
+		
 }
