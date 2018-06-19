@@ -15,4 +15,5 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	static final String TEST_USER_FORBIDDEN = "error.userset_test_user_forbidden";
 	static final String CLIENT_NOT_AUTHORIZED = "error.userset_client_not_authorized";	
 	static final String INVALID_IF_MATCH_TIMESTAMP = "error.userset_if_match_timestamp";
+	static final String INVALID_UPDATE_HEADER_PROFILE = "error.userset_invalid_update_profile";
 }

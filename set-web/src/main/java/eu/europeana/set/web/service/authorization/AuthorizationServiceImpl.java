@@ -84,7 +84,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 		if(Operations.MODERATION_ALL.equals(operationName) || Operations.RETRIEVE.equals(operationName) )
 			return true;
 		
-		return setId != null; // && app.getProvider().equals(annoId.getProvider());
+		return setId != null; 
 	}
 
 	//verify user privileges

@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.impl;
 
 
 import java.io.IOException;
+import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -112,6 +113,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		try {			
 			parser = jsonFactory.createParser(userSetJsonLdStr);
 			UserSet userSet = mapper.readValue(parser, WebUserSetImpl.class); 
+			if (userSet.getModified() == null) {
+				Date now = new Date();				
+				userSet.setModified(now);
+			}
             return userSet;
 		} catch (UserSetAttributeInstantiationException e) {
 			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);

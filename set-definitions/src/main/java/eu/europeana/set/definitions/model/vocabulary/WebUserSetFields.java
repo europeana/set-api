@@ -12,6 +12,9 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String USER_SET_PROVIDER = "userset";
 	public static final String USER_SET_APPLICATION_NAME = "webuserset";
 
+	// Http Header
+	public static final String PREFER_MINIMAL_CONTAINER_HEADER = "ldp:PreferMinimalContainer";
+	
 	//
 	// Query Params
 	//

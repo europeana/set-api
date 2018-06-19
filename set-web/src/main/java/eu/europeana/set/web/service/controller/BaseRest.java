@@ -17,6 +17,7 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
@@ -193,6 +194,26 @@ public class BaseRest extends ApiResponseBuilder {
 		}
 	}
 	
+	/**
+	 * This method checks profile if provided within the "Prefer" HTTP header, 
+	 * and responds with true only when a profile is indicated and is different 
+	 * from "ldp:PreferMinimalContainer"
+	 * @param request
+	 * @return
+	 * @throws ApplicationAuthenticationException
+	 */
+	public boolean checkHeaderProfile(HttpServletRequest request) throws ApplicationAuthenticationException {
+		boolean res = false;
+		String preferHeader = request.getHeader(HttpHeaders.PREFER);
+		if (preferHeader != null) {
+			logger.trace("'Prefer' header value: " + preferHeader);	
+			if (!preferHeader.equals(WebUserSetFields.PREFER_MINIMAL_CONTAINER_HEADER)) {
+				res = true;
+			}
+		}
+		return res;
+	}
+		
 	protected void validateApiKey(String wsKey, String method) throws ApplicationAuthenticationException {
 		
 		// throws exception if the wskey is not found

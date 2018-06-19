@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -77,9 +78,11 @@ public class WebUserSetRest extends BaseRest {
 		try {
 			// validate user - check user credentials (all registered users can create) 
 			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
+			validateApiKey(wsKey, WebUserSetFields.WRITE_METHOD);
 
 			// authorize user
-//			Agent user = getAuthorizationService().authorizeUser(userToken, wsKey, annoId, Operations.CREATE);
+			UserSetId setId = new BaseUserSetId();
+			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.CREATE);			
 			
 			// parse user set 
 			UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
@@ -167,13 +170,13 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	private ResponseEntity<String> getUserSet(String wskey, String identifier, HttpServletRequest request, String action)
+	private ResponseEntity<String> getUserSet(String wsKey, String identifier, HttpServletRequest request, String action)
 					throws HttpException {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
-			// check client access (a valid “wskey” must be provided)
-//			validateApiKey(wskey, WebUserSetFields.READ_METHOD);
-
+			// check client access (a valid "wskey" must be provided)
+			validateApiKey(wsKey, WebUserSetFields.READ_METHOD);
+			
 			// retrieve a Set based on its identifier - process query
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
@@ -222,13 +225,14 @@ public class WebUserSetRest extends BaseRest {
 		userToken = getUserToken(userToken, request);
 		
 		String action = "put:/set/{identifier}.jsonld";
-		return updateUserSet(wskey, identifier, userSet, userToken, action);
+		return updateUserSet(request, wskey, identifier, userSet, userToken, action);
 	}
 		
 	/**
 	 * This method validates input values, retrieves user set object and
 	 * updates it.
 	 * 
+	 * @param request
 	 * @param wskey The API key
 	 * @param identifier The identifier
 	 * @param userSet The user set fields to update in JSON format e.g. title or description
@@ -236,23 +240,26 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> updateUserSet(String wsKey, String identifier,
+	protected ResponseEntity<String> updateUserSet(HttpServletRequest request, String wsKey, String identifier,
 			String userSetJsonLdStr, String userToken, String action) throws HttpException {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
 			//  or if unauthorized respond with HTTP 403
-			// check client access (a valid “wskey” must be provided)
-//			validateApiKey(wskey, WebUserSetFields.READ_METHOD);
+			// check client access (a valid "wskey" must be provided)
+			validateApiKey(wsKey, WebUserSetFields.READ_METHOD);
 
 			// authorize user
-//			getAuthorizationService().authorizeUser(userToken, wsKey, annoId, Operations.UPDATE);
+			UserSetId setId = new BaseUserSetId();
+			setId.setSequenceNumber(identifier);
+			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.UPDATE);
 
-			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
-			
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
+			checkHeaderTimestamp(request, existingUserSet.getModified().hashCode());
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
@@ -269,10 +276,17 @@ public class WebUserSetRest extends BaseRest {
 				UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 	
 				// generate and add a created and modified timestamp to the Set;
+				existingUserSet.setModified(newUserSet.getModified());
 				
 				// update the Set based on its identifier (replace member items with the new items 
 				// that are present in the Set description only when a profile is indicated and is 
-				// different from “ldp:PreferMinimalContainer” is referred in the “Prefer” header);
+				// different from "ldp:PreferMinimalContainer" is referred in the “Prefer” header);
+				if (!checkHeaderProfile(request)) {
+					throw new ApplicationAuthenticationException(
+							I18nConstants.INVALID_UPDATE_HEADER_PROFILE, I18nConstants.INVALID_UPDATE_HEADER_PROFILE,
+							new String[] {""}, HttpStatus.PRECONDITION_FAILED, null);
+				}
+
 				// Respond with HTTP 200
 	            // update an existing user set. merge user sets - insert new fields in existing object
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
@@ -327,6 +341,7 @@ public class WebUserSetRest extends BaseRest {
 	}
 	
 	/**
+	 * @param request
 	 * @param identifier
 	 * @param wsKey
 	 * @param userToken
