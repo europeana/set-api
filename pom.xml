@@ -80,9 +80,7 @@
 		<module>set-common</module>
 		<module>set-mongo</module>
 		<module>set-web</module>
-		<!--
-		<module>annotation-client</module>
-		-->
+		<module>set-client</module>
 	</modules>
 	<build>
 		<!--  configure source and output locations -->
