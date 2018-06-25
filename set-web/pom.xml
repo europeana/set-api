@@ -167,6 +167,14 @@
 			<scope>test</scope>
 		</dependency>
 	
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-mongo</artifactId>
+			<version>${version.setApi}</version>
+			<classifier>tests</classifier>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 		<!-- swagger -->
 		<dependency>
 			<groupId>io.springfox</groupId>
