@@ -4,7 +4,7 @@
 
 	<artifactId>set-client</artifactId>
 	<packaging>jar</packaging>
-	<name>Set Client</name>
+	<name>Europeana (User) Sets Client (remote api access)</name>
 	<description>Implementation of a Java Client for remote invocation of Set REST API (see set-web)</description>
 
 	<parent>

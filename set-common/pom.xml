@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	
 	<artifactId>set-common</artifactId>
-	<name>set-common</name>
+	<name>Europeana (User) Sets - common (shared utilities)</name>
 	<packaging>jar</packaging>
 	
 	<parent>
