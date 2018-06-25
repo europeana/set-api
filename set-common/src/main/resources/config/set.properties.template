@@ -16,86 +16,47 @@
 #
 
 ##common settings
-#boolean value indicating if the indexing of annotations in solr should be performed. required valid solr configurations
-annotation.indexing.enabled=false
 
 #string value indicating if the application runs in "production", "test", "development" environment 
-annotation.environment=development
-
-#Socks proxy configuration. If provided it will be used for all http connections (e.g. solr.entity.url) 
-# Url Format: socks://username:password@socks_proxy_server:1080 
-socks.proxy.url = socks://socksuser:hjwP14h9oSEp423df@95.85.7.105:30080
+set.environment=development
 
 #used only in production environment
-annotation.environment.production.baseUrl=http://data.europeana.eu/annotation
+set.environment.production.baseUrl=http://data.europeana.eu/set
 
 #used only in production environment
-annotation.environment.test.baseUrl=http://test-annotations.europeana.eu/annotation
+set.environment.test.baseUrl=http://test-sets.europeana.eu/set
 
 #used only in production environment
-annotation.environment.development.baseUrl=http://localhost:8080/annotation
-
-#default whitelist resource name
-annotation.whitelist.default=/config/default_whitelist.json
+set.environment.development.baseUrl=http://localhost:8080/set
 
 #max search results per page
-annotation.search.maxpagesize.minimal=10000
-annotation.search.maxpagesize.standard=100
+#set.search.maxpagesize.minimal=10000
+#set.search.maxpagesize.standard=100
  
-
-# VCAP settings
-#available values: pivotal, a9s 
-annotation.environment.vcap.provider = pivotal
-
 # Profiling configurations (enabling/disabling through profiler.expression property)
 # disable profiling
 # profiler.expression=within(none.*)
 # profile all service method invocations
-###profiler.expression=execution(* eu.europeana.annotation.*.service..*.*(..)) 
-profiler.expression=execution(* eu.europeana.set.*.service..*.*(..)) 
+#profiler.expression=execution(* eu.europeana.set.*.service..*.*(..)) 
 
 # mongoDB settings
 ### annotation database ###
-#deprecated
-#mongodb.annotation.dbname=annotation_test
-#mongodb.annotation.host=127.0.0.1
-#mongodb.annotation.port=27017
-#mongodb.annotation.username=europeana
-#mongodb.annotation.password=culture
 #Format: "mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>"
 #USER, PASSWORD are optional (in local environment) 
-
-#VCAP environment will overwrite configurations only if the connectionUrl is empty
-mongodb.annotation.connectionUrl=mongodb://europeana:culture@127.0.0.1:27017/annotation_test
+mongodb.set.connectionUrl=mongodb://127.0.0.1:27017/annotation_test
 #SSL truststore
 #the name of the truststore. Must be available in the classpath in the /config folder
-mongodb.annotation.truststore=
+mongodb.set.truststore=
 #password required to access the truststore
-mongodb.annotation.truststorepass=
+mongodb.set.truststorepass=
 
-# solr connection settings
-solr.annotation.url = http://localhost:8282/solr/annotation
-solr.tag.url = http://localhost:8282/solr/tag
-solr.annotation.timeout = 60000
-solr.tag.timeout = 60000
-
-solr.facetLimit=750
-#solr.username=europeana
-#solr.rowLimit=12
-
-#API Key validation
-api=annotation
-adminapikey=Key1
-adminsecretkey=Key2
-
-#placeholder to store generation timestamp
-annotation.properties.timestamp=-1
 
 # validation
-api=annotation
+api=set
 adminapikey=
 adminsecretkey=
-validation.string=ProviderValidation
+validation.string=
 # cache time for validation of ApiKey in milliseconds (value of type long)
 # e.g. 1800000 is 30 minutes
-annotation.apikey.caching.time=1800000 
+#set.apikey.caching.time=1800000
+
