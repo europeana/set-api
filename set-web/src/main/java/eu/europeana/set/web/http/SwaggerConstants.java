@@ -11,4 +11,5 @@ public interface SwaggerConstants {
 			"Please create your JSON update request using selected fields you are going to update. E.g. 'title' and 'description' example:  { \"title\": {\r\n" + 
 			"     \"en\": \"New Title\"\r\n" + 
 			"  }\r\n }";
+	public static final String INSERT_ITEM_NOTE = "Please create your insert item request using selected parameters.";
 }

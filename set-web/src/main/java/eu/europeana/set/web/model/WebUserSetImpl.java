@@ -3,6 +3,11 @@ package eu.europeana.set.web.model;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldId;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
@@ -10,6 +15,7 @@ import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldType;
 
 
 @JsonldType("http://schema.org/UserSet")
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 		
 	@JsonldId
@@ -42,8 +48,24 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		super.setItems(items);
 	}
 	
+	@JsonIgnore
+	public void setDisabled(boolean disabled) {
+		super.setDisabled(disabled);		
+	}
+
+	@JsonIgnore
+	public void setUgc(boolean ugc) {
+		super.setUgc(ugc);		
+	}
+
 	public String toString() {
 		return "WebUserSet [Title:" + getTitle() + ", Identifier:" + getIdentifier() + "]";
+	}
+	
+	@Override
+	@JsonIgnore
+	public ObjectId getObjectId() {
+		return super.getObjectId();
 	}
 	
 }

@@ -13,10 +13,11 @@ The following properties are optional in all user sets:
 <b>context, type, creator, created.</b> 
 </p>
 					<ul id="toc">
-						<li><a href="#tag_userSet">Create User Set</a></li>
+						<li><a href="#userSet">Create User Set</a></li>
+						<li><a href="#itemList">Insert items</a></li>
 					</ul>
 
-<h3 id="tag_userSet">Create User Set</h3>
+<h3 id="userSet">Create User Set</h3>
 The json-ld serialization available in the following box is a valid input to be used for the creation of simple <b>sets</b>.
 &nbsp;&nbsp;&nbsp; <a href="#top">top</a> 
 <textarea rows="18" cols="120" name="jsonldtag">
@@ -129,6 +130,22 @@ The json-ld serialization available in the following box is a valid input to be 
     "http://data.europeana.eu/item/000000/98",
     "http://data.europeana.eu/item/000000/99",
     "http://data.europeana.eu/item/000000/100"
+  ]
+}
+</textarea>
+<br>
+
+<h3 id="itemsList">Insert items</h3>
+The json-ld serialization available in the following box is a valid input to be used for the inserting of <b>item list</b>.
+&nbsp;&nbsp;&nbsp; <a href="#top">top</a> 
+<textarea rows="18" cols="120" name="jsonldtag">
+{
+  "type": "OrderedCollectionPage",
+  "items": [
+    "http://data.europeana.eu/item/000001/1",
+    "http://data.europeana.eu/item/000001/2",
+    "http://data.europeana.eu/item/000002/2",
+    "http://data.europeana.eu/item/000002/4"
   ]
 }
 </textarea>

@@ -79,23 +79,25 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @param updatedWebUserSet
 	 */
 	private void mergeUserSetProperties(PersistentUserSet UserSet, UserSet updatedWebUserSet) {
-		if (updatedWebUserSet.getType() != null) {
-			UserSet.setType(updatedWebUserSet.getType());
-		}
-
-		if (updatedWebUserSet.getTitle() != null) {
-			UserSet.setTitle(updatedWebUserSet.getTitle());
-		}
-		
-		if (updatedWebUserSet.getCreator() != null) {
-			UserSet.setCreator(updatedWebUserSet.getCreator());
-		}
+		if (updatedWebUserSet != null) {
+			if (updatedWebUserSet.getType() != null) {
+				UserSet.setType(updatedWebUserSet.getType());
+			}
+	
+			if (updatedWebUserSet.getTitle() != null) {
+				UserSet.setTitle(updatedWebUserSet.getTitle());
+			}
 			
-		if (updatedWebUserSet.getCreated() != null) {
-			UserSet.setCreated(updatedWebUserSet.getCreated());
+			if (updatedWebUserSet.getCreator() != null) {
+				UserSet.setCreator(updatedWebUserSet.getCreator());
+			}
+				
+			if (updatedWebUserSet.getCreated() != null) {
+				UserSet.setCreated(updatedWebUserSet.getCreated());
+			}
+	
+			UserSet.setDisabled(updatedWebUserSet.isDisabled());
 		}
-
-		UserSet.setDisabled(updatedWebUserSet.isDisabled());
 	}
 
 	@Override

@@ -1,11 +1,13 @@
 package eu.europeana.set.utils.serialize;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.view.ItemInsertView;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResource;
@@ -22,6 +24,17 @@ public class UserSetLdSerializer {
     
 	ObjectMapper mapper = new ObjectMapper(); 
 		
+	public UserSetLdSerializer() {
+		SimpleDateFormat df = new SimpleDateFormat(WebUserSetFields.SET_DATE_FORMAT);
+		mapper.setDateFormat(df);
+	}
+	
+	/**
+	 * This method provides full serialization of a user set
+	 * @param userSet
+	 * @return full user set view
+	 * @throws IOException
+	 */
 	public String serialize(UserSet userSet) throws IOException {
 		
 		UserSet extUserSet = getUserSetUtils().fillPagination(userSet);
@@ -30,6 +43,28 @@ public class UserSetLdSerializer {
 		JsonldResourceBuilder<UserSet> jsonResourceBuilder = JsonldResource.Builder.create();
 		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
 		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(extUserSet));
+		return jsonString;
+	}
+
+    /**
+     * This method computes pagination values for user set
+     * @param userSet
+     * @return enriched user set
+     */
+    public UserSet fillPagination(UserSet userSet) {
+    	return getUserSetUtils().fillPagination(userSet);
+    }	
+
+	/**
+	 * This method provides response for item insert request.
+	 * @param userSet
+	 * @return specific view for user set after item inserting
+	 * @throws IOException
+	 */
+	public String serialize(ItemInsertView userSet) throws IOException {		
+		mapper.registerModule(new JsonldModule()); 
+		JsonldResourceBuilder<ItemInsertView> jsonResourceBuilder = JsonldResource.Builder.create();
+		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
 		return jsonString;
 	}
 

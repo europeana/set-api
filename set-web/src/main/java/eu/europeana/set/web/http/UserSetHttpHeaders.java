@@ -7,6 +7,7 @@ public interface UserSetHttpHeaders extends HttpHeaders {
 	public static final String ALLOW_GPuDOH = "GET,PUT,DELETE,OPTIONS,HEAD";
 	
 	public static final String ALLOW_GPPD = "GET,POST,PUT,DELETE";
+	public static final String ALLOW_PPGHD = "POST,PUT,GET,HEAD,DELETE";
 	public static final String ALLOW_PG = "POST,GET";
 	
 	public static final String VALUE_LDP_CONTAINER = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"\n"+

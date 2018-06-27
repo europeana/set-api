@@ -25,6 +25,9 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	//
 	public static final String PARAM_WSKEY = "wskey";
 	public static final String PATH_PARAM_SET_ID = "identifier";
+	public static final String PATH_PARAM_DATASET_ID = "datasetId";
+	public static final String PATH_PARAM_LOCAL_ID = "localId";
+	public static final String PATH_PARAM_POSITION = "position";
 	public static final String USER_TOKEN = "userToken";
 	public static final String USER_ANONYMOUNS = "anonymous";
 		
@@ -48,6 +51,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
     // Pagination
     //
 	public final static String BASE_SET_URL = "http://data.europeana.eu/set/";
+	public final static String BASE_ITEM_URL = "http://data.europeana.eu/item/";
     public final static int MAX_ITEMS_PER_PAGE = 10;
     public final static String PAGE = "page";
 	public final static String PAGE_SIZE = "pageSize";
@@ -56,6 +60,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	// Serialization
 	//
 	public static final String SEPARATOR_SEMICOLON = ":";
+	public static final String SET_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	
 	// Internal fields 
 	public static final String INTERNAL_TYPE = "internalType";	

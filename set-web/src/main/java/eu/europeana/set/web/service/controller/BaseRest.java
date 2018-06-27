@@ -1,9 +1,12 @@
 package eu.europeana.set.web.service.controller;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -192,6 +195,28 @@ public class BaseRest extends ApiResponseBuilder {
 						new String[] {modifiedStr}, HttpStatus.PRECONDITION_FAILED, null);
 			}
 		}
+	}
+	
+	/**
+	 * This method validates position input, if false responds with -1
+	 * @param position The given position
+	 * @param items The item list
+	 * @return position The validated position in list to insert
+	 * @throws ApplicationAuthenticationException
+	 */
+	public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException {
+		int positionInt = -1;
+		if (StringUtils.isNotEmpty(position)) {
+			try {
+				positionInt = Integer.parseInt(position);
+				if (positionInt > items.size()) {
+					positionInt = -1;
+				}
+			} catch (Exception e) {
+				logger.trace("Position validation warning: " + e.getMessage());
+			}
+		}
+		return positionInt;
 	}
 	
 	/**
