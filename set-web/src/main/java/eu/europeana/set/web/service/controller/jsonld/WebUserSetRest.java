@@ -548,9 +548,10 @@ public class WebUserSetRest extends BaseRest {
 				// serialize to JsonLd
 				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
 				UserSet extUserSet = serializer.fillPagination(updatedUserSet);
-				ItemInsertView setView = new ItemInsertViewAdapter(extUserSet);
+//				ItemInsertView setView = new ItemInsertViewAdapter(extUserSet);
 				
-		        serializedUserSetJsonLdStr = serializer.serialize(setView); 
+		        serializedUserSetJsonLdStr = serializer.serialize(extUserSet); 
+//		        serializedUserSetJsonLdStr = serializer.serialize(setView); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
