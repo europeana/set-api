@@ -12,4 +12,5 @@ public interface SwaggerConstants {
 			"     \"en\": \"New Title\"\r\n" + 
 			"  }\r\n }";
 	public static final String INSERT_ITEM_NOTE = "Please create your insert item request using selected parameters.";
+	public static final String CHECK_ITEM_NOTE = "Check if item is already in a user set";
 }

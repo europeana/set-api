@@ -576,6 +576,99 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
+	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.GET, 
+			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+	@ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
+	public ResponseEntity<String> isItemInUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
+			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
+			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			HttpServletRequest request
+			) throws HttpException {
+		
+		userToken = getUserToken(userToken, request);
+		
+		String action = "get:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
+		return isItemInUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
+	}
+	
+	/**
+	 * This method validates input values and checks if item is already in a user set.
+	 * 
+	 * @param request
+	 * @param wskey The API key
+	 * @param identifier The identifier of a user set
+	 * @param datasetId The identifier of the dataset, typically a number
+	 * @param localId The local identifier within the provider
+	 * @param userSet The user set fields to update in JSON format e.g. title or description
+	 * @param action The action describing the request
+	 * @return response entity that comprises response body, headers and status code
+	 * @throws HttpException
+	 */
+	protected ResponseEntity<String> isItemInUserSet(HttpServletRequest request, String wsKey, 
+			String identifier, String datasetId, String localId, String userToken, 
+			String action) throws HttpException {
+
+		try {
+			// check user credentials, if invalid respond with HTTP 401,
+			//  or if unauthorized respond with HTTP 403
+			// check client access (a valid "wskey" must be provided)
+			validateApiKey(wsKey, WebUserSetFields.READ_METHOD);
+
+			// authorize user
+			UserSetId setId = new BaseUserSetId();
+			setId.setSequenceNumber(identifier);
+			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.RETRIEVE);
+
+			// check if the Set exists, if not respond with HTTP 404
+			// retrieve an existing user set based on its identifier
+			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+			// check if the Set is disabled, respond with HTTP 410
+			HttpStatus httpStatus = null;
+			String serializedUserSetJsonLdStr = "";
+			if (existingUserSet.isDisabled()) { 
+				httpStatus = HttpStatus.GONE;
+			} else {			
+				// build new item URL
+				StringBuilder urlBuilder = new StringBuilder();
+				urlBuilder.append(WebUserSetFields.BASE_ITEM_URL)
+					.append(datasetId).append(WebUserSetFields.SLASH)
+					.append(localId);
+				String newItem = urlBuilder.toString();
+
+				// check if item already exists in the Set, if so respond with 
+				// HTTP 200, otherwise respond with HTTP 404.
+				// check if item already exists in the Set, if so remove it
+				if (existingUserSet.getItems().contains(newItem)) {
+			        httpStatus = HttpStatus.OK;
+				} else {
+			        httpStatus = HttpStatus.NOT_FOUND;
+				}
+			}
+			
+			// build response entity with headers
+			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+
+			ResponseEntity<String> response = new ResponseEntity<String>(
+					serializedUserSetJsonLdStr, headers, httpStatus);
+
+			return response;
+
+		} catch (UserSetValidationException e) { 
+			throw new RequestBodyValidationException("", I18nConstants.USERSET_CANT_PARSE_BODY, e);
+		} catch (HttpException e) {
+			//TODO: change this when OAUTH is implemented and the user information is available in service
+			throw e;
+		} catch (UserSetInstantiationException e) {
+			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
+		} catch (Exception e) {
+			throw new InternalServerException(e);
+		}
+	}
+
 	@RequestMapping(value = "/set/{identifier}.jsonld", method = RequestMethod.DELETE, produces = {
 			HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
 	@ApiOperation(value = "Delete an existing user set", nickname = "delete", response = java.lang.Void.class)
