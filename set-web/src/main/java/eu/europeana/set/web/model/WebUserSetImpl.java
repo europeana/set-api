@@ -3,11 +3,13 @@ package eu.europeana.set.web.model;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldId;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
@@ -43,6 +45,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		super.setContext(context);
 	}
 	
+	@JsonldProperty("http://schema.org/creator")
+	@JsonIgnore
+	public void setCreator(Agent creator) {
+		super.setCreator(creator);
+	}
+	
 	@JsonldProperty("http://schema.org/items")
 	public void setItems(List<String> items) {
 		super.setItems(items);
@@ -58,8 +66,37 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		super.setUgc(ugc);		
 	}
 
+	@JsonIgnore
+	public void setFirst(String first) {
+		super.setFirst(first);		
+	}
+
+	@JsonIgnore
+	public void setLast(String last) {
+		super.setLast(last);		
+	}
+
 	public String toString() {
-		return "WebUserSet [Title:" + getTitle() + ", Identifier:" + getIdentifier() + "]";
+		StringBuilder resBuilder = new StringBuilder();
+		resBuilder.append("WebUserSet [");
+		if (getTitle() != null && StringUtils.isNotEmpty(getTitle().toString())) {
+			resBuilder.append("Title: ");
+			resBuilder.append(getTitle());
+		}
+		if (StringUtils.isNotEmpty(getIdentifier())) {
+			resBuilder.append(", Identifier: ");
+			resBuilder.append(getIdentifier());
+		}
+		if (StringUtils.isNotEmpty(Integer.toString(getTotal()))) {
+			resBuilder.append(", Total items: ");
+			resBuilder.append(getTotal());
+		}
+		if (getItems() != null && getItems().size() > 0) {
+			resBuilder.append(", Items: ");
+			resBuilder.append(getItems().size());	
+		}
+		resBuilder.append("]");
+        return resBuilder.toString();		
 	}
 	
 	@Override

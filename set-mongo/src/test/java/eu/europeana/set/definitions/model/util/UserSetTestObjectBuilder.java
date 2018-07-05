@@ -50,6 +50,7 @@ public class UserSetTestObjectBuilder {
 	public final static String TEST_HOMEPAGE         = "http://www.pro.europeana.eu/web/europeana-creative";
     public final static String CONTENT_DIR           = "/content/";
     public final static String ITEMS_TEST_INPUT_FILE = CONTENT_DIR + "test_items.txt";
+    public final static String ITEMS_1200_TEST_INPUT_FILE = CONTENT_DIR + "test_items_1200.txt";
 	    
 //	Logger logger = Logger.getLogger(getClass());
 	
@@ -60,6 +61,10 @@ public class UserSetTestObjectBuilder {
     }
     
 	public UserSet buildUserSet(UserSet userSet) {
+		return buildUserSet(userSet, ITEMS_TEST_INPUT_FILE);
+	}
+
+	public UserSet buildUserSet(UserSet userSet, String path) {
 
 		userSet.setTitle(getUserSetUtils().createMap(Locale.ENGLISH.getLanguage(),
 				TEST_TITLE));
@@ -80,7 +85,7 @@ public class UserSetTestObjectBuilder {
 		userSet.setCreator(creator);
 		
 		try {
-			userSet.setItems(loadItems());
+			userSet.setItems(loadItems(path));
 		} catch (UserSetAccessException e) {
 			System.out.println(UserSetAccessException.COULD_NOT_READ_FROM_FILE_ERROR + ". "+ e.getMessage());
 		}
@@ -88,12 +93,12 @@ public class UserSetTestObjectBuilder {
 		return userSet;
 	}
 
-	private List<String> loadItems() throws UserSetAccessException {
+	private List<String> loadItems(String path) throws UserSetAccessException {
 		List<String> items = new ArrayList<String>();
 		
 	    File itemsTestInputFile;
 		try {
-			itemsTestInputFile = getClasspathFile(ITEMS_TEST_INPUT_FILE);
+			itemsTestInputFile = getClasspathFile(path);
 			String itemsStr =
 				    FileUtils.readFileToString(itemsTestInputFile, "UTF-8");
             for (String item : itemsStr.split("\r\n")) {

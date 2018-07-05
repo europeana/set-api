@@ -16,6 +16,8 @@
  */
 package eu.europeana.set.web.service.impl;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -86,7 +88,7 @@ public class WebUserSetServiceTest {
 			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {//, JsonParseException {
 		
 		UserSet userSet = new PersistentUserSetImpl();
-		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet);
+		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
 		       		
 		/**
 		 * Store UserSet in database.
@@ -106,12 +108,12 @@ public class WebUserSetServiceTest {
         System.out.println(userSetJsonLdStr);
 	}
 		
-	@Test(expected = UserSetNotFoundException.class)
+//	@Test(expected = UserSetNotFoundException.class)
 	public void testDeleteUserSet() 
 			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
 		
 		UserSet userSet = new PersistentUserSetImpl();
-		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet);
+		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
 		       		
 		// store user set in database
 		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
@@ -123,6 +125,30 @@ public class WebUserSetServiceTest {
 
 		// verify that user set with given id is deleted from database
 		webUserSetService.getUserSetById(userSetId);		
+	}
+		
+	@Test
+	public void testGetUserSet() 
+			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
+		
+		UserSet userSet = new PersistentUserSetImpl();
+		UserSet userSet1200 = new PersistentUserSetImpl();
+		UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
+		UserSet test1200UserSet = getObjectBuilder().buildUserSet(userSet1200, UserSetTestObjectBuilder.ITEMS_1200_TEST_INPUT_FILE);
+		       		
+		// store user set in database
+		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+		String userSetId = webUserSet.getIdentifier();
+		System.out.println("testUserSet id: " + userSetId);
+		UserSet web1200UserSet = webUserSetService.storeUserSet(test1200UserSet);
+		String userSetId1200 = web1200UserSet.getIdentifier();
+		System.out.println("test1200UserSet id: " + userSetId1200);
+
+		// verify output of user sets
+		UserSet dbUserSet = webUserSetService.getUserSetById(userSetId);		
+		UserSet db1200UserSet = webUserSetService.getUserSetById(userSetId1200);	
+		assertTrue(dbUserSet.getTotal() == 100);
+		assertTrue(db1200UserSet.getTotal() == 1200);
 	}
 		
 }

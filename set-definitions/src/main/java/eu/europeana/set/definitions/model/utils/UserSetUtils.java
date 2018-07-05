@@ -35,9 +35,19 @@ public class UserSetUtils {
 	 * @return user set object enriched by pagination values
 	 */
 	public UserSet analysePagination(UserSet userSet) {
+		UserSet res = userSet;		
+		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier()));		
+		res = updatePagination(res);
+		return res;
+	}
+	
+	/**
+	 * This method updates pagination values.
+	 * @param userSet The user set object
+	 * @return user set object with updated pagination values
+	 */
+	public UserSet updatePagination(UserSet userSet) {
 		UserSet res = userSet;
-		
-		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier()));
 		
 		if (res != null && res.getItems() != null) {
 			int total = res.getItems().size();

@@ -49,6 +49,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	
 	@Override
+	public UserSet updateUserSetPagination(UserSet newUserSet) {		
+		return getUserSetUtils().updatePagination(newUserSet);
+	}
+	
+	@Override
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
 		UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 		if (res == null) {

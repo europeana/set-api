@@ -30,9 +30,8 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.agent.Agent;
-import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
 import eu.europeana.set.definitions.model.impl.BaseUserSetId;
-import eu.europeana.set.definitions.model.view.ItemInsertView;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
@@ -41,7 +40,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.WebSoftwareAgent;
-import eu.europeana.set.web.model.view.ItemInsertViewAdapter;
 import eu.europeana.set.web.model.vocabulary.Operations;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
@@ -68,7 +66,7 @@ public class WebUserSetRest extends BaseRest {
 
 		userToken = getUserToken(userToken, request);
 		
-		return storeUserSet(wskey, userSet, userToken);
+		return storeUserSet(wskey, userSet, userToken, request);
 	}
 	
 	/**
@@ -76,10 +74,12 @@ public class WebUserSetRest extends BaseRest {
 	 * @param wsKey The API key
 	 * @param userSetJsonLdStr The user set in JsonLd format
 	 * @param userToken The user identifier
+	 * @param request HTTP request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> storeUserSet(String wsKey, String userSetJsonLdStr, String userToken) throws HttpException {
+	protected ResponseEntity<String> storeUserSet(String wsKey, String userSetJsonLdStr, String userToken,
+			HttpServletRequest request) throws HttpException {
 		try {
 			// validate user - check user credentials (all registered users can create) 
 			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
@@ -109,9 +109,13 @@ public class WebUserSetRest extends BaseRest {
 			// generate and add a created and modified timestamp to the Set
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 
+			// apply linked data profile from header
+			LdProfiles profile = getProfile(request);
+			UserSet resUserSet = applyProfile(storedUserSet, profile);
+			
 			// serialize Set description in JSON-LD and respond with HTTP 201 if successful
 			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-	        String serializedUserSetJsonLdStr = serializer.serialize(storedUserSet); 
+	        String serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
@@ -187,10 +191,14 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
 		
+			// apply linked data profile from header
+			LdProfiles profile = getProfile(request);
+			UserSet resUserSet = applyProfile(userSet, profile);
+						
 			// serialize Set in JSON-LD according to the “Prefer” HTTP header 
 			// (when present otherwise apply default) and respond with HTTP 200
 			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-	        String userSetJsonLdStr = serializer.serialize(userSet); 
+	        String userSetJsonLdStr = serializer.serialize(resUserSet); 
 
 			// build response
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
@@ -292,15 +300,21 @@ public class WebUserSetRest extends BaseRest {
 							new String[] {""}, HttpStatus.PRECONDITION_FAILED, null);
 				}
 
+				existingUserSet = getUserSetService().updateUserSetPagination(existingUserSet);
+				
 				// Respond with HTTP 200
 	            // update an existing user set. merge user sets - insert new fields in existing object
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
 				modifiedStr = updatedUserSet.getModified().hashCode();
 				
+				// apply linked data profile from header
+				LdProfiles profile = getProfile(request);
+				UserSet resUserSet = applyProfile(updatedUserSet, profile);
+								
 				// serialize to JsonLd
 				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-		        serializedUserSetJsonLdStr = serializer.serialize(updatedUserSet); 
+		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -315,7 +329,7 @@ public class WebUserSetRest extends BaseRest {
 					serializedUserSetJsonLdStr, headers, httpStatus);
 
 			return response;
-
+			
 		} catch (JsonParseException e) {
 			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);
 		} catch (UserSetValidationException e) { 
@@ -329,126 +343,7 @@ public class WebUserSetRest extends BaseRest {
 			throw new InternalServerException(e);
 		}
 	}
-	
-//	@RequestMapping(value = {"/set/{identifier}.jsonld?position=POSITION"}, method = RequestMethod.PUT, 
-//			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-//	@ApiOperation(notes = SwaggerConstants.UPDATE_SAMPLES_JSONLD, value = "Insert items to an existing user set", nickname = "update", response = java.lang.Void.class)
-//	public ResponseEntity<String> insertItemsToUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
-//			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-//			@RequestParam(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
-//			@RequestParam(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
-//			@RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required=false) String position,
-//			@RequestBody String userSet,
-//			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
-//			HttpServletRequest request
-//			) throws HttpException {
-//		
-//		userToken = getUserToken(userToken, request);
-//		
-//		String action = "put:/set/{identifier}.jsonld?position=POSITION";
-//		return insertItemsToUserSet(request, wskey, identifier, datasetId, localId, position, userSet, userToken, action);
-//	}
-//	
-//	/**
-//	 * This method validates input values, retrieves user set object and
-//	 * adds items to it.
-//	 * 
-//	 * @param request
-//	 * @param wskey The API key
-//	 * @param identifier The identifier
-//	 * @param datasetId
-//	 * @param localId
-//	 * @param position
-//	 * @param userSet The user set fields to update in JSON format e.g. title or description
-//	 * @param action The action describing the request
-//	 * @return response entity that comprises response body, headers and status code
-//	 * @throws HttpException
-//	 */
-//	protected ResponseEntity<String> insertItemsToUserSet(HttpServletRequest request, String wsKey, String identifier,
-//			String datasetId, String localId, String position, String userSetJsonLdStr, String userToken, String action) throws HttpException {
-//
-//		try {
-//			// check user credentials, if invalid respond with HTTP 401,
-//			//  or if unauthorized respond with HTTP 403
-//			// check client access (a valid "wskey" must be provided)
-//			validateApiKey(wsKey, WebUserSetFields.READ_METHOD);
-//
-//			// authorize user
-//			UserSetId setId = new BaseUserSetId();
-//			setId.setSequenceNumber(identifier);
-//			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.UPDATE);
-//
-//			// check if the Set exists, if not respond with HTTP 404
-//			// retrieve an existing user set based on its identifier
-//			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
-//
-//			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
-//			checkHeaderTimestamp(request, existingUserSet.getModified().hashCode());
-//
-//			// check if the Set is disabled, respond with HTTP 410
-//			HttpStatus httpStatus = null;
-//			int modifiedStr = 0;
-//			String serializedUserSetJsonLdStr = "";
-//			if (existingUserSet.isDisabled()) { 
-//				httpStatus = HttpStatus.GONE;
-//			} else {			
-//				// validate and process the Set description for format and mandatory fields
-//				// if false respond with HTTP 400
-//				getUserSetService().validateWebUserSet(existingUserSet);
-//				
-//				// parse fields of the new user set to an object
-//				UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-//	
-//				// generate and add a created and modified timestamp to the Set;
-//				existingUserSet.setModified(newUserSet.getModified());
-//				
-//				// update the Set based on its identifier (replace member items with the new items 
-//				// that are present in the Set description only when a profile is indicated and is 
-//				// different from "ldp:PreferMinimalContainer" is referred in the “Prefer” header);
-//				if (!checkHeaderProfile(request)) {
-//					throw new ApplicationAuthenticationException(
-//							I18nConstants.INVALID_UPDATE_HEADER_PROFILE, I18nConstants.INVALID_UPDATE_HEADER_PROFILE,
-//							new String[] {""}, HttpStatus.PRECONDITION_FAILED, null);
-//				}
-//
-//				// Respond with HTTP 200
-//	            // update an existing user set. merge user sets - insert new fields in existing object
-//				UserSet updatedUserSet = getUserSetService().updateUserSet(
-//						(PersistentUserSet) existingUserSet, newUserSet);
-//				modifiedStr = updatedUserSet.getModified().hashCode();
-//				
-//				// serialize to JsonLd
-//				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-//		        serializedUserSetJsonLdStr = serializer.serialize(updatedUserSet); 
-//		        httpStatus = HttpStatus.OK;
-//			}
-//			
-//			// build response entity with headers
-//			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
-//			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-//			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
-//			// generate “ETag”;
-//			headers.add(HttpHeaders.ETAG, "" + modifiedStr);
-//
-//			ResponseEntity<String> response = new ResponseEntity<String>(
-//					serializedUserSetJsonLdStr, headers, httpStatus);
-//
-//			return response;
-//
-//		} catch (JsonParseException e) {
-//			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);
-//		} catch (UserSetValidationException e) { 
-//			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);
-//		} catch (HttpException e) {
-//			//TODO: change this when OAUTH is implemented and the user information is available in service
-//			throw e;
-//		} catch (UserSetInstantiationException e) {
-//			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
-//		} catch (Exception e) {
-//			throw new InternalServerException(e);
-//		}
-//	}
-		
+
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.PUT, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.INSERT_ITEM_NOTE, value = "Insert item to an existing user set", nickname = "insert item", response = java.lang.Void.class)
@@ -507,6 +402,7 @@ public class WebUserSetRest extends BaseRest {
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
 			String serializedUserSetJsonLdStr = "";
+			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
@@ -521,37 +417,52 @@ public class WebUserSetRest extends BaseRest {
 				String newItem = urlBuilder.toString();
 
 				// check if item already exists in the Set, if so remove it
+				boolean noAction = false;
 				if (existingUserSet.getItems().contains(newItem)) {
-					existingUserSet.getItems().remove(newItem);
+					int currentPos = existingUserSet.getItems().indexOf(newItem);
+					if (currentPos == positionInt) {
+						noAction = true;
+					} else {
+						existingUserSet.getItems().remove(newItem);
+					}
 				}
 
 				// insert item to Set in the indicated position (or last position if no position was indicated).
-				if (positionInt == -1) {
-					existingUserSet.getItems().add(newItem);
+				UserSet extUserSet = null;
+				if (!noAction) {
+					if (positionInt == -1) {
+						existingUserSet.getItems().add(newItem);
+					} else {
+						existingUserSet.getItems().add(positionInt, newItem);					
+					}
+					
+					existingUserSet = getUserSetService().updateUserSetPagination(existingUserSet);
+				
+					// validate and process the Set description for format and mandatory fields
+					// if false respond with HTTP 400
+					getUserSetService().validateWebUserSet(existingUserSet);
+					
+					// generate and add a created and modified timestamp to the Set
+					Date now = new Date();				
+					existingUserSet.setModified(now);
+					
+					// Respond with HTTP 200
+		            // update an existing user set. merge user sets - insert new fields in existing object
+					UserSet updatedUserSet = getUserSetService().updateUserSet(
+							(PersistentUserSet) existingUserSet, null);
+				
+					// serialize to JsonLd
+					extUserSet = serializer.fillPagination(updatedUserSet);
 				} else {
-					existingUserSet.getItems().add(positionInt, newItem);					
+					// serialize to JsonLd
+					extUserSet = serializer.fillPagination(existingUserSet);					
 				}
 				
-				// validate and process the Set description for format and mandatory fields
-				// if false respond with HTTP 400
-				getUserSetService().validateWebUserSet(existingUserSet);
-				
-				// generate and add a created and modified timestamp to the Set
-				Date now = new Date();				
-				existingUserSet.setModified(now);
-				
-				// Respond with HTTP 200
-	            // update an existing user set. merge user sets - insert new fields in existing object
-				UserSet updatedUserSet = getUserSetService().updateUserSet(
-						(PersistentUserSet) existingUserSet, null);
-				
-				// serialize to JsonLd
-				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-				UserSet extUserSet = serializer.fillPagination(updatedUserSet);
-//				ItemInsertView setView = new ItemInsertViewAdapter(extUserSet);
-				
-		        serializedUserSetJsonLdStr = serializer.serialize(extUserSet); 
-//		        serializedUserSetJsonLdStr = serializer.serialize(setView); 
+				// apply linked data profile from header
+				LdProfiles profile = getProfile(request);
+				UserSet resUserSet = applyProfile(extUserSet, profile);
+								
+		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -685,6 +596,7 @@ public class WebUserSetRest extends BaseRest {
 	}
 	
 	/**
+	 * This method implements removal of a user set 
 	 * @param request
 	 * @param identifier
 	 * @param wsKey

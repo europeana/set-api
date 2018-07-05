@@ -20,6 +20,8 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.UserSetService;
@@ -184,7 +186,8 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @param modified
 	 * @throws ApplicationAuthenticationException
 	 */
-	public void checkHeaderTimestamp(HttpServletRequest request, int modified) throws ApplicationAuthenticationException {
+	public void checkHeaderTimestamp(HttpServletRequest request, int modified) 
+			throws ApplicationAuthenticationException {
 		String ifMatchHeader = request.getHeader(HttpHeaders.IF_MATCH);
 		if (ifMatchHeader != null) {
 			logger.trace("'If-Match' header value: " + ifMatchHeader);	
@@ -195,6 +198,56 @@ public class BaseRest extends ApiResponseBuilder {
 						new String[] {modifiedStr}, HttpStatus.PRECONDITION_FAILED, null);
 			}
 		}
+	}
+	
+	/**
+	 * This method retrieves view profile if provided within the "If-Match" HTTP header
+	 * @param request
+	 * @return profile value
+	 * @throws ApplicationAuthenticationException
+	 */
+	public LdProfiles getProfile(HttpServletRequest request) {
+		LdProfiles ldProfile = LdProfiles.MINIMAL;
+		
+		String preferHeader = request.getHeader(HttpHeaders.PREFER);
+		if (preferHeader != null) {
+			logger.trace("'Prefer' header value: " + preferHeader);	
+			if (StringUtils.isNotEmpty(preferHeader))
+				ldProfile = LdProfiles.getByHeaderValue(preferHeader);
+		}
+		return ldProfile;
+	}
+	
+	/**
+	 * This methods applies Linked Data profile to a user set
+	 * @param userSet The given user set
+	 * @param profile Provided Linked Data profile
+	 * @return profiled user set value
+	 */
+	public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
+		UserSet res = null;
+		
+		// check that not more then maximal allowed number of items are presented
+		if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
+			int itemsCount = userSet.getItems().size();
+			if (itemsCount > WebUserSetFields.MAX_ITEMS_TO_PRESENT) {
+				 List<String> allowedList = userSet.getItems().subList(0, WebUserSetFields.MAX_ITEMS_TO_PRESENT);
+				 userSet.setItems(allowedList);
+			}
+		}
+
+		// set unnecessary fields to null - the empty fields will not be presented
+		switch(profile) {
+		case STANDARD:
+			res = userSet;
+			break;
+		case MINIMAL:
+		default:
+			userSet.setItems(null);
+			res = userSet;
+			break;
+		}
+		return res;
 	}
 	
 	/**

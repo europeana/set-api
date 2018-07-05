@@ -55,6 +55,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
     public final static int MAX_ITEMS_PER_PAGE = 10;
     public final static String PAGE = "page";
 	public final static String PAGE_SIZE = "pageSize";
+    public final static int MAX_ITEMS_TO_PRESENT = 1000;
 	
 	//
 	// Serialization

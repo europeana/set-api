@@ -26,6 +26,13 @@ public interface UserSetService {
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
 	
 	/**
+	 * This method updates user set pagination values. 
+	 * @param newUserSet
+	 * @return user set with updated pagination values
+	 */
+	public UserSet updateUserSetPagination(UserSet newUserSet);		
+	
+	/**
 	 * This method returns UserSet object for given UserSetId that
 	 * comprises provider and identifier.
 	 * @param

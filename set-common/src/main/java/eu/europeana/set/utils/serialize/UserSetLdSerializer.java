@@ -37,12 +37,10 @@ public class UserSetLdSerializer {
 	 */
 	public String serialize(UserSet userSet) throws IOException {
 		
-		UserSet extUserSet = getUserSetUtils().fillPagination(userSet);
-		
 		mapper.registerModule(new JsonldModule()); 
 		JsonldResourceBuilder<UserSet> jsonResourceBuilder = JsonldResource.Builder.create();
 		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(extUserSet));
+		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
 		return jsonString;
 	}
 
