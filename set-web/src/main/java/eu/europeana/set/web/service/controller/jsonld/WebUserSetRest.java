@@ -347,7 +347,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.PUT, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.INSERT_ITEM_NOTE, value = "Insert item to an existing user set", nickname = "insert item", response = java.lang.Void.class)
-	public ResponseEntity<String> insertItemWithinUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+	public ResponseEntity<String> insertItemIntoUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
@@ -359,7 +359,7 @@ public class WebUserSetRest extends BaseRest {
 		userToken = getUserToken(userToken, request);
 		
 		String action = "put:/set/{identifier}/{dataset_id}/{local_id}.jsonld?position=POSITION";
-		return insertItemWithinUserSet(request, wskey, identifier, datasetId, localId, position, userToken, action);
+		return insertItemIntoUserSet(request, wskey, identifier, datasetId, localId, position, userToken, action);
 	}
 	
 	/**
@@ -377,7 +377,7 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> insertItemWithinUserSet(HttpServletRequest request, String wsKey, 
+	protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, String wsKey, 
 			String identifier, String datasetId, String localId, String position, String userToken, 
 			String action) throws HttpException {
 
@@ -394,6 +394,7 @@ public class WebUserSetRest extends BaseRest {
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
+			//TODO: EA-1194 respond with 404 needs to be implemented...
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
@@ -401,8 +402,11 @@ public class WebUserSetRest extends BaseRest {
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
+			
+			UserSetLdSerializer serializer = new UserSetLdSerializer();
 			String serializedUserSetJsonLdStr = "";
-			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
+			
+			//TODO: EA-1194 refactor implementation to  reduce the dept of if else conditions. Extract methods to improve code readability.  
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
@@ -410,6 +414,7 @@ public class WebUserSetRest extends BaseRest {
 				int positionInt = validatePosition(position, existingUserSet.getItems());
 
 				// build new item URL
+				//TODO: EA-1194 refactor see EA1217 
 				StringBuilder urlBuilder = new StringBuilder();
 				urlBuilder.append(WebUserSetFields.BASE_ITEM_URL)
 					.append(datasetId).append(WebUserSetFields.SLASH)
@@ -417,6 +422,7 @@ public class WebUserSetRest extends BaseRest {
 				String newItem = urlBuilder.toString();
 
 				// check if item already exists in the Set, if so remove it
+				//TODO: EA-1194 merge decoupled business logic. merge this code with the next if(!noAction) block
 				boolean noAction = false;
 				if (existingUserSet.getItems().contains(newItem)) {
 					int currentPos = existingUserSet.getItems().indexOf(newItem);
@@ -440,11 +446,11 @@ public class WebUserSetRest extends BaseRest {
 				
 					// validate and process the Set description for format and mandatory fields
 					// if false respond with HTTP 400
+					//TODO: EA-1194 this method doesn't changes the userset metadata. Validation not needed
 					getUserSetService().validateWebUserSet(existingUserSet);
 					
 					// generate and add a created and modified timestamp to the Set
-					Date now = new Date();				
-					existingUserSet.setModified(now);
+					existingUserSet.setModified(new Date());
 					
 					// Respond with HTTP 200
 		            // update an existing user set. merge user sets - insert new fields in existing object
@@ -476,6 +482,7 @@ public class WebUserSetRest extends BaseRest {
 			return response;
 
 		} catch (UserSetValidationException e) { 
+			//TODO: EA-1194 use message key as first param as well
 			throw new RequestBodyValidationException("", I18nConstants.USERSET_CANT_PARSE_BODY, e);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service

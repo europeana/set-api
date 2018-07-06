@@ -57,6 +57,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
 		UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 		if (res == null) {
+			//TODO: EA-1194 use externalization for all HttpExceptions
 			throw new UserSetNotFoundException(
 					"No user set found in database for identifier! " + userSetId, "", null);
 		}

@@ -2,6 +2,7 @@ package eu.europeana.set.utils.serialize;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,6 +50,7 @@ public class UserSetLdSerializer {
      * @param userSet
      * @return enriched user set
      */
+	//TODO: EA-1194 mode this method to service it is not the business of the serializer
     public UserSet fillPagination(UserSet userSet) {
     	return getUserSetUtils().fillPagination(userSet);
     }	
