@@ -17,6 +17,7 @@ public interface AuthorizationService {
 	 * @return
 	 * @throws UserAuthorizationException
 	 */
+	//TODO: EA1217 change setId to string
 	Agent authorizeUser(String userToken, String apiKey, UserSetId setId, String operationName)
 			throws UserAuthorizationException, ApplicationAuthenticationException, OperationAuthorizationException;
 

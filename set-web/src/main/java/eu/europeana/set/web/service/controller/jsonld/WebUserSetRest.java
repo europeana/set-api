@@ -538,11 +538,14 @@ public class WebUserSetRest extends BaseRest {
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
+			
+			//TODO: EA1217 remove empty local variable it is use only once
 			String serializedUserSetJsonLdStr = "";
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
 				// build new item URL
+				//TODO: EA1217 refactor to own method 
 				StringBuilder urlBuilder = new StringBuilder();
 				urlBuilder.append(WebUserSetFields.BASE_ITEM_URL)
 					.append(datasetId).append(WebUserSetFields.SLASH)
@@ -568,7 +571,8 @@ public class WebUserSetRest extends BaseRest {
 
 			return response;
 
-		} catch (UserSetValidationException e) { 
+		} catch (UserSetValidationException e) {
+			//TODO: EA1217 use I18nConstants.USERSET_CANT_PARSE_BODY as first param as well, the message key will be displayed if the internationalization doesn't work
 			throw new RequestBodyValidationException("", I18nConstants.USERSET_CANT_PARSE_BODY, e);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
