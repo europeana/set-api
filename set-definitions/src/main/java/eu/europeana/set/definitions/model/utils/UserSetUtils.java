@@ -36,6 +36,7 @@ public class UserSetUtils {
 	 */
 	public UserSet analysePagination(UserSet userSet) {
 		UserSet res = userSet;		
+		//TODO: EA-1129 the setting of the identifier should be invoked in the utility class. This method should be removed as the updatePagination already exists.
 		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier()));		
 		res = updatePagination(res);
 		return res;

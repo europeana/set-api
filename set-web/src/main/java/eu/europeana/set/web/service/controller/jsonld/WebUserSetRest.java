@@ -82,11 +82,13 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request) throws HttpException {
 		try {
 			// validate user - check user credentials (all registered users can create) 
-			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
+			// if invalid respond with HTTP 401 
 			validateApiKey(wsKey, WebUserSetFields.WRITE_METHOD);
 
 			// authorize user
 			UserSetId setId = new BaseUserSetId();
+			//or if unauthorized respond with HTTP 403;
+			//TODO: EA-1129 need to implement exception handling and return 403
 			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.CREATE);			
 			
 			// parse user set 
@@ -97,6 +99,7 @@ public class WebUserSetRest extends BaseRest {
 			getUserSetService().validateWebUserSet(webUserSet);
 
 			Agent user = new WebSoftwareAgent();
+			//TODO: EA-1129 remove the hardcoded value, if needed add comments into the specifications document 
 			user.setName("test agent");			
 			
 			// SET DEFAULTS
@@ -107,8 +110,10 @@ public class WebUserSetRest extends BaseRest {
 			// following the order given by the list
 			// generate an identifier (in sequence) for the Set
 			// generate and add a created and modified timestamp to the Set
+			//TODO: EA-1129 need to implement the generation of the created and modified fields
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 
+			//TODO: EA-1129 move the serialization to own method, and avoid duplicated code
 			// apply linked data profile from header
 			LdProfiles profile = getProfile(request);
 			UserSet resUserSet = applyProfile(storedUserSet, profile);
