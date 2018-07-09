@@ -619,13 +619,14 @@ public class WebUserSetRest extends BaseRest {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
-			//  or if unauthorized respond with HTTP 403
 			// check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey, WebUserSetFields.DELETE_METHOD);
 
 			// authorize user
 			UserSetId setId = new BaseUserSetId();
 			setId.setSequenceNumber(identifier);
+			//  or if unauthorized respond with HTTP 403
+			//TODO: EA-1147 this exception handling is not implemented, must return 403 not 500
 			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.DELETE);
 
 			// retrieve a user set based on its identifier
@@ -645,20 +646,19 @@ public class WebUserSetRest extends BaseRest {
 				 if (isAdmin(wsKey, userToken)) {
 					 getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
 				 } else { // otherwise flag it as disabled
+					 //TODO: EA-1147 move this code to UserSetService.disableUserSet() and do not read again the user 					 
 					 existingUserSet.setDisabled(true);
 					 getUserSetService().updateUserSet(
 							(PersistentUserSet) getUserSetService().getUserSetById(identifier)
 							, existingUserSet);
 				 }
+				 httpStatus = HttpStatus.NO_CONTENT;
 			}			
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
-
-			if (httpStatus == null) {
-				httpStatus = HttpStatus.NO_CONTENT;
-			}
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					identifier, headers, httpStatus);
 
