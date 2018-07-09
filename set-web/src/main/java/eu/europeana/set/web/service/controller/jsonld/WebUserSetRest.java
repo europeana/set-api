@@ -593,6 +593,120 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
+	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.DELETE, 
+			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+	@ApiOperation(notes = SwaggerConstants.DELETE_ITEM_NOTE, value = "Delete a item from the set", nickname = "delete item", response = java.lang.Void.class)
+	public ResponseEntity<String> deleteItemFromUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
+			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
+			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			HttpServletRequest request
+			) throws HttpException {
+		
+		userToken = getUserToken(userToken, request);
+		
+		String action = "delete:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
+		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
+	}
+	
+	/**
+	 * This method validates input values and deletes item from a user set.
+	 * 
+	 * @param request
+	 * @param wskey The API key
+	 * @param identifier The identifier of a user set
+	 * @param datasetId The identifier of the dataset, typically a number
+	 * @param localId The local identifier within the provider
+	 * @param userSet The user set fields to update in JSON format e.g. title or description
+	 * @param action The action describing the request
+	 * @return response entity that comprises response body, headers and status code
+	 * @throws HttpException
+	 */
+	protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, String wsKey, 
+			String identifier, String datasetId, String localId, String userToken, 
+			String action) throws HttpException {
+		
+		try {
+			// check user credentials, if invalid respond with HTTP 401,
+			//  or if unauthorized respond with HTTP 403
+			// check client access (a valid "wskey" must be provided)
+			validateApiKey(wsKey, WebUserSetFields.DELETE_METHOD);
+
+			// authorize user
+			UserSetId setId = new BaseUserSetId();
+			setId.setSequenceNumber(identifier);
+			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.RETRIEVE);
+
+			// check if the Set exists, if not respond with HTTP 404
+			// retrieve an existing user set based on its identifier
+			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+			// check if the Set is disabled, respond with HTTP 410
+			HttpStatus httpStatus = null;
+			String serializedUserSetJsonLdStr = "";
+			if (existingUserSet.isDisabled()) { 
+				httpStatus = HttpStatus.GONE;
+			} else {			
+				// build new item URL
+				StringBuilder urlBuilder = new StringBuilder();
+				urlBuilder.append(WebUserSetFields.BASE_ITEM_URL)
+					.append(datasetId).append(WebUserSetFields.SLASH)
+					.append(localId);
+				String newItem = urlBuilder.toString();
+
+				// check if item already exists in the Set, if not respond with HTTP 404
+				if (existingUserSet.getItems().contains(newItem)) {
+					// if already exists - remove item and update modified date
+					existingUserSet.getItems().remove(newItem);
+					Date now = new Date();				
+					existingUserSet.setModified(now);
+					
+		            // update an existing user set
+					UserSet updatedUserSet = getUserSetService().updateUserSet(
+							(PersistentUserSet) existingUserSet, null);
+				
+					// serialize to JsonLd
+					UserSetLdSerializer serializer = new UserSetLdSerializer(); 
+					UserSet extUserSet = serializer.fillPagination(updatedUserSet);
+				
+					// apply linked data profile from header
+					LdProfiles profile = getProfile(request);
+					UserSet resUserSet = applyProfile(extUserSet, profile);
+									
+			        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
+
+			        // respond with HTTP 200 containing the updated Set description as body.
+					// serialize Set in JSON-LD following the requested profile 
+			        // (if not indicated assume the default, ie. minimal) 
+			        httpStatus = HttpStatus.OK;
+				} else {
+			        httpStatus = HttpStatus.NOT_FOUND;
+				}
+			}
+			
+			// build response entity with headers
+			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+
+			ResponseEntity<String> response = new ResponseEntity<String>(
+					serializedUserSetJsonLdStr, headers, httpStatus);
+
+			return response;
+
+		} catch (UserSetValidationException e) { 
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, 
+					I18nConstants.USERSET_CANT_PARSE_BODY, e);
+		} catch (HttpException e) {
+			//TODO: change this when OAUTH is implemented and the user information is available in service
+			throw e;
+		} catch (UserSetInstantiationException e) {
+			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
+		} catch (Exception e) {
+			throw new InternalServerException(e);
+		}
+	}
+
 	@RequestMapping(value = "/set/{identifier}.jsonld", method = RequestMethod.DELETE, produces = {
 			HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
 	@ApiOperation(value = "Delete an existing user set", nickname = "delete", response = java.lang.Void.class)
@@ -660,7 +774,7 @@ public class WebUserSetRest extends BaseRest {
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
-			
+
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					identifier, headers, httpStatus);
 
