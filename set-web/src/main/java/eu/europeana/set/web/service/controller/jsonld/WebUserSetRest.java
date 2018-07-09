@@ -578,7 +578,7 @@ public class WebUserSetRest extends BaseRest {
 
 			return response;
 
-		} catch (UserSetValidationException e) { 
+		} catch (UserSetValidationException e) {
 			//TODO: EA1217 use I18nConstants.USERSET_CANT_PARSE_BODY as first param as well, the message key will be displayed if the internationalization doesn't work
 			throw new RequestBodyValidationException("", I18nConstants.USERSET_CANT_PARSE_BODY, e);
 		} catch (HttpException e) {
