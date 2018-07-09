@@ -258,13 +258,14 @@ public class WebUserSetRest extends BaseRest {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
-			//  or if unauthorized respond with HTTP 403
 			// check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey, WebUserSetFields.READ_METHOD);
 
 			// authorize user
 			UserSetId setId = new BaseUserSetId();
 			setId.setSequenceNumber(identifier);
+			//  or if unauthorized respond with HTTP 403
+			// TODO: EA-1148 implement exception handling, return 403 not 500
 			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.UPDATE);
 
 			// check if the Set exists, if not respond with HTTP 404
@@ -288,9 +289,6 @@ public class WebUserSetRest extends BaseRest {
 				// parse fields of the new user set to an object
 				UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 	
-				// generate and add a created and modified timestamp to the Set;
-				existingUserSet.setModified(newUserSet.getModified());
-				
 				// update the Set based on its identifier (replace member items with the new items 
 				// that are present in the Set description only when a profile is indicated and is 
 				// different from "ldp:PreferMinimalContainer" is referred in the “Prefer” header);
@@ -304,10 +302,14 @@ public class WebUserSetRest extends BaseRest {
 				
 				// Respond with HTTP 200
 	            // update an existing user set. merge user sets - insert new fields in existing object
+				// generate and add a created and modified timestamp to the Set;
+				existingUserSet.setModified(newUserSet.getModified());
+				//TODO: EA-1148 the merge aspects for the usersets need to be clarified in the specifications document before closing this ticket 
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
 				modifiedStr = updatedUserSet.getModified().hashCode();
 				
+				//EA-1148 the move the serialization to own method, possibly in the base class
 				// apply linked data profile from header
 				LdProfiles profile = getProfile(request);
 				UserSet resUserSet = applyProfile(updatedUserSet, profile);

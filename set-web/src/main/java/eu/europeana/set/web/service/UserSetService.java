@@ -30,6 +30,7 @@ public interface UserSetService {
 	 * @param newUserSet
 	 * @return user set with updated pagination values
 	 */
+	//TODO: EA-1148 if this method is only updating the given userset, it should return void
 	public UserSet updateUserSetPagination(UserSet newUserSet);		
 	
 	/**
