@@ -13,4 +13,5 @@ public interface SwaggerConstants {
 			"  }\r\n }";
 	public static final String INSERT_ITEM_NOTE = "Please create your insert item request using selected parameters.";
 	public static final String CHECK_ITEM_NOTE = "Check if item is already in a user set";
+	public static final String DELETE_ITEM_NOTE = "Delete a item from the set ";
 }
