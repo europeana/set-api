@@ -80,11 +80,23 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request) throws HttpException {
 		try {
 			// validate user - check user credentials (all registered users can create) 
+<<<<<<< HEAD
 			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
 			validateApiKey(wsKey);
+=======
+			// if invalid respond with HTTP 401 
+			validateApiKey(wsKey, WebUserSetFields.WRITE_METHOD);
+>>>>>>> branch 'develop' of https://github.com/europeana/set-api
 
 			// authorize user
+<<<<<<< HEAD
 			getAuthorizationService().authorizeUser(userToken, wsKey, null, Operations.CREATE);			
+=======
+			UserSetId setId = new BaseUserSetId();
+			//or if unauthorized respond with HTTP 403;
+			//TODO: EA-1129 need to implement exception handling and return 403
+			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.CREATE);			
+>>>>>>> branch 'develop' of https://github.com/europeana/set-api
 			
 			// parse user set 
 			UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
@@ -94,6 +106,7 @@ public class WebUserSetRest extends BaseRest {
 			getUserSetService().validateWebUserSet(webUserSet);
 
 			Agent user = new WebSoftwareAgent();
+			//TODO: EA-1129 remove the hardcoded value, if needed add comments into the specifications document 
 			user.setName("test agent");			
 			
 			// SET DEFAULTS
@@ -104,8 +117,10 @@ public class WebUserSetRest extends BaseRest {
 			// following the order given by the list
 			// generate an identifier (in sequence) for the Set
 			// generate and add a created and modified timestamp to the Set
+			//TODO: EA-1129 need to implement the generation of the created and modified fields
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 
+			//TODO: EA-1129 move the serialization to own method, and avoid duplicated code
 			// apply linked data profile from header
 			LdProfiles profile = getProfile(request);
 			UserSet resUserSet = applyProfile(storedUserSet, profile);
@@ -255,12 +270,19 @@ public class WebUserSetRest extends BaseRest {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
-			//  or if unauthorized respond with HTTP 403
 			// check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 
 			// authorize user
+<<<<<<< HEAD
 			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.UPDATE);
+=======
+			UserSetId setId = new BaseUserSetId();
+			setId.setSequenceNumber(identifier);
+			//  or if unauthorized respond with HTTP 403
+			// TODO: EA-1148 implement exception handling, return 403 not 500
+			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.UPDATE);
+>>>>>>> branch 'develop' of https://github.com/europeana/set-api
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
@@ -283,9 +305,6 @@ public class WebUserSetRest extends BaseRest {
 				// parse fields of the new user set to an object
 				UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 	
-				// generate and add a created and modified timestamp to the Set;
-				existingUserSet.setModified(newUserSet.getModified());
-				
 				// update the Set based on its identifier (replace member items with the new items 
 				// that are present in the Set description only when a profile is indicated and is 
 				// different from "ldp:PreferMinimalContainer" is referred in the “Prefer” header);
@@ -299,10 +318,14 @@ public class WebUserSetRest extends BaseRest {
 				
 				// Respond with HTTP 200
 	            // update an existing user set. merge user sets - insert new fields in existing object
+				// generate and add a created and modified timestamp to the Set;
+				existingUserSet.setModified(newUserSet.getModified());
+				//TODO: EA-1148 the merge aspects for the usersets need to be clarified in the specifications document before closing this ticket 
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
 				modifiedStr = updatedUserSet.getModified().hashCode();
 				
+				//EA-1148 the move the serialization to own method, possibly in the base class
 				// apply linked data profile from header
 				LdProfiles profile = getProfile(request);
 				UserSet resUserSet = applyProfile(updatedUserSet, profile);
