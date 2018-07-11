@@ -36,12 +36,7 @@ public class UserSetUtils {
 	 */
 	public UserSet analysePagination(UserSet userSet) {
 		UserSet res = userSet;		
-<<<<<<< HEAD
 		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier(), WebUserSetFields.BASE_SET_URL));		
-=======
-		//TODO: EA-1129 the setting of the identifier should be invoked in the utility class. This method should be removed as the updatePagination already exists.
-		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier()));		
->>>>>>> branch 'develop' of https://github.com/europeana/set-api
 		res = updatePagination(res);
 		return res;
 	}

@@ -80,23 +80,11 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request) throws HttpException {
 		try {
 			// validate user - check user credentials (all registered users can create) 
-<<<<<<< HEAD
 			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
 			validateApiKey(wsKey);
-=======
-			// if invalid respond with HTTP 401 
-			validateApiKey(wsKey, WebUserSetFields.WRITE_METHOD);
->>>>>>> branch 'develop' of https://github.com/europeana/set-api
 
 			// authorize user
-<<<<<<< HEAD
 			getAuthorizationService().authorizeUser(userToken, wsKey, null, Operations.CREATE);			
-=======
-			UserSetId setId = new BaseUserSetId();
-			//or if unauthorized respond with HTTP 403;
-			//TODO: EA-1129 need to implement exception handling and return 403
-			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.CREATE);			
->>>>>>> branch 'develop' of https://github.com/europeana/set-api
 			
 			// parse user set 
 			UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
@@ -274,15 +262,7 @@ public class WebUserSetRest extends BaseRest {
 			validateApiKey(wsKey);
 
 			// authorize user
-<<<<<<< HEAD
 			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.UPDATE);
-=======
-			UserSetId setId = new BaseUserSetId();
-			setId.setSequenceNumber(identifier);
-			//  or if unauthorized respond with HTTP 403
-			// TODO: EA-1148 implement exception handling, return 403 not 500
-			getAuthorizationService().authorizeUser(userToken, wsKey, setId, Operations.UPDATE);
->>>>>>> branch 'develop' of https://github.com/europeana/set-api
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
