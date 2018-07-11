@@ -10,72 +10,86 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
-import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldId;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldType;
 
 
-@JsonldType("http://schema.org/UserSet")
+@JsonldType("http://europeana.eu/schemas/context/collection/UserSet")
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 		
-	@JsonldId
-	public void setIdentifier(String sequenceIdentifier) {
-		super.setIdentifier(sequenceIdentifier);
+	@JsonIgnore
+	public String getIdentifier() {
+		return super.getIdentifier();
 	}
 		
-	@JsonldProperty("http://schema.org/type")
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/type")
 	public void setType(String type) {
 		super.setType(type);
 	}
 	
-	@JsonldProperty("http://schema.org/title")
-	public void setTitle(Map<String, String> title) {
-		super.setTitle(title);
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/title")
+	public Map<String, String> getTitle() {
+		return super.getTitle();
 	}
 
-	@JsonldProperty("http://schema.org/description")
-	public void setDescription(Map<String, String> description) {
-		super.setDescription(description);
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/description")
+	public Map<String, String> getDescription() {
+		return super.getDescription();
 	}		
 	
 	@JsonldProperty("@context")
-	public void setContext(String context) {
-		super.setContext(context);
+	public String getContext() {
+		return super.getContext();
 	}
 	
-	@JsonldProperty("http://schema.org/creator")
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/creator")
 	@JsonIgnore
-	public void setCreator(Agent creator) {
-		super.setCreator(creator);
+	public Agent getCreator() {
+		return super.getCreator();
 	}
 	
-	@JsonldProperty("http://schema.org/items")
-	public void setItems(List<String> items) {
-		super.setItems(items);
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/items")
+	public List<String> getItems() {
+		return super.getItems();
 	}
 	
 	@JsonIgnore
-	public void setDisabled(boolean disabled) {
-		super.setDisabled(disabled);		
+	public boolean isDisabled() {
+		return super.isDisabled();		
 	}
 
 	@JsonIgnore
-	public void setUgc(boolean ugc) {
-		super.setUgc(ugc);		
+	public boolean isUgc() {
+		return super.isUgc();		
 	}
 
 	@JsonIgnore
-	public void setFirst(String first) {
-		super.setFirst(first);		
+	public String getFirst() {
+		return super.getFirst();		
 	}
 
 	@JsonIgnore
-	public void setLast(String last) {
-		super.setLast(last);		
+	public String getLast() {
+		return super.getLast();		
 	}
-
+	
+	/**
+	 * This method presents IP as URL.
+	 * @param id The user set id
+	 * @param base The base URL
+	 * @return string presenting ID as URL
+	 */
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/id")
+	public String getId() {
+		StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(WebUserSetFields.BASE_SET_URL); 
+        urlBuilder.append(super.getIdentifier()); 
+        return urlBuilder.toString();
+	}
+	
 	public String toString() {
 		StringBuilder resBuilder = new StringBuilder();
 		resBuilder.append("WebUserSet [");

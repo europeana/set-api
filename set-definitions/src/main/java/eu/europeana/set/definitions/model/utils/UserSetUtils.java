@@ -36,7 +36,7 @@ public class UserSetUtils {
 	 */
 	public UserSet analysePagination(UserSet userSet) {
 		UserSet res = userSet;		
-		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier()));		
+		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier(), WebUserSetFields.BASE_SET_URL));		
 		res = updatePagination(res);
 		return res;
 	}
@@ -65,11 +65,12 @@ public class UserSetUtils {
 	/**
 	 * This method forms an identifier URL
 	 * @param id The sequential ID
+	 * @param base The base URL
 	 * @return identifier URL
 	 */
-	public String buildIdentifierUrl(String id) {
+	public String buildIdentifierUrl(String id, String base) {
 		StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(WebUserSetFields.BASE_SET_URL); 
+        urlBuilder.append(base); 
         urlBuilder.append(id); 
         return urlBuilder.toString();
 	}
@@ -83,7 +84,7 @@ public class UserSetUtils {
 
 		UserSet res = userSet;
 
-		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier()));
+		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier(), WebUserSetFields.BASE_SET_URL));
 		
 		if (res != null && res.getItems() != null) {
 			int total = res.getItems().size();

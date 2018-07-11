@@ -1,7 +1,5 @@
 package eu.europeana.set.web.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -26,6 +24,13 @@ public interface UserSetService {
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
 	
 	/**
+	 * This method disables user set in database
+	 * @param existingUserSet
+	 * @return disabled user set
+	 */
+	public UserSet disableUserSet(UserSet existingUserSet);					 
+	
+	/**
 	 * This method updates user set pagination values. 
 	 * @param newUserSet
 	 * @return user set with updated pagination values
@@ -41,13 +46,27 @@ public interface UserSetService {
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
 		
 	/**
+	 * This method forms an identifier URL
+	 * @param id The sequential ID
+	 * @param base The base URL
+	 * @return identifier URL
+	 */
+	public String buildIdentifierUrl(String id, String base);
+	
+    /**
+     * This method computes pagination values for user set
+     * @param userSet
+     * @return enriched user set
+     */
+    public UserSet fillPagination(UserSet userSet);
+	
+	/**
 	 * This methods converts user set object from JsonLd string format to a UserSet object
 	 * @param userSetJsonLdStr
 	 * @return a UserSet object
-	 * @throws JsonParseException
 	 * @throws HttpException
 	 */
-	public UserSet parseUserSetLd(String userSetJsonLdStr) throws JsonParseException, HttpException;
+	public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException;
 
 	/**
 	 * This method validates and processes the Set description for format and mandatory fields

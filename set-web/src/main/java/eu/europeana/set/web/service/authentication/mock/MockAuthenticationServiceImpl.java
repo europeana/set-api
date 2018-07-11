@@ -60,10 +60,10 @@ public class MockAuthenticationServiceImpl implements AuthenticationService, Res
 
 		Agent admin = AgentObjectFactory.getInstance().createObjectInstance(AgentTypes.PERSON);
 		admin.setName(applicationName + "-" + WebUserSetFields.USER_ADMIN);
-		if (WebUserSetFields.PROVIDER_EUROPEANA_DEV.equals(applicationName))
-			admin.setUserGroup(Roles.ADMIN.name());
-		else
-			admin.setUserGroup(Roles.USER.name());
+//		if (WebUserSetFields.PROVIDER_EUROPEANA_DEV.equals(applicationName))
+		admin.setUserGroup(Roles.ADMIN.name());
+//		else
+//			admin.setUserGroup(Roles.USER.name());
 
 		app.setAdminUser(admin);
 

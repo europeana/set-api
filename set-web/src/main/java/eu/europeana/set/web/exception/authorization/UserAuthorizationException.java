@@ -9,17 +9,14 @@ public class UserAuthorizationException extends HttpException{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7694054571719881829L;
-	/**
-	 * 
-	 */
+	private static final long serialVersionUID = -8607706374204067442L;
 	
 	public UserAuthorizationException(String message, String i18nKey, String[] i18nParams){
-		this(message, i18nKey, i18nParams, HttpStatus.UNAUTHORIZED, null);
+		this(message, i18nKey, i18nParams, HttpStatus.FORBIDDEN, null);
 	}
 	
 	public UserAuthorizationException(String message, String i18nKey, String[] i18nParams, Throwable th){
-		this(message, i18nKey, i18nParams, HttpStatus.UNAUTHORIZED, th);
+		this(message, i18nKey, i18nParams, HttpStatus.FORBIDDEN, th);
 	}
 	
 	public UserAuthorizationException(String message, String i18nKey, String[] i18nParams, HttpStatus status){

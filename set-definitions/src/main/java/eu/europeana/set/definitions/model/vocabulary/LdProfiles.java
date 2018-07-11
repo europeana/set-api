@@ -8,7 +8,7 @@ package eu.europeana.set.definitions.model.vocabulary;
  */
 public enum LdProfiles implements ProfileKeyword{
 
-	MINIMAL("Minimal"), STANDARD("Standard");
+	MINIMAL("ldp:PreferMinimalContainer"), STANDARD("ldp:PreferContainedIRIs");
 	
 	private String headerValue;
 
@@ -24,12 +24,8 @@ public enum LdProfiles implements ProfileKeyword{
 	 */
 	public static LdProfiles getByHeaderValue(String headerValue){
 		
-		String[] values = headerValue.split(":", 2);
-		//last token
-		String headerProfile  = values[values.length -1];
-		
 		for(LdProfiles ldType : LdProfiles.values()){
-			if(headerProfile.contains(ldType.getHeaderValue()))
+			if(headerValue.contains(ldType.getHeaderValue()))
 				return ldType;
 		}
 		return null;

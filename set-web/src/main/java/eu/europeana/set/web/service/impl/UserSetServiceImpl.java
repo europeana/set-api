@@ -57,12 +57,25 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
 		UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 		if (res == null) {
-			//TODO: EA-1194 use externalization for all HttpExceptions
-			throw new UserSetNotFoundException(
-					"No user set found in database for identifier! " + userSetId, "", null);
+			throw new UserSetNotFoundException(I18nConstants.USERSET_CANT_PARSE_BODY, 
+					I18nConstants.USERSET_CANT_PARSE_BODY, null);
 		}
 		return res; 
 	}
+	
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.web.service.UserSetService#buildIdentifierUrl(java.lang.String, java.lang.String)
+	 */
+	public String buildIdentifierUrl(String id, String base) {
+		return getUserSetUtils().buildIdentifierUrl(id, base);
+	}
+	
+    /* (non-Javadoc)
+     * @see eu.europeana.set.web.service.UserSetService#fillPagination(eu.europeana.set.definitions.model.UserSet)
+     */
+    public UserSet fillPagination(UserSet userSet) {
+    	return getUserSetUtils().fillPagination(userSet);
+    }	
 	
 	/*
 	 * (non-Javadoc)
@@ -79,6 +92,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return res;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.web.service.UserSetService#disableUserSet(eu.europeana.set.definitions.model.UserSet)
+	 */
+	public UserSet disableUserSet(UserSet existingUserSet) { 					 
+		existingUserSet.setDisabled(true);
+	 	return updateUserSet((PersistentUserSet) existingUserSet, existingUserSet);
+	}
+	
 	/**
 	 * @deprecated check if the update test must merge the properties or if it simply overwrites it
 	 * @param UserSet
@@ -108,7 +129,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	@Override
 	public UserSet parseUserSetLd(String userSetJsonLdStr)
-			throws JsonParseException, HttpException {
+			throws	HttpException {
 
 		JsonParser parser;
 	    ObjectMapper mapper = new ObjectMapper();  

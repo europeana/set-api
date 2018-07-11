@@ -4,6 +4,7 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	
 	static final String USERSET_INVALID_BODY = "error.userset_invalid_body";
 	static final String USERSET_CANT_PARSE_BODY = "error.userset_cant_parse_body";
+	static final String USERSET_NOT_FOUND = "error.userset_not_found";	
 	static final String BASE64_DECODING_FAIL = "error.userset_base64_encoding_fail";
 	static final String UNSUPPORTED_TOKEN_TYPE = "error.userset_unsupported_token_type";
 	static final String INVALID_HEADER_FORMAT = "error.userset_invalid_format";

@@ -186,9 +186,9 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @param modified
 	 * @throws ApplicationAuthenticationException
 	 */
-	//TODO: EA-1194 change method to get the UserSet object as param
-	public void checkHeaderTimestamp(HttpServletRequest request, int modified) 
+	public void checkHeaderTimestamp(HttpServletRequest request, UserSet userSet) 
 			throws ApplicationAuthenticationException {
+		int modified = userSet.getModified().hashCode();
 		String ifMatchHeader = request.getHeader(HttpHeaders.IF_MATCH);
 		if (ifMatchHeader != null) {
 			logger.trace("'If-Match' header value: " + ifMatchHeader);	
@@ -226,8 +226,6 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @return profiled user set value
 	 */
 	public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
-		//TODO: EA-1194 remove res, it is the same as the input param userSet
-		UserSet res = null;
 		
 		// check that not more then maximal allowed number of items are presented
 		if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
@@ -241,15 +239,14 @@ public class BaseRest extends ApiResponseBuilder {
 		// set unnecessary fields to null - the empty fields will not be presented
 		switch(profile) {
 		case STANDARD:
-			res = userSet;
 			break;
 		case MINIMAL:
 		default:
 			userSet.setItems(null);
-			res = userSet;
 			break;
 		}
-		return res;
+		
+		return userSet;
 	}
 	
 	/**
@@ -294,8 +291,7 @@ public class BaseRest extends ApiResponseBuilder {
 		return res;
 	}
 	
-	//TODO: EA-1194 remove method param as it is not used
-	protected void validateApiKey(String wsKey, String method) throws ApplicationAuthenticationException {
+	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
 		
 		// throws exception if the wskey is not found
 		getAuthenticationService().getByApiKey(wsKey);
