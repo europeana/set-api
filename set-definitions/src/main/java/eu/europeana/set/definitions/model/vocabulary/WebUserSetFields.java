@@ -61,7 +61,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	// Serialization
 	//
 	public static final String SEPARATOR_SEMICOLON = ":";
-	public static final String SET_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public static final String SET_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 	
 	// Internal fields 
 	public static final String INTERNAL_TYPE = "internalType";	

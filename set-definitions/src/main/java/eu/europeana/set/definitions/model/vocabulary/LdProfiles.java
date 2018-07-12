@@ -25,7 +25,7 @@ public enum LdProfiles implements ProfileKeyword{
 	public static LdProfiles getByHeaderValue(String headerValue){
 		
 		for(LdProfiles ldType : LdProfiles.values()){
-			if(headerValue.contains(ldType.getHeaderValue()))
+			if(headerValue.equals(ldType.getHeaderValue()))
 				return ldType;
 		}
 		return null;

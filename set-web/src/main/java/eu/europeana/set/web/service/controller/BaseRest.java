@@ -17,6 +17,7 @@ import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.web.controller.ApiResponseBuilder;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -205,16 +206,23 @@ public class BaseRest extends ApiResponseBuilder {
 	 * This method retrieves view profile if provided within the "If-Match" HTTP header
 	 * @param request
 	 * @return profile value
+	 * @throws HttpException 
 	 * @throws ApplicationAuthenticationException
 	 */
-	public LdProfiles getProfile(HttpServletRequest request) {
+	public LdProfiles getProfile(HttpServletRequest request) throws HttpException {
 		LdProfiles ldProfile = LdProfiles.MINIMAL;
 		
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
 		if (preferHeader != null) {
 			logger.trace("'Prefer' header value: " + preferHeader);	
-			if (StringUtils.isNotEmpty(preferHeader))
+			if (StringUtils.isNotEmpty(preferHeader)) {
 				ldProfile = LdProfiles.getByHeaderValue(preferHeader);
+				if (ldProfile == null) {
+					throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
+							I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
+							HttpStatus.BAD_REQUEST, null); 					
+				}
+			}
 		}
 		return ldProfile;
 	}
