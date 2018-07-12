@@ -77,6 +77,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     	return getUserSetUtils().fillPagination(userSet);
     }	
 	
+    /* (non-Javadoc)
+     * @see eu.europeana.set.web.service.UserSetService#updatePagination(eu.europeana.set.definitions.model.UserSet)
+     */
+    public UserSet updatePagination(UserSet userSet) {
+    	return getUserSetUtils().updatePagination(userSet);
+    }	
+	
 	/*
 	 * (non-Javadoc)
 	 * 

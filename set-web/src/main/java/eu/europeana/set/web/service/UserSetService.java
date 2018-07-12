@@ -61,6 +61,13 @@ public interface UserSetService {
      */
     public UserSet fillPagination(UserSet userSet);
 	
+    /**
+     * This method computes pagination values for user set without update of identifier
+     * @param userSet
+     * @return enriched user set
+     */
+    public UserSet updatePagination(UserSet userSet);
+	
 	/**
 	 * This methods converts user set object from JsonLd string format to a UserSet object
 	 * @param userSetJsonLdStr

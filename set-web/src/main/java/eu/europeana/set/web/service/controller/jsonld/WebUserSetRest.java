@@ -659,7 +659,6 @@ public class WebUserSetRest extends BaseRest {
 					existingUserSet.getItems().remove(newItem);
 					Date now = new Date();				
 					existingUserSet.setModified(now);
-					existingUserSet = getUserSetService().fillPagination(existingUserSet);
 					
 		            // update an existing user set
 					UserSet updatedUserSet = getUserSetService().updateUserSet(
@@ -667,7 +666,7 @@ public class WebUserSetRest extends BaseRest {
 				
 					// serialize to JsonLd
 					UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-					UserSet extUserSet = getUserSetService().fillPagination(updatedUserSet);
+					UserSet extUserSet = getUserSetService().updatePagination(updatedUserSet);
 				
 					// apply linked data profile from header
 					LdProfiles profile = getProfile(request);
@@ -790,7 +789,7 @@ public class WebUserSetRest extends BaseRest {
 	 * @return true if user has necessary permissions
 	 */
 	private boolean isAdmin(String apiKey, String userToken) {
-		return (apiKey.equals("apiadmin") && userToken.equals("admin"));
+		return (apiKey.equals("apidemo") && userToken.equals("admin"));
 	}
 	
 }
