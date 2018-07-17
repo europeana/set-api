@@ -32,7 +32,6 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
@@ -59,12 +58,14 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@RequestBody String userSet,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,			
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request)
 					throws HttpException {
 
 		userToken = getUserToken(userToken, request);
+		LdProfiles ldProfile = getProfile(profile, request);
 		
-		return storeUserSet(wskey, userSet, userToken, request);
+		return storeUserSet(wskey, userSet, userToken, ldProfile, request);
 	}
 	
 	/**
@@ -72,12 +73,13 @@ public class WebUserSetRest extends BaseRest {
 	 * @param wsKey The API key
 	 * @param userSetJsonLdStr The user set in JsonLd format
 	 * @param userToken The user identifier
+	 * @param profile The profile definition
 	 * @param request HTTP request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
 	protected ResponseEntity<String> storeUserSet(String wsKey, String userSetJsonLdStr, String userToken,
-			HttpServletRequest request) throws HttpException {
+			LdProfiles profile, HttpServletRequest request) throws HttpException {
 		try {
 			// validate user - check user credentials (all registered users can create) 
 			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
@@ -94,8 +96,7 @@ public class WebUserSetRest extends BaseRest {
 			getUserSetService().validateWebUserSet(webUserSet);
 
 			Agent user = new WebSoftwareAgent();
-			//TODO: EA-1129 remove the hardcoded value, if needed add comments into the specifications document 
-			user.setName("test agent");			
+			user.setName(WebUserSetFields.DEFAULT_CREATOR);			
 			
 			// SET DEFAULTS
 			if (webUserSet.getCreator() == null)
@@ -105,17 +106,9 @@ public class WebUserSetRest extends BaseRest {
 			// following the order given by the list
 			// generate an identifier (in sequence) for the Set
 			// generate and add a created and modified timestamp to the Set
-			//TODO: EA-1129 need to implement the generation of the created and modified fields
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 
-			//TODO: EA-1129 move the serialization to own method, and avoid duplicated code
-			// apply linked data profile from header
-			LdProfiles profile = getProfile(request);
-			UserSet resUserSet = applyProfile(storedUserSet, profile);
-			
-			// serialize Set description in JSON-LD and respond with HTTP 201 if successful
-			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-	        String serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
+			String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet); 
 
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
@@ -151,7 +144,7 @@ public class WebUserSetRest extends BaseRest {
 		}
 
 	}
-	
+
 	@RequestMapping(value = { "/set/{identifier}.jsonld" }, 
 			method = {RequestMethod.GET},
 			produces = {  HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 }
@@ -162,24 +155,28 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,			
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request) throws HttpException {
 
 		String action = "get:/set/{identifier}.jsonld";
+		LdProfiles ldProfile = getProfile(profile, request);
 
-		return getUserSet(wskey, identifier, request, action);
+		return getUserSet(wskey, ldProfile, identifier, request, action);
 	}
 
 	/**
 	 * This method retrieves an existing user set identified by given identifier, which is
 	 * a number in string format.
 	 * @param wskey The API key
+	 * @param profile The profile definition
 	 * @param identifier The identifier
 	 * @param request HTTP request
 	 * @param action The action describing the request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	private ResponseEntity<String> getUserSet(String wsKey, String identifier, HttpServletRequest request, String action)
+	private ResponseEntity<String> getUserSet(String wsKey, LdProfiles profile, String identifier, 
+			HttpServletRequest request, String action)
 					throws HttpException {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
@@ -190,15 +187,17 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
-		
-			// apply linked data profile from header
-			LdProfiles profile = getProfile(request);
-			UserSet resUserSet = applyProfile(userSet, profile);
-						
-			// serialize Set in JSON-LD according to the “Prefer” HTTP header 
-			// (when present otherwise apply default) and respond with HTTP 200
-			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-	        String userSetJsonLdStr = serializer.serialize(resUserSet); 
+
+			String userSetJsonLdStr = serializeUserSet(profile, userSet); 
+			
+//			// apply linked data profile from header
+//			LdProfiles profile = getProfile(request);
+//			UserSet resUserSet = applyProfile(userSet, profile);
+//						
+//			// serialize Set in JSON-LD according to the “Prefer” HTTP header 
+//			// (when present otherwise apply default) and respond with HTTP 200
+//			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
+//	        String userSetJsonLdStr = serializer.serialize(resUserSet); 
 
 			// build response
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
@@ -232,13 +231,15 @@ public class WebUserSetRest extends BaseRest {
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestBody String userSet,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 		
 		userToken = getUserToken(userToken, request);
+		LdProfiles ldProfile = getProfile(profile, request);
 		
 		String action = "put:/set/{identifier}.jsonld";
-		return updateUserSet(request, wskey, identifier, userSet, userToken, action);
+		return updateUserSet(request, wskey, identifier, userSet, userToken, ldProfile, action);
 	}
 		
 	/**
@@ -249,12 +250,13 @@ public class WebUserSetRest extends BaseRest {
 	 * @param wskey The API key
 	 * @param identifier The identifier
 	 * @param userSet The user set fields to update in JSON format e.g. title or description
+	 * @param profile The profile definition
 	 * @param action The action describing the request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
 	protected ResponseEntity<String> updateUserSet(HttpServletRequest request, String wsKey, String identifier,
-			String userSetJsonLdStr, String userToken, String action) throws HttpException {
+			String userSetJsonLdStr, String userToken, LdProfiles profile, String action) throws HttpException {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
@@ -300,19 +302,19 @@ public class WebUserSetRest extends BaseRest {
 	            // update an existing user set. merge user sets - insert new fields in existing object
 				// generate and add a created and modified timestamp to the Set;
 				existingUserSet.setModified(newUserSet.getModified());
-				//TODO: EA-1148 the merge aspects for the usersets need to be clarified in the specifications document before closing this ticket 
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
 				modifiedStr = updatedUserSet.getModified().hashCode();
 				
-				//EA-1148 the move the serialization to own method, possibly in the base class
-				// apply linked data profile from header
-				LdProfiles profile = getProfile(request);
-				UserSet resUserSet = applyProfile(updatedUserSet, profile);
+				serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
 				
-				// serialize to JsonLd
-				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
+//				// apply linked data profile from header
+//				LdProfiles profile = getProfile(request);
+//				UserSet resUserSet = applyProfile(updatedUserSet, profile);
+//				
+//				// serialize to JsonLd
+//				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
+//		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -349,13 +351,16 @@ public class WebUserSetRest extends BaseRest {
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 			@RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required=false) String position,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 		
 		userToken = getUserToken(userToken, request);
+		LdProfiles ldProfile = getProfile(profile, request);
 		
 		String action = "put:/set/{identifier}/{dataset_id}/{local_id}.jsonld?position=POSITION";
-		return insertItemIntoUserSet(request, wskey, identifier, datasetId, localId, position, userToken, action);
+		return insertItemIntoUserSet(request, wskey, identifier, datasetId, localId, position, userToken, 
+				ldProfile, action);
 	}
 	
 	/**
@@ -369,13 +374,14 @@ public class WebUserSetRest extends BaseRest {
 	 * @param localId The local identifier within the provider
 	 * @param position The position in the existin item list
 	 * @param userSet The user set fields to update in JSON format e.g. title or description
+	 * @param profile The profile definition
 	 * @param action The action describing the request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
 	protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, String wsKey, 
 			String identifier, String datasetId, String localId, String position, String userToken, 
-			String action) throws HttpException {
+			LdProfiles profile, String action) throws HttpException {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
@@ -396,18 +402,20 @@ public class WebUserSetRest extends BaseRest {
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
 			
-			UserSetLdSerializer serializer = new UserSetLdSerializer();
+//			UserSetLdSerializer serializer = new UserSetLdSerializer();
 			String serializedUserSetJsonLdStr = "";
 			
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
 				UserSet extUserSet = insertItem(datasetId, localId, position, existingUserSet);
-				// apply linked data profile from header
-				LdProfiles profile = getProfile(request);
-				UserSet resUserSet = applyProfile(extUserSet, profile);
-								
-		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
+				serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
+				
+//				// apply linked data profile from header
+//				LdProfiles profile = getProfile(request);
+//				UserSet resUserSet = applyProfile(extUserSet, profile);
+//								
+//		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -517,10 +525,12 @@ public class WebUserSetRest extends BaseRest {
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 		
 		userToken = getUserToken(userToken, request);
+		getProfile(profile, request);
 		
 		String action = "get:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
 		return isItemInUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
@@ -605,13 +615,15 @@ public class WebUserSetRest extends BaseRest {
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 		
 		userToken = getUserToken(userToken, request);
+		LdProfiles ldProfile = getProfile(profile, request);
 		
 		String action = "delete:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
-		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
+		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, ldProfile, action);
 	}
 	
 	/**
@@ -623,13 +635,14 @@ public class WebUserSetRest extends BaseRest {
 	 * @param datasetId The identifier of the dataset, typically a number
 	 * @param localId The local identifier within the provider
 	 * @param userSet The user set fields to update in JSON format e.g. title or description
+	 * @param profile The profile definition
 	 * @param action The action describing the request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
 	protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, String wsKey, 
 			String identifier, String datasetId, String localId, String userToken, 
-			String action) throws HttpException {
+			LdProfiles profile, String action) throws HttpException {
 		
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
@@ -665,14 +678,16 @@ public class WebUserSetRest extends BaseRest {
 							(PersistentUserSet) existingUserSet, null);
 				
 					// serialize to JsonLd
-					UserSetLdSerializer serializer = new UserSetLdSerializer(); 
+//					UserSetLdSerializer serializer = new UserSetLdSerializer(); 
 					UserSet extUserSet = getUserSetService().updatePagination(updatedUserSet);
 				
-					// apply linked data profile from header
-					LdProfiles profile = getProfile(request);
-					UserSet resUserSet = applyProfile(extUserSet, profile);
-									
-			        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
+					serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
+					
+//					// apply linked data profile from header
+//					LdProfiles profile = getProfile(request);
+//					UserSet resUserSet = applyProfile(extUserSet, profile);
+//									
+//			        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 
 			        // respond with HTTP 200 containing the updated Set description as body.
 					// serialize Set in JSON-LD following the requested profile 
@@ -712,10 +727,12 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String apiKey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 
 		userToken = getUserToken(userToken, request);
+		getProfile(profile, request);
 				
 		return deleteUserSet(request, identifier, apiKey, userToken);
 	}

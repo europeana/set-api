@@ -1,5 +1,6 @@
 package eu.europeana.set.web.service.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -24,6 +25,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
@@ -181,6 +183,47 @@ public class BaseRest extends ApiResponseBuilder {
 		return userToken;
 	}
 	
+	/**
+	 * This method takes profile from a HTTP header if it exists or from the
+	 * passed request parameter.
+	 * 
+	 * @param paramProfile
+	 *            The HTTP request parameter
+	 * @param request
+	 *            The HTTP request with headers
+	 * @return profile value
+	 * @throws HttpException 
+	 */
+	public LdProfiles getProfile(String paramProfile, HttpServletRequest request)
+			throws HttpException {
+
+		LdProfiles profile = null;
+		String preferHeader = request.getHeader(HttpHeaders.PREFER);
+		if (preferHeader != null) {
+			profile = getProfile(request);
+		} else {
+			profile = LdProfiles.getByName(paramProfile);
+		}
+		return profile;
+	}
+	
+	/**
+	 * This method serializes user set and applies profile to the object.
+	 * @param profile
+	 * @param storedUserSet
+	 * @return serialized user set as a JsonLd string
+	 * @throws IOException
+	 */
+	protected String serializeUserSet(LdProfiles profile, UserSet storedUserSet) throws IOException {
+		// apply linked data profile from header
+		UserSet resUserSet = applyProfile(storedUserSet, profile);
+		
+		// serialize Set description in JSON-LD and respond with HTTP 201 if successful
+		UserSetLdSerializer serializer = new UserSetLdSerializer(); 
+		String serializedUserSetJsonLdStr = serializer.serialize(resUserSet);
+		return serializedUserSetJsonLdStr;
+	}
+		
 	/**
 	 * This method checks timestamp if provided within the "If-Match" HTTP header, if false responds with HTTP 412
 	 * @param request

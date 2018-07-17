@@ -29,7 +29,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String PATH_PARAM_LOCAL_ID = "localId";
 	public static final String PATH_PARAM_POSITION = "position";
 	public static final String USER_TOKEN = "userToken";
-	public static final String USER_ANONYMOUNS = "anonymous";
+	public static final String PROFILE = "profile";
 		
 	//
 	// Mongo
@@ -46,6 +46,11 @@ public interface WebUserSetFields extends WebUserSetModelFields{
     public final static String DESCRIPTION = "description";
     public final static String TYPE = "type";
     public final static String ITEMS = "items";
+    
+    // Defaults
+    public final static String DEFAULT_CREATOR = "creator";
+	public static final String USER_ANONYMOUNS = "anonymous";
+	public static final String PROFILE_MINIMAL = "minimal";
     
     //
     // Pagination

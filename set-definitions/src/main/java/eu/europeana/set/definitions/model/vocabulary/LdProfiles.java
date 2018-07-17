@@ -24,9 +24,20 @@ public enum LdProfiles implements ProfileKeyword{
 	 */
 	public static LdProfiles getByHeaderValue(String headerValue){
 		
-		for(LdProfiles ldType : LdProfiles.values()){
-			if(headerValue.equals(ldType.getHeaderValue()))
+		for(LdProfiles ldType : LdProfiles.values()) {
+			if(headerValue.equals(ldType.getHeaderValue())) {
 				return ldType;
+			}
+		}
+		return null;
+	}
+	
+	public static LdProfiles getByName(String name){
+		
+		for(LdProfiles ldType : LdProfiles.values()){
+			if(name.equals(ldType.name().toLowerCase())) {
+				return ldType;
+			}
 		}
 		return null;
 	}

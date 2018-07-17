@@ -59,9 +59,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 					I18nConstants.INVALID_TOKEN, new String[]{userToken}, HttpStatus.FORBIDDEN);
 		
 		if(!isAdmin(user) && !hasPermission(app, setId, operationName))
-			throw new OperationAuthorizationException(I18nConstants.CLIENT_NOT_AUTHORIZED, 
-					I18nConstants.CLIENT_NOT_AUTHORIZED, 
-					new String[]{"UserSet id: "+ setId},
+			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED, 
+					I18nConstants.USER_NOT_AUTHORIZED, 
+					new String[]{"UserSet id: "+ userToken},
 					HttpStatus.FORBIDDEN);
 				
 		//check permissions
@@ -83,7 +83,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
 	//verify client app privileges 
 	protected boolean hasPermission(Application app, String setId, String operationName) {
-		if(Operations.MODERATION_ALL.equals(operationName) || Operations.RETRIEVE.equals(operationName) )
+		if(Operations.MODERATION_ALL.equals(operationName) 
+				|| Operations.RETRIEVE.equals(operationName) 
+				|| Operations.UPDATE.equals(operationName) 
+				|| Operations.CREATE.equals(operationName))
 			return true;
 		
 		return setId != null; 
