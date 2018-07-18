@@ -253,7 +253,7 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @throws ApplicationAuthenticationException
 	 */
 	public LdProfiles getProfile(HttpServletRequest request) throws HttpException {
-		LdProfiles ldProfile = LdProfiles.MINIMAL;
+		LdProfiles ldProfile = null;
 		
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
 		if (preferHeader != null) {
