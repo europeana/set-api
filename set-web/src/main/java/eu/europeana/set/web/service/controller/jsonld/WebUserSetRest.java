@@ -187,17 +187,7 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
-
 			String userSetJsonLdStr = serializeUserSet(profile, userSet); 
-			
-//			// apply linked data profile from header
-//			LdProfiles profile = getProfile(request);
-//			UserSet resUserSet = applyProfile(userSet, profile);
-//						
-//			// serialize Set in JSON-LD according to the “Prefer” HTTP header 
-//			// (when present otherwise apply default) and respond with HTTP 200
-//			UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-//	        String userSetJsonLdStr = serializer.serialize(resUserSet); 
 
 			// build response
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
@@ -304,17 +294,8 @@ public class WebUserSetRest extends BaseRest {
 				existingUserSet.setModified(newUserSet.getModified());
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
-				modifiedStr = updatedUserSet.getModified().hashCode();
-				
+				modifiedStr = updatedUserSet.getModified().hashCode();			
 				serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
-				
-//				// apply linked data profile from header
-//				LdProfiles profile = getProfile(request);
-//				UserSet resUserSet = applyProfile(updatedUserSet, profile);
-//				
-//				// serialize to JsonLd
-//				UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-//		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -401,8 +382,6 @@ public class WebUserSetRest extends BaseRest {
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
-			
-//			UserSetLdSerializer serializer = new UserSetLdSerializer();
 			String serializedUserSetJsonLdStr = "";
 			
 			if (existingUserSet.isDisabled()) { 
@@ -410,12 +389,6 @@ public class WebUserSetRest extends BaseRest {
 			} else {			
 				UserSet extUserSet = insertItem(datasetId, localId, position, existingUserSet);
 				serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
-				
-//				// apply linked data profile from header
-//				LdProfiles profile = getProfile(request);
-//				UserSet resUserSet = applyProfile(extUserSet, profile);
-//								
-//		        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -651,7 +624,7 @@ public class WebUserSetRest extends BaseRest {
 			validateApiKey(wsKey);
 
 			// authorize user
-			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.RETRIEVE);
+			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.DELETE);
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
@@ -678,23 +651,16 @@ public class WebUserSetRest extends BaseRest {
 							(PersistentUserSet) existingUserSet, null);
 				
 					// serialize to JsonLd
-//					UserSetLdSerializer serializer = new UserSetLdSerializer(); 
-					UserSet extUserSet = getUserSetService().updatePagination(updatedUserSet);
-				
+					UserSet extUserSet = getUserSetService().updatePagination(updatedUserSet);				
 					serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
-					
-//					// apply linked data profile from header
-//					LdProfiles profile = getProfile(request);
-//					UserSet resUserSet = applyProfile(extUserSet, profile);
-//									
-//			        serializedUserSetJsonLdStr = serializer.serialize(resUserSet); 
 
 			        // respond with HTTP 200 containing the updated Set description as body.
 					// serialize Set in JSON-LD following the requested profile 
 			        // (if not indicated assume the default, ie. minimal) 
 			        httpStatus = HttpStatus.OK;
 				} else {
-			        httpStatus = HttpStatus.NOT_FOUND;
+					throw new UserSetNotFoundException(I18nConstants.USERSET_ITEM_NOT_FOUND, 
+							I18nConstants.USERSET_ITEM_NOT_FOUND, new String[] {datasetId + "/" + localId, identifier});
 				}
 			}
 			
