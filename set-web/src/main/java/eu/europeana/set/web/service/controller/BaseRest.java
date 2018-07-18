@@ -330,6 +330,8 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @return
 	 * @throws ApplicationAuthenticationException
 	 */
+	//TODO EA 1148 - this method is not consistent with the 8. The method must be removed, only the update of the items list depends on the value of the profile.
+	//When this method is invoked the value of the profile is already identified, it must not be retrieved again from the header.
 	public boolean checkHeaderProfile(HttpServletRequest request) throws ApplicationAuthenticationException {
 		boolean res = false;
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
