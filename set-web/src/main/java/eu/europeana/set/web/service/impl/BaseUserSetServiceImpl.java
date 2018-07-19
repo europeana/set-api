@@ -4,8 +4,6 @@ import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
 
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
 public abstract class BaseUserSetServiceImpl {
@@ -36,10 +34,4 @@ public abstract class BaseUserSetServiceImpl {
 		return mongoPersistance;
 	}
 
-	//TODO: EA-1148, there are no indexing requirements for now. this method should be removed, and the code used in the parent method
-	protected UserSet updateAndReindex(PersistentUserSet persistentUserSet) {
-		UserSet res = getMongoPersistence().update(persistentUserSet);
-		return res;
-	}
-	
 }

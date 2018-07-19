@@ -3,6 +3,7 @@ package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -49,8 +50,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	
 	@Override
-	public UserSet updateUserSetPagination(UserSet newUserSet) {		
-		return getUserSetUtils().updatePagination(newUserSet);
+	public void updateUserSetPagination(UserSet newUserSet) {		
+		getUserSetUtils().updatePagination(newUserSet);
 	}
 	
 	@Override
@@ -59,6 +60,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		if (res == null) {
 			throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, 
 					I18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
+		} else {
+			if (res.isDisabled()) {
+				throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE, 
+						I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId});
+			}
 		}
 		return res; 
 	}
@@ -94,8 +100,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	@Override
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
 		mergeUserSetProperties(persistentUserSet, webUserSet);
-		UserSet res = updateAndReindex(persistentUserSet);
-
+		UserSet res = getMongoPersistence().update(persistentUserSet);
 		return res;
 	}
 
@@ -112,25 +117,41 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @param UserSet
 	 * @param updatedWebUserSet
 	 */
-	private void mergeUserSetProperties(PersistentUserSet UserSet, UserSet updatedWebUserSet) {
+	private void mergeUserSetProperties(PersistentUserSet userSet, UserSet updatedWebUserSet) {
 		if (updatedWebUserSet != null) {
 			if (updatedWebUserSet.getType() != null) {
-				UserSet.setType(updatedWebUserSet.getType());
+				userSet.setType(updatedWebUserSet.getType());
 			}
-	
+		
 			if (updatedWebUserSet.getTitle() != null) {
-				UserSet.setTitle(updatedWebUserSet.getTitle());
+				if (userSet.getTitle() != null) {
+					for (Map.Entry<String, String> entry : updatedWebUserSet.getTitle().entrySet()) {
+						userSet.getTitle().put(entry.getKey(), entry.getValue());
+					}
+				} else {
+					userSet.setTitle(updatedWebUserSet.getTitle());
+				}
 			}
 			
+			if (updatedWebUserSet.getDescription() != null) {
+				if (userSet.getDescription() != null) {
+					for (Map.Entry<String, String> entry : updatedWebUserSet.getDescription().entrySet()) {
+						userSet.getDescription().put(entry.getKey(), entry.getValue());
+					}
+				} else {
+					userSet.setDescription(updatedWebUserSet.getDescription());
+				}
+			}
+
 			if (updatedWebUserSet.getCreator() != null) {
-				UserSet.setCreator(updatedWebUserSet.getCreator());
+				userSet.setCreator(updatedWebUserSet.getCreator());
 			}
 				
 			if (updatedWebUserSet.getCreated() != null) {
-				UserSet.setCreated(updatedWebUserSet.getCreated());
+				userSet.setCreated(updatedWebUserSet.getCreated());
 			}
 	
-			UserSet.setDisabled(updatedWebUserSet.isDisabled());
+			userSet.setDisabled(updatedWebUserSet.isDisabled());
 		}
 	}
 

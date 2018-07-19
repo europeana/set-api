@@ -48,7 +48,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
     public final static String ITEMS = "items";
     
     // Defaults
-    public final static String DEFAULT_CREATOR = "creator";
 	public static final String USER_ANONYMOUNS = "anonymous";
 	public static final String PROFILE_MINIMAL = "minimal";
     

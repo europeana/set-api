@@ -96,7 +96,7 @@ public class WebUserSetRest extends BaseRest {
 			getUserSetService().validateWebUserSet(webUserSet);
 
 			Agent user = new WebSoftwareAgent();
-			user.setName(WebUserSetFields.DEFAULT_CREATOR);			
+			user.setName(userToken);			
 			
 			// SET DEFAULTS
 			if (webUserSet.getCreator() == null)
@@ -203,9 +203,6 @@ public class WebUserSetRest extends BaseRest {
 		} catch (RuntimeException e) {
 			// not found ..
 			throw new InternalServerException(e);
-		} catch (UserSetNotFoundException e) {
-			throw new UserSetNotFoundException(
-					e.getMessage(), e.getMessage(), null);
 		} catch (HttpException e) {
 			// avoid wrapping http exception
 			throw e;
@@ -279,14 +276,14 @@ public class WebUserSetRest extends BaseRest {
 	
 				// update the Set based on its identifier (replace member items with the new items 
 				// that are present in the Set description only when a profile is indicated and is 
-				// different from "ldp:PreferMinimalContainer" is referred in the “Prefer” header);
-				if (!checkHeaderProfile(request)) {
+				// different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header);
+				if (!checkHeaderProfile(profile)) {
 					throw new ApplicationAuthenticationException(
 							I18nConstants.INVALID_UPDATE_HEADER_PROFILE, I18nConstants.INVALID_UPDATE_HEADER_PROFILE,
-							new String[] {""}, HttpStatus.PRECONDITION_FAILED, null);
+							new String[] {profile.getHeaderValue()}, HttpStatus.PRECONDITION_FAILED, null);
 				}
 
-				existingUserSet = getUserSetService().updateUserSetPagination(existingUserSet);
+				getUserSetService().updateUserSetPagination(existingUserSet);
 				
 				// Respond with HTTP 200
 	            // update an existing user set. merge user sets - insert new fields in existing object
@@ -452,7 +449,7 @@ public class WebUserSetRest extends BaseRest {
 
 	private UserSet updateItemList(UserSet existingUserSet) {
 		UserSet extUserSet;
-		existingUserSet = getUserSetService().updateUserSetPagination(existingUserSet);
+		getUserSetService().updateUserSetPagination(existingUserSet);
 
 		// generate and add a created and modified timestamp to the Set
 		existingUserSet.setModified(new Date());
@@ -693,12 +690,10 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String apiKey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
-			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 
 		userToken = getUserToken(userToken, request);
-		getProfile(profile, request);
 				
 		return deleteUserSet(request, identifier, apiKey, userToken);
 	}
@@ -725,6 +720,12 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve a user set based on its identifier
 			// if the Set doesn’t exist, respond with HTTP 404
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+			// check that only the admins and the owners of the user sets are allowed to delete the user set. 
+			// in the case of regular users (not admins), the autorization method must check if the users 
+			// that calls the deletion (i.e. identified by provided user token) is the same user as the creator 
+			// of the user set
+			checkCreator(existingUserSet, wsKey, userToken);
 
 			// check timestamp if provided within the "If-Match" HTTP header, if false respond with HTTP 412
 			checkHeaderTimestamp(request, existingUserSet);
@@ -761,18 +762,6 @@ public class WebUserSetRest extends BaseRest {
 		} catch (Exception e) {
 			throw new InternalServerException(e);
 		}
-	}
-
-	/**
-	 * This method validates whether user has admin rights to execute methods in
-	 * management API.
-	 * 
-	 * @param apiKey
-	 * @param userToken
-	 * @return true if user has necessary permissions
-	 */
-	private boolean isAdmin(String apiKey, String userToken) {
-		return (apiKey.equals("apidemo") && userToken.equals("admin"));
 	}
 	
 }

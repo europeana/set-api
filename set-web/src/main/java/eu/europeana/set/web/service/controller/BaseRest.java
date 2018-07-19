@@ -26,6 +26,7 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
+import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
@@ -246,11 +247,49 @@ public class BaseRest extends ApiResponseBuilder {
 	}
 	
 	/**
+	 * This method validates whether user has admin rights to execute methods in
+	 * management API.
+	 * 
+	 * @param apiKey
+	 * @param userToken
+	 * @return true if user has necessary permissions
+	 */
+	protected boolean isAdmin(String apiKey, String userToken) {
+		return (apiKey.equals("apidemo") && userToken.equals("admin"));
+	}
+	 
+	/**
+	 * This method checks that only the admins and the owners of the user sets are allowed to delete the user set. 
+	 * in the case of regular users (not admins), the autorization method must check if the users 
+	 * that calls the deletion (i.e. identified by provided user token) is the same user as the creator 
+	 * of the user set
+	 * @param userSet
+	 * @param wsKey
+	 * @param queryUser
+	 * @throws ApplicationAuthenticationException
+	 */
+	public void checkCreator(UserSet userSet, String wsKey, String queryUser) 
+			throws OperationAuthorizationException {
+
+		if (!(isAdmin(wsKey, queryUser) || userSet.getCreator().getName().equals(queryUser))) {
+			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED, 
+					I18nConstants.USER_NOT_AUTHORIZED, 
+					new String[]{"User ID: "+ queryUser},
+					HttpStatus.FORBIDDEN);
+		}
+	}
+	
+	/**
 	 * This method retrieves view profile if provided within the "If-Match" HTTP header
 	 * @param request
 	 * @return profile value
 	 * @throws HttpException 
 	 * @throws ApplicationAuthenticationException
+	 */
+	/**
+	 * @param request
+	 * @return
+	 * @throws HttpException
 	 */
 	public LdProfiles getProfile(HttpServletRequest request) throws HttpException {
 		LdProfiles ldProfile = null;
@@ -323,23 +362,16 @@ public class BaseRest extends ApiResponseBuilder {
 	}
 	
 	/**
-	 * This method checks profile if provided within the "Prefer" HTTP header, 
-	 * and responds with true only when a profile is indicated and is different 
-	 * from "ldp:PreferMinimalContainer"
-	 * @param request
+	 * This method checks profile and responds with true only when a profile is indicated and is different 
+	 * from "ldp:PreferMinimalContainer" referred in the "Prefer" HTTP header
+	 * @param profile
 	 * @return
 	 * @throws ApplicationAuthenticationException
 	 */
-	//TODO EA 1148 - this method is not consistent with the 8. The method must be removed, only the update of the items list depends on the value of the profile.
-	//When this method is invoked the value of the profile is already identified, it must not be retrieved again from the header.
-	public boolean checkHeaderProfile(HttpServletRequest request) throws ApplicationAuthenticationException {
+	public boolean checkHeaderProfile(LdProfiles profile) throws ApplicationAuthenticationException {
 		boolean res = false;
-		String preferHeader = request.getHeader(HttpHeaders.PREFER);
-		if (preferHeader != null) {
-			logger.trace("'Prefer' header value: " + preferHeader);	
-			if (!preferHeader.equals(WebUserSetFields.PREFER_MINIMAL_CONTAINER_HEADER)) {
-				res = true;
-			}
+		if (!profile.getHeaderValue().equals(WebUserSetFields.PREFER_MINIMAL_CONTAINER_HEADER)) {
+			res = true;
 		}
 		return res;
 	}
