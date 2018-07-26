@@ -54,6 +54,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 		Application app = getAuthenticationService().getByApiKey(apiKey);
 		Agent user = getAuthenticationService().getUserByToken(apiKey, userToken);
 		
+		//NOTE: actually getUserByToken throws exception when user is not found
 		if (user== null || user.getName() == null || user.getUserGroup() == null)
 			throw new UserAuthorizationException(I18nConstants.INVALID_TOKEN, 
 					I18nConstants.INVALID_TOKEN, new String[]{userToken}, HttpStatus.UNAUTHORIZED);

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
@@ -133,7 +134,7 @@ public class MockAuthenticationServiceImpl implements AuthenticationService, Res
 
 		// unknown user
 		if (user == null)
-			throw new UserAuthorizationException(null, I18nConstants.INVALID_TOKEN, new String[]{userToken});
+			throw new UserAuthorizationException(null, I18nConstants.INVALID_TOKEN, new String[]{userToken}, HttpStatus.UNAUTHORIZED);
 
 		return user;
 
