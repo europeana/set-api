@@ -162,7 +162,7 @@ public class BaseRest extends ApiResponseBuilder {
 			String[] headerElems = userTokenHeader.split(" ");
 			if(headerElems.length < 2 )
 				throw new ApplicationAuthenticationException(
-						I18nConstants.INVALID_HEADER_FORMAT, I18nConstants.INVALID_HEADER_FORMAT, null);
+						I18nConstants.INVALID_HEADER_FORMAT, I18nConstants.INVALID_HEADER_FORMAT, new String[]{userTokenHeader});
 
 			String userTokenType = headerElems[USER_TOKEN_TYPE_POS];
 			if (!UserSetHttpHeaders.BEARER.equals(userTokenType)) {
