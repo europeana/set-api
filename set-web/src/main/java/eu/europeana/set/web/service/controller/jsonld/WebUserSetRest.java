@@ -753,9 +753,6 @@ public class WebUserSetRest extends BaseRest {
 					identifier, headers, httpStatus);
 
 			return response;			
-		} catch (UserSetNotFoundException e) {
-			throw new UserSetNotFoundException(
-					e.getMessage(), e.getMessage(), null);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
