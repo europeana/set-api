@@ -56,7 +56,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 		
 		if (user== null || user.getName() == null || user.getUserGroup() == null)
 			throw new UserAuthorizationException(I18nConstants.INVALID_TOKEN, 
-					I18nConstants.INVALID_TOKEN, new String[]{userToken}, HttpStatus.FORBIDDEN);
+					I18nConstants.INVALID_TOKEN, new String[]{userToken}, HttpStatus.UNAUTHORIZED);
 		
 		if(!isAdmin(user) && !hasPermission(app, setId, operationName))
 			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED, 
