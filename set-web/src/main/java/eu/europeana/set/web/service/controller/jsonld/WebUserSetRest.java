@@ -549,7 +549,7 @@ public class WebUserSetRest extends BaseRest {
 				// HTTP 200, otherwise respond with HTTP 404.
 				// check if item already exists in the Set, if so remove it
 				if (existingUserSet.getItems().contains(newItem)) {
-			        httpStatus = HttpStatus.OK;
+			        httpStatus = HttpStatus.NO_CONTENT;
 				} else {
 			        httpStatus = HttpStatus.NOT_FOUND;
 				}
