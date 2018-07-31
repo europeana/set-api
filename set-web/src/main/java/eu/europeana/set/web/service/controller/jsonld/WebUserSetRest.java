@@ -257,6 +257,9 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check if the user is the owner of the set or admin, otherwise respond with 403
+			hasModifyRights(existingUserSet, wsKey, userToken);
+			
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
 			checkHeaderTimestamp(request, existingUserSet);
 
