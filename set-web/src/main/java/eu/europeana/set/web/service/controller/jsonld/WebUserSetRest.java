@@ -374,6 +374,9 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check if the user is the owner of the set or admin, otherwise respond with 403
+			hasModifyRights(existingUserSet, wsKey, userToken);
+			
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
 			checkHeaderTimestamp(request, existingUserSet);
 
@@ -627,6 +630,9 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check if the user is the owner of the set or admin, otherwise respond with 403
+			hasModifyRights(existingUserSet, wsKey, userToken);
+			
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
 			String serializedUserSetJsonLdStr = "";
@@ -725,7 +731,7 @@ public class WebUserSetRest extends BaseRest {
 			// in the case of regular users (not admins), the autorization method must check if the users 
 			// that calls the deletion (i.e. identified by provided user token) is the same user as the creator 
 			// of the user set
-			checkCreator(existingUserSet, wsKey, userToken);
+			hasModifyRights(existingUserSet, wsKey, userToken);
 
 			// check timestamp if provided within the "If-Match" HTTP header, if false respond with HTTP 412
 			checkHeaderTimestamp(request, existingUserSet);

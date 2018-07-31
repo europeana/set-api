@@ -268,7 +268,7 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @param queryUser
 	 * @throws ApplicationAuthenticationException
 	 */
-	public void checkCreator(UserSet userSet, String wsKey, String queryUser) 
+	public void hasModifyRights(UserSet userSet, String wsKey, String queryUser) 
 			throws OperationAuthorizationException {
 
 		if (!(isAdmin(wsKey, queryUser) || userSet.getCreator().getName().equals(queryUser))) {
