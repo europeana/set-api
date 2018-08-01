@@ -17,5 +17,8 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	static final String CLIENT_NOT_AUTHORIZED = "error.userset_client_not_authorized";	
 	static final String INVALID_IF_MATCH_TIMESTAMP = "error.userset_if_match_timestamp";
 	static final String INVALID_UPDATE_HEADER_PROFILE = "error.userset_invalid_update_profile";
+	static final String USERSET_INVALID_PROFILE_VALUE = "error.userset_invalid_profile_value";
+	static final String USERSET_CONTAINS_NO_ITEMS = "error.userset_contains_no_items";
+	static final String USERSET_MINIMAL_UPDATE_PROFILE = "error.userset_minimal_update_profile";
 	static final String USER_SET_NOT_AVAILABLE = "error.userset_not_available";
 }

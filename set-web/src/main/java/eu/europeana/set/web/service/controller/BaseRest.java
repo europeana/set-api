@@ -205,6 +205,12 @@ public class BaseRest extends ApiResponseBuilder {
 		} else {
 			profile = LdProfiles.getByName(paramProfile);
 		}
+
+		if (profile == null) {
+			throw new ApplicationAuthenticationException(
+					I18nConstants.USERSET_INVALID_PROFILE_VALUE, I18nConstants.USERSET_INVALID_PROFILE_VALUE,
+					new String[] {paramProfile}, HttpStatus.PRECONDITION_FAILED, null);
+		}
 		return profile;
 	}
 	
