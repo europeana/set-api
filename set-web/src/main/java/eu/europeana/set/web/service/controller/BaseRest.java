@@ -286,6 +286,16 @@ public class BaseRest extends ApiResponseBuilder {
 	}
 	
 	/**
+	 * This method checks if user is an owner of the user set
+	 * @param userSet
+	 * @param queryUser
+	 * @return true if user is owner of a user set
+	 */
+	public boolean isOwner(UserSet userSet, String queryUser) {
+		return userSet.getCreator().getName().equals(queryUser);
+	}
+	
+	/**
 	 * This method retrieves view profile if provided within the "If-Match" HTTP header
 	 * @param request
 	 * @return profile value

@@ -38,12 +38,21 @@ public interface UserSetService {
 	public void updateUserSetPagination(UserSet newUserSet);		
 	
 	/**
-	 * This method returns UserSet object for given UserSetId that
-	 * comprises provider and identifier.
+	 * This method returns UserSet object for given user set identifier.
 	 * @param
 	 * @return UserSet object
 	 */
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
+		
+	/**
+	 * This method returns UserSet object for given user set identifier. Additionally
+	 * this method allows to define whether disabled user sets should be searched.
+	 * Use false if disabled user sets should be returned.
+	 * @param user set ID
+	 * @param true if disabled user sets should be checked (default true)
+	 * @return UserSet object
+	 */
+	public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException; 
 		
 	/**
 	 * This method forms an identifier URL

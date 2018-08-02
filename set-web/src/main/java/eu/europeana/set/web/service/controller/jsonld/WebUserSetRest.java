@@ -32,6 +32,7 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
@@ -739,7 +740,7 @@ public class WebUserSetRest extends BaseRest {
 
 			// retrieve a user set based on its identifier
 			// if the Set doesn’t exist, respond with HTTP 404
-			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+			UserSet existingUserSet = getUserSetService().getUserSetById(identifier, false);
 
 			// check that only the admins and the owners of the user sets are allowed to delete the user set. 
 			// in the case of regular users (not admins), the autorization method must check if the users 
@@ -752,17 +753,39 @@ public class WebUserSetRest extends BaseRest {
 						
 			// if the user set is disabled and the user is not an admin, respond with HTTP 410
 			HttpStatus httpStatus = null;
-			if (existingUserSet.isDisabled() && !isAdmin(wsKey, userToken)) { 
-				httpStatus = HttpStatus.GONE;
+			if (existingUserSet.isDisabled()) {
+				if (!isAdmin(wsKey, userToken)) { 
+					// if the user is the owner, the response should be 410
+					if (isOwner(existingUserSet, userToken)) {
+//						httpStatus = HttpStatus.GONE;	
+						throw new OperationAuthorizationException(I18nConstants.USERSET_ALREADY_DISABLED, 
+								I18nConstants.USERSET_ALREADY_DISABLED, 
+								new String[]{existingUserSet.getIdentifier()},
+								HttpStatus.GONE);
+						
+					} else {
+						// if the user is a registered user but not the owner, the response should be 401 (unathorized)
+						httpStatus = HttpStatus.UNAUTHORIZED;					
+					}
+				} else {
+					// if the user is admin, the set should be permanently deleted and 204 should be returned
+					getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
+					httpStatus = HttpStatus.NO_CONTENT;
+				}
 			} else {			
 				// if the user is an Administrator then permanently remove item 
 				// (and all items that are members of the user set)
+				 httpStatus = HttpStatus.NO_CONTENT;
 				 if (isAdmin(wsKey, userToken)) {
 					 getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
 				 } else { // otherwise flag it as disabled
-					 getUserSetService().disableUserSet(existingUserSet);
+  					 if (isOwner(existingUserSet, userToken)) {
+  						 getUserSetService().disableUserSet(existingUserSet);
+  					 } else {
+ 						// if the user is a registered user but not the owner, the response should be 401 (unathorized)
+ 						httpStatus = HttpStatus.UNAUTHORIZED;					
+  					 }
 				 }
-				 httpStatus = HttpStatus.NO_CONTENT;
 			}			
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);

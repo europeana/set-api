@@ -19,6 +19,7 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	static final String INVALID_UPDATE_HEADER_PROFILE = "error.userset_invalid_update_profile";
 	static final String USERSET_INVALID_PROFILE_VALUE = "error.userset_invalid_profile_value";
 	static final String USERSET_CONTAINS_NO_ITEMS = "error.userset_contains_no_items";
+	static final String USERSET_ALREADY_DISABLED = "error.userset_already_disabled";
 	static final String USERSET_MINIMAL_UPDATE_PROFILE = "error.userset_minimal_update_profile";
 	static final String USER_SET_NOT_AVAILABLE = "error.userset_not_available";
 }

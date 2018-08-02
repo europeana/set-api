@@ -56,14 +56,21 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	@Override
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
+		return getUserSetById(userSetId, true);
+	}
+	
+	@Override
+	public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException {
 		UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 		if (res == null) {
 			throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, 
 					I18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
 		} else {
-			if (res.isDisabled()) {
-				throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE, 
-						I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId});
+			if (checkDisabled) {
+				if (res.isDisabled()) {
+					throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE, 
+							I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId});
+				}
 			}
 		}
 		return res; 
