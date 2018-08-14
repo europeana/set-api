@@ -40,6 +40,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		return super.getDescription();
 	}		
 	
+	@JsonldProperty("http://europeana.eu/schemas/context/collection/total")
+	@JsonInclude(value = JsonInclude.Include.ALWAYS)
+	public int getTotal() {
+		return super.getTotal();
+	}		
+	
 	@JsonldProperty("@context")
 	public String getContext() {
 		return super.getContext();

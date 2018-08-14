@@ -114,6 +114,7 @@ public class WebUserSetRest extends BaseRest {
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
@@ -193,6 +194,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + userSet.getModified().hashCode());
@@ -314,6 +316,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + modifiedStr);
@@ -658,19 +661,19 @@ public class WebUserSetRest extends BaseRest {
 						datasetId + "/" + localId, WebUserSetFields.BASE_ITEM_URL);
 
 				// check if item already exists in the Set, if not respond with HTTP 404
-				if (existingUserSet.getItems().contains(newItem)) {
+				if (existingUserSet.getItems() != null && existingUserSet.getItems().contains(newItem)) {
 					// if already exists - remove item and update modified date
 					existingUserSet.getItems().remove(newItem);
 					Date now = new Date();				
 					existingUserSet.setModified(now);
 					
 		            // update an existing user set
+					UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);				
 					UserSet updatedUserSet = getUserSetService().updateUserSet(
-							(PersistentUserSet) existingUserSet, null);
+							(PersistentUserSet) existingUserSetPaginated, null);
 				
 					// serialize to JsonLd
-					UserSet extUserSet = getUserSetService().updatePagination(updatedUserSet);				
-					serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
+					serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
 
 			        // respond with HTTP 200 containing the updated Set description as body.
 					// serialize Set in JSON-LD following the requested profile 
@@ -790,6 +793,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 
 			ResponseEntity<String> response = new ResponseEntity<String>(

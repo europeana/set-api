@@ -37,11 +37,11 @@ public class WebUserSetApiImpl extends BaseUserSetApi implements WebUserSetApi {
 	}
 
 	@Override
-	public ResponseEntity<String> getUserSet(String wskey, String provider, String identifier) {
+	public ResponseEntity<String> getUserSet(String wskey, String identifier, String userToken) {
 
 		ResponseEntity<String> res;
 		try {
-			res = apiConnection.getUserSet(wskey, identifier);
+			res = apiConnection.getUserSet(wskey, identifier, userToken);
 		} catch (IOException e) {
 			throw new TechnicalRuntimeException(
 					"Exception occured when invoking the UserSetJsonApi getUserSet method", e);

@@ -2,7 +2,9 @@ package eu.europeana.set.web.service.impl;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -181,6 +183,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 				Date now = new Date();				
 				userSet.setModified(now);
 			}
+			removeItemDuplicates(userSet);
             return userSet;
 		} catch (UserSetAttributeInstantiationException e) {
 			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);
@@ -191,21 +194,30 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#validateWebUserSet(eu.europeana.set.definitions.model.UserSet)
+	/**
+	 * This method normalizes item list if they exist to remove duplicated items.
+	 * @param userSet
+	 * @throws ParamValidationException
 	 */
+	public void removeItemDuplicates(UserSet userSet) throws ParamValidationException {
+
+		List<String> resItems = new ArrayList<String>();
+		
+		if (userSet.getItems() != null && userSet.getItems().size() > 0) {
+			for (String item : userSet.getItems()) {
+				if (!resItems.contains(item)) {
+					resItems.add(item);
+				}
+			}
+			userSet.setItems(resItems);		
+		}
+	}
+	
 	public void validateWebUserSet(UserSet webUserSet) throws ParamValidationException {
 
 		//validate title
 		if (webUserSet.getTitle() == null) {
 			throw new ParamValidationException("The title is missing.",
-					I18nConstants.USERSET_VALIDATION,
-					null);
-		}
-
-		//validate description
-		if (webUserSet.getDescription() == null) {
-			throw new ParamValidationException("The description is missing.",
 					I18nConstants.USERSET_VALIDATION,
 					null);
 		}

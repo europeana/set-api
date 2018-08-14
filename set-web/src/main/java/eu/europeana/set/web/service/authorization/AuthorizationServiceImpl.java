@@ -63,7 +63,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED, 
 					I18nConstants.USER_NOT_AUTHORIZED, 
 					new String[]{"UserSet id: "+ userToken},
-					HttpStatus.FORBIDDEN);
+					HttpStatus.UNAUTHORIZED);
 				
 		//check permissions
 		if(isAdmin(user) && hasPermission(user, operationName))//allow all
@@ -79,7 +79,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
 		//user is not authorized to perform operation
 		throw new UserAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED, 
-				I18nConstants.USER_NOT_AUTHORIZED, new String[]{user.getName()}, HttpStatus.FORBIDDEN);	
+				I18nConstants.USER_NOT_AUTHORIZED, new String[]{user.getName()}, HttpStatus.UNAUTHORIZED);	
 	}
 
 	//verify client app privileges 

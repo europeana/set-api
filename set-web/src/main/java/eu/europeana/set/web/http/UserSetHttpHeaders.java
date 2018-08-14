@@ -17,8 +17,12 @@ public interface UserSetHttpHeaders extends HttpHeaders {
 	public static final String VALUE_CONSTRAINTS = "<http://www.w3.org/TR/annotation-protocol/constraints>; " +
 			"rel=\"http://www.w3.org/ns/ldp#constrainedBy\"";
 
-	public static final String VALUE_BASIC_CONTAINER = "<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"\n" + 
-			"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"";	
+//	public static final String VALUE_BASIC_CONTAINER = "<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"\n" + 
+//			"<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"";	
+//	
+	public static final String VALUE_BASIC_CONTAINER = "<http://www.w3.org/ns/ldp#BasicContainer>; rel=\"type\"";	
+	
+	public static final String VALUE_BASIC_RESOURCE = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"";	
 	
 	public static final String VALUE_PREFER_CONTAINEDIRIS = "return=representation;include=\"http://www.w3.org/ns/oa#PreferContainedIRIs\"";
 	public static final String VALUE_PREFER_CONTAINEDDESCRIPTIONS = "return=representation;include=\"http://www.w3.org/ns/oa#PreferContainedDescriptions\"";

@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest { 
 
 		
-	@Test
+//	@Test
 	public void createUserSet() throws IOException {
 		
 		ResponseEntity<String> response = storeTestUserSet();
@@ -36,18 +36,16 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 		assertEquals(response.getStatusCode(), status);
 	}
 	
-//	@Test
+	@Test
 	public void getUserSet() throws IllegalAccessException, IllegalArgumentException
 		, InvocationTargetException, IOException {
 		
-//		ResponseEntity<String> createResponse = storeTestUserSet(); 
-
 		/**
-		 * get annotation by provider and identifier
+		 * get user set by ID and user identifier
 		 */
 		ResponseEntity<String> response = getApiClient().getUserSet(
 				getApiKey()
-				, "58"
+				, TEST_SET_ID
 				, TEST_USER_TOKEN
 				);		
 		validateResponse(response, HttpStatus.OK);

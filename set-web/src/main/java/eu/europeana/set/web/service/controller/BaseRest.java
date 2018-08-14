@@ -281,7 +281,7 @@ public class BaseRest extends ApiResponseBuilder {
 			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED, 
 					I18nConstants.USER_NOT_AUTHORIZED, 
 					new String[]{"User ID: "+ queryUser},
-					HttpStatus.FORBIDDEN);
+					HttpStatus.UNAUTHORIZED);
 		}
 	}
 	

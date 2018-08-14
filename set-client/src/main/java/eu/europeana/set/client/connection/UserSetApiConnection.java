@@ -66,17 +66,20 @@ public class UserSetApiConnection extends BaseApiConnection {
 	 *     496
 	 * @param wskey
 	 * @param identifier
+	 * @param userToken
 	 * @return response entity that comprises response body, headers and status code.
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> getUserSet(
-			String wskey, String identifier) throws IOException {
+			String wskey, String identifier, String userToken) throws IOException {
 
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
 		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
-		    .append(wskey).append(WebUserSetFields.AND);
+	    	.append(wskey).append(WebUserSetFields.AND);
+		urlBuilder.append(WebUserSetFields.USER_TOKEN).append(WebUserSetFields.EQUALS)
+	    	.append(userToken);
 		
 		/**
 		 * Execute Europeana API request
