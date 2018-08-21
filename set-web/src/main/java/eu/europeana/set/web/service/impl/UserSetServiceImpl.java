@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -111,6 +110,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	@Override
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
 		mergeUserSetProperties(persistentUserSet, webUserSet);
+		updateUserSetPagination(persistentUserSet);
+		
 		UserSet res = getMongoPersistence().update(persistentUserSet);
 		return res;
 	}
@@ -205,7 +206,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @param userSet
 	 * @throws ParamValidationException
 	 */
-	public void removeItemDuplicates(UserSet userSet) throws ParamValidationException {
+	public void removeItemDuplicates(UserSet userSet){
 		if (userSet.getItems() != null && !userSet.getItems().isEmpty()){
 			List<String> distinctItems = userSet.getItems().stream().distinct().collect(Collectors.toList());
 			userSet.setItems(distinctItems);

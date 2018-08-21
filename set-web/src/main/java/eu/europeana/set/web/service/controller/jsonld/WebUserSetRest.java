@@ -279,17 +279,19 @@ public class WebUserSetRest extends BaseRest {
 				// validate and process the Set description for format and mandatory fields
 				// if false respond with HTTP 400
 				getUserSetService().validateWebUserSet(newUserSet);
-				//validate 
+				//validate items 
 				validateUpdateItemsByProfile(existingUserSet, newUserSet, profile);
-
-				getUserSetService().updateUserSetPagination(existingUserSet);
+				//remove duplicated items
+				getUserSetService().removeItemDuplicates(newUserSet);
 				
 				// Respond with HTTP 200
 	            // update an existing user set. merge user sets - insert new fields in existing object
+				// update pagination
 				// generate and add a created and modified timestamp to the Set;
 				existingUserSet.setModified(newUserSet.getModified());
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
+				
 				modifiedStr = updatedUserSet.getModified().hashCode();			
 				serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
 		        httpStatus = HttpStatus.OK;

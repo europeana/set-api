@@ -1,7 +1,6 @@
 package eu.europeana.set.web.service;
 
 import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
@@ -99,5 +98,10 @@ public interface UserSetService {
 	 * @throws UserSetNotFoundException 
 	 */
 	public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
-		
+	
+	/**
+	 * remove duplicate items in the user set by preserving the order of items
+	 * @param userSet
+	 */
+	public void removeItemDuplicates(UserSet userSet);
 }
