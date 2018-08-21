@@ -13,10 +13,9 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
-import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldType;
 
 
-@JsonldType("http://europeana.eu/schemas/context/collection/UserSet")
+//@JsonldType("http://europeana.eu/schemas/context/collection/UserSet")
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 		
