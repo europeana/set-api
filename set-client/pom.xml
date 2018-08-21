@@ -34,6 +34,8 @@
 			<version>${version.log4j}</version>
 		</dependency>
 
+
+		<!-- 
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
@@ -42,7 +44,7 @@
 			<scope>test</scope>
 			<type>test-jar</type>
 		</dependency>
-
+ 		-->
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
