@@ -14,11 +14,11 @@ public class UserSetInstantiationException extends RuntimeException{
 	public static final String DEFAULT_MESSAGE = "Cannot instantiate user set attribute: ";
 	
 	public UserSetInstantiationException(String attributeName){
-		super(attributeName);
+		this(attributeName, null);
 	}
 	
 	public UserSetInstantiationException(String attributeName , Throwable th){
-		super(attributeName, th);
+		super(DEFAULT_MESSAGE + attributeName, th);
 	}
 	
 }

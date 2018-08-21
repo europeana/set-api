@@ -58,11 +58,8 @@ public class UserSetUtils {
 				int last = total/WebUserSetFields.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
 				res.setLast("" + last);
 			}
-		} else {
-			if (res != null) {
-				res.setTotal(0);
-			}
-		}
+		} 
+		
 		return res;
 	}
 	

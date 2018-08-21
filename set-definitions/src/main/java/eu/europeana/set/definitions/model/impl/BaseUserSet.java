@@ -66,7 +66,7 @@ public class BaseUserSet implements UserSet {
 	private String last;
 
 	// A non-negative integer specifying the total number of items that are contained within a Set
-	private int total;
+	private int total = 0;
 	
 	// For OrderedCollectionPage class
 

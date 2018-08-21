@@ -4,6 +4,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 
 public interface UserSetService {
@@ -88,9 +89,9 @@ public interface UserSetService {
 	 * This method validates and processes the Set description for format and mandatory fields
      * if false responds with HTTP 400
 	 * @param webUserSet
-	 * @throws ParamValidationException
+	 * @throws RequestBodyValidationException 
 	 */
-	public void validateWebUserSet(UserSet webUserSet) throws ParamValidationException;
+	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException;
 	
 	/**
 	 * This method deletes user set by user set Id value.

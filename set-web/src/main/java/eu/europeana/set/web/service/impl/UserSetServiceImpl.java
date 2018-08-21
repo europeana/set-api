@@ -2,10 +2,10 @@ package eu.europeana.set.web.service.impl;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -16,10 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -128,6 +130,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 */
 	private void mergeUserSetProperties(PersistentUserSet userSet, UserSet updatedWebUserSet) {
 		if (updatedWebUserSet != null) {
+			if (updatedWebUserSet.getContext() != null) {
+				userSet.setContext(updatedWebUserSet.getContext());
+			}
+			
 			if (updatedWebUserSet.getType() != null) {
 				userSet.setType(updatedWebUserSet.getType());
 			}
@@ -186,7 +192,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			removeItemDuplicates(userSet);
             return userSet;
 		} catch (UserSetAttributeInstantiationException e) {
-			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (JsonParseException e) {
 			throw new UserSetInstantiationException("Json formating exception!", e);
 		} catch (IOException e) {
@@ -200,27 +206,25 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @throws ParamValidationException
 	 */
 	public void removeItemDuplicates(UserSet userSet) throws ParamValidationException {
-
-		List<String> resItems = new ArrayList<String>();
-		
-		if (userSet.getItems() != null && userSet.getItems().size() > 0) {
-			for (String item : userSet.getItems()) {
-				if (!resItems.contains(item)) {
-					resItems.add(item);
-				}
-			}
-			userSet.setItems(resItems);		
-		}
+		if (userSet.getItems() != null && !userSet.getItems().isEmpty()){
+			List<String> distinctItems = userSet.getItems().stream().distinct().collect(Collectors.toList());
+			userSet.setItems(distinctItems);
+		} 
 	}
 	
-	public void validateWebUserSet(UserSet webUserSet) throws ParamValidationException {
+	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException {
 
 		//validate title
 		if (webUserSet.getTitle() == null) {
-			throw new ParamValidationException("The title is missing.",
-					I18nConstants.USERSET_VALIDATION,
-					null);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
+					new String[]{WebUserSetModelFields.TITLE});
 		}
+		
+		//validate context
+		if(webUserSet.getContext()!= null && !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())){
+			throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
+					new String[]{WebUserSetModelFields.TITLE});
+		}	
 	}
 	
 	/* (non-Javadoc)

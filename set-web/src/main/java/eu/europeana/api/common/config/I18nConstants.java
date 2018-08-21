@@ -9,7 +9,8 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	static final String BASE64_DECODING_FAIL = "error.userset_base64_encoding_fail";
 	static final String UNSUPPORTED_TOKEN_TYPE = "error.userset_unsupported_token_type";
 	static final String INVALID_HEADER_FORMAT = "error.userset_invalid_header_format";
-	static final String USERSET_VALIDATION = "error.userset_validation";
+//	static final String USERSET_VALIDATION = "error.userset_validation";
+	static final String USERSET_VALIDATION_MANDATORY_PROPERTY = "error.userset_validation_mandatory_property";
 	static final String APIKEY_FILE_NOT_FOUND = "error.userset_apikey_file_not_found";	
 	static final String INVALID_TOKEN = "error.userset_invalid_token";
 	static final String USER_NOT_AUTHORIZED = "error.userset_user_not_authorized";	

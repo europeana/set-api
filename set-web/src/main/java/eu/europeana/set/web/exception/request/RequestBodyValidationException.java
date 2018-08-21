@@ -11,19 +11,23 @@ public class RequestBodyValidationException extends HttpException{
 	 */
 	private static final long serialVersionUID = 3364526076494279093L;
 	
-	private String bodyValue;
+//	private String bodyValue;
 	
-	public static String MESSAGE_PARSE_BODY = " Cannot parse body to user set! ";
+//	public static String MESSAGE_PARSE_BODY = " Cannot parse body to user set! ";
 	
-	public RequestBodyValidationException(String message, String i18nKey, Throwable th){
-		super(message, i18nKey, null, HttpStatus.BAD_REQUEST, th);
-		this.bodyValue = message;
+	
+	public RequestBodyValidationException(String i18nKey, String[] params){
+		this(i18nKey, params, null);		
+	}
+	
+	public RequestBodyValidationException(String i18nKey, String[] params, Throwable th){
+		super(i18nKey, i18nKey, params, HttpStatus.BAD_REQUEST, th);		
 	}
 		
-	public String getBodyValue() {
-		return bodyValue;
-	}
-	protected void setBodyValue(String bodyValue) {
-		this.bodyValue = bodyValue;
-	}
+//	public String getBodyValue() {
+//		return bodyValue;
+//	}
+//	protected void setBodyValue(String bodyValue) {
+//		this.bodyValue = bodyValue;
+//	}
 }

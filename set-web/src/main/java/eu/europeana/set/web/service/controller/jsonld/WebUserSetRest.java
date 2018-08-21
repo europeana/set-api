@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -95,6 +96,8 @@ public class WebUserSetRest extends BaseRest {
 			// validate and process the Set description for format and mandatory fields
 			// if false respond with HTTP 400
 			getUserSetService().validateWebUserSet(webUserSet);
+			if(StringUtils.isEmpty(webUserSet.getContext()))
+				webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
 			Agent user = new WebSoftwareAgent();
 			user.setName(userToken);			
@@ -114,7 +117,7 @@ public class WebUserSetRest extends BaseRest {
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
@@ -125,17 +128,14 @@ public class WebUserSetRest extends BaseRest {
 			return response;
 
 		} catch (JsonParseException e) {
-			throw new RequestBodyValidationException(
-					I18nConstants.USERSET_CANT_PARSE_BODY, I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (ParamValidationException e) {
 			throw new ParamValidationException(e.getMessage(), e.getMessage(), 
 					null);
 		} catch (UserSetValidationException e) { 
-			throw new RequestBodyValidationException(
-					I18nConstants.USERSET_CANT_PARSE_BODY, I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetAttributeInstantiationException e) {
-			throw new RequestBodyValidationException(
-					I18nConstants.USERSET_CANT_PARSE_BODY, I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new HttpException(null, I18nConstants.USERSET_INVALID_BODY, null, HttpStatus.BAD_REQUEST, e); 
 		} catch (HttpException e) {
@@ -194,7 +194,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + userSet.getModified().hashCode());
@@ -273,32 +273,14 @@ public class WebUserSetRest extends BaseRest {
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
-				// validate and process the Set description for format and mandatory fields
-				// if false respond with HTTP 400
-				getUserSetService().validateWebUserSet(existingUserSet);
-				
 				// parse fields of the new user set to an object
 				UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-	
-				// update the Set based on its identifier (replace member items with the new items 
-				// that are present in the Set description only when a profile is indicated and is 
-				// different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header)
-				// if the provided userset contains a list of items and the profile is set to minimal, 
-				// respond with HTTP 412)
-				if (checkHeaderProfile(profile)) {
-					if (newUserSet.getItems() == null || newUserSet.getItems().size() == 0) { // new user set contains no items
-						throw new ApplicationAuthenticationException(
-							I18nConstants.USERSET_CONTAINS_NO_ITEMS, I18nConstants.USERSET_CONTAINS_NO_ITEMS,
-							new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
-					}
-					existingUserSet.setItems(newUserSet.getItems());
-				} else { // it is a minimal profile
-					if (newUserSet.getItems() != null && newUserSet.getItems().size() > 0) { // new user set contains items
-						throw new ApplicationAuthenticationException(
-							I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-							new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
-					}
-				}
+				
+				// validate and process the Set description for format and mandatory fields
+				// if false respond with HTTP 400
+				getUserSetService().validateWebUserSet(newUserSet);
+				//validate 
+				validateUpdateItemsByProfile(existingUserSet, newUserSet, profile);
 
 				getUserSetService().updateUserSetPagination(existingUserSet);
 				
@@ -316,7 +298,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + modifiedStr);
@@ -327,14 +309,37 @@ public class WebUserSetRest extends BaseRest {
 			return response;
 			
 		} catch (UserSetValidationException e) { 
-			throw new RequestBodyValidationException(userSetJsonLdStr, I18nConstants.USERSET_CANT_PARSE_BODY, e);
-		} catch (HttpException e) {
-			//TODO: change this when OAUTH is implemented and the user information is available in service
-			throw e;
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
-			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
+		} catch (HttpException e) {
+				//TODO: change this when OAUTH is implemented and the user information is available in service
+				throw e;
 		} catch (Exception e) {
 			throw new InternalServerException(e);
+		}
+	}
+
+	private void validateUpdateItemsByProfile(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
+			throws ApplicationAuthenticationException {
+		// update the Set based on its identifier (replace member items with the new items 
+		// that are present in the Set description only when a profile is indicated and is 
+		// different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header)
+		// if the provided userset contains a list of items and the profile is set to minimal, 
+		// respond with HTTP 412)
+		if (checkHeaderProfile(profile)) {
+			if (updateUserSet.getItems() == null || updateUserSet.getItems().size() == 0) { // new user set contains no items
+				throw new ApplicationAuthenticationException(
+					I18nConstants.USERSET_CONTAINS_NO_ITEMS, I18nConstants.USERSET_CONTAINS_NO_ITEMS,
+					new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
+			}
+			storedUserSet.setItems(updateUserSet.getItems());
+		} else { // it is a minimal profile
+			if (updateUserSet.getItems() != null && updateUserSet.getItems().size() > 0) { // new user set contains items
+				throw new ApplicationAuthenticationException(
+					I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
+					new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
+			}
 		}
 	}
 
@@ -420,13 +425,12 @@ public class WebUserSetRest extends BaseRest {
 			return response;
 
 		} catch (UserSetValidationException e) { 
-			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY
-					, I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);		
+		} catch (UserSetInstantiationException e) {
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
-		} catch (UserSetInstantiationException e) {
-			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
 		} catch (Exception e) {
 			throw new InternalServerException(e);
 		}
@@ -586,13 +590,12 @@ public class WebUserSetRest extends BaseRest {
 			return response;
 
 		} catch (UserSetValidationException e) {
-			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, 
-					I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);		
+		} catch (UserSetInstantiationException e) {
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
-		} catch (UserSetInstantiationException e) {
-			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
 		} catch (Exception e) {
 			throw new InternalServerException(e);
 		}
@@ -695,13 +698,12 @@ public class WebUserSetRest extends BaseRest {
 			return response;
 
 		} catch (UserSetValidationException e) { 
-			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, 
-					I18nConstants.USERSET_CANT_PARSE_BODY, e);
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
+		} catch (UserSetInstantiationException e) {
+			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
-		} catch (UserSetInstantiationException e) {
-			throw new HttpException("The submitted user set content is invalid!", I18nConstants.USERSET_VALIDATION, null, HttpStatus.BAD_REQUEST, e);
 		} catch (Exception e) {
 			throw new InternalServerException(e);
 		}
@@ -793,7 +795,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-			headers.add(HttpHeaders.LINK2, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 
 			ResponseEntity<String> response = new ResponseEntity<String>(
