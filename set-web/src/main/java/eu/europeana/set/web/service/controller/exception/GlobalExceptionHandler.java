@@ -30,12 +30,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandlingController 
 	
 	@Override
 	protected ApiResponse getErrorReport(String apiKey, String action, Throwable th, boolean includeErrorStack) {
-		// TODO Auto-generated method stub
 		UserSetOperationResponse response = (UserSetOperationResponse) super.getErrorReport(apiKey, action, th, includeErrorStack);
-		//TODO check is super implementation can be used here
-//		if(th instanceof BatchUploadException)
-//			response.setOperationReport(((BatchUploadException)th).getOperationReport());
-
 		return response;
 	}
 

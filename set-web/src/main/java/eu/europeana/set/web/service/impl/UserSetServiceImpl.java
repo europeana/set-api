@@ -26,6 +26,7 @@ import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
+import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
@@ -176,8 +177,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			throws	HttpException {
 
 		JsonParser parser;
-	    ObjectMapper mapper = new ObjectMapper();  
+	    ObjectMapper mapper = new ObjectMapper();
+	    mapper.registerModule(new JsonldModule());
 	    mapper.configure(Feature.AUTO_CLOSE_SOURCE, true);
+//	    mapper.configure(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME, true);
+	    
+	    
 	    JsonFactory jsonFactory = mapper.getFactory();
 		
 		/**
@@ -195,9 +200,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		} catch (UserSetAttributeInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (JsonParseException e) {
-			throw new UserSetInstantiationException("Json formating exception!", e);
+			throw new UserSetInstantiationException("Json formating exception! " + e.getMessage(), e);
 		} catch (IOException e) {
-			throw new UserSetInstantiationException("Json reading exception!", e);
+			throw new UserSetInstantiationException("Json reading exception! " + e.getMessage(), e);
 		}
 	}
 	
@@ -223,8 +228,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		
 		//validate context
 		if(webUserSet.getContext()!= null && !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())){
-			throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
-					new String[]{WebUserSetModelFields.TITLE});
+			throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
+					new String[]{WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext()});
 		}	
 	}
 	

@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -24,40 +25,46 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		return super.getIdentifier();
 	}
 		
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/type")
+	@JsonldProperty("type")
 	public void setType(String type) {
 		super.setType(type);
 	}
 	
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/title")
+	@JsonldProperty("title")
 	public Map<String, String> getTitle() {
 		return super.getTitle();
 	}
 
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/description")
+	@JsonldProperty("description")
 	public Map<String, String> getDescription() {
 		return super.getDescription();
 	}		
 	
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/total")
+	@JsonldProperty("total")
 	@JsonInclude(value = JsonInclude.Include.ALWAYS)
 	public int getTotal() {
 		return super.getTotal();
 	}		
 	
-//	@JsonldProperty("@context")
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/context")
+	@JsonldProperty("@context")	
+	@JsonIgnore
 	public String getContext() {
 		return super.getContext();
 	}
 	
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/creator")
+	@JsonProperty("@context")
+	@Override
+	public void setContext(String context) {
+		super.setContext(context);
+	}
+	
+	@JsonldProperty("creator")
 	@JsonIgnore
 	public Agent getCreator() {
 		return super.getCreator();
 	}
 	
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/items")
+	@JsonldProperty("items")
 	public List<String> getItems() {
 		return super.getItems();
 	}
@@ -88,7 +95,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	 * @param base The base URL
 	 * @return string presenting ID as URL
 	 */
-	@JsonldProperty("http://europeana.eu/schemas/context/collection/id")
+	@JsonldProperty("id")
 	public String getId() {
 		StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(WebUserSetFields.BASE_SET_URL); 
