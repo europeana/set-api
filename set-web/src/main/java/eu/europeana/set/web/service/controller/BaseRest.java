@@ -62,12 +62,6 @@ public class BaseRest extends ApiResponseBuilder {
 		return null;
 	}
 
-	Logger logger = LogManager.getLogger(getClass());
-
-	public Logger getLogger() {
-		return logger;
-	}
-
 	protected UserSetConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -159,7 +153,7 @@ public class BaseRest extends ApiResponseBuilder {
 		String userToken = null;
 		String userTokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (userTokenHeader != null) {
-			logger.trace("'Authorization' header value: " + userTokenHeader);
+			getLogger().trace("'Authorization' header value: " + userTokenHeader);
 			String[] headerElems = userTokenHeader.split(" ");
 			if(headerElems.length < 2 )
 				throw new ApplicationAuthenticationException(
@@ -175,7 +169,7 @@ public class BaseRest extends ApiResponseBuilder {
 			String encodedUserToken = headerElems[BASE64_ENCODED_STRING_POS];
 			
 			userToken = decodeBase64(encodedUserToken);
-			logger.debug("Decoded user token: " + userToken);
+			getLogger().debug("Decoded user token: " + userToken);
 
 		} else {
 			//@deprecated to be removed in the next versions
@@ -243,7 +237,7 @@ public class BaseRest extends ApiResponseBuilder {
 		int modified = userSet.getModified().hashCode();
 		String ifMatchHeader = request.getHeader(HttpHeaders.IF_MATCH);
 		if (ifMatchHeader != null) {
-			logger.trace("'If-Match' header value: " + ifMatchHeader);	
+			getLogger().trace("'If-Match' header value: " + ifMatchHeader);	
 			String modifiedStr = String.valueOf(modified);
 			if (!ifMatchHeader.equals(modifiedStr)) {
 				throw new ApplicationAuthenticationException(
@@ -313,7 +307,7 @@ public class BaseRest extends ApiResponseBuilder {
 		
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
 		if (preferHeader != null) {
-			logger.trace("'Prefer' header value: " + preferHeader);	
+			getLogger().trace("'Prefer' header value: " + preferHeader);	
 			if (StringUtils.isNotEmpty(preferHeader)) {
 				ldProfile = LdProfiles.getByHeaderValue(preferHeader);
 				if (ldProfile == null) {
@@ -372,7 +366,7 @@ public class BaseRest extends ApiResponseBuilder {
 					positionInt = -1;
 				}
 			} catch (Exception e) {
-				logger.trace("Position validation warning: " + e.getMessage());
+				getLogger().trace("Position validation warning: " + e.getMessage());
 			}
 		}
 		return positionInt;
