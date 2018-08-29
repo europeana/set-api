@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import eu.europeana.set.definitions.model.UserSet;
 
 public class BaseWebUserSetProtocolTest {
 
-	protected Logger log = Logger.getLogger(getClass());
+	protected Logger log = LogManager.getLogger(getClass());
 
 	public static final String USER_SET_CONTENT = "/content/userset.json";
 

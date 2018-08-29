@@ -3,7 +3,8 @@ package eu.europeana.set.web.service.authentication.mock;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -32,7 +33,7 @@ public class MockAuthenticationServiceImpl implements AuthenticationService, Res
 
 	UserSetConfiguration configuration;
 
-	Logger logger = Logger.getLogger(getClass());
+	Logger logger = LogManager.getLogger(getClass());
 
 	public MockAuthenticationServiceImpl(UserSetConfiguration configuration) {
 		this.configuration = configuration;

@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -20,7 +21,7 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 	@Resource
 	private UserSetConfiguration configuration;
 	
-	protected final Logger logger = Logger.getLogger(this.getClass());
+	protected final Logger logger = LogManager.getLogger(this.getClass());
 	
 	public UserSetConfiguration getConfiguration() {
 		return configuration;

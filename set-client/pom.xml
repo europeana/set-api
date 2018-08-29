@@ -29,22 +29,11 @@
 		</dependency>
 
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${version.log4j}</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${version.log4j2}</version>
 		</dependency>
 
-
-		<!-- 
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-definitions</artifactId>
-			<version>${version.setApi}</version>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-			<type>test-jar</type>
-		</dependency>
- 		-->
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>

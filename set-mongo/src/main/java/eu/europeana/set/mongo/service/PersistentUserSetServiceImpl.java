@@ -5,7 +5,8 @@ import java.util.Date;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	final String NOT_PERSISTENT_OBJECT = 
 			"User set object in not an instance of persistent user set.";
 
-	protected final Logger logger = Logger.getLogger(this.getClass());
+	protected final Logger logger = LogManager.getLogger(this.getClass());
 	
 	@Resource
 	private UserSetConfiguration configuration;

@@ -11,7 +11,7 @@ public class UserSetOperationResponse extends ApiResponse{
 	
 	UserSet userSet;
 	
-	private BatchReportable operationReport;
+//	private BatchReportable operationReport;
 
 	public static String ERROR_NO_OBJECT_FOUND = "No Object Found!";
 	public static String ERROR_VISIBILITY_CHECK = "This user set object is marked as not visible!";
@@ -40,14 +40,6 @@ public class UserSetOperationResponse extends ApiResponse{
 
 	public void setUserSet(UserSet userSet) {
 		this.userSet = userSet;
-	}
-
-	public BatchReportable getOperationReport() {
-		return operationReport;
-	}
-
-	public void setOperationReport(BatchReportable operationReport) {
-		this.operationReport = operationReport;
 	}
 
 }

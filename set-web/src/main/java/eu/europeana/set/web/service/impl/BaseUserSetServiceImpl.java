@@ -2,7 +2,8 @@ package eu.europeana.set.web.service.impl;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
@@ -11,7 +12,7 @@ public abstract class BaseUserSetServiceImpl {
 	@Resource
 	PersistentUserSetService mongoPersistance;
 
-	Logger logger = Logger.getLogger(getClass());
+	Logger logger = LogManager.getLogger(getClass());
 
 
 	protected PersistentUserSetService getMongoPersistence() {

@@ -2,7 +2,8 @@ package eu.europeana.set.client.connection;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
 import com.google.gson.Gson;
@@ -16,7 +17,7 @@ public class BaseApiConnection {
 	private String setServiceUri = "";
 	private HttpConnection httpConnection = new HttpConnection();
 
-	Logger logger = Logger.getLogger(getClass().getName());
+	Logger logger = LogManager.getLogger(getClass().getName());
 
 	private Gson gson;
 

@@ -2,7 +2,8 @@ package eu.europeana.set.web.service.authorization;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 
 import eu.europeana.api.common.config.I18nConstants;
@@ -19,7 +20,7 @@ import eu.europeana.set.web.service.authentication.AuthenticationService;
 
 public class AuthorizationServiceImpl implements AuthorizationService {
 	
-	protected final Logger logger = Logger.getLogger(getClass());
+	protected final Logger logger = LogManager.getLogger(getClass());
 
 	@Resource
 	AuthenticationService authenticationService;

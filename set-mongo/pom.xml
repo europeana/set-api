@@ -42,6 +42,7 @@
 			<groupId>eu.europeana.api.commons</groupId>
 			<version>${version.commonsApi}</version>
 			<artifactId>commons-nosql</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 
@@ -81,15 +82,40 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>${version.spring}</version>
 		</dependency>
+		
 
 		<!-- TESTING PURPOSES -->
 
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<version>${version.commonsApi}</version>
+			<artifactId>commons-nosql</artifactId>
+			<classifier>tests</classifier>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<scope>test</scope>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<!-- <version>${version.springCore}</version> -->
 			<version>${version.spring}</version>
+		</dependency>
+		
+		<!-- it seems that the test dependencies from api-commons-nosql are not imported automatically -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+			<version>${version.springBootMongoStarter}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>de.flapdoodle.embed</groupId>
+			<artifactId>de.flapdoodle.embed.mongo</artifactId>
+			<version>2.0.3</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
