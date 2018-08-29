@@ -36,6 +36,9 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
         ">
     
+    <util:properties id="setProperties" 
+		location="classpath:config/set.properties" />
+    
     <!-- USING OTHER MODULES -->
 	<beans:import resource="set-definitions-context.xml"/>
 	<beans:import resource="set-mongo-context.xml"/>

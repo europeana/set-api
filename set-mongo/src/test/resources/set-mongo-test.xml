@@ -9,20 +9,24 @@
 	or conditions of any kind, either express or implied. See the Licence for 
 	the specific language governing permissions and limitations under the Licence. -->
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 
+	<!-- TEST BEANS AND PROPERTIES First  -->
 	<util:properties id="setProperties" 
 		location="test-config/set-test.properties" />
-
-	<!-- INTERNAL DEFINITIONS -->
-	<!-- <import resource="internal/annotation-definitions-beans.xml" /> -->
-
-	<!--Log4j Configuration -->
+	<!-- Embedded mongo server -->
+	<bean id="set_embedded_mongo" class="eu.europeana.api.commons.nosql.embedded.EmbeddedMongoServer" init-method="start" destroy-method="stop"/>
 	
+	<import resource="set-mongo-context.xml"/>
 	
 </beans>

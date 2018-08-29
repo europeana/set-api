@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import javax.annotation.Resource;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import eu.europeana.api.commons.nosql.dao.NosqlDao;
+import eu.europeana.api.commons.nosql.embedded.EmbeddedMongoServer;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
@@ -25,14 +25,16 @@ import eu.europeana.set.mongo.service.PersistentUserSetService;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/set-mongo-context.xml",
-		"/set-mongo-test.xml" })
+@ContextConfiguration({ "/set-mongo-test.xml"})
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	
 	public PersistentUserSetServiceTest() {
 		super(null);
 	}
 
+	@Resource
+	EmbeddedMongoServer mongod; 
+	
 	@Resource 
 	PersistentUserSetService userSetService;
 
@@ -59,19 +61,10 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	 */
 	@Before
 	public void setup() throws IOException {
-		userSetDao.getCollection().drop();
+		//mongo server is started as resoource
+//		userSetDao.getCollection().drop();
 		setBaseUserSetUrl(configuration.getUserSetBaseUrl());
 		objectBuilder = new UserSetTestObjectBuilder();
-	}
-
-	/**
-	 * Cleaning the testing session's data
-	 * 
-	 * @throws IOException
-	 */
-	@After
-	public void tearDown() throws IOException {
-		// UserSetDao.getCollection().drop();
 	}
 
 	@Test
