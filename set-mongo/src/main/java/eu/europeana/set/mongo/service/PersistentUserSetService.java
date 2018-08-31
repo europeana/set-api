@@ -22,14 +22,6 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 */
 	public abstract PersistentUserSet getByIdentifier(String identifier);
 	
-	/**
-	 * This method retrieves user set from database by set identifier string
-	 * and filter fields
-	 * @param identifier The set identifier e.g. http://localhost:8080/set6
-	 * @return user set object
-	 */
-	public abstract PersistentUserSet getByIdentifierAndFilters(String identifier, String[] filters);
-	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string
 	 * @param objectId The database object ID e.g. "15"
