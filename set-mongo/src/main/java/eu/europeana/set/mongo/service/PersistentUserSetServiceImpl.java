@@ -136,4 +136,19 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return store(userSet);
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getByIdentifierAndFilters(java.lang.String, java.lang.String[])
+	 */
+	public PersistentUserSet getByIdentifierAndFilters(String identifier, String[] filters) {
+		Query<PersistentUserSet> query = getUserSetDao().createQuery();
+		query.filter(PersistentUserSet.FIELD_IDENTIFIER, identifier);
+		if (filters != null) {
+			for (String filter : filters) {
+				query.project(filter, true);
+			}
+		}		
+
+		return getUserSetDao().findOne(query);
+	}
+		
 }
