@@ -54,7 +54,7 @@ import io.swagger.annotations.ApiOperation;
 public class WebUserSetRest extends BaseRest {
 	
 	@RequestMapping(value = "/set/", method = RequestMethod.POST, 
-			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+			produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
 	public ResponseEntity<String> createUserSet(
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
@@ -214,8 +214,8 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 	
-	@RequestMapping(value = {"/set/{identifier}","/set/{identifier}.jsonld"}, method = RequestMethod.PUT, 
-			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+	@RequestMapping(value = {"/set/{identifier}"}, method = RequestMethod.PUT, 
+			produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.UPDATE_SAMPLES_JSONLD, value = "Update an existing user set", nickname = "update", response = java.lang.Void.class)
 	public ResponseEntity<String> updateUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -345,8 +345,8 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
-	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}","/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.PUT, 
-			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.PUT, 
+			produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.INSERT_ITEM_NOTE, value = "Insert item to an existing user set", nickname = "insert item", response = java.lang.Void.class)
 	public ResponseEntity<String> insertItemIntoUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -514,8 +514,8 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
-	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.GET, 
-			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.GET, 
+			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8})
 	@ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
 	public ResponseEntity<String> isItemInUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -603,8 +603,8 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
-	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}","/set/{identifier}/{datasetId}/{localId}.jsonld"}, method = RequestMethod.DELETE, 
-			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.DELETE, 
+			produces = { HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.DELETE_ITEM_NOTE, value = "Delete a item from the set", nickname = "delete item", response = java.lang.Void.class)
 	public ResponseEntity<String> deleteItemFromUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -711,8 +711,8 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
-	@RequestMapping(value = {"/set/{identifier}","/set/{identifier}.jsonld"}, method = RequestMethod.DELETE, produces = {
-			HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
+	@RequestMapping(value = {"/set/{identifier}"}, method = RequestMethod.DELETE, produces = {
+			HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(value = "Delete an existing user set", nickname = "delete", response = java.lang.Void.class)
 	public ResponseEntity<String> deleteUserSet(
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String apiKey,
