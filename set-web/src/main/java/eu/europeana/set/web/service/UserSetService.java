@@ -45,6 +45,27 @@ public interface UserSetService {
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
 		
 	/**
+	 * This method returns UserSet object for given user set identifier and filter fields. Additionally
+	 * this method allows to define whether disabled user sets should be searched.
+	 * Use false if disabled user sets should be returned.
+	 * @param user set ID
+	 * @param user set filter fields
+	 * @return UserSet object
+	 */
+	public UserSet getUserSetByIdAndFilters(String userSetId, String[] filters) throws UserSetNotFoundException; 
+		
+	/**
+	 * This method returns UserSet object for given user set identifier and filter fields. Additionally
+	 * this method allows to define whether disabled user sets should be searched.
+	 * Use false if disabled user sets should be returned.
+	 * @param user set ID
+	 * @param user set filter fields
+	 * @param true if disabled user sets should be checked (default true)
+	 * @return UserSet object
+	 */
+	public UserSet getUserSetByIdAndFilters(String userSetId, String[] filters, boolean checkDisabled) throws UserSetNotFoundException; 
+		
+	/**
 	 * This method returns UserSet object for given user set identifier. Additionally
 	 * this method allows to define whether disabled user sets should be searched.
 	 * Use false if disabled user sets should be returned.
