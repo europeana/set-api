@@ -14,7 +14,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import eu.europeana.api.commons.nosql.dao.NosqlDao;
-import eu.europeana.api.commons.nosql.embedded.EmbeddedMongoServer;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
@@ -32,9 +31,6 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 		super(null);
 	}
 
-	@Resource
-	EmbeddedMongoServer mongod; 
-	
 	@Resource 
 	PersistentUserSetService userSetService;
 

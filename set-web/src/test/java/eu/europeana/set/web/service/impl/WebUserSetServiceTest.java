@@ -43,8 +43,7 @@ import eu.europeana.set.web.service.UserSetService;
  * Unit test for the Web UserSet service
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/set-web-context.xml", "/set-mongo-context.xml", "/set-mongo-test.xml"
-	})
+@ContextConfiguration({ "/set-web-test.xml"})
 public class WebUserSetServiceTest { 
 
 	String baseUserSetUrl = null;

@@ -21,12 +21,19 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 
-	<!-- TEST BEANS AND PROPERTIES First  -->
+	<!-- 
+	<context:property-override location="test-config/set-web-test.properties" order="0" />
+	 -->
 	<util:properties id="setProperties" 
-		location="test-config/set-mongo-test.properties" />
+		location="test-config/set-web-test.properties" />
+	
+	
 	<!-- Embedded mongo server -->
 	<bean id="set_embedded_mongo" class="eu.europeana.api.commons.nosql.embedded.EmbeddedMongoServer" init-method="start" destroy-method="stop"/>
 	
-	<import resource="set-mongo-context.xml"/>
+	<import resource="set-web-beans.xml"/>
+	
+	
+	
 	
 </beans>

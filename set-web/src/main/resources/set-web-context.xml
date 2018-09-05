@@ -38,57 +38,8 @@
     
     <util:properties id="setProperties" 
 		location="classpath:config/set.properties" />
-    
-    <!-- USING OTHER MODULES -->
-	<beans:import resource="set-definitions-context.xml"/>
-	<beans:import resource="set-mongo-context.xml"/>
 	
-    
-   	<!--  ApiKeyService -->
-   	<!-- 
-   	<beans:bean name="annotation_apiKeyService" class="eu.europeana.corelib.db.service.mock.impl.MockApiKeyServiceImpl"/>
-	 -->
-	 		
-    <!--  AuthenticationService -->
-   	<beans:bean name="set_authenticationService" class="eu.europeana.set.web.service.authentication.mock.BridgeAuthenticationManagerAdapter"/>
-	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.AuthorizationServiceImpl">
-		<!-- 
-		<beans:property name="configuration" ref="configuration"/>
-    	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
-    	 -->       	 
-    </beans:bean>
-    
-    
-    <!--  java api bean -->
-	<beans:bean id="setService" class="eu.europeana.set.web.service.impl.UserSetServiceImpl">
-    	<!-- 
-    	<beans:property name="configuration" ref="configuration"/>
-    	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
-    	 --> 	
-    </beans:bean>
-    
-	<!--
-    <beans:bean id="adminService" class="eu.europeana.annotation.web.service.impl.AdminServiceImpl">
-    </beans:bean>
-	-->
-    
-    <!-- 
-    <beans:bean id="setSearchService" class="eu.europeana.set.web.service.impl.UserSetSearchServiceImpl">
-    </beans:bean>
-     -->
-         
-    <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans -->
-    <context:component-scan base-package="eu.europeana.set.web.service" />
-    <!-- Activates various annotations to be detected in bean classes e.g: @Autowired -->
-    <context:annotation-config />
- 
-    <!-- configurable error messages -->
-    <beans:bean id="set_i18n_messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-		<beans:property name="basename" value="classpath:messages"/>	
-		<beans:property name="defaultEncoding" value="utf-8"/>	 	
-    </beans:bean>
-    <beans:bean id="i18nService" class="eu.europeana.api.commons.config.i18n.I18nServiceImpl">
-    	<beans:property name="messageSource" ref="set_i18n_messageSource"/>
-    </beans:bean>
-    
+    <!-- USING OTHER MODULES -->
+	<beans:import resource="set-web-beans.xml"/>
+	
 </beans:beans>
