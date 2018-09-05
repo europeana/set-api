@@ -85,8 +85,6 @@ public class UserSetUtils {
 
 		UserSet res = userSet;
 
-		res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier(), WebUserSetFields.BASE_SET_URL));
-		
 		if (res != null && res.getItems() != null) {
 			int total = res.getItems().size();
 			res.setTotal(total);
