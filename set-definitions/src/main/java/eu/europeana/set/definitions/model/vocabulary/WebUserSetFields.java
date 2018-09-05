@@ -30,7 +30,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String PATH_PARAM_POSITION = "position";
 	public static final String USER_TOKEN = "userToken";
 	public static final String PROFILE = "profile";
-	public static final String PARAM_QF = "qf";
 	
 	//
 	// Mongo
