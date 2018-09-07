@@ -100,19 +100,5 @@ public class BaseWebUserSetProtocolTest {
 		return getApiClient().getUserSet(getApiKey(), set.getIdentifier(), TEST_USER_TOKEN);
 	}
 	
-	/**
-	 * This method creates test user set object
-	 * 
-	 * @return user set object parsed from HTTP response
-	 * @throws JsonParseException
-	 * @throws IOException 
-	 */
-//	protected UserSet createTestUserSet() throws JsonParseException, IOException {
-//
-//		ResponseEntity<String> response = storeTestUserSet();
-//		UserSet userSet = parseUserSetLd(response);
-//
-//		return userSet;		
-//	}
 	
 }

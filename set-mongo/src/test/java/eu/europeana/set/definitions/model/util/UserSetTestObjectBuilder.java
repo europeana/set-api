@@ -21,12 +21,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import eu.europeana.set.definitions.exception.UserSetAccessException;
+import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
@@ -34,6 +36,7 @@ import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 
 /**
@@ -60,19 +63,17 @@ public class UserSetTestObjectBuilder {
       return userSetUtils;
     }
     
-	public UserSet buildUserSet(UserSet userSet) {
+	public UserSet buildUserSet(UserSet userSet){
 		return buildUserSet(userSet, ITEMS_TEST_INPUT_FILE);
 	}
 
-	public UserSet buildUserSet(UserSet userSet, String path) {
+	public UserSet buildUserSet(UserSet userSet, String classpathFile){
 
 		userSet.setTitle(getUserSetUtils().createMap(Locale.ENGLISH.getLanguage(),
 				TEST_TITLE));
 		userSet.setDescription(getUserSetUtils().createMap(Locale.ENGLISH.getLanguage(),
 				TEST_DESCRIPTION));
 
-//		userSet.setTitle(TEST_TITLE);
-//		userSet.setDescription(TEST_DESCRIPTION);
 		userSet.setType(UserSetTypes.COLLECTION.name());
         
 		Date now = new Date();
@@ -83,32 +84,17 @@ public class UserSetTestObjectBuilder {
 		creator.setName(TEST_AGENT);
 		creator.setHomepage(TEST_HOMEPAGE);
 		userSet.setCreator(creator);
-		
 		try {
-			userSet.setItems(loadItems(path));
-		} catch (UserSetAccessException e) {
-			System.out.println(UserSetAccessException.COULD_NOT_READ_FROM_FILE_ERROR + ". "+ e.getMessage());
+			userSet.setItems(loadItems(classpathFile));
+		} catch (IOException e) {
+			throw new UserSetAttributeInstantiationException("items", null, "cannot read item list from classpath: " + classpathFile, e);
 		}
 			
 		return userSet;
 	}
 
-	private List<String> loadItems(String path) throws UserSetAccessException {
-		List<String> items = new ArrayList<String>();
-		
-	    File itemsTestInputFile;
-		try {
-			itemsTestInputFile = getClasspathFile(path);
-			String itemsStr =
-				    FileUtils.readFileToString(itemsTestInputFile, "UTF-8");
-            for (String item : itemsStr.split("\r\n")) {
-                items.add(item);
-            }
-		} catch (URISyntaxException | IOException e) {
-		      throw new UserSetAccessException(
-		    		  UserSetAccessException.COULD_NOT_READ_FROM_FILE_ERROR, e);
-		}
-		return items;
+	private List<String> loadItems(String path) throws IOException {
+		return IOUtils.readLines(getClass().getResourceAsStream(path), "UTF-8");
 	}
 	
 	  /**

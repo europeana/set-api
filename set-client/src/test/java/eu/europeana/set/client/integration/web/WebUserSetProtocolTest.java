@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,10 @@ import org.springframework.http.ResponseEntity;
 
 /**
  * This class aims at testing of the annotation methods.
+ * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
+@Ignore
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest { 
 
 		
