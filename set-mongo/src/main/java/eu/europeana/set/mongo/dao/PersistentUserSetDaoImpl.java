@@ -40,7 +40,7 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 
 		GeneratedUserSetIdImpl nextUserSetId = null;
 
-		synchronized (provider) {
+		synchronized (new String(provider)) {
 
 			Query<GeneratedUserSetIdImpl> q = getDatastore().createQuery(GeneratedUserSetIdImpl.class);
 			q.filter("_id", provider);
