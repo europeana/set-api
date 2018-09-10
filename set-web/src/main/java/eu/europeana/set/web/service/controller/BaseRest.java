@@ -19,7 +19,6 @@ import eu.europeana.api.commons.web.controller.ApiResponseBuilder;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
@@ -52,12 +51,6 @@ public class BaseRest extends ApiResponseBuilder {
 	@Override
 	protected I18nService getI18nService() {
 		return i18nService;
-	}
-
-	@Override
-	public ApiResponse buildErrorResponse(String errorMessage, String action, String apiKey) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	protected UserSetConfiguration getConfiguration() {
@@ -96,23 +89,6 @@ public class BaseRest extends ApiResponseBuilder {
 		return "/" + collection + "/" + object;
 	}
 	
-	protected ResponseEntity <String> buildResponseEntityForJsonString(String jsonStr) {
-		
-		HttpStatus httpStatus = HttpStatus.OK;
-		ResponseEntity<String> response = buildResponseEntityForJsonString(jsonStr, httpStatus);
-		
-		return response;		
-	}
-	
-	protected ResponseEntity<String> buildResponseEntityForJsonString(String jsonStr, HttpStatus httpStatus) {
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
-		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-		headers.add(HttpHeaders.ETAG, Integer.toString(hashCode()));
-		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
-
-		ResponseEntity<String> response = new ResponseEntity<String>(jsonStr, headers, httpStatus);
-		return response;
-	}
 
 	/**
 	 * This method performs decoding of base64 string
