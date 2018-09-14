@@ -9,14 +9,14 @@ import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
-
-//@JsonldType("http://europeana.eu/schemas/context/collection/UserSet")
+@JsonPropertyOrder({ "id", "type", "title", "description", "collectionPage", "next", "prev", "creator", "created", "modified", "items", "first", "last", "total" })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 		
@@ -28,6 +28,16 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	@JsonldProperty("type")
 	public void setType(String type) {
 		super.setType(type);
+	}
+	
+	@JsonIgnore
+	public int getNext() {
+		return super.getNext();
+	}
+	
+	@JsonIgnore
+	public int getPrev() {
+		return super.getPrev();
 	}
 	
 	@JsonldProperty("title")
