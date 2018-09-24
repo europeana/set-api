@@ -16,7 +16,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
-@JsonPropertyOrder({ "id", "type", "title", "description", "collectionPage", "next", "prev", "creator", "created", "modified", "items", "first", "last", "total" })
+@JsonPropertyOrder({ "id", "type", "title", "description", "collectionPage", "next", "prev", "creator", "created", "modified", "first", "last", "total", "items" })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 		
