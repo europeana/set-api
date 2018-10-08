@@ -9,9 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
@@ -20,6 +17,7 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.exception.UserSetHeaderValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -170,7 +168,7 @@ public class BaseRest extends ApiResponseBuilder {
 		LdProfiles profile = null;
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
 		if (preferHeader != null) {
-			profile = getProfile(request);
+			profile = getProfile(preferHeader);
 		} else {
 			profile = LdProfiles.getByName(paramProfile);
 		}
@@ -276,14 +274,27 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @return
 	 * @throws HttpException
 	 */
-	public LdProfiles getProfile(HttpServletRequest request) throws HttpException {
+	public LdProfiles getProfile(String preferHeader) throws HttpException {
 		LdProfiles ldProfile = null;
+		String[] headerParts = null;
+		String[] includeParts = null;
+		String includeStr = null;
+		String ldPreferHeaderStr = null;
 		
-		String preferHeader = request.getHeader(HttpHeaders.PREFER);
 		if (preferHeader != null) {
 			getLogger().trace("'Prefer' header value: " + preferHeader);	
 			if (StringUtils.isNotEmpty(preferHeader)) {
-				ldProfile = LdProfiles.getByHeaderValue(preferHeader);
+				try {
+					headerParts = preferHeader.split(";");
+					includeStr = headerParts[headerParts.length -1];
+					includeParts = includeStr.split("=");
+					ldPreferHeaderStr = includeParts[includeParts.length -1].replace("\"", "");					
+					ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr);
+				} catch (UserSetHeaderValidationException e) {
+					throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
+							I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
+							HttpStatus.BAD_REQUEST, null); 					
+				}
 				if (ldProfile == null) {
 					throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
 							I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
@@ -308,6 +319,7 @@ public class BaseRest extends ApiResponseBuilder {
 			if (itemsCount > WebUserSetFields.MAX_ITEMS_TO_PRESENT) {
 				 List<String> itemsPage = userSet.getItems().subList(0, WebUserSetFields.MAX_ITEMS_TO_PRESENT);
 				 userSet.setItems(itemsPage);
+				 profile = LdProfiles.MINIMAL;
 			}
 		}
 
@@ -365,6 +377,21 @@ public class BaseRest extends ApiResponseBuilder {
 		
 		// throws exception if the wskey is not found
 		getAuthenticationService().getByApiKey(wsKey);
+	}
+	
+	/**
+	 * This method is used for validation of the provided api key
+	 * @param wsKey
+	 * @throws EntityAuthenticationException
+	 */
+	protected void validateWsKey(String wsKey) throws ApplicationAuthenticationException {
+		// throws exception if the wskey is not found
+		if (wsKey == null) {
+			throw new ApplicationAuthenticationException(I18nConstants.MISSING_APIKEY, null);
+		}
+		if (StringUtils.isEmpty(wsKey)) {
+			throw new ApplicationAuthenticationException(I18nConstants.EMPTY_APIKEY, null);
+		}
 	}
 	
 }

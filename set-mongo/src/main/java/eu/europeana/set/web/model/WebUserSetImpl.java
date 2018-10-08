@@ -99,6 +99,11 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		return super.getLast();		
 	}
 	
+	@JsonIgnore
+	public int getCollectionPage() {
+		return super.getCollectionPage();		
+	}
+	
 	/**
 	 * This method presents IP as URL.
 	 * @param id The user set id

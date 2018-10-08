@@ -1,5 +1,7 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
+import eu.europeana.set.definitions.exception.UserSetHeaderValidationException;
+
 /**
  * This enumeration is intended for Linked Data profiles
  * 
@@ -8,7 +10,7 @@ package eu.europeana.set.definitions.model.vocabulary;
  */
 public enum LdProfiles implements ProfileKeyword{
 
-	MINIMAL("ldp:PreferMinimalContainer"), STANDARD("ldp:PreferContainedIRIs");
+	MINIMAL("http://www.w3.org/ns/oa#PreferMinimalContainer"), STANDARD("http://www.w3.org/ns/oa#PreferContainedIRIs");
 	
 	private String headerValue;
 
@@ -29,7 +31,8 @@ public enum LdProfiles implements ProfileKeyword{
 				return ldType;
 			}
 		}
-		return null;
+		throw new UserSetHeaderValidationException(
+				UserSetHeaderValidationException.ERROR_INVALID_HEADER + ": " + headerValue);		
 	}
 	
 	public static LdProfiles getByName(String name){
@@ -39,7 +42,8 @@ public enum LdProfiles implements ProfileKeyword{
 				return ldType;
 			}
 		}
-		return null;
+		throw new UserSetHeaderValidationException(
+				UserSetHeaderValidationException.ERROR_INVALID_HEADER + ": " + name);		
 	}
 	
 	@Override

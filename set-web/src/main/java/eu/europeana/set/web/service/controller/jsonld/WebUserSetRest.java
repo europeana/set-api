@@ -57,13 +57,16 @@ public class WebUserSetRest extends BaseRest {
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
 	public ResponseEntity<String> createUserSet(
-			@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@RequestBody String userSet,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,			
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request)
 					throws HttpException {
-
+		
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(wskey);
+		
 		userToken = getUserToken(userToken, request);
 		LdProfiles ldProfile = getProfile(profile, request);
 		
@@ -154,11 +157,14 @@ public class WebUserSetRest extends BaseRest {
 	@ApiOperation(notes = SwaggerConstants.SEARCH_HELP_NOTE, value = "Retrieve a user set", 
 				nickname = "retrieve", response = java.lang.Void.class)
 	public ResponseEntity<String> getUserSet(
-			@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,			
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request) throws HttpException {
+
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(wskey);
 
 		String action = "get:/set/{identifier}.jsonld";
 		LdProfiles ldProfile = getProfile(profile, request);
@@ -217,7 +223,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}"}, method = RequestMethod.PUT, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.UPDATE_SAMPLES_JSONLD, value = "Update an existing user set", nickname = "update", response = java.lang.Void.class)
-	public ResponseEntity<String> updateUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+	public ResponseEntity<String> updateUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestBody String userSet,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
@@ -225,6 +231,9 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(wskey);
+
 		userToken = getUserToken(userToken, request);
 		LdProfiles ldProfile = getProfile(profile, request);
 		
@@ -348,7 +357,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.PUT, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.INSERT_ITEM_NOTE, value = "Insert item to an existing user set", nickname = "insert item", response = java.lang.Void.class)
-	public ResponseEntity<String> insertItemIntoUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+	public ResponseEntity<String> insertItemIntoUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
@@ -358,6 +367,9 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(wskey);
+
 		userToken = getUserToken(userToken, request);
 		LdProfiles ldProfile = getProfile(profile, request);
 		
@@ -517,7 +529,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.GET, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
-	public ResponseEntity<String> isItemInUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+	public ResponseEntity<String> isItemInUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
@@ -526,6 +538,9 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(wskey);
+
 		userToken = getUserToken(userToken, request);
 		getProfile(profile, request);
 		
@@ -606,7 +621,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.DELETE, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.DELETE_ITEM_NOTE, value = "Delete a item from the set", nickname = "delete item", response = java.lang.Void.class)
-	public ResponseEntity<String> deleteItemFromUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY) String wskey,
+	public ResponseEntity<String> deleteItemFromUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
@@ -615,6 +630,9 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(wskey);
+
 		userToken = getUserToken(userToken, request);
 		LdProfiles ldProfile = getProfile(profile, request);
 		
@@ -720,6 +738,9 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
 			HttpServletRequest request
 			) throws HttpException {
+
+		// Check client access (a valid "wskey" must be provided)
+		validateWsKey(apiKey);
 
 		userToken = getUserToken(userToken, request);
 				

@@ -48,8 +48,12 @@
 		<mvc:mapping path="/api-docs" allowed-origins="*" exposed-headers="Access-Control-Allow-Origin"/>
 		<mvc:mapping path="/api-docs/**" allowed-origins="*" exposed-headers="Access-Control-Allow-Origin"/>
 		
-		<mvc:mapping path="/set/" allowed-origins="*" allowed-methods="POST,GET,OPTIONS,HEAD" 
+		<mvc:mapping path="/set/*/*/*" allowed-origins="*" allowed-methods="POST,PUT,GET,HEAD,DELETE" 
 			exposed-headers="Allow, Vary, Link" max-age="600"/>
+		<mvc:mapping path="/set/*" allowed-origins="*" allowed-methods="POST,GET,PUT,DELETE" 
+			exposed-headers="Allow, Link, ETag" max-age="600"/>
+		<mvc:mapping path="/set" allowed-origins="*" allowed-methods="POST,GET" 
+			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/>
 		<mvc:mapping path="/sets/**" allowed-origins="*" allowed-methods="GET, HEAD, OPTIONS" 
 			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/>
 	</mvc:cors>
