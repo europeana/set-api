@@ -373,25 +373,18 @@ public class BaseRest extends ApiResponseBuilder {
 		return res;
 	}
 	
-	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
-		
-		// throws exception if the wskey is not found
-		getAuthenticationService().getByApiKey(wsKey);
-	}
-	
 	/**
 	 * This method is used for validation of the provided api key
 	 * @param wsKey
 	 * @throws EntityAuthenticationException
 	 */
-	protected void validateWsKey(String wsKey) throws ApplicationAuthenticationException {
+	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
+		
 		// throws exception if the wskey is not found
-		if (wsKey == null) {
-			throw new ApplicationAuthenticationException(I18nConstants.MISSING_APIKEY, null);
-		}
-		if (StringUtils.isEmpty(wsKey)) {
+		if (wsKey == null || StringUtils.isEmpty(wsKey)) {
 			throw new ApplicationAuthenticationException(I18nConstants.EMPTY_APIKEY, null);
 		}
+		getAuthenticationService().getByApiKey(wsKey);
 	}
-	
+		
 }

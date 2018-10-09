@@ -63,14 +63,8 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request)
 					throws HttpException {
-		
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(wskey);
-		
-		userToken = getUserToken(userToken, request);
-		LdProfiles ldProfile = getProfile(profile, request);
-		
-		return storeUserSet(wskey, userSet, userToken, ldProfile, request);
+				
+		return storeUserSet(wskey, userSet, userToken, profile, request);
 	}
 	
 	/**
@@ -84,11 +78,15 @@ public class WebUserSetRest extends BaseRest {
 	 * @throws HttpException
 	 */
 	protected ResponseEntity<String> storeUserSet(String wsKey, String userSetJsonLdStr, String userToken,
-			LdProfiles profile, HttpServletRequest request) throws HttpException {
+			String profileStr, HttpServletRequest request) throws HttpException {
 		try {
 			// validate user - check user credentials (all registered users can create) 
 			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
+			// Check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
+
+			userToken = getUserToken(userToken, request);
+			LdProfiles profile = getProfile(profileStr, request);
 
 			// authorize user
 			getAuthorizationService().authorizeUser(userToken, wsKey, null, Operations.CREATE);			
@@ -163,13 +161,8 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request) throws HttpException {
 
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(wskey);
-
 		String action = "get:/set/{identifier}.jsonld";
-		LdProfiles ldProfile = getProfile(profile, request);
-
-		return getUserSet(wskey, ldProfile, identifier, request, action);
+		return getUserSet(wskey, profile, identifier, request, action);
 	}
 
 	/**
@@ -183,14 +176,17 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	private ResponseEntity<String> getUserSet(String wsKey, LdProfiles profile, String identifier, 
+	private ResponseEntity<String> getUserSet(String wsKey, String profileStr, String identifier, 
 			HttpServletRequest request, String action)
 					throws HttpException {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
 			// check client access (a valid "wskey" must be provided)
+			// Check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 			
+			LdProfiles profile = getProfile(profileStr, request);
+
 			// retrieve a Set based on its identifier - process query
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
@@ -231,14 +227,8 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(wskey);
-
-		userToken = getUserToken(userToken, request);
-		LdProfiles ldProfile = getProfile(profile, request);
-		
 		String action = "put:/set/{identifier}.jsonld";
-		return updateUserSet(request, wskey, identifier, userSet, userToken, ldProfile, action);
+		return updateUserSet(request, wskey, identifier, userSet, userToken, profile, action);
 	}
 		
 	/**
@@ -255,13 +245,17 @@ public class WebUserSetRest extends BaseRest {
 	 * @throws HttpException
 	 */
 	protected ResponseEntity<String> updateUserSet(HttpServletRequest request, String wsKey, String identifier,
-			String userSetJsonLdStr, String userToken, LdProfiles profile, String action) throws HttpException {
+			String userSetJsonLdStr, String userToken, String profileStr, String action) throws HttpException {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
 			// check client access (a valid "wskey" must be provided)
+			// Check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 
+			userToken = getUserToken(userToken, request);
+			LdProfiles profile = getProfile(profileStr, request);
+			
 			// authorize user
 			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.UPDATE);
 
@@ -367,15 +361,9 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(wskey);
-
-		userToken = getUserToken(userToken, request);
-		LdProfiles ldProfile = getProfile(profile, request);
-		
 		String action = "put:/set/{identifier}/{dataset_id}/{local_id}.jsonld?position=POSITION";
 		return insertItemIntoUserSet(request, wskey, identifier, datasetId, localId, position, userToken, 
-				ldProfile, action);
+				profile, action);
 	}
 	
 	/**
@@ -396,7 +384,7 @@ public class WebUserSetRest extends BaseRest {
 	 */
 	protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, String wsKey, 
 			String identifier, String datasetId, String localId, String position, String userToken, 
-			LdProfiles profile, String action) throws HttpException {
+			String profileStr, String action) throws HttpException {
 
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
@@ -404,6 +392,9 @@ public class WebUserSetRest extends BaseRest {
 			// check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 
+			userToken = getUserToken(userToken, request);
+			LdProfiles profile = getProfile(profileStr, request);
+			
 			// authorize user
 			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.UPDATE);
 
@@ -538,12 +529,6 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(wskey);
-
-		userToken = getUserToken(userToken, request);
-		getProfile(profile, request);
-		
 		String action = "get:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
 		return isItemInUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
 	}
@@ -630,14 +615,8 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(wskey);
-
-		userToken = getUserToken(userToken, request);
-		LdProfiles ldProfile = getProfile(profile, request);
-		
 		String action = "delete:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
-		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, ldProfile, action);
+		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, profile, action);
 	}
 	
 	/**
@@ -656,7 +635,7 @@ public class WebUserSetRest extends BaseRest {
 	 */
 	protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, String wsKey, 
 			String identifier, String datasetId, String localId, String userToken, 
-			LdProfiles profile, String action) throws HttpException {
+			String profileStr, String action) throws HttpException {
 		
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
@@ -664,6 +643,9 @@ public class WebUserSetRest extends BaseRest {
 			// check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 
+			userToken = getUserToken(userToken, request);
+			LdProfiles profile = getProfile(profileStr, request);
+			
 			// authorize user
 			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.DELETE);
 
@@ -739,9 +721,6 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 
-		// Check client access (a valid "wskey" must be provided)
-		validateWsKey(apiKey);
-
 		userToken = getUserToken(userToken, request);
 				
 		return deleteUserSet(request, identifier, apiKey, userToken);
@@ -761,6 +740,7 @@ public class WebUserSetRest extends BaseRest {
 		try {
 			// check user credentials, if invalid respond with HTTP 401,
 			// check client access (a valid "wskey" must be provided)
+			// Check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 
 			// authorize user or if unauthorized respond with HTTP 403
