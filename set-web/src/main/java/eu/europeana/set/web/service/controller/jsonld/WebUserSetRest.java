@@ -161,7 +161,7 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request) throws HttpException {
 
-		String action = "get:/set/{identifier}.jsonld";
+		String action = "get:/set/{identifier}{.jsonld}";
 		return getUserSet(wskey, profile, identifier, request, action);
 	}
 
@@ -227,7 +227,7 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		String action = "put:/set/{identifier}.jsonld";
+		String action = "put:/set/{identifier}";
 		return updateUserSet(request, wskey, identifier, userSet, userToken, profile, action);
 	}
 		
@@ -361,7 +361,7 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		String action = "put:/set/{identifier}/{dataset_id}/{local_id}.jsonld?position=POSITION";
+		String action = "put:/set/{identifier}/{dataset_id}/{local_id}?position=POSITION";
 		return insertItemIntoUserSet(request, wskey, identifier, datasetId, localId, position, userToken, 
 				profile, action);
 	}
@@ -517,7 +517,7 @@ public class WebUserSetRest extends BaseRest {
 		}
 	}
 
-	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.GET, 
+	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET, RequestMethod.HEAD}, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
 	public ResponseEntity<String> isItemInUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
@@ -529,7 +529,7 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		String action = "get:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
+		String action = "get:/set/{identifier}/{dataset_id}/{local_id}";
 		return isItemInUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
 	}
 	
@@ -615,7 +615,7 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request
 			) throws HttpException {
 		
-		String action = "delete:/set/{identifier}/{dataset_id}/{local_id}.jsonld";
+		String action = "delete:/set/{identifier}/{dataset_id}/{local_id}";
 		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, profile, action);
 	}
 	
