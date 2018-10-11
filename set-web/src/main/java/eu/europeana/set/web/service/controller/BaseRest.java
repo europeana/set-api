@@ -1,7 +1,9 @@
 package eu.europeana.set.web.service.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -161,9 +163,10 @@ public class BaseRest extends ApiResponseBuilder {
 	 *            The HTTP request with headers
 	 * @return profile value
 	 * @throws HttpException 
+	 * @throws UserSetHeaderValidationException 
 	 */
 	public LdProfiles getProfile(String paramProfile, HttpServletRequest request)
-			throws HttpException {
+			throws HttpException, UserSetHeaderValidationException {
 
 		LdProfiles profile = null;
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
@@ -266,43 +269,48 @@ public class BaseRest extends ApiResponseBuilder {
 	 * This method retrieves view profile if provided within the "If-Match" HTTP header
 	 * @param request
 	 * @return profile value
-	 * @throws HttpException 
-	 * @throws ApplicationAuthenticationException
-	 */
-	/**
-	 * @param request
-	 * @return
 	 * @throws HttpException
 	 */
-	public LdProfiles getProfile(String preferHeader) throws HttpException {
+	public LdProfiles getProfile(String preferHeader) throws HttpException, UserSetHeaderValidationException {
 		LdProfiles ldProfile = null;
-		String[] headerParts = null;
-		String[] includeParts = null;
-		String includeStr = null;
 		String ldPreferHeaderStr = null;
+		String INCLUDE = "include";
 		
 		if (preferHeader != null) {
 			getLogger().trace("'Prefer' header value: " + preferHeader);	
 			if (StringUtils.isNotEmpty(preferHeader)) {
-				try {
-					headerParts = preferHeader.split(";");
-					includeStr = headerParts[headerParts.length -1];
-					includeParts = includeStr.split("=");
-					ldPreferHeaderStr = includeParts[includeParts.length -1].replace("\"", "");					
-					ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr);
-				} catch (UserSetHeaderValidationException e) {
-					throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
-							I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
-							HttpStatus.BAD_REQUEST, null); 					
-				}
-				if (ldProfile == null) {
-					throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
-							I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
-							HttpStatus.BAD_REQUEST, null); 					
-				}
+				Map<String,String> preferHeaderMap = getParsePreferHeader(preferHeader);
+				ldPreferHeaderStr = preferHeaderMap.get(INCLUDE).replace("\"", ""); 					
+				ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr);
 			}
 		}
+		if (ldProfile == null) {
+			throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
+					I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
+					HttpStatus.BAD_REQUEST, null); 					
+		}
 		return ldProfile;
+	}
+	
+	/**
+	 * This method parses prefer header in keys and values
+	 * @param preferHeader
+	 * @return map of prefer header keys and values
+	 */
+	public Map<String,String> getParsePreferHeader(String preferHeader)  {
+		String[] headerParts = null;
+		String[] contentParts = null;
+		int KEY_POS = 0;
+		int VALUE_POS = 1;
+		
+		Map<String,String> resMap = new HashMap<String,String>();
+		
+		headerParts = preferHeader.split(";");
+		for (String headerPart : headerParts) {
+			contentParts = headerPart.split("=");
+			resMap.put(contentParts[KEY_POS], contentParts[VALUE_POS]);
+		}
+		return resMap;
 	}
 	
 	/**
