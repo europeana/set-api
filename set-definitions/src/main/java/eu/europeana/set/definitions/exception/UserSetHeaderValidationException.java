@@ -5,7 +5,7 @@ package eu.europeana.set.definitions.exception;
  * @author GrafR 
  *
  */
-public class UserSetHeaderValidationException extends RuntimeException{
+public class UserSetHeaderValidationException extends Exception {
 
 	/**
 	 * 

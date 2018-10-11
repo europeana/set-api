@@ -23,8 +23,9 @@ public enum LdProfiles implements ProfileKeyword{
 	 * For user friendliness the the comparison is case insensitive  
 	 * @param ldValue
 	 * @return
+	 * @throws UserSetHeaderValidationException 
 	 */
-	public static LdProfiles getByHeaderValue(String headerValue){
+	public static LdProfiles getByHeaderValue(String headerValue) throws UserSetHeaderValidationException{
 		
 		for(LdProfiles ldType : LdProfiles.values()) {
 			if(headerValue.equals(ldType.getHeaderValue())) {
@@ -35,7 +36,7 @@ public enum LdProfiles implements ProfileKeyword{
 				UserSetHeaderValidationException.ERROR_INVALID_HEADER + ": " + headerValue);		
 	}
 	
-	public static LdProfiles getByName(String name){
+	public static LdProfiles getByName(String name) throws UserSetHeaderValidationException{
 		
 		for(LdProfiles ldType : LdProfiles.values()){
 			if(name.equals(ldType.name().toLowerCase())) {
