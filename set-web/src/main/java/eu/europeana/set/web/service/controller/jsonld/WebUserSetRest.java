@@ -339,19 +339,19 @@ public class WebUserSetRest extends BaseRest {
 		// different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header)
 		// if the provided userset contains a list of items and the profile is set to minimal, 
 		// respond with HTTP 412)
-		if (checkHeaderProfile(profile)) {
+		if (LdProfiles.MINIMAL.equals(profile)) {
+			if (updateUserSet.getItems() != null && updateUserSet.getItems().size() > 0) { // new user set contains items
+				throw new ApplicationAuthenticationException(
+					I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
+					new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
+			}		
+		} else { // it is a minimal profile
 			if (updateUserSet.getItems() == null || updateUserSet.getItems().size() == 0) { // new user set contains no items
 				throw new ApplicationAuthenticationException(
 					I18nConstants.USERSET_CONTAINS_NO_ITEMS, I18nConstants.USERSET_CONTAINS_NO_ITEMS,
 					new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
 			}
 			storedUserSet.setItems(updateUserSet.getItems());
-		} else { // it is a minimal profile
-			if (updateUserSet.getItems() != null && updateUserSet.getItems().size() > 0) { // new user set contains items
-				throw new ApplicationAuthenticationException(
-					I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-					new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
-			}
 		}
 	}
 

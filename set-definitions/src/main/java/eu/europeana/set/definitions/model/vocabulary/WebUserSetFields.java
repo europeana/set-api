@@ -17,9 +17,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String EQUALS = "=";
 	public static final String JSON_LD_REST = ".jsonld";
 	
-	// Http Header
-	public static final String PREFER_MINIMAL_CONTAINER_HEADER = "ldp:PreferMinimalContainer";
-	
 	//
 	// Query Params
 	//

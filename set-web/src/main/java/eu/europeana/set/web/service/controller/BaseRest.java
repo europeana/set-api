@@ -276,14 +276,15 @@ public class BaseRest extends ApiResponseBuilder {
 		String ldPreferHeaderStr = null;
 		String INCLUDE = "include";
 		
-		if (preferHeader != null) {
-			getLogger().trace("'Prefer' header value: " + preferHeader);	
-			if (StringUtils.isNotEmpty(preferHeader)) {
-				Map<String,String> preferHeaderMap = getParsePreferHeader(preferHeader);
-				ldPreferHeaderStr = preferHeaderMap.get(INCLUDE).replace("\"", ""); 					
-				ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr);
-			}
+		if (StringUtils.isNotEmpty(preferHeader)) {
+			//log header for debuging 
+			getLogger().debug("'Prefer' header value: " + preferHeader);	
+			
+			Map<String,String> preferHeaderMap = parsePreferHeader(preferHeader);
+			ldPreferHeaderStr = preferHeaderMap.get(INCLUDE).replace("\"", ""); 					
+			ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr);
 		}
+		
 		if (ldProfile == null) {
 			throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
 					I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
@@ -297,7 +298,7 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @param preferHeader
 	 * @return map of prefer header keys and values
 	 */
-	public Map<String,String> getParsePreferHeader(String preferHeader)  {
+	public Map<String,String> parsePreferHeader(String preferHeader)  {
 		String[] headerParts = null;
 		String[] contentParts = null;
 		int KEY_POS = 0;
@@ -328,12 +329,14 @@ public class BaseRest extends ApiResponseBuilder {
 				 List<String> itemsPage = userSet.getItems().subList(0, WebUserSetFields.MAX_ITEMS_TO_PRESENT);
 				 userSet.setItems(itemsPage);
 				 profile = LdProfiles.MINIMAL;
+				 getLogger().debug("Profile switched to minimal, due to set size!");
 			}
 		}
 
 		// set unnecessary fields to null - the empty fields will not be presented
 		switch(profile) {
 		case STANDARD:
+			//not for stadard profile
 			break;
 		case MINIMAL:
 		default:
@@ -366,20 +369,6 @@ public class BaseRest extends ApiResponseBuilder {
 		return positionInt;
 	}
 	
-	/**
-	 * This method checks profile and responds with true only when a profile is indicated and is different 
-	 * from "ldp:PreferMinimalContainer" referred in the "Prefer" HTTP header
-	 * @param profile
-	 * @return
-	 * @throws ApplicationAuthenticationException
-	 */
-	public boolean checkHeaderProfile(LdProfiles profile) throws ApplicationAuthenticationException {
-		boolean res = false;
-		if (!profile.getHeaderValue().equals(WebUserSetFields.PREFER_MINIMAL_CONTAINER_HEADER)) {
-			res = true;
-		}
-		return res;
-	}
 	
 	/**
 	 * This method is used for validation of the provided api key
@@ -389,7 +378,7 @@ public class BaseRest extends ApiResponseBuilder {
 	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
 		
 		// throws exception if the wskey is not found
-		if (wsKey == null || StringUtils.isEmpty(wsKey)) {
+		if (StringUtils.isEmpty(wsKey)) {
 			throw new ApplicationAuthenticationException(I18nConstants.EMPTY_APIKEY, null);
 		}
 		getAuthenticationService().getByApiKey(wsKey);
