@@ -171,16 +171,19 @@ public class BaseRest extends ApiResponseBuilder {
 		LdProfiles profile = null;
 		String preferHeader = request.getHeader(HttpHeaders.PREFER);
 		if (preferHeader != null) {
+			//identify profile by prefer header
 			profile = getProfile(preferHeader);
+			getLogger().debug("Profile identified by prefer header: " + profile.name());
 		} else {
+			//get profile from param
 			profile = LdProfiles.getByName(paramProfile);
 		}
 
-		if (profile == null) {
-			throw new ApplicationAuthenticationException(
-					I18nConstants.USERSET_INVALID_PROFILE_VALUE, I18nConstants.USERSET_INVALID_PROFILE_VALUE,
-					new String[] {paramProfile}, HttpStatus.PRECONDITION_FAILED, null);
-		}
+//		if (profile == null) {
+//			throw new ApplicationAuthenticationException(
+//					I18nConstants.USERSET_INVALID_PROFILE_VALUE, I18nConstants.USERSET_INVALID_PROFILE_VALUE,
+//					new String[] {paramProfile}, HttpStatus.PRECONDITION_FAILED, null);
+//		}
 		return profile;
 	}
 	
@@ -271,7 +274,7 @@ public class BaseRest extends ApiResponseBuilder {
 	 * @return profile value
 	 * @throws HttpException
 	 */
-	public LdProfiles getProfile(String preferHeader) throws HttpException, UserSetHeaderValidationException {
+	public LdProfiles getProfile(String preferHeader) throws HttpException {
 		LdProfiles ldProfile = null;
 		String ldPreferHeaderStr = null;
 		String INCLUDE = "include";
@@ -282,14 +285,15 @@ public class BaseRest extends ApiResponseBuilder {
 			
 			Map<String,String> preferHeaderMap = parsePreferHeader(preferHeader);
 			ldPreferHeaderStr = preferHeaderMap.get(INCLUDE).replace("\"", ""); 					
-			ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr);
+			try {
+				ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
+			} catch (UserSetHeaderValidationException e) {
+				throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
+						I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
+						HttpStatus.BAD_REQUEST, null);
+			}
 		}
 		
-		if (ldProfile == null) {
-			throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, 
-					I18nConstants.INVALID_HEADER_FORMAT, new String[] {preferHeader}, 
-					HttpStatus.BAD_REQUEST, null); 					
-		}
 		return ldProfile;
 	}
 	
