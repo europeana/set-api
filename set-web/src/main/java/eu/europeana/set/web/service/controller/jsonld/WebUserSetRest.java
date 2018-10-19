@@ -200,7 +200,8 @@ public class WebUserSetRest extends BaseRest {
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
+			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
+			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + userSet.getModified().hashCode());
 
