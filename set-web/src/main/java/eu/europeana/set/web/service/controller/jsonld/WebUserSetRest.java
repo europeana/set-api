@@ -117,7 +117,6 @@ public class WebUserSetRest extends BaseRest {
 			String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet); 
 
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
-			headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
