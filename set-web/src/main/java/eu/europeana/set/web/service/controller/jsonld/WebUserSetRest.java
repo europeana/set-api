@@ -54,7 +54,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "Web User Set API", description = " ")
 public class WebUserSetRest extends BaseRest {
 	
-	@RequestMapping(value = "/set/", method = RequestMethod.POST, 
+	@RequestMapping(value = "/set", method = RequestMethod.POST, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
 	public ResponseEntity<String> createUserSet(
