@@ -120,7 +120,7 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
-			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.PRIVATE);
+			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_PRIVATE);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
 
@@ -201,7 +201,7 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
 			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
-			headers.add(HttpHeaders.PREFER, getPreferStr(profileStr, request));
+			headers.add(HttpHeaders.PREFER, profile.getPreferHeaderValue());
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + userSet.getModified().hashCode());
 
@@ -312,7 +312,7 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
 			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
-			headers.add(HttpHeaders.PREFER, getPreferStr(profileStr, request));
+			headers.add(HttpHeaders.PREFER, profile.getPreferHeaderValue());
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + modifiedStr);
 
