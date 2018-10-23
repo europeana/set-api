@@ -53,7 +53,7 @@
 		<mvc:mapping path="/set/*" allowed-origins="*" allowed-methods="GET,PUT,DELETE" 
 			exposed-headers="Allow, Link, ETag, Vary" max-age="600"/>
 		<mvc:mapping path="/set" allowed-origins="*" allowed-methods="POST,GET" 
-			exposed-headers="Allow, Link, ETag, Vary" max-age="600"/>
+			exposed-headers="Allow, Link, ETag, Vary, Cache-Control" max-age="600"/>
 		<!-- 	
 		<mvc:mapping path="/sets/**" allowed-origins="*" allowed-methods="GET, HEAD, OPTIONS" 
 			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/>

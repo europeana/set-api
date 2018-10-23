@@ -10,7 +10,9 @@ public interface UserSetHttpHeaders extends HttpHeaders {
 	public static final String ALLOW_GPD = "GET,PUT,DELETE";
 	public static final String ALLOW_PPGHD = "POST,PUT,GET,HEAD,DELETE";
 	public static final String ALLOW_PG = "POST,GET";
-	
+
+	public static final String PRIVATE = "private";
+
 	public static final String VALUE_LDP_CONTAINER = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"\n"+
 			"<http://www.w3.org/TR/annotation-protocol/constraints>;\n" +
 			"rel=\"http://www.w3.org/ns/ldp#constrainedBy\"";
