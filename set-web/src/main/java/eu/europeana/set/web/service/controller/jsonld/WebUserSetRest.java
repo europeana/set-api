@@ -312,6 +312,7 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
 			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
+			headers.add(HttpHeaders.PREFER, getPreferStr(profileStr, request));
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + modifiedStr);
 
