@@ -8,14 +8,17 @@ import eu.europeana.set.definitions.exception.UserSetHeaderValidationException;
  * @author GrafR
  *
  */
-public enum LdProfiles implements ProfileKeyword{
+public enum LdProfiles implements ProfileKeyword {
 
-	MINIMAL("http://www.w3.org/ns/oa#PreferMinimalContainer"), STANDARD("http://www.w3.org/ns/oa#PreferContainedIRIs");
+	MINIMAL(VALUE_LD_MINIMAL, VALUE_PREFER_MINIMAL), STANDARD(VALUE_LD_CONTAINEDIRIS, VALUE_PREFER_CONTAINEDIRIS);
 	
 	private String headerValue;
+	private String preferHeaderValue;
+	
 
-	LdProfiles(String headerValue){
+	LdProfiles(String headerValue, String preferHeaderValue){
 		this.headerValue = headerValue; 
+		this.preferHeaderValue = preferHeaderValue;
 	}
 	
 	/**
@@ -57,5 +60,8 @@ public enum LdProfiles implements ProfileKeyword{
 		return getHeaderValue();
 	}
 
+	public String getPreferHeaderValue() {
+		return preferHeaderValue;
+	}
 	
 }

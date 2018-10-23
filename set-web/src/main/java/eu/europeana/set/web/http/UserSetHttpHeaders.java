@@ -7,9 +7,12 @@ public interface UserSetHttpHeaders extends HttpHeaders {
 	public static final String ALLOW_GPuDOH = "GET,PUT,DELETE,OPTIONS,HEAD";
 	
 	public static final String ALLOW_GPPD = "GET,POST,PUT,DELETE";
+	public static final String ALLOW_GPD = "GET,PUT,DELETE";
 	public static final String ALLOW_PPGHD = "POST,PUT,GET,HEAD,DELETE";
 	public static final String ALLOW_PG = "POST,GET";
-	
+
+	public static final String VALUE_PRIVATE = "private";
+
 	public static final String VALUE_LDP_CONTAINER = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"\n"+
 			"<http://www.w3.org/TR/annotation-protocol/constraints>;\n" +
 			"rel=\"http://www.w3.org/ns/ldp#constrainedBy\"";
@@ -24,8 +27,6 @@ public interface UserSetHttpHeaders extends HttpHeaders {
 	
 	public static final String VALUE_BASIC_RESOURCE = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"";	
 	
-	public static final String VALUE_PREFER_CONTAINEDIRIS = "return=representation;include=\"http://www.w3.org/ns/oa#PreferContainedIRIs\"";
-	public static final String VALUE_PREFER_CONTAINEDDESCRIPTIONS = "return=representation;include=\"http://www.w3.org/ns/oa#PreferContainedDescriptions\"";
 
 	/**
 	 * Authorization
