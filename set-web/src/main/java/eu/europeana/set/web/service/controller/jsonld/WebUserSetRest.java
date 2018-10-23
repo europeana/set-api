@@ -185,7 +185,6 @@ public class WebUserSetRest extends BaseRest {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
 			// check client access (a valid "wskey" must be provided)
-			// Check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
 			
 			LdProfiles profile = getProfile(profileStr, request);
@@ -202,6 +201,7 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
 			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
+			headers.add(HttpHeaders.PREFER, getPreferStr(profileStr, request));
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + userSet.getModified().hashCode());
 

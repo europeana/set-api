@@ -188,6 +188,31 @@ public class BaseRest extends ApiResponseBuilder {
 	}
 	
 	/**
+	 * This method extracts Prefer profile string from a HTTP header if it exists or from the
+	 * passed request parameter.
+	 * 
+	 * @param paramProfile
+	 *            The HTTP request parameter
+	 * @param request
+	 *            The HTTP request with headers
+	 * @return prefer profile value
+	 * @throws HttpException 
+	 * @throws UserSetHeaderValidationException 
+	 */
+	public String getPreferStr(String paramProfile, HttpServletRequest request)
+			throws HttpException, UserSetHeaderValidationException {
+
+		String preferStr = null;
+		String preferHeader = request.getHeader(HttpHeaders.PREFER);
+		if (preferHeader != null) {
+			preferStr = preferHeader;
+		} else {
+			preferStr = paramProfile;
+		}
+		return preferStr;
+	}
+	
+	/**
 	 * This method serializes user set and applies profile to the object.
 	 * @param profile
 	 * @param storedUserSet
