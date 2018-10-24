@@ -27,6 +27,10 @@ public interface UserSetHttpHeaders extends HttpHeaders {
 	
 	public static final String VALUE_BASIC_RESOURCE = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"";	
 	
+	/**
+	 * Response headers
+	 */
+	public static final String PREFERENCE_APPLIED = "Preference-Applied";
 
 	/**
 	 * Authorization
