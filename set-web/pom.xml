@@ -1,0 +1,197 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>set-web</artifactId>
+	<name>Europeana (User) Sets - WEB API </name>
+	<packaging>war</packaging>
+	<description>The implementation of the User Sets REST service</description>
+
+	<parent>
+		<artifactId>set-api</artifactId>
+		<groupId>eu.europeana.set</groupId>
+		<relativePath>../pom.xml</relativePath>
+		<version>${version.setApi}</version>
+	</parent>
+
+	<repositories>
+		<!-- jetty repos -->
+		<repository>
+			<id>repo1.maven.org</id>
+			<url>http://repo1.maven.org/maven2/</url>
+		</repository>
+
+		<repository>
+			<id>jcenter-release</id>
+			<name>jcenter</name>
+			<url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<!-- europeana api commons -->
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-web</artifactId>
+			<version>${version.commonsApi}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-oauth</artifactId>
+			<version>${version.commonsApi}</version>
+		</dependency>
+	
+		<!-- europeana api key client -->
+		<!--
+		<dependency>
+		    <groupId>eu.europeana.apikey-utils</groupId>
+		    <artifactId>apikey-client</artifactId>
+		    <version>${version.apiKeyClient}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		-->
+
+		<!-- set projects -->
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-mongo</artifactId>
+			<version>${version.setApi}</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-common</artifactId>
+			<version>${version.setApi}</version>
+		</dependency>
+		
+		<!-- aspectj /profiling -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${version.aspectj}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0-m01</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${version.jackson}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jaxb-annotations</artifactId>
+			<version>${version.jackson}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>${version.servletJstl}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<scope>provided</scope>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${version.spring}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${version.spring}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${version.spring}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+			<version>${version.spring}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot</artifactId>
+			<version>${version.springBoot}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- test dependencies -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${version.spring}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-mongo</artifactId>
+			<version>${version.setApi}</version>
+			<classifier>tests</classifier>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<version>${version.commonsApi}</version>
+			<artifactId>commons-nosql</artifactId>
+			<classifier>tests</classifier>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.flapdoodle.embed</groupId>
+			<artifactId>de.flapdoodle.embed.mongo</artifactId>
+			<version>2.0.3</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- swagger -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.4.0</version>
+		</dependency>	
+		
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${version.junit}</version>
+			<scope>test</scope>
+		</dependency>
+				
+	</dependencies>
+	
+
+</project>
