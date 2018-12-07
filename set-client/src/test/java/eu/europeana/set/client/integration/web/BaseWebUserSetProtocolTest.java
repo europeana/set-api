@@ -35,7 +35,7 @@ public class BaseWebUserSetProtocolTest {
 	public String TEST_USER_TOKEN = "tester1";
 	public String ADMIN_USER_TOKEN = "admin";
 	public String ANONYMOUS_USER_TOKEN = "anonymous";
-	public String TEST_SET_ID = "118";
+	public String TEST_SET_ID = "134";
 
 	private WebUserSetApi apiClient;
 
