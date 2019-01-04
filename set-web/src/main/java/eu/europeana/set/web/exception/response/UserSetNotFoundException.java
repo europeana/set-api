@@ -17,7 +17,11 @@ public class UserSetNotFoundException extends HttpException{
 	 */
 			
 	public UserSetNotFoundException(String message, String i18nKey, String[] i18nParams){
-		this(message, i18nKey, i18nParams, null);
+		this(message, i18nKey, i18nParams, HttpStatus.NOT_FOUND, null);
+	}
+	
+	public UserSetNotFoundException(String message, String i18nKey, String[] i18nParams, HttpStatus status){
+		this(message, i18nKey, i18nParams, status, null);
 	}
 	
 	public UserSetNotFoundException(String message, String i18nKey, String[] i18nParams, Throwable th){

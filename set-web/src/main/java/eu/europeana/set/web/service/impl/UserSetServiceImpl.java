@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -73,7 +75,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			if (checkDisabled) {
 				if (res.isDisabled()) {
 					throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE, 
-							I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId});
+							I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId}, HttpStatus.GONE);
 				}
 			}
 		}
