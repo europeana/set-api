@@ -1,6 +1,6 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
-import eu.europeana.set.definitions.exception.UserSetHeaderValidationException;
+import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 
 /**
  * This enumeration is intended for Linked Data profiles
@@ -22,32 +22,36 @@ public enum LdProfiles implements ProfileKeyword {
 	}
 	
 	/**
-	 * Identifying agent type by the Linked Data value.
+	 * Identifying requested profile by Linked Data value.
 	 * For user friendliness the the comparison is case insensitive  
 	 * @param ldValue
 	 * @return
-	 * @throws UserSetHeaderValidationException 
+	 * @throws UserSetProfileValidationException 
 	 */
-	public static LdProfiles getByHeaderValue(String headerValue) throws UserSetHeaderValidationException{
+	public static LdProfiles getByHeaderValue(String headerValue) throws UserSetProfileValidationException{
 		
 		for(LdProfiles ldType : LdProfiles.values()) {
 			if(headerValue.equals(ldType.getHeaderValue())) {
 				return ldType;
 			}
 		}
-		throw new UserSetHeaderValidationException(
-				UserSetHeaderValidationException.ERROR_INVALID_HEADER + ": " + headerValue);		
+		throw new UserSetProfileValidationException(headerValue);		
 	}
 	
-	public static LdProfiles getByName(String name) throws UserSetHeaderValidationException{
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 * @throws UserSetProfileValidationException
+	 */
+	public static LdProfiles getByName(String name) throws UserSetProfileValidationException{
 		
 		for(LdProfiles ldType : LdProfiles.values()){
 			if(name.equals(ldType.name().toLowerCase())) {
 				return ldType;
 			}
 		}
-		throw new UserSetHeaderValidationException(
-				UserSetHeaderValidationException.ERROR_INVALID_HEADER + ": " + name);		
+		throw new UserSetProfileValidationException(name);		
 	}
 	
 	@Override

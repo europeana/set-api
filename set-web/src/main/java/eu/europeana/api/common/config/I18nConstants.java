@@ -9,6 +9,7 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	static final String BASE64_DECODING_FAIL = "error.userset_base64_encoding_fail";
 	static final String UNSUPPORTED_TOKEN_TYPE = "error.userset_unsupported_token_type";
 	static final String INVALID_HEADER_FORMAT = "error.userset_invalid_header_format";
+	static final String INVALID_HEADER_VALUE = "error.userset_invalid_header_value";
 	static final String USERSET_VALIDATION_MANDATORY_PROPERTY = "error.userset_validation_mandatory_property";
 	static final String USERSET_VALIDATION_PROPERTY_VALUE = "error.userset_validation_property_value";
 	static final String APIKEY_FILE_NOT_FOUND = "error.userset_apikey_file_not_found";	
@@ -18,7 +19,6 @@ public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18n
 	static final String CLIENT_NOT_AUTHORIZED = "error.userset_client_not_authorized";	
 	static final String INVALID_IF_MATCH_TIMESTAMP = "error.userset_if_match_timestamp";
 	static final String INVALID_UPDATE_HEADER_PROFILE = "error.userset_invalid_update_profile";
-	static final String USERSET_INVALID_PROFILE_VALUE = "error.userset_invalid_profile_value";
 	static final String USERSET_CONTAINS_NO_ITEMS = "error.userset_contains_no_items";
 	static final String USERSET_ALREADY_DISABLED = "error.userset_already_disabled";
 	static final String USERSET_MINIMAL_UPDATE_PROFILE = "error.userset_minimal_update_profile";

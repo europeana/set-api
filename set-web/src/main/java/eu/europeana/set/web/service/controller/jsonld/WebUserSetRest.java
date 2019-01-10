@@ -23,10 +23,8 @@ import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
-import eu.europeana.set.definitions.exception.UserSetHeaderValidationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -131,17 +129,12 @@ public class WebUserSetRest extends BaseRest {
 
 		} catch (JsonParseException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (ParamValidationException e) {
-			throw new ParamValidationException(e.getMessage(), e.getMessage(), 
-					null);
 		} catch (UserSetValidationException e) { 
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetAttributeInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new HttpException(null, I18nConstants.USERSET_INVALID_BODY, null, HttpStatus.BAD_REQUEST, e); 
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 			// avoid wrapping HttpExceptions
 			throw e;
@@ -215,8 +208,6 @@ public class WebUserSetRest extends BaseRest {
 		} catch (HttpException e) {
 			// avoid wrapping http exception
 			throw e;
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			throw new InternalServerException(e);
 		}
@@ -325,8 +316,6 @@ public class WebUserSetRest extends BaseRest {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 				//TODO: change this when OAUTH is implemented and the user information is available in service
 				throw e;
@@ -443,8 +432,6 @@ public class WebUserSetRest extends BaseRest {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);		
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
@@ -715,8 +702,6 @@ public class WebUserSetRest extends BaseRest {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
