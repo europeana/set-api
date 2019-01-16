@@ -71,13 +71,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		if (res == null) {
 			throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, 
 					I18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
-		} else {
-			if (checkDisabled) {
-				if (res.isDisabled()) {
+		} else if (checkDisabled && res.isDisabled()) {
 					throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE, 
 							I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId}, HttpStatus.GONE);
-				}
-			}
 		}
 		return res; 
 	}
