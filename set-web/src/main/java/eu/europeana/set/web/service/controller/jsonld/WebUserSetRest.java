@@ -121,7 +121,8 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_PRIVATE);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
-
+			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, HttpStatus.CREATED);
 
@@ -423,7 +424,8 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-
+			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, httpStatus);
 
@@ -449,7 +451,7 @@ public class WebUserSetRest extends BaseRest {
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
-			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
+//			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 		
@@ -617,7 +619,8 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-
+			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, httpStatus);
 
