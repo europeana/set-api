@@ -1,5 +1,8 @@
 package eu.europeana.set.web.service;
 
+import java.util.List;
+
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -104,4 +107,51 @@ public interface UserSetService {
 	 * @param userSet
 	 */
 	public void removeItemDuplicates(UserSet userSet);
+	
+	/**
+	 * This method validates position input, if false responds with -1
+	 * 
+	 * @param position
+	 *            The given position
+	 * @param items
+	 *            The item list
+	 * @return position The validated position in list to insert
+	 * @throws ApplicationAuthenticationException
+	 */
+	public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException;
+
+	/**
+	 * This method enriches user set by provided item
+	 * @param datasetId The id of dataset
+	 * @param localId The id in collection
+	 * @param position The position in item list
+	 * @param existingUserSet
+	 * @return user set enriched by new item
+	 * @throws ApplicationAuthenticationException
+	 */
+	public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
+			throws ApplicationAuthenticationException;
+
+	/**
+	 * This method updates existing item list
+	 * @param existingUserSet
+	 * @return updated user set
+	 */
+	public UserSet updateItemList(UserSet existingUserSet);
+
+	/**
+	 * This method replaces item in user set
+	 * @param existingUserSet
+	 * @param positionInt
+	 * @param newItem
+	 */
+	public void replaceItem(UserSet existingUserSet, int positionInt, String newItem);
+
+	/**
+	 * Add item to the list in given position if provided.
+	 * @param existingUserSet
+	 * @param positionInt
+	 * @param newItem
+	 */
+	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
 }

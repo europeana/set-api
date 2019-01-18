@@ -363,31 +363,6 @@ public class BaseRest extends ApiResponseBuilder {
 	}
 
 	/**
-	 * This method validates position input, if false responds with -1
-	 * 
-	 * @param position
-	 *            The given position
-	 * @param items
-	 *            The item list
-	 * @return position The validated position in list to insert
-	 * @throws ApplicationAuthenticationException
-	 */
-	public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException {
-		int positionInt = -1;
-		if (StringUtils.isNotEmpty(position)) {
-			try {
-				positionInt = Integer.parseInt(position);
-				if (positionInt > items.size()) {
-					positionInt = -1;
-				}
-			} catch (Exception e) {
-				getLogger().trace("Position validation warning: " + e.getMessage());
-			}
-		}
-		return positionInt;
-	}
-
-	/**
 	 * This method is used for validation of the provided api key
 	 * 
 	 * @param wsKey

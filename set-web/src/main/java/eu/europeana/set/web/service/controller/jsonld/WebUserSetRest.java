@@ -52,7 +52,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "Web User Set API", description = " ")
 public class WebUserSetRest extends BaseRest {
 	
-	@RequestMapping(value = "/set", method = RequestMethod.POST, 
+	@RequestMapping(value = "/set/", method = RequestMethod.POST, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
 	public ResponseEntity<String> createUserSet(
@@ -414,7 +414,8 @@ public class WebUserSetRest extends BaseRest {
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
-				UserSet extUserSet = insertItem(datasetId, localId, position, existingUserSet);
+				UserSet extUserSet = getUserSetService().insertItem(
+						datasetId, localId, position, existingUserSet);
 				serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
@@ -437,82 +438,6 @@ public class WebUserSetRest extends BaseRest {
 			throw e;
 		} catch (Exception e) {
 			throw new InternalServerException(e);
-		}
-	}
-
-	/**
-	 * This method enriches user set by provided item
-	 * @param datasetId The id of dataset
-	 * @param localId The id in collection
-	 * @param position The position in item list
-	 * @param existingUserSet
-	 * @return user set enriched by new item
-	 * @throws ApplicationAuthenticationException
-	 */
-	private UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
-			throws ApplicationAuthenticationException {
-		// validate position 
-		int positionInt = validatePosition(position, existingUserSet.getItems());
-
-		// build new item URL
-		String newItem = getUserSetService().buildIdentifierUrl(
-				datasetId + "/" + localId, WebUserSetFields.BASE_ITEM_URL);
-
-		// check if item already exists in the Set, if so remove it
-		// insert item to Set in the indicated position (or last position if no position was indicated).
-		UserSet extUserSet = null;
-		if (existingUserSet.getItems().contains(newItem)) {
-			int currentPos = existingUserSet.getItems().indexOf(newItem);
-			if (currentPos == positionInt) {
-				extUserSet = getUserSetService().fillPagination(existingUserSet);											
-			} else {
-				replaceItem(existingUserSet, positionInt, newItem);				
-				extUserSet = updateItemList(existingUserSet);
-			}
-		} else {
-			addNewItemToList(existingUserSet, positionInt, newItem);
-			extUserSet = updateItemList(existingUserSet);			
-		}
-		return extUserSet;
-	}
-
-	private UserSet updateItemList(UserSet existingUserSet) {
-		UserSet extUserSet;
-		getUserSetService().updateUserSetPagination(existingUserSet);
-
-		// generate and add a created and modified timestamp to the Set
-		existingUserSet.setModified(new Date());
-		
-		// Respond with HTTP 200
-		// update an existing user set. merge user sets - insert new fields in existing object
-		UserSet updatedUserSet = getUserSetService().updateUserSet(
-				(PersistentUserSet) existingUserSet, null);
-		extUserSet = getUserSetService().fillPagination(updatedUserSet);
-		return extUserSet;
-	}
-
-	/**
-	 * This method replaces item in user set
-	 * @param existingUserSet
-	 * @param positionInt
-	 * @param newItem
-	 */
-	private void replaceItem(UserSet existingUserSet, int positionInt, String newItem) {
-		existingUserSet.getItems().remove(newItem);
-		addNewItemToList(existingUserSet, positionInt, newItem);
-	}
-
-	/**
-	 * Add item to the list in given position if provided.
-	 * @param existingUserSet
-	 * @param positionInt
-	 * @param newItem
-	 */
-	private void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem) {
-		if (positionInt == -1) {
-			existingUserSet.getItems().add(newItem);
-		} else {
-			existingUserSet.getItems().add(positionInt, newItem);					
 		}
 	}
 
