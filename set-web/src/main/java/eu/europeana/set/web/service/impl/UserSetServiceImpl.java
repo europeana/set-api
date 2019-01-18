@@ -261,7 +261,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 				if (positionInt > items.size()) {
 					positionInt = -1;
 				}
-			} catch (Exception e) {
+			} catch (RuntimeException e) {
+				//invalid position, assume last (-1)
 				getLogger().trace("Position validation warning: " + e.getMessage());
 			}
 		}
