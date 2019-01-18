@@ -118,7 +118,7 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
-			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_PRIVATE);
+			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
 			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
