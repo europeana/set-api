@@ -23,10 +23,8 @@ import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
-import eu.europeana.set.definitions.exception.UserSetHeaderValidationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -54,7 +52,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "Web User Set API", description = " ")
 public class WebUserSetRest extends BaseRest {
 	
-	@RequestMapping(value = "/set", method = RequestMethod.POST, 
+	@RequestMapping(value = "/set/", method = RequestMethod.POST, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
 	public ResponseEntity<String> createUserSet(
@@ -120,10 +118,11 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 			headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
-			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_PRIVATE);
+			headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
 			// generate “ETag”;
 			headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
-
+			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, HttpStatus.CREATED);
 
@@ -131,17 +130,12 @@ public class WebUserSetRest extends BaseRest {
 
 		} catch (JsonParseException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (ParamValidationException e) {
-			throw new ParamValidationException(e.getMessage(), e.getMessage(), 
-					null);
 		} catch (UserSetValidationException e) { 
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetAttributeInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new HttpException(null, I18nConstants.USERSET_INVALID_BODY, null, HttpStatus.BAD_REQUEST, e); 
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 			// avoid wrapping HttpExceptions
 			throw e;
@@ -215,8 +209,6 @@ public class WebUserSetRest extends BaseRest {
 		} catch (HttpException e) {
 			// avoid wrapping http exception
 			throw e;
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			throw new InternalServerException(e);
 		}
@@ -325,8 +317,6 @@ public class WebUserSetRest extends BaseRest {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 				//TODO: change this when OAUTH is implemented and the user information is available in service
 				throw e;
@@ -425,7 +415,8 @@ public class WebUserSetRest extends BaseRest {
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
 			} else {			
-				UserSet extUserSet = insertItem(datasetId, localId, position, existingUserSet);
+				UserSet extUserSet = getUserSetService().insertItem(
+						datasetId, localId, position, existingUserSet);
 				serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet); 
 		        httpStatus = HttpStatus.OK;
 			}
@@ -433,7 +424,8 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-
+			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, httpStatus);
 
@@ -443,89 +435,11 @@ public class WebUserSetRest extends BaseRest {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);		
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;
 		} catch (Exception e) {
 			throw new InternalServerException(e);
-		}
-	}
-
-	/**
-	 * This method enriches user set by provided item
-	 * @param datasetId The id of dataset
-	 * @param localId The id in collection
-	 * @param position The position in item list
-	 * @param existingUserSet
-	 * @return user set enriched by new item
-	 * @throws ApplicationAuthenticationException
-	 */
-	private UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
-			throws ApplicationAuthenticationException {
-		// validate position 
-		int positionInt = validatePosition(position, existingUserSet.getItems());
-
-		// build new item URL
-		String newItem = getUserSetService().buildIdentifierUrl(
-				datasetId + "/" + localId, WebUserSetFields.BASE_ITEM_URL);
-
-		// check if item already exists in the Set, if so remove it
-		// insert item to Set in the indicated position (or last position if no position was indicated).
-		UserSet extUserSet = null;
-		if (existingUserSet.getItems().contains(newItem)) {
-			int currentPos = existingUserSet.getItems().indexOf(newItem);
-			if (currentPos == positionInt) {
-				extUserSet = getUserSetService().fillPagination(existingUserSet);											
-			} else {
-				replaceItem(existingUserSet, positionInt, newItem);				
-				extUserSet = updateItemList(existingUserSet);
-			}
-		} else {
-			addNewItemToList(existingUserSet, positionInt, newItem);
-			extUserSet = updateItemList(existingUserSet);			
-		}
-		return extUserSet;
-	}
-
-	private UserSet updateItemList(UserSet existingUserSet) {
-		UserSet extUserSet;
-		getUserSetService().updateUserSetPagination(existingUserSet);
-
-		// generate and add a created and modified timestamp to the Set
-		existingUserSet.setModified(new Date());
-		
-		// Respond with HTTP 200
-		// update an existing user set. merge user sets - insert new fields in existing object
-		UserSet updatedUserSet = getUserSetService().updateUserSet(
-				(PersistentUserSet) existingUserSet, null);
-		extUserSet = getUserSetService().fillPagination(updatedUserSet);
-		return extUserSet;
-	}
-
-	/**
-	 * This method replaces item in user set
-	 * @param existingUserSet
-	 * @param positionInt
-	 * @param newItem
-	 */
-	private void replaceItem(UserSet existingUserSet, int positionInt, String newItem) {
-		existingUserSet.getItems().remove(newItem);
-		addNewItemToList(existingUserSet, positionInt, newItem);
-	}
-
-	/**
-	 * Add item to the list in given position if provided.
-	 * @param existingUserSet
-	 * @param positionInt
-	 * @param newItem
-	 */
-	private void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem) {
-		if (positionInt == -1) {
-			existingUserSet.getItems().add(newItem);
-		} else {
-			existingUserSet.getItems().add(positionInt, newItem);					
 		}
 	}
 
@@ -537,7 +451,7 @@ public class WebUserSetRest extends BaseRest {
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
-			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
+//			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request
 			) throws HttpException {
 		
@@ -705,7 +619,8 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-
+			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+			
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, httpStatus);
 
@@ -715,8 +630,6 @@ public class WebUserSetRest extends BaseRest {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
-		} catch (UserSetHeaderValidationException e) {
-			throw new HttpException(e.getMessage(),e.getMessage(),HttpStatus.BAD_REQUEST);
 		} catch (HttpException e) {
 			//TODO: change this when OAUTH is implemented and the user information is available in service
 			throw e;

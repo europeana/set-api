@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
@@ -46,6 +47,16 @@ import eu.europeana.set.web.service.UserSetService;
 @ContextConfiguration({ "/set-web-test.xml"})
 public class WebUserSetServiceTest { 
 
+	private String TEST_DATASET_ID = "000000";
+	private String TEST_LOCAL_ID = "2";
+	private String TEST_LOCAL_ID_5 = "5";
+	private String TEST_LOCAL_ID_7 = "7";
+	private String TEST_POSITION = "0";
+	private String TEST_POSITION_BIG = "50";
+	private String INSERT_IN_EMPTY_ITEM_LIST_RES = "http://data.europeana.eu/item/000000/2";
+	private String INSERT_IN_POSITION_0_RES = "http://data.europeana.eu/item/000000/5";
+	private String INSERT_IN_POSITION_LAST_RES = "http://data.europeana.eu/item/000000/7";
+	
 	String baseUserSetUrl = null;
 	
 	public void setBaseUserSetUrl(String baseUserSetUrl) {
@@ -126,7 +137,7 @@ public class WebUserSetServiceTest {
 		webUserSetService.getUserSetById(userSetId);		
 	}
 		
-	@Test
+//	@Test
 	public void testGetUserSet() 
 			throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
 		
@@ -148,6 +159,40 @@ public class WebUserSetServiceTest {
 		UserSet db1200UserSet = webUserSetService.getUserSetById(userSetId1200);	
 		assertTrue(dbUserSet.getTotal() == 100);
 		assertTrue(db1200UserSet.getTotal() == 1200);
+	}
+		
+	@Test
+	public void testInsertItemUserSet() 
+			throws MalformedURLException, IOException, UserSetServiceException, 
+				UserSetNotFoundException, ApplicationAuthenticationException {
+		
+		UserSet userSet = new PersistentUserSetImpl();
+		UserSet testUserSet = getObjectBuilder().buildUserSet(
+				userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
+		testUserSet.setItems(null);
+		       		
+		// store user set in database
+		UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+		String userSetId = webUserSet.getIdentifier();
+		System.out.println("testUserSet id: " + userSetId);
+
+		// insert empty items
+		UserSet dbUserSet = webUserSetService.insertItem(
+				TEST_DATASET_ID, TEST_LOCAL_ID, TEST_POSITION, webUserSet);	
+		assertTrue(dbUserSet.getItems().size() == 1);
+		assertTrue(dbUserSet.getItems().get(0).equals(INSERT_IN_EMPTY_ITEM_LIST_RES));
+		
+		// insert item at position 0 if item list is not empty
+		dbUserSet = webUserSetService.insertItem(
+				TEST_DATASET_ID, TEST_LOCAL_ID_5, TEST_POSITION, webUserSet);	
+		assertTrue(dbUserSet.getItems().size() == 2);
+		assertTrue(dbUserSet.getItems().get(0).equals(INSERT_IN_POSITION_0_RES));
+
+		// insert item at position greater than items size
+		dbUserSet = webUserSetService.insertItem(
+				TEST_DATASET_ID, TEST_LOCAL_ID_7, TEST_POSITION_BIG, webUserSet);	
+		assertTrue(dbUserSet.getItems().size() == 3);
+		assertTrue(dbUserSet.getItems().get(2).equals(INSERT_IN_POSITION_LAST_RES));
 	}
 		
 }
