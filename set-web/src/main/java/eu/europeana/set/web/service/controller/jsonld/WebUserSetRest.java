@@ -424,6 +424,7 @@ public class WebUserSetRest extends BaseRest {
 			// build response entity with headers
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
 			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
 			
 			ResponseEntity<String> response = new ResponseEntity<String>(
