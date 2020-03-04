@@ -17,19 +17,4 @@
 	</organization>
 	<url>http://www.europeanalabs.eu</url>
 
-	<dependencies>
-		<!-- Other -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>${version.commonsLang3}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${version.commonsIo}</version>
-		</dependency>
-	</dependencies>
-
 </project>

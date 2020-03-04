@@ -1,6 +1,6 @@
 package eu.europeana.api.common.config;
 
-public interface I18nConstants extends eu.europeana.api.commons.config.i18n.I18nConstants{
+public interface I18nConstants extends eu.europeana.api.commons.definitions.config.i18n.I18nConstants{
 	
 	static final String USERSET_INVALID_BODY = "error.userset_invalid_body";
 	static final String USERSET_CANT_PARSE_BODY = "error.userset_cant_parse_body";
