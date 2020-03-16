@@ -8,12 +8,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.set.web.service.authorization.AuthorizationService;
 import eu.europeana.api.commons.web.controller.ApiResponseBuilder;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -25,11 +25,11 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
-import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
-import eu.europeana.set.web.http.UserSetHttpHeaders;
+import eu.europeana.set.web.exception.request.HeaderValidationException;
+//import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
-import eu.europeana.set.web.service.authorization.AuthorizationService;
+
 
 public class BaseRest extends ApiResponseBuilder {
 
@@ -90,68 +90,6 @@ public class BaseRest extends ApiResponseBuilder {
 	}
 
 	/**
-	 * This method performs decoding of base64 string
-	 * 
-	 * @param base64Str
-	 * @return decoded string
-	 * @throws ApplicationAuthenticationException
-	 */
-	public String decodeBase64(String base64Str) throws ApplicationAuthenticationException {
-		String res = null;
-		try {
-			byte[] decodedBase64Str = Base64.decodeBase64(base64Str);
-			res = new String(decodedBase64Str);
-		} catch (Exception e) {
-			throw new ApplicationAuthenticationException(I18nConstants.BASE64_DECODING_FAIL,
-					I18nConstants.BASE64_DECODING_FAIL, null);
-		}
-		return res;
-	}
-
-	/**
-	 * This method takes user token from a HTTP header if it exists or from the
-	 * passed request parameter.
-	 * 
-	 * @param paramUserToken
-	 *            The HTTP request parameter
-	 * @param request
-	 *            The HTTP request with headers
-	 * @return user token
-	 * @throws ApplicationAuthenticationException
-	 */
-	public String getUserToken(String paramUserToken, HttpServletRequest request)
-			throws ApplicationAuthenticationException {
-		int USER_TOKEN_TYPE_POS = 0;
-		int BASE64_ENCODED_STRING_POS = 1;
-		String userToken = null;
-		String userTokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (userTokenHeader != null) {
-			getLogger().trace("'Authorization' header value: " + userTokenHeader);
-			String[] headerElems = userTokenHeader.split(" ");
-			if (headerElems.length < 2)
-				throw new ApplicationAuthenticationException(I18nConstants.INVALID_HEADER_FORMAT,
-						I18nConstants.INVALID_HEADER_FORMAT, new String[] { userTokenHeader });
-
-			String userTokenType = headerElems[USER_TOKEN_TYPE_POS];
-			if (!UserSetHttpHeaders.BEARER.equals(userTokenType)) {
-				throw new ApplicationAuthenticationException(I18nConstants.UNSUPPORTED_TOKEN_TYPE,
-						I18nConstants.UNSUPPORTED_TOKEN_TYPE, new String[] { userTokenType });
-			}
-
-			String encodedUserToken = headerElems[BASE64_ENCODED_STRING_POS];
-
-			userToken = decodeBase64(encodedUserToken);
-			getLogger().debug("Decoded user token: " + userToken);
-
-		} else {
-			// @deprecated to be removed in the next versions
-			// fallback to URL param
-			userToken = paramUserToken;
-		}
-		return userToken;
-	}
-
-	/**
 	 * This method takes profile from a HTTP header if it exists or from the
 	 * passed request parameter.
 	 * 
@@ -202,72 +140,28 @@ public class BaseRest extends ApiResponseBuilder {
 		return serializedUserSetJsonLdStr;
 	}
 
-	/**
-	 * This method checks timestamp if provided within the "If-Match" HTTP
-	 * header, if false responds with HTTP 412
-	 * 
-	 * @param request
-	 * @param modified
-	 * @throws ApplicationAuthenticationException
-	 */
-	public void checkHeaderTimestamp(HttpServletRequest request, UserSet userSet)
-			throws ApplicationAuthenticationException {
-		int modified = userSet.getModified().hashCode();
+    /**
+     * This method compares If-Match header with the current etag value.
+     * 
+     * @param etag    The current etag value
+     * @param request The request containing If-Match header
+     * @throws HttpException
+     */
+    public void checkIfMatchHeader(int etag, HttpServletRequest request) throws HttpException {
+
 		String ifMatchHeader = request.getHeader(HttpHeaders.IF_MATCH);
 		if (ifMatchHeader != null) {
-			getLogger().trace("'If-Match' header value: " + ifMatchHeader);
-			String modifiedStr = String.valueOf(modified);
-			if (!ifMatchHeader.equals(modifiedStr)) {
-				throw new ApplicationAuthenticationException(I18nConstants.INVALID_IF_MATCH_TIMESTAMP,
-						I18nConstants.INVALID_IF_MATCH_TIMESTAMP, new String[] { modifiedStr },
-						HttpStatus.PRECONDITION_FAILED, null);
-			}
+		    try {
+		    	int ifMatchValue = Integer.parseInt(ifMatchHeader);
+		    	if (etag != ifMatchValue)
+		    		throw new HeaderValidationException(I18nConstants.INVALID_PARAM_VALUE, HttpHeaders.IF_MATCH,
+		    				ifMatchHeader);
+		    } catch (NumberFormatException e) {
+		    	throw new HeaderValidationException(I18nConstants.INVALID_PARAM_VALUE, HttpHeaders.IF_MATCH,
+		    			ifMatchHeader);
+		    }
 		}
-	}
-
-	/**
-	 * This method validates whether user has admin rights to execute methods in
-	 * management API.
-	 * 
-	 * @param apiKey
-	 * @param userToken
-	 * @return true if user has necessary permissions
-	 */
-	protected boolean isAdmin(String apiKey, String userToken) {
-		return (apiKey.equals("apidemo") && userToken.equals("admin"));
-	}
-
-	/**
-	 * This method checks that only the admins and the owners of the user sets
-	 * are allowed to delete the user set. in the case of regular users (not
-	 * admins), the autorization method must check if the users that calls the
-	 * deletion (i.e. identified by provided user token) is the same user as the
-	 * creator of the user set
-	 * 
-	 * @param userSet
-	 * @param wsKey
-	 * @param queryUser
-	 * @throws ApplicationAuthenticationException
-	 */
-	public void hasModifyRights(UserSet userSet, String wsKey, String queryUser)
-			throws OperationAuthorizationException {
-
-		if (!(isAdmin(wsKey, queryUser) || userSet.getCreator().getName().equals(queryUser))) {
-			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED,
-					I18nConstants.USER_NOT_AUTHORIZED, new String[] { "User ID: " + queryUser }, HttpStatus.FORBIDDEN);
-		}
-	}
-
-	/**
-	 * This method checks if user is an owner of the user set
-	 * 
-	 * @param userSet
-	 * @param queryUser
-	 * @return true if user is owner of a user set
-	 */
-	public boolean isOwner(UserSet userSet, String queryUser) {
-		return userSet.getCreator().getName().equals(queryUser);
-	}
+    }
 
 	/**
 	 * This method retrieves view profile if provided within the "If-Match" HTTP

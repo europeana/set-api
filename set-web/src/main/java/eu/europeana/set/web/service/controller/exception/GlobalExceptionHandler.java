@@ -5,6 +5,7 @@ import javax.annotation.Resource;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.api.commons.service.authorization.AuthorizationService;
 import eu.europeana.api.commons.web.controller.exception.AbstractExceptionHandlingController;
 import eu.europeana.api.commons.web.model.ApiResponse;
 import eu.europeana.set.web.model.UserSetOperationResponse;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler extends AbstractExceptionHandlingController 
 	protected ApiResponse getErrorReport(String apiKey, String action, Throwable th, boolean includeErrorStack) {
 		UserSetOperationResponse response = (UserSetOperationResponse) super.getErrorReport(apiKey, action, th, includeErrorStack);
 		return response;
+	}
+
+	@Override
+	protected AuthorizationService getAuthorizationService() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
