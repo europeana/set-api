@@ -20,6 +20,9 @@ public interface UserSetConfiguration {
 	
 	public static final String VALIDATION_STRING = "validation.string";
 
+	public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
+	public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
+	
 	
 	public String getComponentName();
 	
@@ -50,4 +53,6 @@ public interface UserSetConfiguration {
 	 */
 	public boolean isProductionEnvironment();
 	
+	public String getJwtTokenSignatureKey();
+	public String getAuthorizationApiName();	
 }

@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,11 +11,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 import eu.europeana.api.common.config.I18nConstants;
-import eu.europeana.api.commons.config.i18n.I18nService;
-import eu.europeana.api.commons.web.controller.ApiResponseBuilder;
+import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -25,13 +29,13 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
-import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
+import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
 import eu.europeana.set.web.service.authorization.AuthorizationService;
 
-public class BaseRest extends ApiResponseBuilder {
+public class BaseRest extends BaseRestController { 
 
 	@Resource
 	UserSetConfiguration configuration;
@@ -45,14 +49,12 @@ public class BaseRest extends ApiResponseBuilder {
 	@Resource
 	AuthorizationService authorizationService;
 
-	@Resource
-	I18nService i18nService;
+	Logger logger = LogManager.getLogger(getClass());
 
-	@Override
-	protected I18nService getI18nService() {
-		return i18nService;
+	public Logger getLogger() {
+		return logger;
 	}
-
+	
 	protected UserSetConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -225,39 +227,55 @@ public class BaseRest extends ApiResponseBuilder {
 		}
 	}
 
-	/**
-	 * This method validates whether user has admin rights to execute methods in
-	 * management API.
-	 * 
-	 * @param apiKey
-	 * @param userToken
-	 * @return true if user has necessary permissions
-	 */
-	protected boolean isAdmin(String apiKey, String userToken) {
-		return (apiKey.equals("apidemo") && userToken.equals("admin"));
-	}
+    protected String buildCreatorUri(String userId) {
+    	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
+    }
+    
+    /**
+     * This method validates input values wsKey, identifier and userToken.
+     * 
+     * @param identifier
+     * @param userId
+     * @return
+     * @return userSet object
+     * @throws HttpException
+     */
+    protected UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException {
 
-	/**
-	 * This method checks that only the admins and the owners of the user sets
-	 * are allowed to delete the user set. in the case of regular users (not
-	 * admins), the autorization method must check if the users that calls the
-	 * deletion (i.e. identified by provided user token) is the same user as the
-	 * creator of the user set
-	 * 
-	 * @param userSet
-	 * @param wsKey
-	 * @param queryUser
-	 * @throws ApplicationAuthenticationException
-	 */
-	public void hasModifyRights(UserSet userSet, String wsKey, String queryUser)
-			throws OperationAuthorizationException {
-
-		if (!(isAdmin(wsKey, queryUser) || userSet.getCreator().getName().equals(queryUser))) {
-			throw new OperationAuthorizationException(I18nConstants.USER_NOT_AUTHORIZED,
-					I18nConstants.USER_NOT_AUTHORIZED, new String[] { "User ID: " + queryUser }, HttpStatus.FORBIDDEN);
+		String userId = buildCreatorUri((String)authentication.getPrincipal());
+		
+		//verify ownership
+		boolean isOwner = userSet.getCreator().getHttpUrl().equals(userId);
+		if(isOwner || hasAdminRights(authentication)) {
+		    //approve owner or admin
+		    return userSet;
+		}else {
+		    //not authorized
+		    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
+			    I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] { "Only the creators of the annotation or admins are authorized to perform this operation."});
 		}
-	}
+    }
 
+    protected boolean hasAdminRights(Authentication authentication) {
+    	
+		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator.hasNext();) {
+		    //role based authorization
+		    String role = iterator.next().getAuthority();
+		    if(Roles.ADMIN.getName().equals(role)){
+			return true;
+		    }
+		}
+		return false;
+    }
+
+	@Override
+	public Authentication verifyWriteAccess(String operation, HttpServletRequest request)
+	        throws ApplicationAuthenticationException {
+	    
+	    Authentication auth = super.verifyWriteAccess(operation, request);
+	    return auth;
+	}
+	
 	/**
 	 * This method checks if user is an owner of the user set
 	 * 
