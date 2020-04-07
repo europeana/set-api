@@ -62,4 +62,17 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 		return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());
 	}
 	
+	@Override
+    public String getJwtTokenSignatureKey() {
+		return getSetProperties().getProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY);
+    }
+	
+	public String getAuthorizationApiName() {
+    	return getSetProperties().getProperty(AUTHORIZATION_API_NAME);
+    }
+
+	@Override
+	public String getApiVersion() {
+	    return getSetProperties().getProperty(API_VERSION);
+	}	
 }

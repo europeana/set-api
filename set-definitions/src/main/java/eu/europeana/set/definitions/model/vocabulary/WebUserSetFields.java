@@ -16,6 +16,8 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String AND = "&";
 	public static final String EQUALS = "=";
 	public static final String JSON_LD_REST = ".jsonld";
+	public static final String FORMAT_JSONLD = "jsonld";
+	
 	
 	//
 	// Query Params
@@ -80,4 +82,5 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String READ_METHOD = "read";
 	public static final String WRITE_METHOD = "write";
 	public static final String DELETE_METHOD = "delete";	
+	public static final String DEFAULT_CREATOR_URL = "http://data.europeana.eu/user/";
 }
