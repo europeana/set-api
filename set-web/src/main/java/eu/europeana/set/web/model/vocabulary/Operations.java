@@ -9,9 +9,6 @@ public interface Operations {
 	public static final String UPDATE = "update";
 	public static final String DELETE = "delete";
 	
-	//feedback
-	public static final String REPORT = "report";
-	
 	//admin
 	public static final String ADMIN_ALL = "admin_all";
 	public static final String ADMIN_UNLOCK = "admin_unlock";
