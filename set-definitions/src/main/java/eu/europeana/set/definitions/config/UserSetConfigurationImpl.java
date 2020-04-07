@@ -71,4 +71,9 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
     public String getAuthorizationApiName() {
     	return getSetProperties().getProperty(AUTHORIZATION_API_NAME);
     }
+    
+	@Override
+	public String getApiVersion() {
+	    return getSetProperties().getProperty(API_VERSION);
+	}	
 }

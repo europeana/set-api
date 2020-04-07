@@ -16,6 +16,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String AND = "&";
 	public static final String EQUALS = "=";
 	public static final String JSON_LD_REST = ".jsonld";
+	public static final String FORMAT_JSONLD = "jsonld";
 	
 	//
 	// Query Params

@@ -43,3 +43,5 @@ validation.string=
 # e.g. 1800000 is 30 minutes
 #set.apikey.caching.time=1800000
 
+# User set API version
+set.api.version=

@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,11 +28,11 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
-import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
 import eu.europeana.set.web.service.authorization.AuthorizationService;
+
 
 public class BaseRest extends BaseRestController { 
 
@@ -92,68 +91,6 @@ public class BaseRest extends BaseRestController {
 	}
 
 	/**
-	 * This method performs decoding of base64 string
-	 * 
-	 * @param base64Str
-	 * @return decoded string
-	 * @throws ApplicationAuthenticationException
-	 */
-	public String decodeBase64(String base64Str) throws ApplicationAuthenticationException {
-		String res = null;
-		try {
-			byte[] decodedBase64Str = Base64.decodeBase64(base64Str);
-			res = new String(decodedBase64Str);
-		} catch (Exception e) {
-			throw new ApplicationAuthenticationException(I18nConstants.BASE64_DECODING_FAIL,
-					I18nConstants.BASE64_DECODING_FAIL, null);
-		}
-		return res;
-	}
-
-	/**
-	 * This method takes user token from a HTTP header if it exists or from the
-	 * passed request parameter.
-	 * 
-	 * @param paramUserToken
-	 *            The HTTP request parameter
-	 * @param request
-	 *            The HTTP request with headers
-	 * @return user token
-	 * @throws ApplicationAuthenticationException
-	 */
-	public String getUserToken(String paramUserToken, HttpServletRequest request)
-			throws ApplicationAuthenticationException {
-		int USER_TOKEN_TYPE_POS = 0;
-		int BASE64_ENCODED_STRING_POS = 1;
-		String userToken = null;
-		String userTokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (userTokenHeader != null) {
-			getLogger().trace("'Authorization' header value: " + userTokenHeader);
-			String[] headerElems = userTokenHeader.split(" ");
-			if (headerElems.length < 2)
-				throw new ApplicationAuthenticationException(I18nConstants.INVALID_HEADER_FORMAT,
-						I18nConstants.INVALID_HEADER_FORMAT, new String[] { userTokenHeader });
-
-			String userTokenType = headerElems[USER_TOKEN_TYPE_POS];
-			if (!UserSetHttpHeaders.BEARER.equals(userTokenType)) {
-				throw new ApplicationAuthenticationException(I18nConstants.UNSUPPORTED_TOKEN_TYPE,
-						I18nConstants.UNSUPPORTED_TOKEN_TYPE, new String[] { userTokenType });
-			}
-
-			String encodedUserToken = headerElems[BASE64_ENCODED_STRING_POS];
-
-			userToken = decodeBase64(encodedUserToken);
-			getLogger().debug("Decoded user token: " + userToken);
-
-		} else {
-			// @deprecated to be removed in the next versions
-			// fallback to URL param
-			userToken = paramUserToken;
-		}
-		return userToken;
-	}
-
-	/**
 	 * This method takes profile from a HTTP header if it exists or from the
 	 * passed request parameter.
 	 * 
@@ -202,29 +139,6 @@ public class BaseRest extends BaseRestController {
 		UserSetLdSerializer serializer = new UserSetLdSerializer();
 		String serializedUserSetJsonLdStr = serializer.serialize(resUserSet);
 		return serializedUserSetJsonLdStr;
-	}
-
-	/**
-	 * This method checks timestamp if provided within the "If-Match" HTTP
-	 * header, if false responds with HTTP 412
-	 * 
-	 * @param request
-	 * @param modified
-	 * @throws ApplicationAuthenticationException
-	 */
-	public void checkHeaderTimestamp(HttpServletRequest request, UserSet userSet)
-			throws ApplicationAuthenticationException {
-		int modified = userSet.getModified().hashCode();
-		String ifMatchHeader = request.getHeader(HttpHeaders.IF_MATCH);
-		if (ifMatchHeader != null) {
-			getLogger().trace("'If-Match' header value: " + ifMatchHeader);
-			String modifiedStr = String.valueOf(modified);
-			if (!ifMatchHeader.equals(modifiedStr)) {
-				throw new ApplicationAuthenticationException(I18nConstants.INVALID_IF_MATCH_TIMESTAMP,
-						I18nConstants.INVALID_IF_MATCH_TIMESTAMP, new String[] { modifiedStr },
-						HttpStatus.PRECONDITION_FAILED, null);
-			}
-		}
 	}
 
     protected String buildCreatorUri(String userId) {
@@ -395,4 +309,7 @@ public class BaseRest extends BaseRestController {
 		getAuthenticationService().getByApiKey(wsKey);
 	}
 
+    public String getApiVersion() {
+    	return getAuthorizationService().getConfiguration().getApiVersion();
+    }
 }
