@@ -79,8 +79,10 @@ public class WebUserSetRest extends BaseRest {
 	 */
 	protected ResponseEntity<String> storeUserSet(String userSetJsonLdStr, 
 			Authentication authentication,
+
 			String profileStr, HttpServletRequest request) throws HttpException {
 		try {
+
 			LdProfiles profile = getProfile(profileStr, request);
 
 			// parse user set 

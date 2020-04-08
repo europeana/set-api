@@ -240,6 +240,7 @@ public class BaseRest extends BaseRestController {
 		
 		//verify ownership
 		boolean isOwner = userSet.getCreator().getName().equals(userId);
+
 		if(isOwner || hasAdminRights(authentication)) {
 		    //approve owner or admin
 		    return userSet;
