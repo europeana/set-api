@@ -81,6 +81,7 @@ public class WebUserSetRest extends BaseRest {
 			Authentication authentication,
 			String profileStr, HttpServletRequest request) throws HttpException {
 		try {
+
 			LdProfiles profile = getProfile(profileStr, request);
 
 			// parse user set 
@@ -104,6 +105,8 @@ public class WebUserSetRest extends BaseRest {
 			// generate an identifier (in sequence) for the Set
 			// generate and add a created and modified timestamp to the Set
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
+
+			storedUserSet = updateItemsWithIsDefinedBy(storedUserSet);
 
 			String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet); 
 
@@ -181,6 +184,9 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
+			
+			userSet = updateItemsWithIsDefinedBy(userSet);
+			
 			String userSetJsonLdStr = serializeUserSet(profile, userSet); 
 
 			// build response

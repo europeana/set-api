@@ -56,6 +56,11 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 		return super.getTotal();
 	}		
 	
+    @JsonldProperty(WebUserSetFields.IS_DEFINED_BY)
+    public String getIsDefinedBy() {
+    	return super.getIsDefinedBy();
+    }
+    
 	@JsonldProperty("@context")	
 	@JsonIgnore
 	public String getContext() {

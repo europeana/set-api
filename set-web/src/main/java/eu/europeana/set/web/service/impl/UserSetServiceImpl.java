@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -28,6 +29,9 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.service.SearchApiResponse;
+import eu.europeana.set.search.service.SetApiService;
+import eu.europeana.set.search.service.impl.SetApiServiceImpl;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -38,8 +42,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     UserSetUtils userSetUtils = new UserSetUtils();
 
+    private SetApiService setApiService = new SetApiServiceImpl();
+
     public UserSetUtils getUserSetUtils() {
       return userSetUtils;
+    }
+
+    public SetApiService getSetApiService() {
+    	return setApiService;
     }
 
 	/*
@@ -170,6 +180,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 				userSet.setCreated(updatedWebUserSet.getCreated());
 			}
 	
+		    if (updatedWebUserSet.getIsDefinedBy() != null) {
+				userSet.setIsDefinedBy(updatedWebUserSet.getIsDefinedBy());
+			}
+
 			userSet.setDisabled(updatedWebUserSet.isDisabled());
 		}
 	}
@@ -233,6 +247,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
 					new String[]{WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext()});
 		}	
+		
+		// validate isDefinedBy and items - we should not have both of them
+		if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
+		    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+			    new String[] { WebUserSetModelFields.IS_DEFINED_BY });
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -353,5 +373,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		} 
 	}
 
-	
+    @Override
+    public UserSet updateUserSetsWithIsDefinedByUrl(UserSet storedUserSet, String apiKey, String action)
+	    throws HttpException, IOException, JSONException {
+    	
+    	String uri;
+    	uri = storedUserSet.getIsDefinedBy();
+    	SearchApiResponse apiResult = getSetApiService().queryEuropeanaApi(uri, apiKey, action);
+    	List<String> items = new ArrayList<String>();
+    	for(String item : apiResult.getItems()) {
+    		items.add(WebUserSetFields.BASE_URL_DATA + item);
+    	}
+    	storedUserSet.setItems(items);
+    	return storedUserSet;
+    }
 }

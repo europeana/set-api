@@ -13,6 +13,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,6 +31,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
+import eu.europeana.set.web.model.vocabulary.Operations;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authentication.AuthenticationService;
@@ -240,6 +242,7 @@ public class BaseRest extends BaseRestController {
 		
 		//verify ownership
 		boolean isOwner = userSet.getCreator().getName().equals(userId);
+
 		if(isOwner || hasAdminRights(authentication)) {
 		    //approve owner or admin
 		    return userSet;
@@ -352,7 +355,8 @@ public class BaseRest extends BaseRestController {
 			break;
 		case MINIMAL:
 		default:
-			userSet.setItems(null);
+			if(userSet.getIsDefinedBy() == null)
+				userSet.setItems(null);
 			break;
 		}
 
@@ -376,5 +380,23 @@ public class BaseRest extends BaseRestController {
 
 	public String getApiVersion() {
     	return getAuthorizationService().getConfiguration().getApiVersion();
+    }
+	
+    /**
+     * This method performs query to Europeana API using URI defined in isDefinedBy parameter.
+     * @param userSet
+     * @return user set updated with items from Europeana API
+     * @throws HttpException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public UserSet updateItemsWithIsDefinedBy(UserSet userSet) throws HttpException, IOException, JSONException {
+		if (userSet.getIsDefinedBy() != null) {
+			String[] path = userSet.getIsDefinedBy().split("=");
+			String pathApiKey = path[path.length-1];
+			userSet = getUserSetService().updateUserSetsWithIsDefinedByUrl(
+					userSet, pathApiKey, Operations.CREATE);	
+		}
+		return userSet;
     }
 }

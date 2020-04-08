@@ -1,6 +1,9 @@
 package eu.europeana.set.web.service;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.codehaus.jettison.json.JSONException;
 
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -18,6 +21,8 @@ public interface UserSetService {
 	 */
 	public UserSet storeUserSet(UserSet UserSet);
 
+    public UserSet updateUserSetsWithIsDefinedByUrl(UserSet storedUserSet, String apiKey, String action)
+    	    throws HttpException, IOException, JSONException;
 	/**
 	 * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
 	 * @param persistentUserSet
