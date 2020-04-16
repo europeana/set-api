@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -260,7 +261,7 @@ public class WebUserSetRest extends BaseRest {
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
 		    String eTagOrigin = generateETag(
 		    		existingUserSet.getModified()
-				    , WebUserSetFields.FORMAT_JSONLD
+				    , WebFields.FORMAT_JSONLD
 				    , getApiVersion()
 				    );
 			checkIfMatchHeader(eTagOrigin, request);
@@ -401,7 +402,7 @@ public class WebUserSetRest extends BaseRest {
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
 		    String eTagOrigin = generateETag(
 		    		existingUserSet.getModified()
-				    , WebUserSetFields.FORMAT_JSONLD
+				    , WebFields.FORMAT_JSONLD
 				    , getApiVersion()
 				    );
 			checkIfMatchHeader(eTagOrigin, request);
@@ -669,7 +670,7 @@ public class WebUserSetRest extends BaseRest {
 			// check timestamp if provided within the "If-Match" HTTP header, if false respond with HTTP 412
 		    String eTagOrigin = generateETag(
 		    		existingUserSet.getModified()
-				    , WebUserSetFields.FORMAT_JSONLD
+				    , WebFields.FORMAT_JSONLD
 				    , getApiVersion()
 				    );
 			checkIfMatchHeader(eTagOrigin, request);

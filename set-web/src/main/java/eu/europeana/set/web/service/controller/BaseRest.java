@@ -20,6 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -254,7 +255,7 @@ public class BaseRest extends BaseRestController {
     }
 
     protected String buildCreatorUri(String userId) {
-    	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
+    	return WebFields.DEFAULT_CREATOR_URL + userId;
     }
     
     protected boolean hasAdminRights(Authentication authentication) {

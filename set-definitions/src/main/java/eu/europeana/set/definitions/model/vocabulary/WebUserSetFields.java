@@ -76,14 +76,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String USER_ADMIN = "admin";	
 	public static final String PROVIDER_EUROPEANA_DEV = "eanadev";	
 	
-	//
-	// Validation definitions
-	//
-	public static final String READ_METHOD = "read";
-	public static final String WRITE_METHOD = "write";
-	public static final String DELETE_METHOD = "delete";	
-	public static final String DEFAULT_CREATOR_URL = "http://data.europeana.eu/user/";
-	
 	// Europeana API
     public final String BASE_URL_DATA = "http://data.europeana.eu/item";
 }

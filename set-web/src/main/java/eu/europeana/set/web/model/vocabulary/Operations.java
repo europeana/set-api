@@ -1,13 +1,6 @@
 package eu.europeana.set.web.model.vocabulary;
 
-public interface Operations {
-
-	//search is also retrieve
-	//crud operations
-	public static final String RETRIEVE = "retrieve";
-	public static final String CREATE = "create";
-	public static final String UPDATE = "update";
-	public static final String DELETE = "delete";
+public interface Operations extends eu.europeana.api.commons.web.model.vocabulary.Operations {
 	
 	//admin
 	public static final String ADMIN_ALL = "admin_all";
