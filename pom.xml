@@ -60,7 +60,7 @@
 		<version.slf4j>1.7.5</version.slf4j>
 		<version.servletJstl>1.2</version.servletJstl>
 		<version.springBootMongoStarter>2.0.3.RELEASE</version.springBootMongoStarter>
-		
+		<version.httpClient>3.1</version.httpClient>
 		
 		<!--
 		<version.apiKeyClient>1.1</version.apiKeyClient>
@@ -73,6 +73,7 @@
 		<module>set-mongo</module>
 		<module>set-web</module>
 		<module>set-client</module>
+		<module>set-search-api-client</module>
 	</modules>
 	<build>
 		<!--  configure source and output locations -->

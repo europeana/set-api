@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -56,40 +58,33 @@ public class WebUserSetRest extends BaseRest {
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
 	public ResponseEntity<String> createUserSet(
-			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@RequestBody String userSet,
-			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,			
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request)
 					throws HttpException {
 				
-		return storeUserSet(wskey, userSet, userToken, profile, request);
+		// validate user - check user credentials (all registered users can create) 
+		// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
+		Authentication authentication = verifyWriteAccess(Operations.CREATE, request);
+		return storeUserSet(userSet, authentication, profile, request);
 	}
 	
 	/**
 	 * This method requests parsing of a user set in JsonLd format to a UserSet object
-	 * @param wsKey The API key
 	 * @param userSetJsonLdStr The user set in JsonLd format
-	 * @param userToken The user identifier
+	 * @param authentication The authentication object with user identifier
 	 * @param profile The profile definition
 	 * @param request HTTP request
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> storeUserSet(String wsKey, String userSetJsonLdStr, String userToken,
+	protected ResponseEntity<String> storeUserSet(String userSetJsonLdStr, 
+			Authentication authentication,
 			String profileStr, HttpServletRequest request) throws HttpException {
 		try {
-			// validate user - check user credentials (all registered users can create) 
-			// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
-			// Check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
 
-			userToken = getUserToken(userToken, request);
 			LdProfiles profile = getProfile(profileStr, request);
 
-			// authorize user
-			getAuthorizationService().authorizeUser(userToken, wsKey, null, Operations.CREATE);			
-			
 			// parse user set 
 			UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
@@ -100,7 +95,7 @@ public class WebUserSetRest extends BaseRest {
 				webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
 			Agent user = new WebSoftwareAgent();
-			user.setName(userToken);			
+			user.setName(getUserId(authentication));			
 			
 			// SET DEFAULTS
 			if (webUserSet.getCreator() == null)
@@ -111,6 +106,8 @@ public class WebUserSetRest extends BaseRest {
 			// generate an identifier (in sequence) for the Set
 			// generate and add a created and modified timestamp to the Set
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
+
+			storedUserSet = updateItemsWithIsDefinedBy(storedUserSet);
 
 			String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet); 
 
@@ -159,6 +156,7 @@ public class WebUserSetRest extends BaseRest {
 			HttpServletRequest request) throws HttpException {
 
 		String action = "get:/set/{identifier}{.jsonld}";
+		verifyReadAccess(request);
 		return getUserSet(wskey, profile, identifier, request, action);
 	}
 
@@ -187,6 +185,9 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
+			
+			userSet = updateItemsWithIsDefinedBy(userSet);
+			
 			String userSetJsonLdStr = serializeUserSet(profile, userSet); 
 
 			// build response
@@ -217,7 +218,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}"}, method = RequestMethod.PUT, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.UPDATE_SAMPLES_JSONLD, value = "Update an existing user set", nickname = "update", response = java.lang.Void.class)
-	public ResponseEntity<String> updateUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	public ResponseEntity<String> updateUserSet(
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestBody String userSet,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
@@ -226,7 +227,9 @@ public class WebUserSetRest extends BaseRest {
 			) throws HttpException {
 		
 		String action = "put:/set/{identifier}";
-		return updateUserSet(request, wskey, identifier, userSet, userToken, profile, action);
+		// check user credentials, if invalid respond with HTTP 401,
+		Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+		return updateUserSet(request, authentication, identifier, userSet, userToken, profile, action);
 	}
 		
 	/**
@@ -234,7 +237,7 @@ public class WebUserSetRest extends BaseRest {
 	 * updates it.
 	 * 
 	 * @param request
-	 * @param wskey The API key
+	 * @param authentication The Authentication object
 	 * @param identifier The identifier
 	 * @param userSet The user set fields to update in JSON format e.g. title or description
 	 * @param profile The profile definition
@@ -242,30 +245,26 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> updateUserSet(HttpServletRequest request, String wsKey, String identifier,
+	protected ResponseEntity<String> updateUserSet(HttpServletRequest request, Authentication authentication, String identifier,
 			String userSetJsonLdStr, String userToken, String profileStr, String action) throws HttpException {
 
 		try {
-			// check user credentials, if invalid respond with HTTP 401,
-			// check client access (a valid "wskey" must be provided)
-			// Check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
-
-			userToken = getUserToken(userToken, request);
 			LdProfiles profile = getProfile(profileStr, request);
 			
-			// authorize user
-			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.UPDATE);
-
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 			// check if the user is the owner of the set or admin, otherwise respond with 403
-			hasModifyRights(existingUserSet, wsKey, userToken);
+			verifyOwnerOrAdmin(existingUserSet, authentication);
 			
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
-			checkHeaderTimestamp(request, existingUserSet);
+		    String eTagOrigin = generateETag(
+		    		existingUserSet.getModified()
+				    , WebFields.FORMAT_JSONLD
+				    , getApiVersion()
+				    );
+			checkIfMatchHeader(eTagOrigin, request);
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
@@ -351,7 +350,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.PUT, 
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.INSERT_ITEM_NOTE, value = "Insert item to an existing user set", nickname = "insert item", response = java.lang.Void.class)
-	public ResponseEntity<String> insertItemIntoUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	public ResponseEntity<String> insertItemIntoUserSet(
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
@@ -362,7 +361,10 @@ public class WebUserSetRest extends BaseRest {
 			) throws HttpException {
 		
 		String action = "put:/set/{identifier}/{dataset_id}/{local_id}?position=POSITION";
-		return insertItemIntoUserSet(request, wskey, identifier, datasetId, localId, position, userToken, 
+		// check user credentials, if invalid respond with HTTP 401,
+		//  or if unauthorized respond with HTTP 403
+		Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+		return insertItemIntoUserSet(request, authentication, identifier, datasetId, localId, position, userToken, 
 				profile, action);
 	}
 	
@@ -371,7 +373,7 @@ public class WebUserSetRest extends BaseRest {
 	 * inserts item within user set to given position or at the end if no valid position provided.
 	 * 
 	 * @param request
-	 * @param wskey The API key
+	 * @param authentication The Authentication object
 	 * @param identifier The identifier of a user set
 	 * @param datasetId The identifier of the dataset, typically a number
 	 * @param localId The local identifier within the provider
@@ -382,31 +384,28 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, String wsKey, 
+	protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, 
+			Authentication authentication, 
 			String identifier, String datasetId, String localId, String position, String userToken, 
 			String profileStr, String action) throws HttpException {
 
 		try {
-			// check user credentials, if invalid respond with HTTP 401,
-			//  or if unauthorized respond with HTTP 403
-			// check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
-
-			userToken = getUserToken(userToken, request);
 			LdProfiles profile = getProfile(profileStr, request);
 			
-			// authorize user
-			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.UPDATE);
-
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 			// check if the user is the owner of the set or admin, otherwise respond with 403
-			hasModifyRights(existingUserSet, wsKey, userToken);
-			
+			verifyOwnerOrAdmin(existingUserSet, authentication);
+						
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
-			checkHeaderTimestamp(request, existingUserSet);
+		    String eTagOrigin = generateETag(
+		    		existingUserSet.getModified()
+				    , WebFields.FORMAT_JSONLD
+				    , getApiVersion()
+				    );
+			checkIfMatchHeader(eTagOrigin, request);
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
@@ -457,6 +456,7 @@ public class WebUserSetRest extends BaseRest {
 			) throws HttpException {
 		
 		String action = "get:/set/{identifier}/{dataset_id}/{local_id}";
+		verifyReadAccess(request);
 		return isItemInUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
 	}
 	
@@ -482,9 +482,6 @@ public class WebUserSetRest extends BaseRest {
 			//  or if unauthorized respond with HTTP 403
 			// check client access (a valid "wskey" must be provided)
 			validateApiKey(wsKey);
-
-			// authorize user
-			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.RETRIEVE);
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
@@ -533,7 +530,7 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = RequestMethod.DELETE, 
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
 	@ApiOperation(notes = SwaggerConstants.DELETE_ITEM_NOTE, value = "Delete a item from the set", nickname = "delete item", response = java.lang.Void.class)
-	public ResponseEntity<String> deleteItemFromUserSet(@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	public ResponseEntity<String> deleteItemFromUserSet(
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
@@ -543,14 +540,17 @@ public class WebUserSetRest extends BaseRest {
 			) throws HttpException {
 		
 		String action = "delete:/set/{identifier}/{dataset_id}/{local_id}";
-		return deleteItemFromUserSet(request, wskey, identifier, datasetId, localId, userToken, profile, action);
+		// check user credentials, if invalid respond with HTTP 401,
+		//  or if unauthorized respond with HTTP 403
+		Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
+		return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId, userToken, profile, action);
 	}
 	
 	/**
 	 * This method validates input values and deletes item from a user set.
 	 * 
 	 * @param request
-	 * @param wskey The API key
+	 * @param authentication The Authentication object
 	 * @param identifier The identifier of a user set
 	 * @param datasetId The identifier of the dataset, typically a number
 	 * @param localId The local identifier within the provider
@@ -560,28 +560,20 @@ public class WebUserSetRest extends BaseRest {
 	 * @return response entity that comprises response body, headers and status code
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, String wsKey, 
+	protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, 
+			Authentication authentication, 
 			String identifier, String datasetId, String localId, String userToken, 
 			String profileStr, String action) throws HttpException {
 		
 		try {
-			// check user credentials, if invalid respond with HTTP 401,
-			//  or if unauthorized respond with HTTP 403
-			// check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
-
-			userToken = getUserToken(userToken, request);
 			LdProfiles profile = getProfile(profileStr, request);
 			
-			// authorize user
-			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.DELETE);
-
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 			// check if the user is the owner of the set or admin, otherwise respond with 403
-			hasModifyRights(existingUserSet, wsKey, userToken);
+			verifyOwnerOrAdmin(existingUserSet, authentication);
 			
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
@@ -642,15 +634,14 @@ public class WebUserSetRest extends BaseRest {
 	@RequestMapping(value = {"/set/{identifier}"}, method = RequestMethod.DELETE)
 	@ApiOperation(value = "Delete an existing user set", nickname = "delete", response = java.lang.Void.class)
 	public ResponseEntity<String> deleteUserSet(
-			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String apiKey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
 			HttpServletRequest request
 			) throws HttpException {
 
-		userToken = getUserToken(userToken, request);
-				
-		return deleteUserSet(request, identifier, apiKey, userToken);
+		// check user credentials, if invalid respond with HTTP 401,
+		//  or if unauthorized respond with HTTP 403
+		Authentication authentication = verifyWriteAccess(Operations.DELETE, request);		
+		return deleteUserSet(request, identifier, authentication);
 	}
 	
 	/**
@@ -661,18 +652,11 @@ public class WebUserSetRest extends BaseRest {
 	 * @param userToken
 	 * @throws HttpException
 	 */
-	protected ResponseEntity<String> deleteUserSet(HttpServletRequest request, String identifier, String wsKey, String userToken)
+	protected ResponseEntity<String> deleteUserSet(HttpServletRequest request, String identifier, 
+			Authentication authentication)
 			throws HttpException {
 
 		try {
-			// check user credentials, if invalid respond with HTTP 401,
-			// check client access (a valid "wskey" must be provided)
-			// Check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
-
-			// authorize user or if unauthorized respond with HTTP 403
-			getAuthorizationService().authorizeUser(userToken, wsKey, identifier, Operations.DELETE);
-
 			// retrieve a user set based on its identifier
 			// if the Set doesn’t exist, respond with HTTP 404
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier, false);
@@ -681,18 +665,22 @@ public class WebUserSetRest extends BaseRest {
 			// in the case of regular users (not admins), the autorization method must check if the users 
 			// that calls the deletion (i.e. identified by provided user token) is the same user as the creator 
 			// of the user set
-			hasModifyRights(existingUserSet, wsKey, userToken);
-
+			verifyOwnerOrAdmin(existingUserSet, authentication);
+			
 			// check timestamp if provided within the "If-Match" HTTP header, if false respond with HTTP 412
-			checkHeaderTimestamp(request, existingUserSet);
+		    String eTagOrigin = generateETag(
+		    		existingUserSet.getModified()
+				    , WebFields.FORMAT_JSONLD
+				    , getApiVersion()
+				    );
+			checkIfMatchHeader(eTagOrigin, request);
 						
 			// if the user set is disabled and the user is not an admin, respond with HTTP 410
 			HttpStatus httpStatus = null;
 			if (existingUserSet.isDisabled()) {
-				if (!isAdmin(wsKey, userToken)) { 
+				if (!hasAdminRights(authentication)) { 
 					// if the user is the owner, the response should be 410
-					if (isOwner(existingUserSet, userToken)) {
-//						httpStatus = HttpStatus.GONE;	
+					if (isOwner(existingUserSet, authentication)) {
 						throw new OperationAuthorizationException(I18nConstants.USERSET_ALREADY_DISABLED, 
 								I18nConstants.USERSET_ALREADY_DISABLED, 
 								new String[]{existingUserSet.getIdentifier()},
@@ -711,10 +699,10 @@ public class WebUserSetRest extends BaseRest {
 				// if the user is an Administrator then permanently remove item 
 				// (and all items that are members of the user set)
 				 httpStatus = HttpStatus.NO_CONTENT;
-				 if (isAdmin(wsKey, userToken)) {
+				 if (hasAdminRights(authentication)) {
 					 getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
 				 } else { // otherwise flag it as disabled
-  					 if (isOwner(existingUserSet, userToken)) {
+  					 if (isOwner(existingUserSet, authentication)) {
   						 getUserSetService().disableUserSet(existingUserSet);
   					 } else {
  						// if the user is a registered user but not the owner, the response should be 401 (unathorized)

@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<artifactId>set-search-api-client</artifactId>
+	<name>Europeana (User) Sets - Search API Client</name>
+	<packaging>jar</packaging>
+	
+	<parent>
+		<artifactId>set-api</artifactId>
+		<groupId>eu.europeana.set</groupId>
+		<relativePath>../pom.xml</relativePath>
+		<version>${version.setApi}</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<!-- europeana api commons -->
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-web</artifactId>
+			<version>${version.commonsApi}</version>
+		</dependency>
+			
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-definitions</artifactId>
+			<version>${version.setApi}</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>${version.httpClient}</version>
+		</dependency>
+			
+		<dependency>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.3</version>
+		</dependency>
+	</dependencies>
+ 
+</project>

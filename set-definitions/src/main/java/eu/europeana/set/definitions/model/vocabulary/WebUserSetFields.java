@@ -16,6 +16,8 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String AND = "&";
 	public static final String EQUALS = "=";
 	public static final String JSON_LD_REST = ".jsonld";
+	public static final String FORMAT_JSONLD = "jsonld";
+	
 	
 	//
 	// Query Params
@@ -74,10 +76,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String USER_ADMIN = "admin";	
 	public static final String PROVIDER_EUROPEANA_DEV = "eanadev";	
 	
-	//
-	// Validation definitions
-	//
-	public static final String READ_METHOD = "read";
-	public static final String WRITE_METHOD = "write";
-	public static final String DELETE_METHOD = "delete";	
+	// Europeana API
+    public final String BASE_URL_DATA = "http://data.europeana.eu/item";
 }

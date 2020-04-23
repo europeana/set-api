@@ -69,6 +69,11 @@
 			<artifactId>set-common</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-search-api-client</artifactId>
+			<version>${version.setApi}</version>
+		</dependency>
 		
 		<!-- aspectj /profiling -->
 		<dependency>
