@@ -107,7 +107,8 @@ public class WebUserSetRest extends BaseRest {
 			// generate and add a created and modified timestamp to the Set
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 
-			storedUserSet = updateItemsWithIsDefinedBy(storedUserSet);
+			storedUserSet = fetchItemsPage(storedUserSet, 
+					null, null, WebUserSetFields.DEFAULT_PAGE, WebUserSetFields.MAX_ITEMS_PER_PAGE);
 
 			String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet); 
 
@@ -152,12 +153,17 @@ public class WebUserSetRest extends BaseRest {
 			@RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 			@PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 			@RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,			
+		    @RequestParam(value = WebUserSetFields.PARAM_SORT, required = false) String sortField,
+		    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
+		    @RequestParam(value = WebUserSetFields.PAGE, defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
+		    @RequestParam(value = WebUserSetFields.PAGE_SIZE, defaultValue = ""
+			    + WebUserSetFields.MAX_ITEMS_PER_PAGE) int pageSize,
 			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 			HttpServletRequest request) throws HttpException {
 
 		String action = "get:/set/{identifier}{.jsonld}";
 		verifyReadAccess(request);
-		return getUserSet(wskey, profile, identifier, request, action);
+		return getUserSet(wskey, profile, identifier, request, action, sortField, sortOrderField, page, pageSize);
 	}
 
 	/**
@@ -172,7 +178,7 @@ public class WebUserSetRest extends BaseRest {
 	 * @throws HttpException
 	 */
 	private ResponseEntity<String> getUserSet(String wsKey, String profileStr, String identifier, 
-			HttpServletRequest request, String action)
+			HttpServletRequest request, String action, String sort, String sortOrder, int pageNr, int pageSize)
 					throws HttpException {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
@@ -186,7 +192,9 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
 			
-			userSet = updateItemsWithIsDefinedBy(userSet);
+			// append the HTTP parameters related to sort, page and pageSize 
+			// to URL defined in the rdfs:isDefinedBy property
+			userSet = fetchItemsPage(userSet, sort, sortOrder, pageNr, pageSize);
 			
 			String userSetJsonLdStr = serializeUserSet(profile, userSet); 
 
@@ -268,7 +276,7 @@ public class WebUserSetRest extends BaseRest {
 
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
-			int modifiedStr = 0;
+			Date modifiedDate = null;
 			String serializedUserSetJsonLdStr = "";
 			if (existingUserSet.isDisabled()) { 
 				httpStatus = HttpStatus.GONE;
@@ -279,6 +287,32 @@ public class WebUserSetRest extends BaseRest {
 				// validate and process the Set description for format and mandatory fields
 				// if false respond with HTTP 400
 				getUserSetService().validateWebUserSet(newUserSet);
+				
+				// if the Set corresponds to an open set, update the metadata associated to the Set, 
+				// and if the standard profile is requested, obtain the URIs for the items following 
+				// the logic defined for retrieving a Set.
+				if (newUserSet.isOpenSet()) {
+					newUserSet = fetchItemsPage(newUserSet,
+							null, null, WebUserSetFields.DEFAULT_PAGE, WebUserSetFields.MAX_ITEMS_PER_PAGE);
+				} else {
+					// If the provided userset contains a list of items and the profile is set to minimal, 
+					// respond with HTTP 412, also when standard profile is used and no items are provided, 
+					// respond with 412;
+					LdProfiles headerProfile = getHeaderProfile(request);
+					if ((newUserSet.getItems() != null && newUserSet.getItems().size() > 0 && (profile == LdProfiles.MINIMAL || headerProfile == LdProfiles.MINIMAL)) || 
+					    ((newUserSet.getItems() == null || newUserSet.getItems().size() == 0) && profile == LdProfiles.STANDARD)) { 
+						throw new ApplicationAuthenticationException(
+							I18nConstants.USERSET_CONTAINS_NO_ITEMS, I18nConstants.USERSET_CONTAINS_NO_ITEMS,
+							new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
+					}
+
+					// if the Set corresponds to a closed set, replace member items with the new items 
+					// that are present in the Set description only when a profile is indicated and 
+					// is different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header.
+					if (getHeaderProfile(request) != LdProfiles.MINIMAL)
+						newUserSet = getUserSetService().updateUserSetExt(existingUserSet, newUserSet.getItems());
+				}
+				
 				//validate items 
 				validateUpdateItemsByProfile(existingUserSet, newUserSet, profile);
 				//remove duplicated items
@@ -292,8 +326,8 @@ public class WebUserSetRest extends BaseRest {
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
 				
-				modifiedStr = updatedUserSet.getModified().hashCode();			
 				serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
+				modifiedDate = updatedUserSet.getModified();			
 		        httpStatus = HttpStatus.OK;
 			}
 			
@@ -305,7 +339,12 @@ public class WebUserSetRest extends BaseRest {
 			headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
 			headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
 			// generate “ETag”;
-			headers.add(HttpHeaders.ETAG, "" + modifiedStr);
+		    String eTagNew = generateETag(
+		    		modifiedDate
+				    , WebFields.FORMAT_JSONLD
+				    , getApiVersion()
+				    );
+			headers.add(HttpHeaders.ETAG, eTagNew);
 
 			ResponseEntity<String> response = new ResponseEntity<String>(
 					serializedUserSetJsonLdStr, headers, httpStatus);
@@ -593,7 +632,7 @@ public class WebUserSetRest extends BaseRest {
 					
 		            // update an existing user set
 					UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);				
-					UserSet updatedUserSet = getUserSetService().updateUserSet(
+					UserSet updatedUserSet = getUserSetService().updateUserSetExt(
 							(PersistentUserSet) existingUserSetPaginated, null);
 				
 					// serialize to JsonLd

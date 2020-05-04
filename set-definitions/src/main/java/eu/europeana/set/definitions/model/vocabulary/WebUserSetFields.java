@@ -29,7 +29,9 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String PATH_PARAM_POSITION = "position";
 	public static final String USER_TOKEN = "userToken";
 	public static final String PROFILE = "profile";
-	
+	public static final String PARAM_SORT = "sort";
+	public static final String PARAM_SORT_ORDER = "sortOrder";
+
 	//
 	// Mongo
 	//
@@ -56,6 +58,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public final static String BASE_SET_URL = "http://data.europeana.eu/set/";
 	public final static String BASE_ITEM_URL = "http://data.europeana.eu/item/";
     public final static int MAX_ITEMS_PER_PAGE = 10;
+    public final static int DEFAULT_PAGE = 0;
     public final static String PAGE = "page";
 	public final static String PAGE_SIZE = "pageSize";
     public final static int MAX_ITEMS_TO_PRESENT = 1000;

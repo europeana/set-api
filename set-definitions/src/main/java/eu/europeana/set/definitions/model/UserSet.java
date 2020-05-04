@@ -99,4 +99,10 @@ public interface UserSet {
 	String getIsDefinedBy();
 	
 	void setIsDefinedBy(String query);
+	
+    /**
+     * This method detects if it is open or closed set
+     * @return true if it is an open set
+     */
+    public boolean isOpenSet();
 }

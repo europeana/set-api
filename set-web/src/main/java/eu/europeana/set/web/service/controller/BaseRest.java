@@ -170,13 +170,9 @@ public class BaseRest extends BaseRestController {
 	 */
 	public LdProfiles getProfile(String paramProfile, HttpServletRequest request) throws HttpException {
 
-		LdProfiles profile = null;
-		String preferHeader = request.getHeader(HttpHeaders.PREFER);
-		if (preferHeader != null) {
-			// identify profile by prefer header
-			profile = getProfile(preferHeader);
-			getLogger().debug("Profile identified by prefer header: " + profile.name());
-		} else {
+		LdProfiles profile = null;		
+		profile = getHeaderProfile(request);
+		if (profile == null) {
 			// get profile from param
 			try {
 				profile = LdProfiles.getByName(paramProfile);
@@ -188,6 +184,47 @@ public class BaseRest extends BaseRestController {
 		return profile;
 	}
 
+	/**
+	 * This method identifies profile from a HTTP header if it exists.
+	 * 
+	 * @param paramProfile
+	 *            The HTTP request parameter
+	 * @param request
+	 *            The HTTP request with headers
+	 * @return profile value
+	 * @throws HttpException
+	 * @throws UserSetProfileValidationException
+	 */
+	public LdProfiles getHeaderProfile(HttpServletRequest request) throws HttpException {
+
+		LdProfiles profile = null;
+		String preferHeader = request.getHeader(HttpHeaders.PREFER);
+		if (preferHeader != null) {
+			// identify profile by prefer header
+			// retrieve profile if provided within the "If-Match" HTTP
+			String ldPreferHeaderStr = null;
+			String INCLUDE = "include";
+			if (StringUtils.isNotEmpty(preferHeader)) {
+				// log header for debuging
+				getLogger().debug("'Prefer' header value: " + preferHeader);					
+				try {
+					Map<String, String> preferHeaderMap = parsePreferHeader(preferHeader);
+					ldPreferHeaderStr = preferHeaderMap.get(INCLUDE).replace("\"", "");
+					profile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
+				} catch (UserSetProfileValidationException e) {
+					throw new HttpException(I18nConstants.INVALID_HEADER_VALUE, I18nConstants.INVALID_HEADER_VALUE,
+							new String[] {HttpHeaders.PREFER,  preferHeader}, HttpStatus.BAD_REQUEST, null);
+				} catch (Throwable th){
+					throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, I18nConstants.INVALID_HEADER_FORMAT,
+							new String[] {HttpHeaders.PREFER,  preferHeader}, HttpStatus.BAD_REQUEST, null);
+				}
+			}			
+			
+			getLogger().debug("Profile identified by prefer header: " + profile.name());
+		}
+		return profile;
+	}
+	
 	/**
 	 * This method serializes user set and applies profile to the object.
 	 * 
@@ -270,39 +307,6 @@ public class BaseRest extends BaseRestController {
 		return false;
     }
     
-    /**
-	 * This method retrieves view profile if provided within the "If-Match" HTTP
-	 * header
-	 * 
-	 * @param request
-	 * @return profile value
-	 * @throws HttpException
-	 */
-	LdProfiles getProfile(String preferHeader) throws HttpException {
-		LdProfiles ldProfile = null;
-		String ldPreferHeaderStr = null;
-		String INCLUDE = "include";
-
-		if (StringUtils.isNotEmpty(preferHeader)) {
-			// log header for debuging
-			getLogger().debug("'Prefer' header value: " + preferHeader);
-				
-			try {
-				Map<String, String> preferHeaderMap = parsePreferHeader(preferHeader);
-				ldPreferHeaderStr = preferHeaderMap.get(INCLUDE).replace("\"", "");
-				ldProfile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
-			} catch (UserSetProfileValidationException e) {
-				throw new HttpException(I18nConstants.INVALID_HEADER_VALUE, I18nConstants.INVALID_HEADER_VALUE,
-						new String[] {HttpHeaders.PREFER,  preferHeader}, HttpStatus.BAD_REQUEST, null);
-			} catch (Throwable th){
-				throw new HttpException(I18nConstants.INVALID_HEADER_FORMAT, I18nConstants.INVALID_HEADER_FORMAT,
-						new String[] {HttpHeaders.PREFER,  preferHeader}, HttpStatus.BAD_REQUEST, null);
-			}
-		}
-
-		return ldProfile;
-	}
-
 	/**
 	 * This method parses prefer header in keys and values
 	 * 
@@ -391,13 +395,16 @@ public class BaseRest extends BaseRestController {
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet updateItemsWithIsDefinedBy(UserSet userSet) throws HttpException, IOException, JSONException {
-		if (userSet.getIsDefinedBy() != null) {
+    public UserSet fetchItemsPage(UserSet userSet, 
+    		String sort, String sortOrder, int pageNr, int pageSize) 
+    				throws HttpException, IOException, JSONException {
+    	if (userSet.isOpenSet()) {
 			String[] path = userSet.getIsDefinedBy().split("=");
 			String pathApiKey = path[path.length-1];
-			userSet = getUserSetService().updateUserSetsWithIsDefinedByUrl(
-					userSet, pathApiKey, Operations.CREATE);	
+			userSet = getUserSetService().updateUserSet(
+					userSet, pathApiKey, Operations.CREATE, sort, sortOrder, pageNr, pageSize);	
 		}
 		return userSet;
     }
+       
 }
