@@ -170,13 +170,9 @@ public class BaseRest extends BaseRestController {
 	 */
 	public LdProfiles getProfile(String paramProfile, HttpServletRequest request) throws HttpException {
 
-		LdProfiles profile = null;
-		String preferHeader = request.getHeader(HttpHeaders.PREFER);
-		if (preferHeader != null) {
-			// identify profile by prefer header
-			profile = getProfile(preferHeader);
-			getLogger().debug("Profile identified by prefer header: " + profile.name());
-		} else {
+		LdProfiles profile = null;		
+		profile = getHeaderProfile(request);
+		if (profile == null) {
 			// get profile from param
 			try {
 				profile = LdProfiles.getByName(paramProfile);
@@ -188,6 +184,29 @@ public class BaseRest extends BaseRestController {
 		return profile;
 	}
 
+	/**
+	 * This method identifies profile from a HTTP header if it exists.
+	 * 
+	 * @param paramProfile
+	 *            The HTTP request parameter
+	 * @param request
+	 *            The HTTP request with headers
+	 * @return profile value
+	 * @throws HttpException
+	 * @throws UserSetProfileValidationException
+	 */
+	public LdProfiles getHeaderProfile(HttpServletRequest request) throws HttpException {
+
+		LdProfiles profile = null;
+		String preferHeader = request.getHeader(HttpHeaders.PREFER);
+		if (preferHeader != null) {
+			// identify profile by prefer header
+			profile = getProfile(preferHeader);
+			getLogger().debug("Profile identified by prefer header: " + profile.name());
+		}
+		return profile;
+	}
+	
 	/**
 	 * This method serializes user set and applies profile to the object.
 	 * 
@@ -391,13 +410,16 @@ public class BaseRest extends BaseRestController {
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet updateItemsWithIsDefinedBy(UserSet userSet) throws HttpException, IOException, JSONException {
-		if (userSet.getIsDefinedBy() != null) {
+    public UserSet updateItemsWithIsDefinedBy(UserSet userSet, 
+    		String sort, String sortOrder, int pageNr, int pageSize) 
+    				throws HttpException, IOException, JSONException {
+		if (getUserSetService().isOpenSet(userSet)) {
 			String[] path = userSet.getIsDefinedBy().split("=");
 			String pathApiKey = path[path.length-1];
 			userSet = getUserSetService().updateUserSetsWithIsDefinedByUrl(
-					userSet, pathApiKey, Operations.CREATE);	
+					userSet, pathApiKey, Operations.CREATE, sort, sortOrder, pageNr, pageSize);	
 		}
 		return userSet;
     }
+       
 }

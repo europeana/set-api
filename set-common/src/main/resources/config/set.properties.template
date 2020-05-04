@@ -36,12 +36,23 @@ mongodb.set.truststorepass=
 
 # validation
 api=set
-adminapikey=
-adminsecretkey=
 validation.string=
 # cache time for validation of ApiKey in milliseconds (value of type long)
 # e.g. 1800000 is 30 minutes
 #set.apikey.caching.time=1800000
+
+
+# apikey verification settings
+#string value representing the key used for JWT signature verification
+europeana.apikey.jwttoken.siganturekey=
+#URL of the APIKEY service
+europeana.apikey.serviceurl=
+
+#the name for annotation api resources in keyckloak tokens
+authorization.api.name=usersets
+
+# valid licenses list
+annotation.licenses=
 
 # User set API version
 set.api.version=

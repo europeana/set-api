@@ -21,8 +21,28 @@ public interface UserSetService {
 	 */
 	public UserSet storeUserSet(UserSet UserSet);
 
-    public UserSet updateUserSetsWithIsDefinedByUrl(UserSet storedUserSet, String apiKey, String action)
+    /**
+     * This method converts close set to open set by updating respective items
+     * @param storedUserSet
+     * @param apiKey
+     * @param action
+     * @return updated set
+     * @throws HttpException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public UserSet updateUserSetsWithIsDefinedByUrl(UserSet storedUserSet, String apiKey, String action,
+    		String sort, String sortOrder, int pageNr, int pageSize)
     	    throws HttpException, IOException, JSONException;
+    
+    /**
+     * This method converts open set to close set by updating respective items
+     * @param storedUserSet
+     * @param items
+     * @return updated set
+     */
+    public UserSet updateUserSetsWithCloseSetItems(UserSet storedUserSet, List<String> items);
+    
 	/**
 	 * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
 	 * @param persistentUserSet
@@ -159,4 +179,12 @@ public interface UserSetService {
 	 * @param newItem
 	 */
 	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
+	
+    /**
+     * This method detects if it is open or closed set
+     * @param userSet
+     * @return true if it is an open set
+     */
+    public boolean isOpenSet(UserSet userSet);
+
 }
