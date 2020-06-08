@@ -433,4 +433,14 @@ public class BaseUserSet implements UserSet {
 	public void setIsDefinedBy(String isDefinedBy) {
 		this.isDefinedBy = isDefinedBy;
 	}
+	
+    /* (non-Javadoc)
+     * @see eu.europeana.set.definitions.model.UserSet#isOpenSet()
+     */
+    public boolean isOpenSet() {
+    	boolean res = false;
+    	if (getIsDefinedBy() != null) 
+    		res = true;
+    	return res;
+    }	
 }
