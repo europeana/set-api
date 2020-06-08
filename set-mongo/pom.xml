@@ -81,7 +81,7 @@
 		
 
 		<!-- TESTING PURPOSES -->
-
+<!--  
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<version>${version.commonsApi}</version>
@@ -90,6 +90,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		 -->
 		
 		<dependency>
 			<scope>test</scope>

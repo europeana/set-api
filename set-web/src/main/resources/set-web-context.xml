@@ -26,4 +26,14 @@
 		<beans:property name="apiKeyServiceUrl" value="#{setProperties['europeana.apikey.serviceurl']}"/>
 	</beans:bean>  
 	
+	<!-- configurable error messages -->
+   <beans:bean id="set_i18n_messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<beans:property name="basename" value="classpath:messages"/>	
+		<beans:property name="defaultEncoding" value="utf-8"/>	 	
+    </beans:bean>
+    
+    <beans:bean id="i18nService" class="eu.europeana.api.commons.config.i18n.I18nServiceImpl">
+    	<beans:property name="messageSource" ref="set_i18n_messageSource"/>
+    </beans:bean>
+    
 </beans:beans>

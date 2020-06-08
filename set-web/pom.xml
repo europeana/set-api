@@ -161,6 +161,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		<!--  
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<version>${version.commonsApi}</version>
@@ -169,6 +170,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>

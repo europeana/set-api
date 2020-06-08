@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
@@ -17,8 +19,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 
 import eu.europeana.api.common.config.I18nConstants;
+import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -40,6 +44,9 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
+    @Resource
+    I18nService i18nService;
+    
     UserSetUtils userSetUtils = new UserSetUtils();
 
     private SetApiService setApiService = new SetApiServiceImpl();
@@ -260,6 +267,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 */
 	public void deleteUserSet(String userSetId) throws UserSetNotFoundException {
 
+		// in case it is a closed set, remove the items that are members of the Set.
+		UserSet userSet = getUserSetById(userSetId);
+		if (!userSet.isOpenSet()) {
+			for (String item : userSet.getItems()) {
+				getMongoPersistence().remove(item);
+			}
+		}
+
+		// if the user is an Administrator then permanently remove the Set. 
 		getMongoPersistence().remove(userSetId);
 	}
 	
@@ -340,7 +356,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		
 		// Respond with HTTP 200
 		// update an existing user set. merge user sets - insert new fields in existing object
-		UserSet updatedUserSet = updateUserSet(
+		UserSet updatedUserSet = updateUserSetExt(
 				(PersistentUserSet) existingUserSet, null);
 		extUserSet = fillPagination(updatedUserSet);
 		return extUserSet;
@@ -374,17 +390,74 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
     @Override
-    public UserSet updateUserSetsWithIsDefinedByUrl(UserSet storedUserSet, String apiKey, String action)
+    public UserSet updateUserSet(UserSet storedUserSet, String apiKey, String action,
+    		String sort, String sortOrder, int pageNr, int pageSize)
 	    throws HttpException, IOException, JSONException {
     	
     	String uri;
-    	uri = storedUserSet.getIsDefinedBy();
+    	String additionalParameters;
+    	additionalParameters = buildSearchQuery(sort, sortOrder, pageNr, pageSize);
+    	uri = storedUserSet.getIsDefinedBy() + additionalParameters;
     	SearchApiResponse apiResult = getSetApiService().queryEuropeanaApi(uri, apiKey, action);
     	List<String> items = new ArrayList<String>();
     	for(String item : apiResult.getItems()) {
     		items.add(WebUserSetFields.BASE_URL_DATA + item);
     	}
-    	storedUserSet.setItems(items);
+    	if (items.size() > 0) {
+	    	storedUserSet.setItems(items);
+	    	storedUserSet.setTotal(items.size());
+    	}
     	return storedUserSet;
     }
+    
+	/**
+	 * This method appends additional search parameter from HTTP request
+	 * @param sort
+	 * @param sortOrder
+	 * @param pageNr
+	 * @param pageSize
+	 * @return additional search Query string
+	 */
+	public String buildSearchQuery(String sort, String sortOrder, int pageNr, int pageSize) {
+
+		StringBuilder searchQuery = new StringBuilder();
+		
+		searchQuery.append(WebUserSetFields.AND);
+		searchQuery.append(pageNr);
+		searchQuery.append(WebUserSetFields.PAGE).append("=");
+		if(pageNr < 0)
+			searchQuery.append(WebUserSetFields.DEFAULT_PAGE);
+		else
+			searchQuery.append(pageNr);
+
+		searchQuery.append(WebUserSetFields.AND);
+		searchQuery.append(WebUserSetFields.PAGE_SIZE).append("=");
+		if(pageSize < 0)
+			searchQuery.append(WebUserSetFields.MAX_ITEMS_PER_PAGE);
+		else
+			searchQuery.append(pageSize);
+		
+		searchQuery.append(WebUserSetFields.AND);
+		if (!Strings.isNullOrEmpty(sort)) {
+			searchQuery.append(WebUserSetFields.PARAM_SORT).append("=");
+			searchQuery.append(sort);
+			searchQuery.append(WebUserSetFields.AND);
+			searchQuery.append(WebUserSetFields.PARAM_SORT_ORDER).append("=");
+			searchQuery.append(sortOrder);
+		}
+
+		return searchQuery.toString();
+	}
+        
+    /* (non-Javadoc)
+     * @see eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(eu.europeana.set.definitions.model.UserSet, java.util.List)
+     */
+    public UserSet updateUserSetExt(UserSet storedUserSet, List<String> items) {    	
+    	if (items.size() > 0) {
+	    	storedUserSet.setItems(items);
+	    	storedUserSet.setTotal(items.size());
+    	}
+    	return storedUserSet;
+    }
+    
 }
