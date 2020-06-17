@@ -1,24 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2007 EDL FOUNDATION
-  ~
-  ~  Licensed under the EUPL, Version 1.1 or as soon they
-  ~  will be approved by the European Commission - subsequent
-  ~  versions of the EUPL (the "Licence");
-  ~  you may not use this work except in compliance with the
-  ~  Licence.
-  ~  You may obtain a copy of the Licence at:
-  ~
-  ~  http://ec.europa.eu/idabc/eupl
-  ~
-  ~  Unless required by applicable law or agreed to in
-  ~  writing, software distributed under the Licence is
-  ~  distributed on an "AS IS" BASIS,
-  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  ~  express or implied.
-  ~  See the Licence for the specific language governing
-  ~  permissions and limitations under the Licence.
-  -->
 <beans:beans
         xmlns="http://www.springframework.org/schema/security"
         xmlns:beans="http://www.springframework.org/schema/beans"
@@ -42,4 +22,18 @@
     <!-- USING OTHER MODULES -->
 	<beans:import resource="set-web-beans.xml"/>
 	
+	<beans:bean name="commons_oauth2_europeanaClientDetailsService" class="eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService">
+		<beans:property name="apiKeyServiceUrl" value="#{setProperties['europeana.apikey.serviceurl']}"/>
+	</beans:bean>  
+	
+	<!-- configurable error messages -->
+   <beans:bean id="set_i18n_messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<beans:property name="basename" value="classpath:messages"/>	
+		<beans:property name="defaultEncoding" value="utf-8"/>	 	
+    </beans:bean>
+    
+    <beans:bean id="i18nService" class="eu.europeana.api.commons.config.i18n.I18nServiceImpl">
+    	<beans:property name="messageSource" ref="set_i18n_messageSource"/>
+    </beans:bean>
+    
 </beans:beans>

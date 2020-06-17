@@ -12,14 +12,22 @@ public interface UserSetConfiguration {
 	public static final String VALUE_ENVIRONMENT_TEST = "test";
 	public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
 	
+	@Deprecated
 	public static final String VALIDATION_API = "api";
+	@Deprecated
 	public static final String VALIDATION_ADMIN_API_KEY = "adminapikey";
+	@Deprecated
 	public static final String VALIDATION_ADMIN_SECRET_KEY = "adminsecretkey";
-
+	@Deprecated
 	public static final String API_KEY_CACHING_TIME = "userset.apikey.caching.time";
-	
+	@Deprecated
 	public static final String VALIDATION_STRING = "validation.string";
 
+	//TODO: move constants to api commons
+	public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
+	public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
+	public static final String API_VERSION = "userset.api.version";
+	
 	
 	public String getComponentName();
 	
@@ -50,4 +58,10 @@ public interface UserSetConfiguration {
 	 */
 	public boolean isProductionEnvironment();
 	
+	/**
+	 * authorization settings
+	 */
+	public String getJwtTokenSignatureKey();
+	public String getAuthorizationApiName();
+	public String getApiVersion();
 }

@@ -1,6 +1,9 @@
 package eu.europeana.set.web.service;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.codehaus.jettison.json.JSONException;
 
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -18,6 +21,31 @@ public interface UserSetService {
 	 */
 	public UserSet storeUserSet(UserSet UserSet);
 
+    /**
+     * This method converts close set to open set by updating respective items
+     * 
+     * @param storedUserSet
+     * @param apiKey
+     * @param action
+     * @return updated set
+     * @throws HttpException
+     * @throws IOException
+     * @throws JSONException
+     */
+	@Deprecated
+	//TODO: refactor and remove redundant parameters
+    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey, String action,
+    		String sort, String sortOrder, int pageNr, int pageSize)
+    	    throws HttpException, IOException, JSONException;
+    
+    /**
+     * This method converts open set to close set by updating respective items
+     * @param storedUserSet
+     * @param items
+     * @return updated set
+     */
+    public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items);
+    
 	/**
 	 * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
 	 * @param persistentUserSet
@@ -154,4 +182,5 @@ public interface UserSetService {
 	 * @param newItem
 	 */
 	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
+
 }

@@ -30,14 +30,17 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 		return getSetProperties().getProperty(USERSET_ENVIRONMENT);
 	}
 	
+	@Deprecated
 	public String getValidationApi() {
 		return getSetProperties().getProperty(VALIDATION_API);
 	}
 
+	@Deprecated
 	public String getValidationAdminApiKey() {
 		return getSetProperties().getProperty(VALIDATION_ADMIN_API_KEY);
 	}
 
+	@Deprecated
 	public String getValidationAdminSecretKey() {
 		return getSetProperties().getProperty(VALIDATION_ADMIN_SECRET_KEY);
 	}
@@ -48,11 +51,13 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 	}
 
 	@Override
+	@Deprecated
 	public long getApiKeyCachingTime() {
 		return Long.parseLong(getSetProperties().getProperty(API_KEY_CACHING_TIME));
 	}
 	
 	@Override
+	@Deprecated
 	public String getValidationString() {
 		return getSetProperties().getProperty(VALIDATION_STRING);
 	}
@@ -62,4 +67,17 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 		return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());
 	}
 	
+	@Override
+    public String getJwtTokenSignatureKey() {
+		return getSetProperties().getProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY);
+    }
+	
+	public String getAuthorizationApiName() {
+    	return getSetProperties().getProperty(AUTHORIZATION_API_NAME);
+    }
+
+	@Override
+	public String getApiVersion() {
+	    return getSetProperties().getProperty(API_VERSION);
+	}	
 }

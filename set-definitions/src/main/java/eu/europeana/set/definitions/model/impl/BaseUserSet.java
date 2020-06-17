@@ -94,6 +94,9 @@ public class BaseUserSet implements UserSet {
     // Indicates whether the set is disabled in database
     private boolean disabled;
 	
+    // Contains query URI to items
+	private String isDefinedBy;
+	
 	public String getIdentifier() {
 		return identifier;
 	}
@@ -421,4 +424,23 @@ public class BaseUserSet implements UserSet {
 		this.disabled = disabled;		
 	}
 
+	@Override
+	public String getIsDefinedBy() {
+		return this.isDefinedBy;
+	}
+	
+	@Override
+	public void setIsDefinedBy(String isDefinedBy) {
+		this.isDefinedBy = isDefinedBy;
+	}
+	
+    /* (non-Javadoc)
+     * @see eu.europeana.set.definitions.model.UserSet#isOpenSet()
+     */
+    public boolean isOpenSet() {
+    	boolean res = false;
+    	if (getIsDefinedBy() != null) 
+    		res = true;
+    	return res;
+    }	
 }

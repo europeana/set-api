@@ -1,14 +1,4 @@
 <?xml version="1.0"?>
-
-<!-- Copyright 2007-2012 The Europeana Foundation Licenced under the EUPL, 
-	Version 1.1 (the "Licence") and subsequent versions as approved by the European 
-	Commission; You may not use this work except in compliance with the Licence. 
-	You may obtain a copy of the Licence at: http://joinup.ec.europa.eu/software/page/eupl 
-	Unless required by applicable law or agreed to in writing, software distributed 
-	under the Licence is distributed on an "AS IS" basis, without warranties 
-	or conditions of any kind, either express or implied. See the Licence for 
-	the specific language governing permissions and limitations under the Licence. -->
-
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -57,11 +47,12 @@
 			<version>${version.commonsLang3}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${version.commonsIo}</version>
-		</dependency>
+	<!--  apis not included in JDK 11 -->
+	<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>${version.javax.annotation}</version>
+		</dependency>	
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -90,7 +81,7 @@
 		
 
 		<!-- TESTING PURPOSES -->
-
+<!--  
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<version>${version.commonsApi}</version>
@@ -99,6 +90,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		 -->
 		
 		<dependency>
 			<scope>test</scope>

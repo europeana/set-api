@@ -30,6 +30,7 @@
 						<value>text/plain; charset=utf-8</value>
 					</list>
 				</property>
+				<property name="writeAcceptCharset" value="false"/>
 			</bean>
 		</mvc:message-converters>
 	</mvc:annotation-driven>

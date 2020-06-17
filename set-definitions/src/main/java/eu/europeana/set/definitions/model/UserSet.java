@@ -91,4 +91,18 @@ public interface UserSet {
 	boolean isDisabled();
 
 	void setDisabled(boolean disabled);
+	
+	/**
+	 * @return Holds a search request to the User Set API (complete URL pointing to production). 
+	 * To reduce complexity on the API, the exhaustive listing could also be expressed as a query.
+	 */
+	String getIsDefinedBy();
+	
+	void setIsDefinedBy(String query);
+	
+    /**
+     * This method detects if it is open or closed set
+     * @return true if it is an open set
+     */
+    public boolean isOpenSet();
 }

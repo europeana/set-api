@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.web.controller.exception.AbstractExceptionHandlingController;
-import eu.europeana.api.commons.web.model.ApiResponse;
-import eu.europeana.set.web.model.UserSetOperationResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandlingController {
@@ -19,19 +17,4 @@ public class GlobalExceptionHandler extends AbstractExceptionHandlingController 
 		return i18nService;
 	}
 	
-	@Override
-	public ApiResponse buildErrorResponse(String errorMessage, String action, String apiKey) {
-
-		UserSetOperationResponse response = new UserSetOperationResponse(apiKey, action);
-		response.success = false;
-		response.error = errorMessage;
-		return response;
-	}
-	
-	@Override
-	protected ApiResponse getErrorReport(String apiKey, String action, Throwable th, boolean includeErrorStack) {
-		UserSetOperationResponse response = (UserSetOperationResponse) super.getErrorReport(apiKey, action, th, includeErrorStack);
-		return response;
-	}
-
 }

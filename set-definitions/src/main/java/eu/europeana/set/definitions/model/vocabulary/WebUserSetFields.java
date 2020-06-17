@@ -16,6 +16,8 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String AND = "&";
 	public static final String EQUALS = "=";
 	public static final String JSON_LD_REST = ".jsonld";
+	public static final String FORMAT_JSONLD = "jsonld";
+	
 	
 	//
 	// Query Params
@@ -27,7 +29,9 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String PATH_PARAM_POSITION = "position";
 	public static final String USER_TOKEN = "userToken";
 	public static final String PROFILE = "profile";
-	
+	public static final String PARAM_SORT = "sort";
+	public static final String PARAM_SORT_ORDER = "sortOrder";
+
 	//
 	// Mongo
 	//
@@ -54,6 +58,7 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public final static String BASE_SET_URL = "http://data.europeana.eu/set/";
 	public final static String BASE_ITEM_URL = "http://data.europeana.eu/item/";
     public final static int MAX_ITEMS_PER_PAGE = 10;
+    public final static int DEFAULT_PAGE = 0;
     public final static String PAGE = "page";
 	public final static String PAGE_SIZE = "pageSize";
     public final static int MAX_ITEMS_TO_PRESENT = 1000;
@@ -74,10 +79,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String USER_ADMIN = "admin";	
 	public static final String PROVIDER_EUROPEANA_DEV = "eanadev";	
 	
-	//
-	// Validation definitions
-	//
-	public static final String READ_METHOD = "read";
-	public static final String WRITE_METHOD = "write";
-	public static final String DELETE_METHOD = "delete";	
+	// Europeana API
+    public final String BASE_URL_DATA = "http://data.europeana.eu/item";
 }
