@@ -30,14 +30,17 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 		return getSetProperties().getProperty(USERSET_ENVIRONMENT);
 	}
 	
+	@Deprecated
 	public String getValidationApi() {
 		return getSetProperties().getProperty(VALIDATION_API);
 	}
 
+	@Deprecated
 	public String getValidationAdminApiKey() {
 		return getSetProperties().getProperty(VALIDATION_ADMIN_API_KEY);
 	}
 
+	@Deprecated
 	public String getValidationAdminSecretKey() {
 		return getSetProperties().getProperty(VALIDATION_ADMIN_SECRET_KEY);
 	}
@@ -48,11 +51,13 @@ public class UserSetConfigurationImpl implements UserSetConfiguration{
 	}
 
 	@Override
+	@Deprecated
 	public long getApiKeyCachingTime() {
 		return Long.parseLong(getSetProperties().getProperty(API_KEY_CACHING_TIME));
 	}
 	
 	@Override
+	@Deprecated
 	public String getValidationString() {
 		return getSetProperties().getProperty(VALIDATION_STRING);
 	}

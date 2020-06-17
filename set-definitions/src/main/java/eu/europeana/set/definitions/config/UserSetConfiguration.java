@@ -12,12 +12,15 @@ public interface UserSetConfiguration {
 	public static final String VALUE_ENVIRONMENT_TEST = "test";
 	public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
 	
+	@Deprecated
 	public static final String VALIDATION_API = "api";
+	@Deprecated
 	public static final String VALIDATION_ADMIN_API_KEY = "adminapikey";
+	@Deprecated
 	public static final String VALIDATION_ADMIN_SECRET_KEY = "adminsecretkey";
-
+	@Deprecated
 	public static final String API_KEY_CACHING_TIME = "userset.apikey.caching.time";
-	
+	@Deprecated
 	public static final String VALIDATION_STRING = "validation.string";
 
 	//TODO: move constants to api commons

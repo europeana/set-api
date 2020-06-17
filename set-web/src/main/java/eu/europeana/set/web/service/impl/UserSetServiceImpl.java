@@ -356,7 +356,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		
 		// Respond with HTTP 200
 		// update an existing user set. merge user sets - insert new fields in existing object
-		UserSet updatedUserSet = updateUserSetExt(
+		UserSet updatedUserSet = updateUserSetInDb(
 				(PersistentUserSet) existingUserSet, null);
 		extUserSet = fillPagination(updatedUserSet);
 		return extUserSet;
@@ -390,7 +390,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
     @Override
-    public UserSet updateUserSet(UserSet storedUserSet, String apiKey, String action,
+    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey, String action,
     		String sort, String sortOrder, int pageNr, int pageSize)
 	    throws HttpException, IOException, JSONException {
     	
@@ -452,12 +452,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     /* (non-Javadoc)
      * @see eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(eu.europeana.set.definitions.model.UserSet, java.util.List)
      */
-    public UserSet updateUserSetExt(UserSet storedUserSet, List<String> items) {    	
-    	if (items.size() > 0) {
-	    	storedUserSet.setItems(items);
-	    	storedUserSet.setTotal(items.size());
-    	}
-    	return storedUserSet;
+    @Deprecated
+    //TODO: fix the implementation and remove this method
+    public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items) {    	
+//    	if (items.size() > 0) {
+//	    	storedUserSet.setItems(items);
+//	    	storedUserSet.setTotal(items.size());
+//    	}
+    	//simply store userSet
+	return getMongoPersistence().update((PersistentUserSet) storedUserSet);
     }
     
 }

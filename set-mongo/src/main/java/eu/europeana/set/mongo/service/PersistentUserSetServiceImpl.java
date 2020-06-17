@@ -132,6 +132,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	@Override
+	@Deprecated
+	//TODO: use store instead
 	public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException {
 		return store(userSet);
 	}

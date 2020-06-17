@@ -7,7 +7,6 @@ import java.util.List;
 import org.codehaus.jettison.json.JSONException;
 
 import eu.europeana.api.commons.definitions.search.Query;
-import eu.europeana.api.commons.web.exception.HttpException;
 
 
 public interface SetApiService {
@@ -20,7 +19,7 @@ public interface SetApiService {
 	 * @throws IOException
 	 * @throws JSONException
 	 */
-	List<String> parseItemsByUrl(String uri) throws HttpException, IOException, JSONException;
+	List<String> parseItemsByUrl(String uri) throws IOException, JSONException;
 
 	/**
 	 * This method searches the user sets using the provided search query and specific filters
@@ -28,7 +27,7 @@ public interface SetApiService {
 	 * @return
 	 * @throws HttpException
 	 */
-	public SearchApiResponse search(Query query) throws HttpException;
+	public SearchApiResponse search(Query query) throws Exception;
 	
     /**
      * @param uri
@@ -40,6 +39,6 @@ public interface SetApiService {
      * @throws HttpException
      */
     public SearchApiResponse queryEuropeanaApi(String uri, String apiKey, String action) 
-    		throws IOException, JSONException, HttpException;
+    		throws IOException, JSONException;
 
 }

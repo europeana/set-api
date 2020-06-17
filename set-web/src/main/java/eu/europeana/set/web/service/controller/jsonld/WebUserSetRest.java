@@ -106,9 +106,10 @@ public class WebUserSetRest extends BaseRest {
 			// generate an identifier (in sequence) for the Set
 			// generate and add a created and modified timestamp to the Set
 			UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
-
-			storedUserSet = fetchItemsPage(storedUserSet, 
+			if(storedUserSet.isOpenSet()) {
+			    storedUserSet = fetchItemsPage(storedUserSet, 
 					null, null, WebUserSetFields.DEFAULT_PAGE, WebUserSetFields.MAX_ITEMS_PER_PAGE);
+			}
 
 			String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet); 
 
@@ -183,7 +184,8 @@ public class WebUserSetRest extends BaseRest {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
 			// check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
+		    verifyReadAccess(request);
+//		    validateApiKey(wsKey);
 			
 			LdProfiles profile = getProfile(profileStr, request);
 
@@ -288,47 +290,56 @@ public class WebUserSetRest extends BaseRest {
 				// if false respond with HTTP 400
 				getUserSetService().validateWebUserSet(newUserSet);
 				
-				// if the Set corresponds to an open set, update the metadata associated to the Set, 
-				// and if the standard profile is requested, obtain the URIs for the items following 
-				// the logic defined for retrieving a Set.
-				if (newUserSet.isOpenSet()) {
-					newUserSet = fetchItemsPage(newUserSet,
-							null, null, WebUserSetFields.DEFAULT_PAGE, WebUserSetFields.MAX_ITEMS_PER_PAGE);
-				} else {
-					// If the provided userset contains a list of items and the profile is set to minimal, 
-					// respond with HTTP 412, also when standard profile is used and no items are provided, 
-					// respond with 412;
-					LdProfiles headerProfile = getHeaderProfile(request);
-					if ((newUserSet.getItems() != null && newUserSet.getItems().size() > 0 && (profile == LdProfiles.MINIMAL || headerProfile == LdProfiles.MINIMAL)) || 
-					    ((newUserSet.getItems() == null || newUserSet.getItems().size() == 0) && profile == LdProfiles.STANDARD)) { 
-						throw new ApplicationAuthenticationException(
-							I18nConstants.USERSET_CONTAINS_NO_ITEMS, I18nConstants.USERSET_CONTAINS_NO_ITEMS,
-							new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
-					}
-
-					// if the Set corresponds to a closed set, replace member items with the new items 
-					// that are present in the Set description only when a profile is indicated and 
-					// is different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header.
-					if (getHeaderProfile(request) != LdProfiles.MINIMAL)
-						newUserSet = getUserSetService().updateUserSetExt(existingUserSet, newUserSet.getItems());
-				}
-				
+						
 				//validate items 
 				validateUpdateItemsByProfile(existingUserSet, newUserSet, profile);
 				//remove duplicated items
 				getUserSetService().removeItemDuplicates(newUserSet);
 				
+				
+				
+				// If the provided userset contains a list of items and the profile is set to minimal, 
+				// respond with HTTP 412, also when standard profile is used and no items are provided, 
+				// respond with 412;
+				LdProfiles headerProfile = getHeaderProfile(request);
+				if ((newUserSet.getItems() != null && newUserSet.getItems().size() > 0 && (profile == LdProfiles.MINIMAL || headerProfile == LdProfiles.MINIMAL)) || 
+					    ((newUserSet.getItems() == null || newUserSet.getItems().size() == 0) && profile == LdProfiles.STANDARD)) { 
+						throw new ApplicationAuthenticationException(
+							I18nConstants.USERSET_CONTAINS_NO_ITEMS, I18nConstants.USERSET_CONTAINS_NO_ITEMS,
+							new String[] {}, HttpStatus.PRECONDITION_FAILED, null);	
+				}
+
+//					if (getHeaderProfile(request) != LdProfiles.MINIMAL) {
+//					    if (items.size() > 0) {
+//					    	storedUserSet.setItems(items);
+//					    	storedUserSet.setTotal(items.size());
+//				    	}
+//				}
+
+				
+				
 				// Respond with HTTP 200
-	            // update an existing user set. merge user sets - insert new fields in existing object
+				// update an existing user set. merge user sets - insert new fields in existing object
 				// update pagination
 				// generate and add a created and modified timestamp to the Set;
 				existingUserSet.setModified(newUserSet.getModified());
+				// if the Set corresponds to a closed set, replace member items with the new items 
+				// that are present in the Set description only when a profile is indicated and 
 				UserSet updatedUserSet = getUserSetService().updateUserSet(
 						(PersistentUserSet) existingUserSet, newUserSet);
 				
+				// if the Set corresponds to an open set, update the metadata associated to the Set, 
+				// and if the standard profile is requested, obtain the URIs for the items following 
+				// the logic defined for retrieving a Set.
+				//TODO: if different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header.
+				if (updatedUserSet.isOpenSet()) {
+				    updatedUserSet = fetchItemsPage(updatedUserSet,
+							null, null, WebUserSetFields.DEFAULT_PAGE, WebUserSetFields.MAX_ITEMS_PER_PAGE);
+				} 
+				
 				serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
 				modifiedDate = updatedUserSet.getModified();			
-		        httpStatus = HttpStatus.OK;
+				httpStatus = HttpStatus.OK;
 			}
 			
 			// build response entity with headers
@@ -356,7 +367,6 @@ public class WebUserSetRest extends BaseRest {
 		} catch (UserSetInstantiationException e) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
 		} catch (HttpException e) {
-				//TODO: change this when OAUTH is implemented and the user information is available in service
 				throw e;
 		} catch (Exception e) {
 			throw new InternalServerException(e);
@@ -365,7 +375,12 @@ public class WebUserSetRest extends BaseRest {
 
 	private void validateUpdateItemsByProfile(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
 			throws ApplicationAuthenticationException {
-		// update the Set based on its identifier (replace member items with the new items 
+	    //no validation of items for open sets, they are retrieved dynamically
+	    if(storedUserSet.isOpenSet()) {
+		return;
+	    }
+		
+	    // update the Set based on its identifier (replace member items with the new items 
 		// that are present in the Set description only when a profile is indicated and is 
 		// different from "ldp:PreferMinimalContainer" is referred in the "Prefer" header)
 		// if the provided userset contains a list of items and the profile is set to minimal, 
@@ -520,7 +535,8 @@ public class WebUserSetRest extends BaseRest {
 			// check user credentials, if invalid respond with HTTP 401,
 			//  or if unauthorized respond with HTTP 403
 			// check client access (a valid "wskey" must be provided)
-			validateApiKey(wsKey);
+//			validateApiKey(wsKey);
+		    	verifyReadAccess(request);
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
@@ -632,9 +648,9 @@ public class WebUserSetRest extends BaseRest {
 					
 		            // update an existing user set
 					UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);				
-					UserSet updatedUserSet = getUserSetService().updateUserSetExt(
+					UserSet updatedUserSet = getUserSetService().updateUserSetInDb(
 							(PersistentUserSet) existingUserSetPaginated, null);
-				
+					
 					// serialize to JsonLd
 					serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet); 
 

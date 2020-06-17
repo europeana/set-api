@@ -11,7 +11,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import eu.europeana.api.commons.definitions.search.Query;
-import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.search.connection.HttpConnection;
 import eu.europeana.set.search.service.SearchApiResponse;
@@ -46,7 +45,7 @@ public class SetApiServiceImpl implements SetApiService {
      * @throws JSONException 
      * @throws HttpException 
      */
-    public synchronized SearchApiResponse queryEuropeanaApi(String uri, String apiKey, String action) throws IOException, JSONException, HttpException {
+    public synchronized SearchApiResponse queryEuropeanaApi(String uri, String apiKey, String action) throws IOException, JSONException {
 		List<String> res = parseItemsByUrl(uri);
 		SearchApiResponse searchApiResponse = new SearchApiResponse(apiKey, action);
 		searchApiResponse.setItems(res);
@@ -90,7 +89,7 @@ public class SetApiServiceImpl implements SetApiService {
 	 * @see eu.europeana.set.search.service.SetApiService#parseItemsByUrl(java.lang.String)
 	 */
 	@Override
-	public List<String> parseItemsByUrl(String uri) throws HttpException, IOException, JSONException {
+	public List<String> parseItemsByUrl(String uri) throws IOException, JSONException {
 		String jsonResponse = getHttpConnection().getURLContent(uri);
 		JSONObject jo = parseJson(jsonResponse);
 		JSONArray itemsArray = jo.getJSONArray(WebUserSetFields.ITEMS);
@@ -98,7 +97,7 @@ public class SetApiServiceImpl implements SetApiService {
 	}
 
 	@Override
-	public SearchApiResponse search(Query query) throws HttpException {
+	public SearchApiResponse search(Query query)  {
 		// TODO Auto-generated method stub
 		return null;
 	}

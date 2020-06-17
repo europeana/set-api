@@ -23,6 +23,7 @@ public interface UserSetService {
 
     /**
      * This method converts close set to open set by updating respective items
+     * 
      * @param storedUserSet
      * @param apiKey
      * @param action
@@ -31,7 +32,9 @@ public interface UserSetService {
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet updateUserSet(UserSet storedUserSet, String apiKey, String action,
+	@Deprecated
+	//TODO: refactor and remove redundant parameters
+    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey, String action,
     		String sort, String sortOrder, int pageNr, int pageSize)
     	    throws HttpException, IOException, JSONException;
     
@@ -41,7 +44,7 @@ public interface UserSetService {
      * @param items
      * @return updated set
      */
-    public UserSet updateUserSetExt(UserSet storedUserSet, List<String> items);
+    public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items);
     
 	/**
 	 * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>

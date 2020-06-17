@@ -374,6 +374,7 @@ public class BaseRest extends BaseRestController {
 	 * @param wsKey
 	 * @throws EntityAuthenticationException
 	 */
+	@Deprecated
 	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
 
 		// throws exception if the wskey is not found
@@ -401,7 +402,7 @@ public class BaseRest extends BaseRestController {
     	if (userSet.isOpenSet()) {
 			String[] path = userSet.getIsDefinedBy().split("=");
 			String pathApiKey = path[path.length-1];
-			userSet = getUserSetService().updateUserSet(
+			userSet = getUserSetService().fetchDynamicSetItems(
 					userSet, pathApiKey, Operations.CREATE, sort, sortOrder, pageNr, pageSize);	
 		}
 		return userSet;

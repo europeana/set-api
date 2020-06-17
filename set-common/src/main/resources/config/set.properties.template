@@ -26,7 +26,7 @@ set.environment.development.baseUrl=http://localhost:8080/set
 ### annotation database ###
 #Format: "mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>"
 #USER, PASSWORD are optional (in local environment) 
-mongodb.set.connectionUrl=mongodb://127.0.0.1:27017/annotation_test
+mongodb.set.connectionUrl=mongodb://127.0.0.1:27017/set_test
 #SSL truststore
 #the name of the truststore. Must be available in the classpath in the /config folder
 mongodb.set.truststore=
@@ -34,9 +34,10 @@ mongodb.set.truststore=
 mongodb.set.truststorepass=
 
 
+#deprecated
 # validation
-api=set
-validation.string=
+#api=set
+#validation.string=
 # cache time for validation of ApiKey in milliseconds (value of type long)
 # e.g. 1800000 is 30 minutes
 #set.apikey.caching.time=1800000
@@ -50,9 +51,6 @@ europeana.apikey.serviceurl=
 
 #the name for annotation api resources in keyckloak tokens
 authorization.api.name=usersets
-
-# valid licenses list
-annotation.licenses=
 
 # User set API version
 set.api.version=

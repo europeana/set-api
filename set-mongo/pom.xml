@@ -46,13 +46,13 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>${version.commonsLang3}</version>
 		</dependency>
-<!-- 
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${version.commonsIo}</version>
-		</dependency>
- -->		
+
+	<!--  apis not included in JDK 11 -->
+	<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>${version.javax.annotation}</version>
+		</dependency>	
 
 		<dependency>
 			<groupId>junit</groupId>
