@@ -159,6 +159,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 				userSet.setType(updatedWebUserSet.getType());
 			}
 		
+			if (updatedWebUserSet.getVisibility() != null) {
+				userSet.setVisibility(updatedWebUserSet.getVisibility());
+			}
+			
 			if (updatedWebUserSet.getTitle() != null) {
 				if (userSet.getTitle() != null) {
 					for (Map.Entry<String, String> entry : updatedWebUserSet.getTitle().entrySet()) {

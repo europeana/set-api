@@ -32,6 +32,7 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
@@ -87,10 +88,10 @@ public class WebUserSetRest extends BaseRest {
 
 			// parse user set 
 			UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-
+			
 			// validate and process the Set description for format and mandatory fields
 			// if false respond with HTTP 400
-			getUserSetService().validateWebUserSet(webUserSet);
+			getUserSetService().validateWebUserSet(webUserSet);						
 			if(StringUtils.isEmpty(webUserSet.getContext()))
 				webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
@@ -159,12 +160,13 @@ public class WebUserSetRest extends BaseRest {
 		    @RequestParam(value = WebUserSetFields.PAGE, defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
 		    @RequestParam(value = WebUserSetFields.PAGE_SIZE, defaultValue = ""
 			    + WebUserSetFields.MAX_ITEMS_PER_PAGE) int pageSize,
-			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
+			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,					
 			HttpServletRequest request) throws HttpException {
 
 		String action = "get:/set/{identifier}{.jsonld}";
 		verifyReadAccess(request);
-		return getUserSet(wskey, profile, identifier, request, action, sortField, sortOrderField, page, pageSize);
+		return getUserSet(wskey, profile, identifier, request, action, sortField, sortOrderField, page, 
+				pageSize);
 	}
 
 	/**
@@ -179,20 +181,23 @@ public class WebUserSetRest extends BaseRest {
 	 * @throws HttpException
 	 */
 	private ResponseEntity<String> getUserSet(String wsKey, String profileStr, String identifier, 
-			HttpServletRequest request, String action, String sort, String sortOrder, int pageNr, int pageSize)
+			HttpServletRequest request, String action, String sort, String sortOrder, int pageNr, 
+			int pageSize)
 					throws HttpException {
 		try {
 			// check user credentials, if invalid respond with HTTP 401.
 			// check client access (a valid "wskey" must be provided)
 		    verifyReadAccess(request);
-//		    validateApiKey(wsKey);
-			
+		    
 			LdProfiles profile = getProfile(profileStr, request);
 
 			// retrieve a Set based on its identifier - process query
 			// if the Set doesn’t exist, respond with HTTP 404
 			// if the Set is disabled respond with HTTP 410
 			UserSet userSet = getUserSetService().getUserSetById(identifier);
+			
+			// check visibility level for given user
+		    checkStatus(request, userSet);
 			
 			// append the HTTP parameters related to sort, page and pageSize 
 			// to URL defined in the rdfs:isDefinedBy property
@@ -265,8 +270,17 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check visibility level for given user
+		    checkStatus(request, existingUserSet);
+			
 			// check if the user is the owner of the set or admin, otherwise respond with 403
 			verifyOwnerOrAdmin(existingUserSet, authentication);
+			
+		    // only an editor can set the state of a set to "published" 
+			// and only if the set is in "public" visibility.
+			if (hasEditorRole(authentication) && existingUserSet.getVisibility().equals(VisibilityTypes.PUBLIC.getName())) {
+				existingUserSet.setVisibility(VisibilityTypes.PUBLISHED.getName());
+			}
 			
 			// check timestamp if provided within the “If-Match” HTTP header, if false respond with HTTP 412
 		    String eTagOrigin = generateETag(
@@ -450,6 +464,9 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check visibility level for given user
+		    checkStatus(request, existingUserSet);
+			
 			// check if the user is the owner of the set or admin, otherwise respond with 403
 			verifyOwnerOrAdmin(existingUserSet, authentication);
 						
@@ -535,13 +552,15 @@ public class WebUserSetRest extends BaseRest {
 			// check user credentials, if invalid respond with HTTP 401,
 			//  or if unauthorized respond with HTTP 403
 			// check client access (a valid "wskey" must be provided)
-//			validateApiKey(wsKey);
-		    	verifyReadAccess(request);
+	    	verifyReadAccess(request);
 
 			// check if the Set exists, if not respond with HTTP 404
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check visibility level for given user
+		    checkStatus(request, existingUserSet);
+			
 			// check if the Set is disabled, respond with HTTP 410
 			HttpStatus httpStatus = null;
 			
@@ -627,6 +646,9 @@ public class WebUserSetRest extends BaseRest {
 			// retrieve an existing user set based on its identifier
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+			// check visibility level for given user
+		    checkStatus(request, existingUserSet);
+			
 			// check if the user is the owner of the set or admin, otherwise respond with 403
 			verifyOwnerOrAdmin(existingUserSet, authentication);
 			
@@ -716,6 +738,9 @@ public class WebUserSetRest extends BaseRest {
 			// if the Set doesn’t exist, respond with HTTP 404
 			UserSet existingUserSet = getUserSetService().getUserSetById(identifier, false);
 
+			// check visibility level for given user
+		    checkStatus(request, existingUserSet);
+			
 			// check that only the admins and the owners of the user sets are allowed to delete the user set. 
 			// in the case of regular users (not admins), the autorization method must check if the users 
 			// that calls the deletion (i.e. identified by provided user token) is the same user as the creator 

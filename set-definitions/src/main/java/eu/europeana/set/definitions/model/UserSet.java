@@ -12,6 +12,10 @@ public interface UserSet {
 
 	void setType(String type);
 
+	String getVisibility();
+
+	void setVisibility(String visibility);
+
 	Map<String, String> getTitle();
 
 	void setTitle(Map<String, String> title);
