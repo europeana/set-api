@@ -149,7 +149,13 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	@Override
 	@JsonIgnore
 	public ObjectId getObjectId() {
-		return super.getObjectId();
+	    return super.getObjectId();
 	}
 	
+	@Override
+	@JsonIgnore
+	public boolean isOpenSet() {
+	    // TODO Auto-generated method stub
+	    return super.isOpenSet();
+	}
 }
