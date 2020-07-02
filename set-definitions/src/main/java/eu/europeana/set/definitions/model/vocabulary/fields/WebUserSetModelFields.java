@@ -9,6 +9,9 @@ public interface WebUserSetModelFields {
 	//** common fields **/
 	public static final String ID = "id";
 	public static final String TYPE = "type";
+	public static final String TYPE_OPEN = "open";
+	public static final String TYPE_CLOSED = "closed";
+	
 	public static final String TITLE = "title";
 
 	
@@ -17,7 +20,9 @@ public interface WebUserSetModelFields {
 	public static final String CREATOR = "creator";
 	public static final String CREATED = "created";
 	public static final String IS_DEFINED_BY = "isDefinedBy";
-	public static final String TOTAL = "total";	
+	public static final String ITEMS = "items";
+	public static final String TOTAL = "total";
+	
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
 	
