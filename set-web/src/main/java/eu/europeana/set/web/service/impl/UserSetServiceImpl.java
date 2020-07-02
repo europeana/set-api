@@ -257,8 +257,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		
 		// validate isDefinedBy and items - we should not have both of them
 		if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
-		    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-			    new String[] { WebUserSetModelFields.IS_DEFINED_BY });
+		    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+			    new String[] { WebUserSetModelFields.ITEMS,  WebUserSetModelFields.TYPE_OPEN});
 		}
 	}
 	
