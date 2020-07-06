@@ -1,7 +1,5 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -113,13 +111,15 @@ public class WebUserSetRest extends BaseRest {
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
 
+	    String etag = generateETag(storedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
 	    headers.add(HttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
 	    // generate “ETag”;
-	    headers.add(HttpHeaders.ETAG, "" + storedUserSet.getModified().hashCode());
+	    headers.add(HttpHeaders.ETAG, etag);
 	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
 
 	    ResponseEntity<String> response = new ResponseEntity<String>(serializedUserSetJsonLdStr, headers,
@@ -202,6 +202,8 @@ public class WebUserSetRest extends BaseRest {
 
 	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
 
+	    String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+
 	    // build response
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
@@ -210,7 +212,7 @@ public class WebUserSetRest extends BaseRest {
 	    headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
 	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
 	    // generate “ETag”;
-	    headers.add(HttpHeaders.ETAG, "" + userSet.getModified().hashCode());
+	    headers.add(HttpHeaders.ETAG, etag);
 
 	    ResponseEntity<String> response = new ResponseEntity<String>(userSetJsonLdStr, headers, HttpStatus.OK);
 
@@ -276,74 +278,52 @@ public class WebUserSetRest extends BaseRest {
 	    checkIfMatchHeader(eTagOrigin, request);
 
 	    // check if the Set is disabled, respond with HTTP 410
-	    HttpStatus httpStatus = null;
-	    Date modifiedDate = null;
-	    String serializedUserSetJsonLdStr = "";
 	    if (existingUserSet.isDisabled()) {
-		httpStatus = HttpStatus.GONE;
-	    } else {
-		// parse fields of the new user set to an object
-		UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-
-		// validate and process the Set description for format and mandatory fields
-		// if false respond with HTTP 400
-		getUserSetService().validateWebUserSet(newUserSet);
-
-		// validate items
-		validateUpdateItemsByProfile(existingUserSet, newUserSet, profile);
-		// remove duplicated items
-		getUserSetService().removeItemDuplicates(newUserSet);
-
-		// If the provided userset contains a list of items and the profile is set to
-		// minimal,
-		// respond with HTTP 412, also when standard profile is used and no items are
-		// provided,
-		// respond with 412;
-		LdProfiles headerProfile = getHeaderProfile(request);
-		if ((newUserSet.getItems() != null && newUserSet.getItems().size() > 0
-			&& (profile == LdProfiles.MINIMAL || headerProfile == LdProfiles.MINIMAL))
-			|| ((newUserSet.getItems() == null || newUserSet.getItems().size() == 0)
-				&& profile == LdProfiles.STANDARD)) {
-		    throw new ApplicationAuthenticationException(I18nConstants.USERSET_CONTAINS_NO_ITEMS,
-			    I18nConstants.USERSET_CONTAINS_NO_ITEMS, new String[] {}, HttpStatus.PRECONDITION_FAILED,
-			    null);
-		}
-
-//					if (getHeaderProfile(request) != LdProfiles.MINIMAL) {
-//					    if (items.size() > 0) {
-//					    	storedUserSet.setItems(items);
-//					    	storedUserSet.setTotal(items.size());
-//				    	}
-//				}
-
-		// Respond with HTTP 200
-		// update an existing user set. merge user sets - insert new fields in existing
-		// object
-		// update pagination
-		// generate and add a created and modified timestamp to the Set;
-		existingUserSet.setModified(newUserSet.getModified());
-		// if the Set corresponds to a closed set, replace member items with the new
-		// items
-		// that are present in the Set description only when a profile is indicated and
-		UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet,
-			newUserSet);
-
-		// if the Set corresponds to an open set, update the metadata associated to the
-		// Set,
-		// and if the standard profile is requested, obtain the URIs for the items
-		// following
-		// the logic defined for retrieving a Set.
-		// TODO: if different from "ldp:PreferMinimalContainer" is referred in the
-		// "Prefer" header.
-		if (updatedUserSet.isOpenSet()) {
-		    updatedUserSet = fetchItemsPage(updatedUserSet, null, null, WebUserSetFields.DEFAULT_PAGE,
-			    WebUserSetFields.MAX_ITEMS_PER_PAGE);
-		}
-
-		serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-		modifiedDate = updatedUserSet.getModified();
-		httpStatus = HttpStatus.OK;
+		return generateGoneResponse(existingUserSet);
 	    }
+
+	    // parse fields of the new user set to an object
+	    UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
+
+	    // validate and process the Set description for format and mandatory fields
+	    // if false respond with HTTP 400
+	    getUserSetService().validateWebUserSet(newUserSet);
+
+	    // validate items
+	    validateAndSetItems(existingUserSet, newUserSet, profile);
+	    // remove duplicated items
+	    getUserSetService().removeItemDuplicates(newUserSet);
+
+
+	    // Respond with HTTP 200
+	    // update an existing user set. merge user sets - insert new fields in existing
+	    // object
+	    // update pagination
+	    // generate and add a created and modified timestamp to the Set;
+	    
+	    // if the Set corresponds to a closed set, replace member items with the new
+	    // items
+	    // that are present in the Set description only when a profile is indicated and
+	    //modified date is set in the service;
+	    UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
+
+	    // if the Set corresponds to an open set, update the metadata associated to the
+	    // Set,
+	    // and if the standard profile is requested, obtain the URIs for the items
+	    // following
+	    // the logic defined for retrieving a Set.
+	    // TODO: if different from "ldp:PreferMinimalContainer" is referred in the
+	    // "Prefer" header.
+	    if (updatedUserSet.isOpenSet() && LdProfiles.STANDARD.equals(profile)) {
+		updatedUserSet = fetchItemsPage(updatedUserSet, null, null, WebUserSetFields.DEFAULT_PAGE,
+			WebUserSetFields.MAX_ITEMS_PER_PAGE);
+	    }
+
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+	    
+	    //TODO: refactor to use a build response method
+	    // generate “ETag”;
+	    String eTagNew = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	    // build response entity with headers
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
@@ -352,12 +332,10 @@ public class WebUserSetRest extends BaseRest {
 	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
 	    headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
 	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-	    // generate “ETag”;
-	    String eTagNew = generateETag(modifiedDate, WebFields.FORMAT_JSONLD, getApiVersion());
 	    headers.add(HttpHeaders.ETAG, eTagNew);
 
 	    ResponseEntity<String> response = new ResponseEntity<String>(serializedUserSetJsonLdStr, headers,
-		    httpStatus);
+		    HttpStatus.OK);
 
 	    return response;
 
@@ -374,13 +352,29 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
-    private void validateUpdateItemsByProfile(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
+    private ResponseEntity<String> generateGoneResponse(UserSet existingUserSet) {
+	String eTag = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+
+	// build response entity with headers
+	MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+	headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
+//	    headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
+	headers.add(HttpHeaders.ETAG, eTag);
+
+	ResponseEntity<String> response = new ResponseEntity<String>("", headers, HttpStatus.GONE);
+	return response;
+    }
+
+    private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
 	    throws ApplicationAuthenticationException {
 	// no validation of items for open sets, they are retrieved dynamically
 	if (storedUserSet.isOpenSet()) {
 	    return;
 	}
-
+	
+	
 	// update the Set based on its identifier (replace member items with the new
 	// items
 	// that are present in the Set description only when a profile is indicated and
@@ -397,7 +391,7 @@ public class WebUserSetRest extends BaseRest {
 			I18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {}, HttpStatus.PRECONDITION_FAILED,
 			null);
 	    }
-	} else { // it is a minimal profile
+	} else { // it is a Standard profile
 	    if (updateUserSet.getItems() == null || updateUserSet.getItems().size() == 0) { // new user set contains no
 											    // items
 		throw new ApplicationAuthenticationException(I18nConstants.USERSET_CONTAINS_NO_ITEMS,
@@ -466,25 +460,23 @@ public class WebUserSetRest extends BaseRest {
 	    checkIfMatchHeader(eTagOrigin, request);
 
 	    // check if the Set is disabled, respond with HTTP 410
-	    HttpStatus httpStatus = null;
-	    String serializedUserSetJsonLdStr = "";
-
 	    if (existingUserSet.isDisabled()) {
-		httpStatus = HttpStatus.GONE;
-	    } else {
-		UserSet extUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-		serializedUserSetJsonLdStr = serializeUserSet(profile, extUserSet);
-		httpStatus = HttpStatus.OK;
-	    }
+		return generateGoneResponse(existingUserSet);
+	    } 
+
+	    UserSet updatedUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+	    
+	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	    // build response entity with headers
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
 	    headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
 	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-
+	    headers.add(HttpHeaders.ETAG, etag);
 	    ResponseEntity<String> response = new ResponseEntity<String>(serializedUserSetJsonLdStr, headers,
-		    httpStatus);
+		    HttpStatus.OK);
 
 	    return response;
 
@@ -554,19 +546,19 @@ public class WebUserSetRest extends BaseRest {
 	    HttpStatus httpStatus = null;
 
 	    if (existingUserSet.isDisabled()) {
-		httpStatus = HttpStatus.GONE;
-	    } else {
-		String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
-			WebUserSetFields.BASE_ITEM_URL);
+		return generateGoneResponse(existingUserSet);
+	    } 
+	    
+	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
+		    WebUserSetFields.BASE_ITEM_URL);
 
-		// check if item already exists in the Set, if so respond with
-		// HTTP 200, otherwise respond with HTTP 404.
-		// check if item already exists in the Set, if so remove it
-		if (existingUserSet.getItems().contains(newItem)) {
-		    httpStatus = HttpStatus.NO_CONTENT;
-		} else {
-		    httpStatus = HttpStatus.NOT_FOUND;
-		}
+	    // check if item already exists in the Set, if so respond with
+	    // HTTP 200, otherwise respond with HTTP 404.
+	    // check if item already exists in the Set, if so remove it
+	    if (existingUserSet.getItems().contains(newItem)) {
+		httpStatus = HttpStatus.NO_CONTENT;
+	    } else {
+		httpStatus = HttpStatus.NOT_FOUND;
 	    }
 
 	    // build response entity with headers
@@ -642,47 +634,47 @@ public class WebUserSetRest extends BaseRest {
 	    verifyOwnerOrAdmin(existingUserSet, authentication);
 
 	    // check if the Set is disabled, respond with HTTP 410
-	    HttpStatus httpStatus = null;
-	    String serializedUserSetJsonLdStr = "";
 	    if (existingUserSet.isDisabled()) {
-		httpStatus = HttpStatus.GONE;
-	    } else {
-		String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
-			WebUserSetFields.BASE_ITEM_URL);
-
-		// check if item already exists in the Set, if not respond with HTTP 404
-		if (existingUserSet.getItems() != null && existingUserSet.getItems().contains(newItem)) {
-		    // if already exists - remove item and update modified date
-		    existingUserSet.getItems().remove(newItem);
-		    Date now = new Date();
-		    existingUserSet.setModified(now);
-
-		    // update an existing user set
-		    UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);
-		    UserSet updatedUserSet = getUserSetService()
-			    .updateUserSetInDb((PersistentUserSet) existingUserSetPaginated, null);
-
-		    // serialize to JsonLd
-		    serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-
-		    // respond with HTTP 200 containing the updated Set description as body.
-		    // serialize Set in JSON-LD following the requested profile
-		    // (if not indicated assume the default, ie. minimal)
-		    httpStatus = HttpStatus.OK;
-		} else {
-		    throw new UserSetNotFoundException(I18nConstants.USERSET_ITEM_NOT_FOUND,
-			    I18nConstants.USERSET_ITEM_NOT_FOUND,
-			    new String[] { datasetId + "/" + localId, identifier });
-		}
+		return generateGoneResponse(existingUserSet);
 	    }
+	    
+	    
+	   
+	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
+		    WebUserSetFields.BASE_ITEM_URL);
 
+	    // check if item already exists in the Set, if not respond with HTTP 404
+	    boolean hasItem = existingUserSet.getItems() != null && existingUserSet.getItems().contains(newItem);
+	    if (!hasItem) {
+		// TODO: consider changing to generateItemNotFoundResponse
+		throw new UserSetNotFoundException(I18nConstants.USERSET_ITEM_NOT_FOUND,
+			I18nConstants.USERSET_ITEM_NOT_FOUND, new String[] { datasetId + "/" + localId, identifier });
+	    }
+	    
+	   
+	    // if already exists - remove item and update modified date
+	    existingUserSet.getItems().remove(newItem);
+	    
+	    // update an existing user set
+	    UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);
+	    UserSet updatedUserSet = getUserSetService().updateUserSetInDb((PersistentUserSet) existingUserSetPaginated,
+		    null);
+
+	    // serialize to JsonLd
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+
+	    // respond with HTTP 200 containing the updated Set description as body.
+	    // serialize Set in JSON-LD following the requested profile
+	    // (if not indicated assume the default, ie. minimal)
 	    // build response entity with headers
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
 	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+	    headers.add(HttpHeaders.ETAG, etag);
 
 	    ResponseEntity<String> response = new ResponseEntity<String>(serializedUserSetJsonLdStr, headers,
-		    httpStatus);
+		    HttpStatus.OK);
 
 	    return response;
 
@@ -693,8 +685,6 @@ public class WebUserSetRest extends BaseRest {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY,
 		    new String[] { e.getMessage() }, e);
 	} catch (HttpException e) {
-	    // TODO: change this when OAUTH is implemented and the user information is
-	    // available in service
 	    throw e;
 	} catch (Exception e) {
 	    throw new InternalServerException(e);

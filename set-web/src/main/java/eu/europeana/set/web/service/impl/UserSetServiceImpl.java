@@ -131,7 +131,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
 		mergeUserSetProperties(persistentUserSet, webUserSet);
 		updateUserSetPagination(persistentUserSet);
-		
+		//update modified date
+		persistentUserSet.setModified(new Date());
 		UserSet res = getMongoPersistence().update(persistentUserSet);
 		return res;
 	}
@@ -459,6 +460,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	    	storedUserSet.setItems(items);
 //	    	storedUserSet.setTotal(items.size());
 //    	}
+	storedUserSet.setModified(new Date());
     	//simply store userSet
 	return getMongoPersistence().update((PersistentUserSet) storedUserSet);
     }

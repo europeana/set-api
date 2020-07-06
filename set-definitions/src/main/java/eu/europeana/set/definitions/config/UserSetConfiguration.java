@@ -26,7 +26,7 @@ public interface UserSetConfiguration {
 	//TODO: move constants to api commons
 	public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
 	public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
-	public static final String API_VERSION = "userset.api.version";
+	public static final String API_VERSION = "set.api.version";
 	
 	
 	public String getComponentName();

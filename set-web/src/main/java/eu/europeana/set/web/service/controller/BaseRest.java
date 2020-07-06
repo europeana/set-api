@@ -385,7 +385,7 @@ public class BaseRest extends BaseRestController {
 	}
 
 	public String getApiVersion() {
-    	return getAuthorizationService().getConfiguration().getApiVersion();
+    	return getConfiguration().getApiVersion();
     }
 	
     /**

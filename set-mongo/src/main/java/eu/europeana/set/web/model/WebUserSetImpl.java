@@ -110,17 +110,22 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	}
 	
 	/**
-	 * This method presents IP as URL.
-	 * @param id The user set id
+	 * This method presents Id as URL.
+	 * 
+	 * @param id   The user set id
 	 * @param base The base URL
 	 * @return string presenting ID as URL
 	 */
 	@JsonldProperty("id")
 	public String getId() {
-		StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(WebUserSetFields.BASE_SET_URL); 
-        urlBuilder.append(super.getIdentifier()); 
-        return urlBuilder.toString();
+	    StringBuilder urlBuilder = new StringBuilder();
+	    urlBuilder.append(WebUserSetFields.BASE_SET_URL);
+	    urlBuilder.append(super.getIdentifier());
+	    return urlBuilder.toString();
+	}
+	
+	public void setId(String id) {
+	    //this method is defined just for avoiding parse errors in update method, the URI is ignored as the identifier from URL is used
 	}
 	
 	public String toString() {
