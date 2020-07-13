@@ -35,7 +35,6 @@ import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.vocabulary.Operations;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.UserSetService;
-import eu.europeana.set.web.service.authentication.AuthenticationService;
 import eu.europeana.set.web.service.authorization.AuthorizationService;
 
 public class BaseRest extends BaseRestController {
@@ -45,9 +44,6 @@ public class BaseRest extends BaseRestController {
 
 	@Resource
 	private UserSetService userSetService;
-
-	@Resource
-	AuthenticationService authenticationService;
 
 	@Resource
 	AuthorizationService authorizationService;
@@ -72,14 +68,6 @@ public class BaseRest extends BaseRestController {
 
 	public void setConfiguration(UserSetConfiguration configuration) {
 		this.configuration = configuration;
-	}
-
-	public AuthenticationService getAuthenticationService() {
-		return authenticationService;
-	}
-
-	public void setAuthenticationService(AuthenticationService authenticationService) {
-		this.authenticationService = authenticationService;
 	}
 
 	public AuthorizationService getAuthorizationService() {
@@ -368,25 +356,9 @@ public class BaseRest extends BaseRestController {
 		return userSet;
 	}
 
-	/**
-	 * This method is used for validation of the provided api key
-	 * 
-	 * @param wsKey
-	 * @throws EntityAuthenticationException
-	 */
-	@Deprecated
-	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
-
-		// throws exception if the wskey is not found
-		if (StringUtils.isEmpty(wsKey)) {
-			throw new ApplicationAuthenticationException(I18nConstants.EMPTY_APIKEY, null);
-		}
-		getAuthenticationService().getByApiKey(wsKey);
-	}
-
 	public String getApiVersion() {
-    	return getConfiguration().getApiVersion();
-    }
+	    return getConfiguration().getApiVersion();
+	}
 	
     /**
      * This method performs query to Europeana API using URI defined in isDefinedBy parameter.

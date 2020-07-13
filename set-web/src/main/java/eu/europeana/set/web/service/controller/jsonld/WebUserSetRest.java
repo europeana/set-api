@@ -154,7 +154,6 @@ public class WebUserSetRest extends BaseRest {
     public ResponseEntity<String> getUserSet(
 	    @RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-	    @RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
 	    @RequestParam(value = WebUserSetFields.PAGE, defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
@@ -234,14 +233,13 @@ public class WebUserSetRest extends BaseRest {
     @ApiOperation(notes = SwaggerConstants.UPDATE_SAMPLES_JSONLD, value = "Update an existing user set", nickname = "update", response = java.lang.Void.class)
     public ResponseEntity<String> updateUserSet(
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier, @RequestBody String userSet,
-	    @RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
 	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "put:/set/{identifier}";
 	// check user credentials, if invalid respond with HTTP 401,
 	Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
-	return updateUserSet(request, authentication, identifier, userSet, userToken, profile, action);
+	return updateUserSet(request, authentication, identifier, userSet, profile, action);
     }
 
     /**
@@ -258,7 +256,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     protected ResponseEntity<String> updateUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String userSetJsonLdStr, String userToken, String profileStr, String action)
+	    String identifier, String userSetJsonLdStr, String profileStr, String action)
 	    throws HttpException {
 
 	try {
@@ -409,7 +407,6 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 	    @RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required = false) String position,
-	    @RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
 	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
@@ -417,7 +414,7 @@ public class WebUserSetRest extends BaseRest {
 	// check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
-	return insertItemIntoUserSet(request, authentication, identifier, datasetId, localId, position, userToken,
+	return insertItemIntoUserSet(request, authentication, identifier, datasetId, localId, position,
 		profile, action);
     }
 
@@ -440,7 +437,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String datasetId, String localId, String position, String userToken, String profileStr,
+	    String identifier, String datasetId, String localId, String position, String profileStr,
 	    String action) throws HttpException {
 
 	try {
@@ -504,13 +501,11 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
-	    @RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
-//			@RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,			
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "get:/set/{identifier}/{dataset_id}/{local_id}";
 	verifyReadAccess(request);
-	return isItemInUserSet(request, wskey, identifier, datasetId, localId, userToken, action);
+	return isItemInUserSet(request, wskey, identifier, datasetId, localId, action);
     }
 
     /**
@@ -529,7 +524,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     protected ResponseEntity<String> isItemInUserSet(HttpServletRequest request, String wsKey, String identifier,
-	    String datasetId, String localId, String userToken, String action) throws HttpException {
+	    String datasetId, String localId, String action) throws HttpException {
 
 	try {
 	    // check user credentials, if invalid respond with HTTP 401,
@@ -591,7 +586,6 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
-	    @RequestParam(value = WebUserSetFields.USER_TOKEN, required = false, defaultValue = WebUserSetFields.USER_ANONYMOUNS) String userToken,
 	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
@@ -599,7 +593,7 @@ public class WebUserSetRest extends BaseRest {
 	// check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-	return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId, userToken, profile,
+	return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId, profile,
 		action);
     }
 
@@ -619,7 +613,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String datasetId, String localId, String userToken, String profileStr, String action)
+	    String identifier, String datasetId, String localId,String profileStr, String action)
 	    throws HttpException {
 
 	try {

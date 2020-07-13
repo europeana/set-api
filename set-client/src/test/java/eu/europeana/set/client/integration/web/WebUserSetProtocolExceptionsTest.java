@@ -48,10 +48,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 		String requestBody = getJsonStringInput(USER_SET_CONTENT);
 		
 		ResponseEntity<String> response = getApiClient().createUserSet(
-				UNKNOWN_WSKEY
-				, requestBody
-				, TEST_USER_TOKEN
-				);
+				UNKNOWN_WSKEY, requestBody);
 		
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
@@ -61,10 +58,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 	public void createWebsetUserSetWithoutBody() {
 		
 		ResponseEntity<String> response = getApiClient().createUserSet(
-				getApiKey()
-				, null
-				, TEST_USER_TOKEN
-				);
+				getApiKey(), null);
 		
 		assertEquals( HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
@@ -75,9 +69,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 		
 		ResponseEntity<String> response = getApiClient().createUserSet(
 				getApiKey()
-				, CORRUPTED_JSON
-				, TEST_USER_TOKEN
-				);
+				, CORRUPTED_JSON);
 		
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
@@ -86,9 +78,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 	public void getWebUserSetWithWrongIdentifier() {
 		
 		ResponseEntity<String> response = getApiClient().getUserSet(
-				getApiKey()
-				, WRONG_GENERATED_IDENTIFIER
-				, TEST_USER_TOKEN);
+				getApiKey(), WRONG_GENERATED_IDENTIFIER);
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 	
@@ -100,9 +90,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 		ResponseEntity<String> response = getApiClient().updateUserSet(
 				getApiKey()
 				, WRONG_GENERATED_IDENTIFIER
-				, requestBody
-				, TEST_USER_TOKEN
-				);
+				, requestBody);
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 			
@@ -114,9 +102,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 		ResponseEntity<String> response = getApiClient().updateUserSet(
 				getApiKey()
 				, WRONG_GENERATED_IDENTIFIER
-				, requestBody
-				, TEST_USER_TOKEN
-				);
+				, requestBody);
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 	

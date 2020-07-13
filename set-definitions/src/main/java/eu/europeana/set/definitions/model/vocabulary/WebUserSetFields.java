@@ -27,7 +27,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
 	public static final String PATH_PARAM_DATASET_ID = "datasetId";
 	public static final String PATH_PARAM_LOCAL_ID = "localId";
 	public static final String PATH_PARAM_POSITION = "position";
-	public static final String USER_TOKEN = "userToken";
 	public static final String PROFILE = "profile";
 	public static final String PARAM_SORT = "sort";
 	public static final String PARAM_SORT_ORDER = "sortOrder";
@@ -49,7 +48,6 @@ public interface WebUserSetFields extends WebUserSetModelFields{
     public final static String ITEMS = "items";
     
     // Defaults
-	public static final String USER_ANONYMOUNS = "anonymous";
 	public static final String PROFILE_MINIMAL = "minimal";
     
     //
