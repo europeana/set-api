@@ -1,0 +1,10 @@
+{
+  "type": "Collection",
+  "title": {
+     "en": "Cinema of attraction"
+  },
+  "description": {
+     "en": "From around 1907 to 1913, film makers were seeking to make distinctive images that went beyond everyday life representations. Their curiosity brought …"
+  },
+  "isDefinedBy":"https://api.europeana.eu/api/v2/search.json?query=%28europeana_collectionName%3A08641%2A%20AND%20NOT%28proxy_dc_identifier%3A%5C%221037479000000477087%5C%22%29%29"
+}

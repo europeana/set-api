@@ -33,23 +33,17 @@ mongodb.set.truststore=
 #password required to access the truststore
 mongodb.set.truststorepass=
 
-
-#deprecated
-# validation
-#api=set
-#validation.string=
-# cache time for validation of ApiKey in milliseconds (value of type long)
-# e.g. 1800000 is 30 minutes
-#set.apikey.caching.time=1800000
-
-
 # apikey verification settings
 #string value representing the key used for JWT signature verification
 europeana.apikey.jwttoken.siganturekey=
+
 #URL of the APIKEY service
 europeana.apikey.serviceurl=
 
-#the name for annotation api resources in keyckloak tokens
+#API key used for invocation of search api
+europeana.search.apikey=
+
+#the name for annotation api resources in keykloack tokens
 authorization.api.name=usersets
 
 # User set API version

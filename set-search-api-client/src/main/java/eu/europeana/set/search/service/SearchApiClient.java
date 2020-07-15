@@ -4,12 +4,13 @@ package eu.europeana.set.search.service;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.httpclient.HttpException;
 import org.codehaus.jettison.json.JSONException;
 
-import eu.europeana.api.commons.definitions.search.Query;
+import eu.europeana.set.search.exception.SearchApiClientException;
 
 
-public interface SetApiService {
+public interface SearchApiClient {
 
 	/**
 	 * This methods converts items from user set object to a list of IDs.
@@ -18,8 +19,9 @@ public interface SetApiService {
 	 * @throws HttpException
 	 * @throws IOException
 	 * @throws JSONException
+	 * @throws SearchApiClientException 
 	 */
-	List<String> parseItemsByUrl(String uri) throws IOException, JSONException;
+//	List<String> searchItems(String uri) throws SearchApiClientException;
 
 	/**
 	 * This method searches the user sets using the provided search query and specific filters
@@ -27,7 +29,7 @@ public interface SetApiService {
 	 * @return
 	 * @throws HttpException
 	 */
-	public SearchApiResponse search(Query query) throws Exception;
+//	public SearchApiResponse search(Query query) throws Exception;
 	
     /**
      * @param uri
@@ -36,9 +38,10 @@ public interface SetApiService {
      * @return
      * @throws IOException
      * @throws JSONException
+     * @throws SearchApiClientException 
      * @throws HttpException
      */
-    public SearchApiResponse queryEuropeanaApi(String uri, String apiKey, String action) 
-    		throws IOException, JSONException;
+    public SearchApiResponse searchItems(String uri, String apiKey, String action) 
+    		throws SearchApiClientException;
 
 }
