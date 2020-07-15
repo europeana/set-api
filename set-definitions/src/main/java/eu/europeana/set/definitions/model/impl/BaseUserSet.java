@@ -20,6 +20,9 @@ public class BaseUserSet implements UserSet {
 	// Type of user set e.g. Collection
     private String type;
 
+	// Visibility of user set e.g. private
+    private String visibility;
+
     // Name of user set
     private Map<String, String> title; 
 
@@ -443,4 +446,14 @@ public class BaseUserSet implements UserSet {
     		res = true;
     	return res;
     }	
+
+    @Override
+	public String getVisibility() {
+		return this.visibility;
+	}
+
+	@Override
+	public void setVisibility(String visibility) {
+		this.visibility = visibility;
+	}
 }

@@ -31,6 +31,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.model.vocabulary.Operations;
@@ -113,6 +114,39 @@ public class BaseRest extends BaseRestController {
 		return profile;
 	}
 
+	/**
+	 * This method checks visibility level
+	 *     
+	 * @param request
+	 * @param userSet
+	 * @throws HttpException
+	 */
+	public void checkStatus(HttpServletRequest request, UserSet userSet) throws HttpException {
+		Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+
+		String visibility = userSet.getVisibility();
+		if (visibility.equals(VisibilityTypes.PRIVATE.getName())) {
+			// private: only visible to the owner
+			if (!isOwner(userSet, authentication)) {
+				throw new ParamValidationException(I18nConstants.USER_NOT_AUTHORIZED, I18nConstants.USER_NOT_AUTHORIZED,
+						new String[] { WebUserSetFields.VISIBILITY, visibility });
+			}
+		}
+
+		if (visibility.equals(VisibilityTypes.PUBLIC.getName())) {
+			// public: visible to the owner and anyone else that the owner shared with (also editors)
+			if (!isOwner(userSet, authentication) && !hasEditorRole(authentication)) {
+				throw new ParamValidationException(I18nConstants.USER_NOT_AUTHORIZED, I18nConstants.USER_NOT_AUTHORIZED,
+						new String[] { WebUserSetFields.VISIBILITY, visibility });
+			}
+		}
+
+		if (StringUtils.isBlank(visibility) 
+				|| visibility.equals(VisibilityTypes.PUBLISHED.getName())) {
+			// published: visible to all users on Collections (can only be set by an editor)
+		}
+	}
+	
 	/**
 	 * This method identifies profile from a HTTP header if it exists.
 	 * 
@@ -237,6 +271,23 @@ public class BaseRest extends BaseRestController {
 		return false;
     }
     
+    /**
+     * Check if user is an editor
+     * @param authentication
+     * @return true if user has editor role
+     */
+    protected boolean hasEditorRole(Authentication authentication) {
+    	
+		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator.hasNext();) {
+		    //role based authorization
+		    String role = iterator.next().getAuthority();
+		    if(Roles.EDITOR.getName().equals(role)){
+		    	return true;
+		    }
+		}
+		return false;
+    }
+    
 	/**
 	 * This method parses prefer header in keys and values
 	 * 
@@ -321,5 +372,4 @@ public class BaseRest extends BaseRestController {
 	}
 	return userSet;
     }
-       
 }

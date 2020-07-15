@@ -177,6 +177,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		userSet.setType(updatedWebUserSet.getType());
 	    }
 
+	    if (updatedWebUserSet.getVisibility() != null) {
+		userSet.setVisibility(updatedWebUserSet.getVisibility());
+	    }
+
 	    if (updatedWebUserSet.getTitle() != null) {
 		if (userSet.getTitle() != null) {
 		    for (Map.Entry<String, String> entry : updatedWebUserSet.getTitle().entrySet()) {
@@ -435,13 +439,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	SearchApiResponse apiResult;
 	try {
 	    apiResult = getSearchApiClient().searchItems(url, apiKey, "UserSet.FETCH_ITEMS");
-		setItems(userSet, apiResult);
-		return userSet;
+	    setItems(userSet, apiResult);
+	    return userSet;
 	} catch (SearchApiClientException e) {
-	    if(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
-		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
-		    new String[] {WebUserSetFields.IS_DEFINED_BY, userSet.getIsDefinedBy()});
-	    }else {
+	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
+		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+			new String[] { WebUserSetFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
+	    } else {
 		throw new InternalServerException(e);
 	    }
 	}

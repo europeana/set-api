@@ -30,6 +30,7 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
@@ -186,7 +187,6 @@ public class WebUserSetRest extends BaseRest {
 	    // check user credentials, if invalid respond with HTTP 401.
 	    // check client access (a valid "wskey" must be provided)
 	    verifyReadAccess(request);
-//		    validateApiKey(wsKey);
 
 	    LdProfiles profile = getProfile(profileStr, request);
 
@@ -194,6 +194,9 @@ public class WebUserSetRest extends BaseRest {
 	    // if the Set doesn’t exist, respond with HTTP 404
 	    // if the Set is disabled respond with HTTP 410
 	    UserSet userSet = getUserSetService().getUserSetById(identifier);
+
+	    // check visibility level for given user
+	    checkStatus(request, userSet);
 
 	    // append the HTTP parameters related to sort, page and pageSize
 	    // to URL defined in the rdfs:isDefinedBy property
@@ -266,9 +269,19 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+	    // check visibility level for given user
+	    checkStatus(request, existingUserSet);
+
 	    // check if the user is the owner of the set or admin, otherwise respond with
 	    // 403
 	    verifyOwnerOrAdmin(existingUserSet, authentication);
+
+	    // only an editor can set the state of a set to "published"
+	    // and only if the set is in "public" visibility.
+	    if (hasEditorRole(authentication)
+		    && existingUserSet.getVisibility().equals(VisibilityTypes.PUBLIC.getName())) {
+		existingUserSet.setVisibility(VisibilityTypes.PUBLISHED.getName());
+	    }
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
@@ -292,17 +305,16 @@ public class WebUserSetRest extends BaseRest {
 	    // remove duplicated items
 	    getUserSetService().removeItemDuplicates(newUserSet);
 
-
 	    // Respond with HTTP 200
 	    // update an existing user set. merge user sets - insert new fields in existing
 	    // object
 	    // update pagination
 	    // generate and add a created and modified timestamp to the Set;
-	    
+
 	    // if the Set corresponds to a closed set, replace member items with the new
 	    // items
 	    // that are present in the Set description only when a profile is indicated and
-	    //modified date is set in the service;
+	    // modified date is set in the service;
 	    UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
 
 	    // if the Set corresponds to an open set, update the metadata associated to the
@@ -318,8 +330,8 @@ public class WebUserSetRest extends BaseRest {
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-	    
-	    //TODO: refactor to use a build response method
+
+	    // TODO: refactor to use a build response method
 	    // generate “ETag”;
 	    String eTagNew = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -371,8 +383,7 @@ public class WebUserSetRest extends BaseRest {
 	if (storedUserSet.isOpenSet()) {
 	    return;
 	}
-	
-	
+
 	// update the Set based on its identifier (replace member items with the new
 	// items
 	// that are present in the Set description only when a profile is indicated and
@@ -447,6 +458,9 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+	    // check visibility level for given user
+	    checkStatus(request, existingUserSet);
+
 	    // check if the user is the owner of the set or admin, otherwise respond with
 	    // 403
 	    verifyOwnerOrAdmin(existingUserSet, authentication);
@@ -459,11 +473,11 @@ public class WebUserSetRest extends BaseRest {
 	    // check if the Set is disabled, respond with HTTP 410
 	    if (existingUserSet.isDisabled()) {
 		return generateGoneResponse(existingUserSet);
-	    } 
+	    }
 
 	    UserSet updatedUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-	    
+
 	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	    // build response entity with headers
@@ -530,20 +544,22 @@ public class WebUserSetRest extends BaseRest {
 	    // check user credentials, if invalid respond with HTTP 401,
 	    // or if unauthorized respond with HTTP 403
 	    // check client access (a valid "wskey" must be provided)
-//			validateApiKey(wsKey);
 	    verifyReadAccess(request);
 
 	    // check if the Set exists, if not respond with HTTP 404
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+	    // check visibility level for given user
+	    checkStatus(request, existingUserSet);
+
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
 
 	    if (existingUserSet.isDisabled()) {
 		return generateGoneResponse(existingUserSet);
-	    } 
-	    
+	    }
+
 	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
 		    WebUserSetFields.BASE_ITEM_URL);
 
@@ -613,7 +629,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String datasetId, String localId,String profileStr, String action)
+	    String identifier, String datasetId, String localId, String profileStr, String action)
 	    throws HttpException {
 
 	try {
@@ -623,6 +639,9 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+	    // check visibility level for given user
+	    checkStatus(request, existingUserSet);
+
 	    // check if the user is the owner of the set or admin, otherwise respond with
 	    // 403
 	    verifyOwnerOrAdmin(existingUserSet, authentication);
@@ -631,9 +650,7 @@ public class WebUserSetRest extends BaseRest {
 	    if (existingUserSet.isDisabled()) {
 		return generateGoneResponse(existingUserSet);
 	    }
-	    
-	    
-	   
+
 	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
 		    WebUserSetFields.BASE_ITEM_URL);
 
@@ -644,11 +661,10 @@ public class WebUserSetRest extends BaseRest {
 		throw new UserSetNotFoundException(I18nConstants.USERSET_ITEM_NOT_FOUND,
 			I18nConstants.USERSET_ITEM_NOT_FOUND, new String[] { datasetId + "/" + localId, identifier });
 	    }
-	    
-	   
+
 	    // if already exists - remove item and update modified date
 	    existingUserSet.getItems().remove(newItem);
-	    
+
 	    // update an existing user set
 	    UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);
 	    UserSet updatedUserSet = getUserSetService().updateUserSetInDb((PersistentUserSet) existingUserSetPaginated,
@@ -713,6 +729,9 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve a user set based on its identifier
 	    // if the Set doesn’t exist, respond with HTTP 404
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier, false);
+
+	    // check visibility level for given user
+	    checkStatus(request, existingUserSet);
 
 	    // check that only the admins and the owners of the user sets are allowed to
 	    // delete the user set.
