@@ -32,9 +32,7 @@ public interface UserSetService {
      * @throws IOException
      * @throws JSONException
      */
-	@Deprecated
-	//TODO: refactor and remove redundant parameters
-    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey, String action,
+    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey,
     		String sort, String sortOrder, int pageNr, int pageSize)
     	    throws HttpException, IOException, JSONException;
     

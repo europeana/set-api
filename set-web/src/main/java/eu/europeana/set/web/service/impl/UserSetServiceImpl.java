@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -23,8 +23,10 @@ import com.google.common.base.Strings;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
@@ -33,9 +35,10 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.exception.SearchApiClientException;
+import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
-import eu.europeana.set.search.service.SetApiService;
-import eu.europeana.set.search.service.impl.SetApiServiceImpl;
+import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -49,21 +52,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     
     UserSetUtils userSetUtils = new UserSetUtils();
 
-    private SetApiService setApiService = new SetApiServiceImpl();
+    private SearchApiClient setApiService = new SearchApiClientImpl();
 
     public UserSetUtils getUserSetUtils() {
       return userSetUtils;
     }
 
-    public SetApiService getSetApiService() {
+    public SearchApiClient getSearchApiClient() {
     	return setApiService;
     }
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
+     * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
 	 * europeana.UserSet.definitions.model.UserSet)
 	 */
 	@Override
@@ -90,8 +92,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException {
 		UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 		if (res == null) {
-			throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, 
-					I18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
+	    throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, I18nConstants.USERSET_NOT_FOUND,
+		    new String[] { userSetId });
 		} else if (checkDisabled && res.isDisabled()) {
 					throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE, 
 							I18nConstants.USER_SET_NOT_AVAILABLE, new String[] {userSetId}, HttpStatus.GONE);
@@ -99,22 +101,34 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return res; 
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#buildIdentifierUrl(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#buildIdentifierUrl(java.lang.
+     * String, java.lang.String)
 	 */
 	public String buildIdentifierUrl(String id, String base) {
 		return getUserSetUtils().buildIdentifierUrl(id, base);
 	}
 	
-    /* (non-Javadoc)
-     * @see eu.europeana.set.web.service.UserSetService#fillPagination(eu.europeana.set.definitions.model.UserSet)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#fillPagination(eu.europeana.set.
+     * definitions.model.UserSet)
      */
     public UserSet fillPagination(UserSet userSet) {
     	return getUserSetUtils().fillPagination(userSet);
     }	
 	
-    /* (non-Javadoc)
-     * @see eu.europeana.set.web.service.UserSetService#updatePagination(eu.europeana.set.definitions.model.UserSet)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#updatePagination(eu.europeana.set
+     * .definitions.model.UserSet)
      */
     public UserSet updatePagination(UserSet userSet) {
     	return getUserSetUtils().updatePagination(userSet);
@@ -123,21 +137,25 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
+     * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
 	 * europeana.UserSet.definitions.model.UserSet, boolean)
 	 */
 	@Override
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
 		mergeUserSetProperties(persistentUserSet, webUserSet);
 		updateUserSetPagination(persistentUserSet);
-		
+	// update modified date
+	persistentUserSet.setModified(new Date());
 		UserSet res = getMongoPersistence().update(persistentUserSet);
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#disableUserSet(eu.europeana.set.definitions.model.UserSet)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#disableUserSet(eu.europeana.set.
+     * definitions.model.UserSet)
 	 */
 	public UserSet disableUserSet(UserSet existingUserSet) { 					 
 		existingUserSet.setDisabled(true);
@@ -145,7 +163,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	
 	/**
-	 * @deprecated check if the update test must merge the properties or if it simply overwrites it
+     * @deprecated check if the update test must merge the properties or if it
+     *             simply overwrites it
 	 * @param UserSet
 	 * @param updatedWebUserSet
 	 */
@@ -200,8 +219,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	@Override
-	public UserSet parseUserSetLd(String userSetJsonLdStr)
-			throws	HttpException {
+    public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException {
 
 		JsonParser parser;
 	    ObjectMapper mapper = new ObjectMapper();
@@ -225,7 +243,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			removeItemDuplicates(userSet);
             return userSet;
 		} catch (UserSetAttributeInstantiationException e) {
-			throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY, new String[]{e.getMessage()}, e);
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY,
+		    new String[] { e.getMessage() }, e);
 		} catch (JsonParseException e) {
 			throw new UserSetInstantiationException("Json formating exception! " + e.getMessage(), e);
 		} catch (IOException e) {
@@ -235,6 +254,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	/**
 	 * This method normalizes item list if they exist to remove duplicated items.
+     * 
 	 * @param userSet
 	 * @throws ParamValidationException
 	 */
@@ -254,20 +274,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 		
 		//validate context
-		if(webUserSet.getContext()!= null && !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())){
+	if (webUserSet.getContext() != null
+		&& !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())) {
 			throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
 					new String[]{WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext()});
 		}	
 		
 		// validate isDefinedBy and items - we should not have both of them
 		if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
-		    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-			    new String[] { WebUserSetModelFields.IS_DEFINED_BY });
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.TYPE_OPEN });
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#deleteUserSet(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#deleteUserSet(java.lang.String)
 	 */
 	public void deleteUserSet(String userSetId) throws UserSetNotFoundException {
 
@@ -286,10 +310,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	/**
 	 * This method validates position input, if false responds with -1
 	 * 
-	 * @param position
-	 *            The given position
-	 * @param items
-	 *            The item list
+     * @param position The given position
+     * @param items    The item list
 	 * @return position The validated position in list to insert
 	 * @throws ApplicationAuthenticationException
 	 */
@@ -309,8 +331,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return positionInt;
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#insertItem(java.lang.String, java.lang.String, java.lang.String, eu.europeana.set.definitions.model.UserSet)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see eu.europeana.set.web.service.UserSetService#insertItem(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * eu.europeana.set.definitions.model.UserSet)
 	 */
 	public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 			throws ApplicationAuthenticationException {
@@ -319,11 +345,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		int positionInt = validatePosition(position, existingUserSet.getItems());
 
 		// build new item URL
-		String newItem = buildIdentifierUrl(
-				datasetId + "/" + localId, WebUserSetFields.BASE_ITEM_URL);
+	String newItem = buildIdentifierUrl(datasetId + "/" + localId, WebUserSetFields.BASE_ITEM_URL);
 
 		// check if item already exists in the Set, if so remove it
-		// insert item to Set in the indicated position (or last position if no position was indicated).
+	// insert item to Set in the indicated position (or last position if no position
+	// was indicated).
 		UserSet extUserSet = null;		
 		if (existingUserSet.getItems() == null) {
 			addNewItemToList(existingUserSet, -1, newItem);
@@ -348,8 +374,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return extUserSet;
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#updateItemList(eu.europeana.set.definitions.model.UserSet)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#updateItemList(eu.europeana.set.
+     * definitions.model.UserSet)
 	 */
 	public UserSet updateItemList(UserSet existingUserSet) {
 		UserSet extUserSet;
@@ -359,23 +389,31 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		existingUserSet.setModified(new Date());
 		
 		// Respond with HTTP 200
-		// update an existing user set. merge user sets - insert new fields in existing object
-		UserSet updatedUserSet = updateUserSetInDb(
-				(PersistentUserSet) existingUserSet, null);
+	// update an existing user set. merge user sets - insert new fields in existing
+	// object
+	UserSet updatedUserSet = updateUserSetInDb((PersistentUserSet) existingUserSet, null);
 		extUserSet = fillPagination(updatedUserSet);
 		return extUserSet;
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#replaceItem(eu.europeana.set.definitions.model.UserSet, int, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#replaceItem(eu.europeana.set.
+     * definitions.model.UserSet, int, java.lang.String)
 	 */
 	public void replaceItem(UserSet existingUserSet, int positionInt, String newItem) {
 			existingUserSet.getItems().remove(newItem);
 			addNewItemToList(existingUserSet, positionInt, newItem);
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.europeana.set.web.service.UserSetService#addNewItemToList(eu.europeana.set.definitions.model.UserSet, int, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#addNewItemToList(eu.europeana.set
+     * .definitions.model.UserSet, int, java.lang.String)
 	 */
 	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem) {
 		
@@ -394,28 +432,67 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
     @Override
-    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey, String action,
-    		String sort, String sortOrder, int pageNr, int pageSize)
-	    throws HttpException, IOException, JSONException {
+    public UserSet fetchDynamicSetItems(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
+	    int pageSize) throws HttpException {
+
+	String url = buildSearchApiUrl(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
+//    	uri = userSet.getIsDefinedBy() + additionalParameters;
+
+	SearchApiResponse apiResult;
+	try {
+	    apiResult = getSearchApiClient().searchItems(url, apiKey, "UserSet.FETCH_ITEMS");
+		setItems(userSet, apiResult);
+		return userSet;
+	} catch (SearchApiClientException e) {
+	    if(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
+		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
+		    new String[] {WebUserSetFields.IS_DEFINED_BY, userSet.getIsDefinedBy()});
+	    }else {
+		throw new InternalServerException(e);
+	    }
+	}
+    }
     	
-    	String uri;
-    	String additionalParameters;
-    	additionalParameters = buildSearchQuery(sort, sortOrder, pageNr, pageSize);
-    	uri = storedUserSet.getIsDefinedBy() + additionalParameters;
-    	SearchApiResponse apiResult = getSetApiService().queryEuropeanaApi(uri, apiKey, action);
-    	List<String> items = new ArrayList<String>();
-    	for(String item : apiResult.getItems()) {
-    		items.add(WebUserSetFields.BASE_URL_DATA + item);
-    	}
-    	if (items.size() > 0) {
-	    	storedUserSet.setItems(items);
-	    	storedUserSet.setTotal(items.size());
-    	}
-    	return storedUserSet;
+    private void setItems(UserSet userSet, SearchApiResponse apiResult) {
+	List<String> items = new ArrayList<String>();
+	for (String item : apiResult.getItems()) {
+	    items.add(WebUserSetFields.BASE_URL_DATA + item);
+	}
+	if (items.size() > 0) {
+	    userSet.setItems(items);
+	    userSet.setTotal(items.size());
+	}
     }
     
+    private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
+	    int pageSize) {
+	// String uri;
+	// String additionalParameters;
+	// additionalParameters = buildSearchQuery(sort, sortOrder, pageNr, pageSize);
+	UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(userSet.getIsDefinedBy());
+	// MultiValueMap<String, String> parameters = uriBuilder.build().queryParams();
+	uriBuilder.replaceQueryParam(Query.PROFILE, Query.PROFILE_MINIMAL);
+	// remove pagination and ordering
+	Integer start = pageNr * pageSize + 1;
+	uriBuilder.replaceQueryParam("start", start);
+	uriBuilder.replaceQueryParam("rows", pageSize);
+	// remove apikey if exists
+	uriBuilder.replaceQueryParam(WebUserSetFields.PARAM_WSKEY, apiKey);
+
+	if (sortOrder == null) {
+	    uriBuilder.replaceQueryParam(Query.SORT, sort);
+	} else {
+	    uriBuilder.replaceQueryParam(Query.SORT, sort + "+" + sortOrder);
+	}
+
+	String uri = uriBuilder.build(true).toUriString();
+	return uri;
+    }
+
+
 	/**
 	 * This method appends additional search parameter from HTTP request
+     * 
 	 * @param sort
 	 * @param sortOrder
 	 * @param pageNr
@@ -423,7 +500,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @return additional search Query string
 	 */
 	public String buildSearchQuery(String sort, String sortOrder, int pageNr, int pageSize) {
-
+	// TODO use SearchQuery object from api commons
 		StringBuilder searchQuery = new StringBuilder();
 		
 		searchQuery.append(WebUserSetFields.AND);
@@ -453,8 +530,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return searchQuery.toString();
 	}
         
-    /* (non-Javadoc)
-     * @see eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(eu.europeana.set.definitions.model.UserSet, java.util.List)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(
+     * eu.europeana.set.definitions.model.UserSet, java.util.List)
      */
     @Deprecated
     //TODO: fix the implementation and remove this method
@@ -463,6 +544,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	    	storedUserSet.setItems(items);
 //	    	storedUserSet.setTotal(items.size());
 //    	}
+	storedUserSet.setModified(new Date());
     	//simply store userSet
 	return getMongoPersistence().update((PersistentUserSet) storedUserSet);
     }

@@ -22,17 +22,9 @@
 	
     
    	<!--  ApiKeyService -->
-   	<!-- 
-   	<beans:bean name="annotation_apiKeyService" class="eu.europeana.corelib.db.service.mock.impl.MockApiKeyServiceImpl"/>
-	 -->
 	 		
     <!--  AuthenticationService -->
-   	<beans:bean name="set_authenticationService" class="eu.europeana.set.web.service.authentication.mock.BridgeAuthenticationManagerAdapter"/>
-	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.AuthorizationServiceImpl">
-		<!-- 
-		<beans:property name="configuration" ref="configuration"/>
-    	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
-    	 -->       	 
+   	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.AuthorizationServiceImpl">
     </beans:bean>
     
     

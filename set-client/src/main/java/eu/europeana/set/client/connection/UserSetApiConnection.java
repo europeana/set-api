@@ -39,14 +39,12 @@ public class UserSetApiConnection extends BaseApiConnection {
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> createUserSet(
-			String wskey, String set, String userToken) throws IOException {
+			String wskey, String set) throws IOException {
 		
 		StringBuilder urlBuilder = getUserSetServiceUri();		
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
 		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
 			.append(wskey).append(WebUserSetFields.AND);
-		urlBuilder.append(WebUserSetFields.USER_TOKEN).append(WebUserSetFields.EQUALS)
-			.append(userToken).append(WebUserSetFields.AND);
 		
 		String resUrl = urlBuilder.toString();
 		
@@ -71,15 +69,13 @@ public class UserSetApiConnection extends BaseApiConnection {
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> getUserSet(
-			String wskey, String identifier, String userToken) throws IOException {
+			String wskey, String identifier) throws IOException {
 
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
 		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
 	    	.append(wskey).append(WebUserSetFields.AND);
-		urlBuilder.append(WebUserSetFields.USER_TOKEN).append(WebUserSetFields.EQUALS)
-	    	.append(userToken);
 		
 		/**
 		 * Execute Europeana API request
@@ -98,12 +94,11 @@ public class UserSetApiConnection extends BaseApiConnection {
 	 * @param wskey
 	 * @param identifier The identifier that comprise set ID
 	 * @param updateUserSet The update UserSet body in JSON format
-	 * @param userToken
 	 * @return response entity that comprises response body, headers and status code.
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> updateUserSet(
-			String wskey, String identifier, String updateUserSet, String userToken) throws IOException {
+			String wskey, String identifier, String updateUserSet) throws IOException {
 
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
@@ -130,7 +125,7 @@ public class UserSetApiConnection extends BaseApiConnection {
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> deleteUserSet(
-			String wskey, String identifier, String userToken) throws IOException {
+			String wskey, String identifier) throws IOException {
 		
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);

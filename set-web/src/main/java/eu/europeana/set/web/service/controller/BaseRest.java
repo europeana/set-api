@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,8 +16,11 @@ import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.europeana.api.common.config.I18nConstants;
+import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -32,11 +34,9 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.utils.serialize.UserSetLdSerializer;
-import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.vocabulary.Operations;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.UserSetService;
-import eu.europeana.set.web.service.authentication.AuthenticationService;
 import eu.europeana.set.web.service.authorization.AuthorizationService;
 
 public class BaseRest extends BaseRestController {
@@ -46,9 +46,6 @@ public class BaseRest extends BaseRestController {
 
 	@Resource
 	private UserSetService userSetService;
-
-	@Resource
-	AuthenticationService authenticationService;
 
 	@Resource
 	AuthorizationService authorizationService;
@@ -75,14 +72,6 @@ public class BaseRest extends BaseRestController {
 		this.configuration = configuration;
 	}
 
-	public AuthenticationService getAuthenticationService() {
-		return authenticationService;
-	}
-
-	public void setAuthenticationService(AuthenticationService authenticationService) {
-		this.authenticationService = authenticationService;
-	}
-
 	public AuthorizationService getAuthorizationService() {
 		return authorizationService;
 	}
@@ -95,67 +84,6 @@ public class BaseRest extends BaseRestController {
 		return "/" + collection + "/" + object;
 	}
 
-	/**
-	 * This method performs decoding of base64 string
-	 * 
-	 * @param base64Str
-	 * @return decoded string
-	 * @throws ApplicationAuthenticationException
-	 */
-	public String decodeBase64(String base64Str) throws ApplicationAuthenticationException {
-		String res = null;
-		try {
-			byte[] decodedBase64Str = Base64.decodeBase64(base64Str);
-			res = new String(decodedBase64Str);
-		} catch (Exception e) {
-			throw new ApplicationAuthenticationException(I18nConstants.BASE64_DECODING_FAIL,
-					I18nConstants.BASE64_DECODING_FAIL, null);
-		}
-		return res;
-	}
-
-	/**
-	 * This method takes user token from a HTTP header if it exists or from the
-	 * passed request parameter.
-	 * 
-	 * @param paramUserToken
-	 *            The HTTP request parameter
-	 * @param request
-	 *            The HTTP request with headers
-	 * @return user token
-	 * @throws ApplicationAuthenticationException
-	 */
-	public String getUserToken(String paramUserToken, HttpServletRequest request)
-			throws ApplicationAuthenticationException {
-		int USER_TOKEN_TYPE_POS = 0;
-		int BASE64_ENCODED_STRING_POS = 1;
-		String userToken = null;
-		String userTokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (userTokenHeader != null) {
-			getLogger().trace("'Authorization' header value: " + userTokenHeader);
-			String[] headerElems = userTokenHeader.split(" ");
-			if (headerElems.length < 2)
-				throw new ApplicationAuthenticationException(I18nConstants.INVALID_HEADER_FORMAT,
-						I18nConstants.INVALID_HEADER_FORMAT, new String[] { userTokenHeader });
-
-			String userTokenType = headerElems[USER_TOKEN_TYPE_POS];
-			if (!UserSetHttpHeaders.BEARER.equals(userTokenType)) {
-				throw new ApplicationAuthenticationException(I18nConstants.UNSUPPORTED_TOKEN_TYPE,
-						I18nConstants.UNSUPPORTED_TOKEN_TYPE, new String[] { userTokenType });
-			}
-
-			String encodedUserToken = headerElems[BASE64_ENCODED_STRING_POS];
-
-			userToken = decodeBase64(encodedUserToken);
-			getLogger().debug("Decoded user token: " + userToken);
-
-		} else {
-			// @deprecated to be removed in the next versions
-			// fallback to URL param
-			userToken = paramUserToken;
-		}
-		return userToken;
-	}
 
 	/**
 	 * This method takes profile from a HTTP header if it exists or from the
@@ -169,6 +97,7 @@ public class BaseRest extends BaseRestController {
 	 * @throws HttpException
 	 * @throws UserSetProfileValidationException
 	 */
+	//TODO: consider moving to api-commons
 	public LdProfiles getProfile(String paramProfile, HttpServletRequest request) throws HttpException {
 
 		LdProfiles profile = null;		
@@ -229,6 +158,7 @@ public class BaseRest extends BaseRestController {
 	 * @throws HttpException
 	 * @throws UserSetProfileValidationException
 	 */
+	//TODO: consider moving to api-commons
 	public LdProfiles getHeaderProfile(HttpServletRequest request) throws HttpException {
 
 		LdProfiles profile = null;
@@ -365,19 +295,20 @@ public class BaseRest extends BaseRestController {
 	 * @return map of prefer header keys and values
 	 */
 	public Map<String, String> parsePreferHeader(String preferHeader) {
-		String[] headerParts = null;
-		String[] contentParts = null;
-		int KEY_POS = 0;
-		int VALUE_POS = 1;
+	    //TODO: consider moving to api-commons
+	    String[] headerParts = null;
+	    String[] contentParts = null;
+	    int KEY_POS = 0;
+	    int VALUE_POS = 1;
 
-		Map<String, String> resMap = new HashMap<String, String>();
+	    Map<String, String> resMap = new HashMap<String, String>();
 
-		headerParts = preferHeader.split(";");
-		for (String headerPart : headerParts) {
-			contentParts = headerPart.split("=");
-			resMap.put(contentParts[KEY_POS], contentParts[VALUE_POS]);
-		}
-		return resMap;
+	    headerParts = preferHeader.split(";");
+	    for (String headerPart : headerParts) {
+		contentParts = headerPart.split("=");
+		resMap.put(contentParts[KEY_POS], contentParts[VALUE_POS]);
+	    }
+	    return resMap;
 	}
 
 	/**
@@ -419,25 +350,9 @@ public class BaseRest extends BaseRestController {
 		return userSet;
 	}
 
-	/**
-	 * This method is used for validation of the provided api key
-	 * 
-	 * @param wsKey
-	 * @throws EntityAuthenticationException
-	 */
-	@Deprecated
-	protected void validateApiKey(String wsKey) throws ApplicationAuthenticationException {
-
-		// throws exception if the wskey is not found
-		if (StringUtils.isEmpty(wsKey)) {
-			throw new ApplicationAuthenticationException(I18nConstants.EMPTY_APIKEY, null);
-		}
-		getAuthenticationService().getByApiKey(wsKey);
-	}
-
 	public String getApiVersion() {
-    	return getAuthorizationService().getConfiguration().getApiVersion();
-    }
+	    return getConfiguration().getApiVersion();
+	}
 	
     /**
      * This method performs query to Europeana API using URI defined in isDefinedBy parameter.
@@ -447,16 +362,15 @@ public class BaseRest extends BaseRestController {
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet fetchItemsPage(UserSet userSet, 
-    		String sort, String sortOrder, int pageNr, int pageSize) 
-    				throws HttpException, IOException, JSONException {
-    	if (userSet.isOpenSet()) {
-			String[] path = userSet.getIsDefinedBy().split("=");
-			String pathApiKey = path[path.length-1];
-			userSet = getUserSetService().fetchDynamicSetItems(
-					userSet, pathApiKey, Operations.CREATE, sort, sortOrder, pageNr, pageSize);	
-		}
-		return userSet;
+    public UserSet fetchItemsPage(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize)
+	    throws HttpException, IOException, JSONException {
+	if (userSet.isOpenSet()) {
+	    String apiKey = getConfiguration().getSearchApiKey();
+	    
+	    userSet = getUserSetService().fetchDynamicSetItems(userSet, apiKey, sort, sortOrder,
+		    pageNr, pageSize);
+	}
+	return userSet;
     }
        
 }
