@@ -6,6 +6,7 @@ import java.util.Map;
 
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 
 /**
  * Europeana Sets API Specification
@@ -455,5 +456,20 @@ public class BaseUserSet implements UserSet {
 	@Override
 	public void setVisibility(String visibility) {
 		this.visibility = visibility;
+	}
+
+	@Override
+	public boolean isPrivate() {
+	    return VisibilityTypes.PRIVATE.getName().contentEquals(getVisibility());
+	}
+
+	@Override
+	public boolean isPublic() {
+	    return VisibilityTypes.PUBLIC.getName().contentEquals(getVisibility());
+	}
+
+	@Override
+	public boolean isPublished() {
+	    return VisibilityTypes.PUBLISHED.getName().contentEquals(getVisibility());
 	}
 }

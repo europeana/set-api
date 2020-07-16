@@ -19,4 +19,13 @@ public enum VisibilityTypes {
     public String getName() {
         return name;
     }
+    
+    public static final boolean isValid(String visibility) {
+	for (VisibilityTypes type : VisibilityTypes.values()) {
+	    if(type.getName().equals(visibility)) {
+		return true;
+	    }
+	}
+	return false;
+    }
 }

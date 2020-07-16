@@ -31,6 +31,7 @@ import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationExcep
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -278,11 +279,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext() });
 	}
 
+	//validate visibility
+	if (webUserSet.getVisibility()!= null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+	}
+	
 	// validate isDefinedBy and items - we should not have both of them
 	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.TYPE_OPEN });
 	}
+	
     }
 
     /*

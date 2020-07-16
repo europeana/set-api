@@ -109,4 +109,11 @@ public interface UserSet {
      * @return true if it is an open set
      */
     public boolean isOpenSet();
+    
+    public boolean isPrivate();
+    
+    public boolean isPublic();
+    
+    public boolean isPublished();
+    
 }
