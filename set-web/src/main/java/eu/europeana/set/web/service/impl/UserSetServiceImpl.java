@@ -30,6 +30,7 @@ import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -45,6 +46,10 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
+/**
+ * @author GrafR
+ *
+ */
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
     @Resource
@@ -98,6 +103,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE,
 		    I18nConstants.USER_SET_NOT_AVAILABLE, new String[] { userSetId }, HttpStatus.GONE);
 	}
+	return res;
+    }
+
+    @Override
+    public boolean isTypeAndCreatorExisting(String type, Agent creator) throws UserSetNotFoundException {
+	boolean res = getMongoPersistence().isTypeAndCreatorExisting(type, creator);
 	return res;
     }
 
@@ -290,7 +301,34 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.TYPE_OPEN });
 	}
+    }
+
+    /* (non-Javadoc)
+     * @see eu.europeana.set.web.service.UserSetService#validateFavoriteUserSet(eu.europeana.set.definitions.model.UserSet, eu.europeana.set.definitions.model.UserSet)
+     */
+    public void validateFavoriteUserSet(UserSet webUserSet, UserSet storedUserSet) throws RequestBodyValidationException, UserSetNotFoundException {
+
+	// verify if the "type" is set to "BookmarkFolder", if true:
+	if (webUserSet.getType() != null && WebUserSetModelFields.DEFAULT_FAVORITE_TYPE.equals(webUserSet.getType())) {
+	    // check if set is open set, if true return HTTP 400;
+	    if (webUserSet.isOpenSet()) {
+		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+		    new String[] { WebUserSetModelFields.TYPE, WebUserSetModelFields.TYPE_OPEN });
+	    }
+	    // check if there is already a set with type="BookmarkFolder" for the same creator and if so return HTTP 400;
+            // only 1 set per user should have the type="BookmarkFolder"
+	    if (isTypeAndCreatorExisting(WebUserSetModelFields.DEFAULT_FAVORITE_TYPE, webUserSet.getCreator())) {
+		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+			    new String[] { WebUserSetModelFields.TYPE, webUserSet.getCreator().getName() });		
+	    }
+	}
 	
+	// for update use case it is not allowed to change the type. If type is present in the request body, 
+	// it must match the value from the object stored in the database.
+	if (webUserSet.getType() != null && storedUserSet!= null && !webUserSet.getType().equals(storedUserSet.getType())) {
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+		    new String[] { WebUserSetModelFields.TYPE, storedUserSet.getType() });
+	}
     }
 
     /*

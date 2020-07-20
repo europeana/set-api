@@ -20,6 +20,7 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 		public static final String FIELD_TITLE = "title";
 		public static final String FIELD_DESCRIPTION = "description";
 		public static final String FIELD_SET_TYPE = "setType";
+		public static final String FIELD_TYPE = "type";
 		
 		public abstract ObjectId getObjectId();		
 		public abstract String getIdentifier();		

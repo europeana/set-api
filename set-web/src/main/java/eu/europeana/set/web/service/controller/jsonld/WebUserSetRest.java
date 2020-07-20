@@ -85,7 +85,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // parse user set
 	    UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-
+	    
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
 	    getUserSetService().validateWebUserSet(webUserSet);
@@ -104,11 +104,14 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getName());
 	    }
 
+	    getUserSetService().validateFavoriteUserSet(webUserSet, null);
+
 	    // store the new Set with its respective id, together with all the containing
 	    // items
 	    // following the order given by the list
 	    // generate an identifier (in sequence) for the Set
 	    // generate and add a created and modified timestamp to the Set
+	    // type should be saved now in the database and not generated on the fly during serialization
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 	    if (storedUserSet.isOpenSet()) {
 		storedUserSet = fetchItemsPage(storedUserSet, null, null, WebUserSetFields.DEFAULT_PAGE,
@@ -298,6 +301,8 @@ public class WebUserSetRest extends BaseRest {
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
 	    getUserSetService().validateWebUserSet(newUserSet);
+
+	    getUserSetService().validateFavoriteUserSet(newUserSet, existingUserSet);
 
 	    // validate items
 	    validateAndSetItems(existingUserSet, newUserSet, profile);

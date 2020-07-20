@@ -3,6 +3,7 @@ package eu.europeana.set.mongo.service;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
@@ -21,6 +22,15 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return user set object
 	 */
 	public abstract PersistentUserSet getByIdentifier(String identifier);
+	
+	/**
+	 * This method checks if a user set with provided type and creator already exists in
+	 * database
+	 * @param type
+	 * @param creator
+	 * @return true if exists
+	 */
+	public abstract boolean isTypeAndCreatorExisting(String type, Agent creator);
 	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string

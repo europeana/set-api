@@ -26,4 +26,6 @@ public interface WebUserSetModelFields {
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
 	
+	//** user set defaults **/
+	public static final String DEFAULT_FAVORITE_TYPE = "BookmarkFolder";
 }

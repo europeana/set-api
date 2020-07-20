@@ -1,6 +1,7 @@
 package eu.europeana.set.mongo.service;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.QueryResults;
 import org.springframework.stereotype.Component;
 
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
@@ -16,6 +18,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
+import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
@@ -87,6 +90,26 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		query.filter(PersistentUserSet.FIELD_IDENTIFIER, identifier);
 
 		return getUserSetDao().findOne(query);
+	}
+	
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#isTypeAndCreatorExisting(java.lang.String, eu.europeana.set.definitions.model.agent.Agent)
+	 */
+	public boolean isTypeAndCreatorExisting(String type, Agent creator) {
+	    Query<PersistentUserSet> query = getUserSetDao().createQuery();
+	    query.filter(PersistentUserSet.FIELD_TYPE, type);
+
+	    QueryResults<PersistentUserSet> results = getUserSetDao().find(query);
+	    List<PersistentUserSet> userSetList = results.asList();
+	    
+	    boolean res = false;
+	    for (UserSet userSet : userSetList) {
+		if (userSet.getCreator().getName().equals(creator.getName())) {
+		    res = true;
+		    break;
+		}
+	    }
+	    return res;
 	}
 	
 	/**
