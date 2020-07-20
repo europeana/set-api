@@ -3,6 +3,7 @@ package eu.europeana.set.definitions.model.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
@@ -110,8 +111,8 @@ public class UserSetUtils {
 	public String fillPage(UserSet userSet, int pageIndex) {
 		StringBuilder firstBuilder = new StringBuilder();
         String pageStr = firstBuilder.append(String.format("%s?%s=%d&%s=%d", 
-        		userSet.getIdentifier(), WebUserSetFields.PAGE, pageIndex
-        		, WebUserSetFields.PAGE_SIZE,WebUserSetFields.MAX_ITEMS_PER_PAGE
+        		userSet.getIdentifier(), CommonApiConstants.QUERY_PARAM_PAGE, pageIndex
+        		, CommonApiConstants.QUERY_PARAM_PAGE_SIZE,WebUserSetFields.MAX_ITEMS_PER_PAGE
         		)).toString();
 		return pageStr;		
 	}
