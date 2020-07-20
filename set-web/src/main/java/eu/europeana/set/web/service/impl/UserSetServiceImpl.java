@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
-import eu.europeana.api.commons.definitions.search.Query;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -477,7 +477,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// additionalParameters = buildSearchQuery(sort, sortOrder, pageNr, pageSize);
 	UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(userSet.getIsDefinedBy());
 	// MultiValueMap<String, String> parameters = uriBuilder.build().queryParams();
-	uriBuilder.replaceQueryParam(Query.PROFILE, Query.PROFILE_MINIMAL);
+	uriBuilder.replaceQueryParam(CommonApiConstants.QUERY_PARAM_PROFILE, CommonApiConstants.PROFILE_MINIMAL);
 	// remove pagination and ordering
 	Integer start = pageNr * pageSize + 1;
 	uriBuilder.replaceQueryParam("start", start);
@@ -486,9 +486,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	uriBuilder.replaceQueryParam(WebUserSetFields.PARAM_WSKEY, apiKey);
 
 	if (sortOrder == null) {
-	    uriBuilder.replaceQueryParam(Query.SORT, sort);
+	    uriBuilder.replaceQueryParam(CommonApiConstants.QUERY_PARAM_SORT, sort);
 	} else {
-	    uriBuilder.replaceQueryParam(Query.SORT, sort + "+" + sortOrder);
+	    uriBuilder.replaceQueryParam(CommonApiConstants.QUERY_PARAM_SORT, sort + "+" + sortOrder);
 	}
 
 	String uri = uriBuilder.build(true).toUriString();
@@ -510,14 +510,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	searchQuery.append(WebUserSetFields.AND);
 	searchQuery.append(pageNr);
-	searchQuery.append(WebUserSetFields.PAGE).append("=");
+	searchQuery.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=");
 	if (pageNr < 0)
-	    searchQuery.append(WebUserSetFields.DEFAULT_PAGE);
+	    searchQuery.append(CommonApiConstants.DEFAULT_PAGE);
 	else
 	    searchQuery.append(pageNr);
 
 	searchQuery.append(WebUserSetFields.AND);
-	searchQuery.append(WebUserSetFields.PAGE_SIZE).append("=");
+	searchQuery.append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=");
 	if (pageSize < 0)
 	    searchQuery.append(WebUserSetFields.MAX_ITEMS_PER_PAGE);
 	else
@@ -525,7 +525,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	searchQuery.append(WebUserSetFields.AND);
 	if (!Strings.isNullOrEmpty(sort)) {
-	    searchQuery.append(WebUserSetFields.PARAM_SORT).append("=");
+	    searchQuery.append(CommonApiConstants.QUERY_PARAM_SORT).append("=");
 	    searchQuery.append(sort);
 	    searchQuery.append(WebUserSetFields.AND);
 	    searchQuery.append(WebUserSetFields.PARAM_SORT_ORDER).append("=");
