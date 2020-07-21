@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -56,7 +57,7 @@ public class WebUserSetRest extends BaseRest {
 	    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
     public ResponseEntity<String> createUserSet(@RequestBody String userSet,
-	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	// validate user - check user credentials (all registered users can create)
@@ -110,7 +111,7 @@ public class WebUserSetRest extends BaseRest {
 	    // generate and add a created and modified timestamp to the Set
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 	    if (storedUserSet.isOpenSet()) {
-		storedUserSet = fetchItemsPage(storedUserSet, null, null, WebUserSetFields.DEFAULT_PAGE,
+		storedUserSet = fetchItemsPage(storedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
 			WebUserSetFields.MAX_ITEMS_PER_PAGE);
 	    }
 
@@ -159,12 +160,12 @@ public class WebUserSetRest extends BaseRest {
     public ResponseEntity<String> getUserSet(
 	    @RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-	    @RequestParam(value = WebUserSetFields.PARAM_SORT, required = false) String sortField,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
-	    @RequestParam(value = WebUserSetFields.PAGE, defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
-	    @RequestParam(value = WebUserSetFields.PAGE_SIZE, defaultValue = ""
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, defaultValue = "" + CommonApiConstants.DEFAULT_PAGE) int page,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
 		    + WebUserSetFields.MAX_ITEMS_PER_PAGE) int pageSize,
-	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "get:/set/{identifier}{.jsonld}";
@@ -245,7 +246,7 @@ public class WebUserSetRest extends BaseRest {
     @ApiOperation(notes = SwaggerConstants.UPDATE_SAMPLES_JSONLD, value = "Update an existing user set", nickname = "update", response = java.lang.Void.class)
     public ResponseEntity<String> updateUserSet(
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier, @RequestBody String userSet,
-	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "put:/set/{identifier}";
@@ -318,7 +319,7 @@ public class WebUserSetRest extends BaseRest {
 	    // TODO: if different from "ldp:PreferMinimalContainer" is referred in the
 	    // "Prefer" header.
 	    if (updatedUserSet.isOpenSet() && LdProfiles.STANDARD.equals(profile)) {
-		updatedUserSet = fetchItemsPage(updatedUserSet, null, null, WebUserSetFields.DEFAULT_PAGE,
+		updatedUserSet = fetchItemsPage(updatedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
 			WebUserSetFields.MAX_ITEMS_PER_PAGE);
 	    }
 
@@ -405,7 +406,7 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
 	    @RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required = false) String position,
-	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "put:/set/{identifier}/{dataset_id}/{local_id}?position=POSITION";
@@ -574,7 +575,7 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
-	    @RequestParam(value = WebUserSetFields.PROFILE, required = false, defaultValue = WebUserSetFields.PROFILE_MINIMAL) String profile,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "delete:/set/{identifier}/{dataset_id}/{local_id}";

@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import eu.europeana.api.common.config.I18nConstants;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -100,7 +101,7 @@ public class BaseRest extends BaseRestController {
 		profile = LdProfiles.getByName(paramProfile);
 	    } catch (UserSetProfileValidationException e) {
 		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-			new String[] { WebUserSetFields.PROFILE, paramProfile });
+			new String[] { CommonApiConstants.QUERY_PARAM_PROFILE, paramProfile });
 	    }
 	}
 	return profile;
