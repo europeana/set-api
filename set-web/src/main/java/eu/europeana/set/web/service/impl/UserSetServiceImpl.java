@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -85,18 +84,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
-	return getUserSetById(userSetId, true);
-    }
-
-    @Override
-    public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException {
 	UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 	if (res == null) {
 	    throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, I18nConstants.USERSET_NOT_FOUND,
 		    new String[] { userSetId });
-	} else if (checkDisabled && res.isDisabled()) {
-	    throw new UserSetNotFoundException(I18nConstants.USER_SET_NOT_AVAILABLE,
-		    I18nConstants.USER_SET_NOT_AVAILABLE, new String[] { userSetId }, HttpStatus.GONE);
 	}
 	return res;
     }
@@ -150,18 +141,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return res;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.europeana.set.web.service.UserSetService#disableUserSet(eu.europeana.set.
-     * definitions.model.UserSet)
-     */
-    public UserSet disableUserSet(UserSet existingUserSet) {
-	existingUserSet.setDisabled(true);
-	return updateUserSet((PersistentUserSet) existingUserSet, existingUserSet);
-    }
-
     /**
      * @deprecated check if the update test must merge the properties or if it
      *             simply overwrites it
@@ -213,8 +192,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    if (updatedWebUserSet.getIsDefinedBy() != null) {
 		userSet.setIsDefinedBy(updatedWebUserSet.getIsDefinedBy());
 	    }
-
-	    userSet.setDisabled(updatedWebUserSet.isDisabled());
 	}
     }
 
@@ -303,7 +280,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// in case it is a closed set, remove the items that are members of the Set.
 	UserSet userSet = getUserSetById(userSetId);
-	if (!userSet.isOpenSet()) {
+	if (!userSet.isOpenSet() && userSet.getItems() != null) {
 	    for (String item : userSet.getItems()) {
 		getMongoPersistence().remove(item);
 	    }
