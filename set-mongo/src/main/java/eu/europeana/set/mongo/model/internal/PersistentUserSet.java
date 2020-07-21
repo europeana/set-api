@@ -17,10 +17,8 @@ import eu.europeana.set.definitions.model.agent.Agent;
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
 		public final static String FIELD_IDENTIFIER = "identifier";
-		public static final String FIELD_TITLE = "title";
-		public static final String FIELD_DESCRIPTION = "description";
-		public static final String FIELD_SET_TYPE = "setType";
 		public static final String FIELD_TYPE = "type";
+		public static final String FIELD_CREATOR = "creator.name";
 		
 		public abstract ObjectId getObjectId();		
 		public abstract String getIdentifier();		

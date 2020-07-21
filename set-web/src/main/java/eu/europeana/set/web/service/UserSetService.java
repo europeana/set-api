@@ -8,7 +8,6 @@ import org.codehaus.jettison.json.JSONException;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -129,15 +128,6 @@ public interface UserSetService {
 	 * @throws RequestBodyValidationException
 	 */
 	public void validateFavoriteUserSet(UserSet webUserSet, UserSet existingUserSet) throws RequestBodyValidationException, UserSetNotFoundException;
-
-	/**
-	 * This method checks if a user set with provided type and user already exists in database
-	 * @param type
-	 * @param creator
-	 * @return true if a user set object found in database
-	 * @throws UserSetNotFoundException
-	 */
-	public boolean isTypeAndCreatorExisting(String type, Agent creator) throws UserSetNotFoundException;
 
 	/**
 	 * This method deletes user set by user set Id value.

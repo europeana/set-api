@@ -106,9 +106,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return res;
     }
 
-    @Override
-    public boolean isTypeAndCreatorExisting(String type, Agent creator) throws UserSetNotFoundException {
-	boolean res = getMongoPersistence().isTypeAndCreatorExisting(type, creator);
+    /**
+     * This method checks if a user set with provided type and user already exists in database
+     * @param type
+     * @param creator
+     * @return true if a user set object found in database
+     * @throws UserSetNotFoundException
+     */
+    public boolean getBookmarksFolder(String type, Agent creator) throws UserSetNotFoundException {
+	boolean res = getMongoPersistence().getBookmarksFolder(type, creator.getName());
 	return res;
     }
 
@@ -317,9 +323,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    }
 	    // check if there is already a set with type="BookmarkFolder" for the same creator and if so return HTTP 400;
             // only 1 set per user should have the type="BookmarkFolder"
-	    if (isTypeAndCreatorExisting(WebUserSetModelFields.DEFAULT_FAVORITE_TYPE, webUserSet.getCreator())) {
+	    Agent creator = webUserSet.getCreator();
+	    if (webUserSet.getCreator() == null && storedUserSet.getCreator() != null)
+		creator = storedUserSet.getCreator();
+	    if (getBookmarksFolder(WebUserSetModelFields.DEFAULT_FAVORITE_TYPE, creator)) {
 		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-			    new String[] { WebUserSetModelFields.TYPE, webUserSet.getCreator().getName() });		
+			    new String[] { WebUserSetModelFields.TYPE, creator.getName() });		
 	    }
 	}
 	

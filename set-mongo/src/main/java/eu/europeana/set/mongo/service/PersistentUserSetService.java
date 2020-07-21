@@ -3,7 +3,6 @@ package eu.europeana.set.mongo.service;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
@@ -30,7 +29,7 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @param creator
 	 * @return true if exists
 	 */
-	public abstract boolean isTypeAndCreatorExisting(String type, Agent creator);
+	public abstract boolean getBookmarksFolder(String type, String creatorid);
 	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string
