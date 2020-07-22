@@ -22,6 +22,8 @@ import com.google.common.base.Strings;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.api.commons.definitions.search.Query;
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -30,7 +32,9 @@ import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
@@ -42,6 +46,10 @@ import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.search.BaseUserSetResultPage;
+import eu.europeana.set.web.search.CollectionView;
+import eu.europeana.set.web.search.UserSetIdsResultPage;
+import eu.europeana.set.web.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
@@ -257,18 +265,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext() });
 	}
 
-	//validate visibility
-	if (webUserSet.getVisibility()!= null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
+	// validate visibility
+	if (webUserSet.getVisibility() != null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
 	}
-	
+
 	// validate isDefinedBy and items - we should not have both of them
 	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.TYPE_OPEN });
 	}
-	
+
     }
 
     /*
@@ -281,11 +289,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// in case it is a closed set, remove the items that are members of the Set.
 	UserSet userSet = getUserSetById(userSetId);
-	if (!userSet.isOpenSet() && userSet.getItems() != null) {
-	    for (String item : userSet.getItems()) {
-		getMongoPersistence().remove(item);
-	    }
-	}
 
 	// if the user is an Administrator then permanently remove the Set.
 	getMongoPersistence().remove(userSetId);
@@ -461,7 +464,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	uriBuilder.replaceQueryParam("start", start);
 	uriBuilder.replaceQueryParam("rows", pageSize);
 	// remove apikey if exists
-	uriBuilder.replaceQueryParam(WebUserSetFields.PARAM_WSKEY, apiKey);
+	uriBuilder.replaceQueryParam(CommonApiConstants.PARAM_WSKEY, apiKey);
 
 	if (sortOrder == null) {
 	    uriBuilder.replaceQueryParam(CommonApiConstants.QUERY_PARAM_SORT, sort);
@@ -505,9 +508,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (!Strings.isNullOrEmpty(sort)) {
 	    searchQuery.append(CommonApiConstants.QUERY_PARAM_SORT).append("=");
 	    searchQuery.append(sort);
-	    searchQuery.append(WebUserSetFields.AND);
-	    searchQuery.append(WebUserSetFields.PARAM_SORT_ORDER).append("=");
-	    searchQuery.append(sortOrder);
+//	    searchQuery.append(WebUserSetFields.AND);
+//	    searchQuery.append(WebUserSetFields.PARAM_SORT_ORDER).append("=");
+//	    searchQuery.append(sortOrder);
 	}
 
 	return searchQuery.toString();
@@ -532,4 +535,119 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return getMongoPersistence().update((PersistentUserSet) storedUserSet);
     }
 
+    @Override
+    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile) {
+
+	ResultSet<? extends UserSet> res = getMongoPersistance().find(searchQuery);
+	return res;
+    }
+
+    @Override
+    public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
+	    StringBuffer requestUrl, String reqParams, LdProfiles profile) {
+
+	BaseUserSetResultPage<?> resPage = null;
+	int resultPageSize = results.getResults().size();
+
+	if (LdProfiles.MINIMAL.equals(profile)) {
+	    resPage = new UserSetIdsResultPage();
+	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
+	} else if (LdProfiles.STANDARD.equals(profile)) {
+	    resPage = new UserSetResultPage();
+	    setPageItems(results, (UserSetResultPage)resPage, resultPageSize);
+	}
+
+//	resPage.setFacetFields(results.getFacetFields());
+//	resPage.setTotalInPage(resultPageSize);
+
+	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
+	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize()));
+
+	int currentPage = searchQuery.getPageNr();
+	String currentPageUrl = buildPageUrl(collectionUrl, currentPage, searchQuery.getPageSize());
+	resPage.setCurrentPageUri(currentPageUrl);
+
+	if (currentPage > 0) {
+	    String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
+	    resPage.setPrevPageUri(prevPage);
+	}
+
+	// if current page is not the last one
+	boolean isLastPage = resPage.getTotalInCollection() <= (currentPage + 1) * searchQuery.getPageSize();
+	if (!isLastPage) {
+	    String nextPage = buildPageUrl(collectionUrl, currentPage + 1, searchQuery.getPageSize());
+	    resPage.setNextPageUri(nextPage);
+	}
+
+	return resPage;
+    }
+
+    private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
+	List<String> items = new ArrayList<String>(resultPageSize);
+	for (UserSet set : results.getResults()) {
+	    items.add(((WebUserSetImpl) set).getId());
+	}
+	resPage.setItems(items);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize) {
+	List<UserSet> items = new ArrayList<UserSet>(results.getResults().size());
+	
+	for (UserSet set : results.getResults()) {
+	    //items not included in results
+//	    set.setItems(null);
+	    items.add(set);
+	}
+	resPage.setItems(items);
+    }
+
+    private String buildPageUrl(String collectionUrl, int page, int pageSize) {
+	StringBuilder builder = new StringBuilder(collectionUrl);
+	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
+
+	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
+
+	return builder.toString();
+    }
+
+    private String buildCollectionUrl(Query searchQuery, StringBuffer requestUrl, String queryString) {
+
+	// queryString = removeParam(WebAnnotationFields.PARAM_WSKEY,
+	// queryString);
+
+	// remove out of scope parameters
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
+
+	// avoid duplication of query parameters
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
+
+	// add mandatory parameters
+	if (StringUtils.isNotBlank(searchQuery.getSearchProfile())) {
+	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchQuery.getSearchProfile());
+	}
+
+	return requestUrl.append("?").append(queryString).toString();
+    }
+
+    protected String removeParam(final String queryParam, String queryParams) {
+	String tmp;
+	// avoid name conflicts search "queryParam="
+	int startPos = queryParams.indexOf(queryParam + "=");
+	int startEndPos = queryParams.indexOf("&", startPos + 1);
+
+	if (startPos >= 0) {
+	    // make sure to remove the "&" if not the first param
+	    if (startPos > 0)
+		startPos--;
+	    tmp = queryParams.substring(0, startPos);
+
+	    if (startEndPos > 0)
+		tmp += queryParams.substring(startEndPos);
+	} else {
+	    tmp = queryParams;
+	}
+	return tmp;
+    }
 }

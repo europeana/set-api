@@ -42,6 +42,19 @@
 			<artifactId>commons-oauth</artifactId>
 			<version>${version.commonsApi}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-search</artifactId>
+			<version>${version.commonsApi}</version>
+			<exclusions>
+			<exclusion>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			
+			</exclusion>
+			</exclusions>
+		</dependency>
 	
 		<!-- europeana api key client -->
 		<!--
