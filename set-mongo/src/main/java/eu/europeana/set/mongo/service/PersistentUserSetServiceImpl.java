@@ -1,6 +1,7 @@
 package eu.europeana.set.mongo.service;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -8,15 +9,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.Sort;
 import org.springframework.stereotype.Component;
 
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -125,6 +131,63 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return getDao().findOne(WebUserSetFields.MONGO_ID, new ObjectId(id));
 	}
 
+	@Override
+	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
+	    Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
+	    long totalInCollection = mongoQuery.count();
+	    
+	    FindOptions options = buildMongoPaginationOptions(query);
+	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
+	    
+	    ResultSet<PersistentUserSet> res = new ResultSet<PersistentUserSet>();
+	    res.setResults(userSets);
+	    res.setResultSize(totalInCollection);
+	    
+	    return res;
+	}
+
+	private FindOptions buildMongoPaginationOptions(UserSetQuery query) {
+	    FindOptions options = new FindOptions();
+	    options.skip(query.getPageNr() * query.getPageSize());
+	    options.limit(query.getPageSize());
+	    return options;
+	}
+
+	private Query<PersistentUserSet> buildMongoQuery(UserSetQuery query) {
+	    Query<PersistentUserSet> mongoQuery = getUserSetDao(). createQuery();
+	    mongoQuery.disableValidation();
+	    
+	    if(query.getVisibility() != null) {
+		mongoQuery.filter(WebUserSetModelFields.VISIBILITY, query.getVisibility());
+	    }
+	    
+	    
+	    if(query.getType() != null) {
+		mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
+	    }
+	    
+	    if(query.getCreator() != null) {
+		mongoQuery.filter("creator.httpUrl", query.getType());
+	    }
+	    
+	    if(query.getSortCriteria() != null) {
+		for (String sortField : query.getSortCriteria()) {
+		    if(!sortField.contains(" ")) {
+			mongoQuery.order(Sort.ascending(sortField));
+		    }else {
+			String[] sortParts = sortField.split(" ", 2);
+			if(!"desc".contentEquals(sortParts[1])) {
+			    mongoQuery.order(Sort.ascending(sortParts[0]));
+			}else {
+			    mongoQuery.order(Sort.descending(sortParts[0]));
+			}
+			
+		    }
+		}
+	    }
+	    return mongoQuery;
+	}
+	
 	@Override
 	public void remove(String id) {
 		PersistentUserSet userSet = getByIdentifier(id);

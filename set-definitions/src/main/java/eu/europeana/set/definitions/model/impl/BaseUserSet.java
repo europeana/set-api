@@ -460,16 +460,16 @@ public class BaseUserSet implements UserSet {
 
 	@Override
 	public boolean isPrivate() {
-	    return VisibilityTypes.PRIVATE.getName().contentEquals(getVisibility());
+	    return VisibilityTypes.PRIVATE.getJsonValue().contentEquals(getVisibility());
 	}
 
 	@Override
 	public boolean isPublic() {
-	    return VisibilityTypes.PUBLIC.getName().contentEquals(getVisibility());
+	    return VisibilityTypes.PUBLIC.getJsonValue().contentEquals(getVisibility());
 	}
 
 	@Override
 	public boolean isPublished() {
-	    return VisibilityTypes.PUBLISHED.getName().contentEquals(getVisibility());
+	    return VisibilityTypes.PUBLISHED.getJsonValue().contentEquals(getVisibility());
 	}
 }

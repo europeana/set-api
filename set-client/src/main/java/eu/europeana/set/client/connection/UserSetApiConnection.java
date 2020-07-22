@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.http.ResponseEntity;
 
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
@@ -43,7 +44,7 @@ public class UserSetApiConnection extends BaseApiConnection {
 		
 		StringBuilder urlBuilder = getUserSetServiceUri();		
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
 			.append(wskey).append(WebUserSetFields.AND);
 		
 		String resUrl = urlBuilder.toString();
@@ -74,7 +75,7 @@ public class UserSetApiConnection extends BaseApiConnection {
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
 	    	.append(wskey).append(WebUserSetFields.AND);
 		
 		/**
@@ -103,7 +104,7 @@ public class UserSetApiConnection extends BaseApiConnection {
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
 		    .append(wskey).append(WebUserSetFields.AND);
 		
 		/**
@@ -130,7 +131,7 @@ public class UserSetApiConnection extends BaseApiConnection {
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(WebUserSetFields.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
 		    .append(wskey).append(WebUserSetFields.AND);
 		
 		/**

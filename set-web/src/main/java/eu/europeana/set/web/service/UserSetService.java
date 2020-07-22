@@ -5,12 +5,17 @@ import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
 
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.search.BaseUserSetResultPage;
+import eu.europeana.set.web.search.UserSetIdsResultPage;
 
 public interface UserSetService {
 
@@ -179,6 +184,17 @@ public interface UserSetService {
 	 * @param positionInt
 	 * @param newItem
 	 */
-	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
+	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);
+
+	/**
+	 * search user sets using the given query and profile 
+	 * @param searchQuery
+	 * @param profile
+	 * @return 
+	 */
+	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
+
+	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile);
 
 }

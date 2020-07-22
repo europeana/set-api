@@ -21,7 +21,7 @@ public interface WebUserSetFields extends WebUserSetModelFields {
     //
     // Query Params
     //
-    public static final String PARAM_WSKEY = "wskey";
+//    public static final String PARAM_WSKEY = "wskey";
     public static final String PATH_PARAM_SET_ID = "identifier";
     public static final String PATH_PARAM_DATASET_ID = "datasetId";
     public static final String PATH_PARAM_LOCAL_ID = "localId";
@@ -46,6 +46,12 @@ public interface WebUserSetFields extends WebUserSetModelFields {
     public final static String DESCRIPTION = "description";
     public final static String TYPE = "type";
     public final static String ITEMS = "items";
+    
+    //results page
+    public final static String PART_OF = "partOf";
+    public final static String NEXT = "next";
+    public final static String PREV = "prev";
+    
 
     // Defaults
 

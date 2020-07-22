@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 
 /**
  * @author GrafR
@@ -16,10 +17,7 @@ import eu.europeana.set.definitions.model.agent.Agent;
  */
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
-		public final static String FIELD_IDENTIFIER = "identifier";
-		public static final String FIELD_TITLE = "title";
-		public static final String FIELD_DESCRIPTION = "description";
-		public static final String FIELD_SET_TYPE = "setType";
+		public final static String FIELD_IDENTIFIER = WebUserSetModelFields.IDENTIFIER;
 		
 		public abstract ObjectId getObjectId();		
 		public abstract String getIdentifier();		

@@ -15,8 +15,10 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 
-@JsonPropertyOrder({ "id", "type", "visibility", "title", "description", "collectionPage", "next", "prev", "creator",
-	"created", "modified", "first", "last", "total", "items" })
+@JsonPropertyOrder({ WebUserSetFields.ID, WebUserSetFields.TYPE, WebUserSetFields.TITLE, WebUserSetFields.DESCRIPTION,
+	WebUserSetFields.VISIBILITY, WebUserSetFields.IS_DEFINED_BY, WebUserSetFields.ITEMS, WebUserSetFields.CREATOR,
+	WebUserSetFields.CREATED, WebUserSetFields.MODIFIED, WebUserSetFields.TOTAL, WebUserSetFields.NEXT,
+	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 
@@ -56,7 +58,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonProperty(WebUserSetFields.TOTAL)
-    @JsonInclude(value = JsonInclude.Include.ALWAYS)
+    @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
     public int getTotal() {
 	return super.getTotal();
     }
@@ -67,7 +69,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonProperty(WebUserSetFields.CONTEXT_FIELD)
-    @JsonIgnore //avoid double serialization
+    @JsonIgnore // avoid double serialization
     public String getContext() {
 	return super.getContext();
     }
@@ -79,7 +81,8 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonProperty(WebUserSetFields.CREATOR)
-    @JsonIgnore // creator is automatically set by the system, temporarily excluded from serialization
+    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
+		// serialization
     public Agent getCreator() {
 	return super.getCreator();
     }
@@ -168,22 +171,22 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     public boolean isOpenSet() {
 	return super.isOpenSet();
     }
-    
+
     @Override
     @JsonIgnore
     public boolean isPrivate() {
-        return super.isPrivate();
+	return super.isPrivate();
     }
-    
+
     @Override
     @JsonIgnore
     public boolean isPublic() {
-        return super.isPublic();
+	return super.isPublic();
     }
-    
+
     @Override
     @JsonIgnore
     public boolean isPublished() {
-        return super.isPublished();
+	return super.isPublished();
     }
 }

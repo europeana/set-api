@@ -30,8 +30,8 @@ import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.model.vocabulary.Roles;
+import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.AuthorizationService;
 

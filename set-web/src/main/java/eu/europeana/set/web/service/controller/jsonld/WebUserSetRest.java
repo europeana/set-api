@@ -94,7 +94,7 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
 	    Agent user = new WebSoftwareAgent();
-	    user.setName(getUserId(authentication));
+	    user.setHttpUrl(getUserId(authentication));
 
 	    // SET DEFAULTS
 	    if (webUserSet.getCreator() == null) {
@@ -102,7 +102,7 @@ public class WebUserSetRest extends BaseRest {
 	    }
 
 	    if (webUserSet.getVisibility() == null) {
-		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getName());
+		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	    }
 
 	    // store the new Set with its respective id, together with all the containing
@@ -159,7 +159,7 @@ public class WebUserSetRest extends BaseRest {
 		    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.SEARCH_HELP_NOTE, value = "Retrieve a user set", nickname = "retrieve", response = java.lang.Void.class)
     public ResponseEntity<String> getUserSet(
-	    @RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
@@ -516,7 +516,7 @@ public class WebUserSetRest extends BaseRest {
 		    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
     public ResponseEntity<String> isItemInUserSet(
-	    @RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId, HttpServletRequest request)
