@@ -53,13 +53,6 @@ public interface UserSetService {
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
 	
 	/**
-	 * This method disables user set in database
-	 * @param existingUserSet
-	 * @return disabled user set
-	 */
-	public UserSet disableUserSet(UserSet existingUserSet);					 
-	
-	/**
 	 * This method updates user set pagination values. 
 	 * @param newUserSet
 	 * @return user set with updated pagination values
@@ -72,16 +65,6 @@ public interface UserSetService {
 	 * @return UserSet object
 	 */
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
-		
-	/**
-	 * This method returns UserSet object for given user set identifier. Additionally
-	 * this method allows to define whether disabled user sets should be searched.
-	 * Use false if disabled user sets should be returned.
-	 * @param user set ID
-	 * @param true if disabled user sets should be checked (default true)
-	 * @return UserSet object
-	 */
-	public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException; 
 		
 	/**
 	 * This method forms an identifier URL

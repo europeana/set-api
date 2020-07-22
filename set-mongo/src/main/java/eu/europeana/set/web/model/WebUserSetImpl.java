@@ -90,11 +90,6 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonIgnore
-    public boolean isDisabled() {
-	return super.isDisabled();
-    }
-
-    @JsonIgnore
     public boolean isUgc() {
 	return super.isUgc();
     }

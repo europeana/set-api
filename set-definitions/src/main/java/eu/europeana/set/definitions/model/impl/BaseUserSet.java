@@ -95,10 +95,7 @@ public class BaseUserSet implements UserSet {
 	// web context
 	private String context;
 
-    // Indicates whether the set is disabled in database
-    private boolean disabled;
-	
-    // Contains query URI to items
+	// Contains query URI to items
 	private String isDefinedBy;
 	
 	public String getIdentifier() {
@@ -416,16 +413,6 @@ public class BaseUserSet implements UserSet {
 		if (getItems() != null) 
 			res = res + "\t\t" + "number of items:" + getItems().size() + "\n";
 		return res;
-	}
-
-	@Override
-	public boolean isDisabled() {
-		return disabled;
-	}
-
-	@Override
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;		
 	}
 
 	@Override
