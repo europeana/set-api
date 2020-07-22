@@ -191,7 +191,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@Override
 	public void remove(String id) {
 		PersistentUserSet userSet = getByIdentifier(id);
-		getDao().delete(userSet);
+		if (userSet != null)
+		    getDao().delete(userSet);
 	}
 
 	@Override
