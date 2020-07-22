@@ -19,7 +19,7 @@ import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 	WebUserSetFields.VISIBILITY, WebUserSetFields.IS_DEFINED_BY, WebUserSetFields.ITEMS, WebUserSetFields.CREATOR,
 	WebUserSetFields.CREATED, WebUserSetFields.MODIFIED, WebUserSetFields.TOTAL, WebUserSetFields.NEXT,
 	WebUserSetFields.PREV })
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 
     @JsonIgnore
