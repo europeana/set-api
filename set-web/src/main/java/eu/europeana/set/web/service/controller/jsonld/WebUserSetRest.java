@@ -294,6 +294,8 @@ public class WebUserSetRest extends BaseRest {
 
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
+	    newUserSet.setCreator(existingUserSet.getCreator());
+	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
 	    getUserSetService().validateWebUserSet(newUserSet);
 
 	    // validate items

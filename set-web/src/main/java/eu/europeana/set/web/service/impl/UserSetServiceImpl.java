@@ -288,7 +288,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.TYPE_OPEN });
 	}
 	
-	validateFavoriteUserSet(webUserSet);
+	// for update use case it is not allowed to change the type. If type is present in the request body, 
+	// it must match the value from the object stored in the database.
+	if (webUserSet.getIdentifier() != null) { // that means it is an update use case
+	    // only if the type in the request body is BookmarksFolder and it is different from the type in database object, 
+	    // only in this case we have to verify if a BookmarkFolder exist in the database for the same user 
+	    UserSet existingUserSet = getBookmarksFolder(webUserSet.getCreator());
+	    if (WebUserSetModelFields.DEFAULT_FAVORITE_TYPE.equals(webUserSet.getType()) 
+		    && !existingUserSet.getType().equals(webUserSet.getType())) {
+		validateFavoriteUserSet(webUserSet);
+	    }
+	} else {
+    	    validateFavoriteUserSet(webUserSet);
+	}
     }
 
     /**
