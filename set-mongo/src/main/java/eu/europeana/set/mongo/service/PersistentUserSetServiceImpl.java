@@ -21,6 +21,7 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
@@ -160,9 +161,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if(query.getVisibility() != null) {
 		mongoQuery.filter(WebUserSetModelFields.VISIBILITY, query.getVisibility());
 	    }
-	    
-	    
-	    if(query.getType() != null) {
+	        
+	    if(query.getType() == null) {
+		mongoQuery.filter(WebUserSetModelFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
+	    }else {
 		mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
 	    }
 	    
@@ -170,7 +172,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		mongoQuery.filter("creator.httpUrl", query.getType());
 	    }
 	    
-	    if(query.getSortCriteria() != null) {
+	    if(query.getSortCriteria() == null) {
+		//default ordering if none is defined by the user
+		mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));
+	    } else {
 		for (String sortField : query.getSortCriteria()) {
 		    if(!sortField.contains(" ")) {
 			mongoQuery.order(Sort.ascending(sortField));

@@ -3,6 +3,7 @@ package eu.europeana.set.web.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,7 +11,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -25,6 +27,7 @@ import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -46,6 +49,7 @@ import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.BaseUserSetResultPage;
 import eu.europeana.set.web.search.CollectionView;
 import eu.europeana.set.web.search.UserSetIdsResultPage;
@@ -274,7 +278,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// validate isDefinedBy and items - we should not have both of them
 	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.TYPE_OPEN });
+		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
 
     }
@@ -544,7 +548,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    StringBuffer requestUrl, String reqParams, LdProfiles profile) {
+	    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) {
 
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
@@ -554,7 +558,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
 	} else if (LdProfiles.STANDARD.equals(profile)) {
 	    resPage = new UserSetResultPage();
-	    setPageItems(results, (UserSetResultPage)resPage, resultPageSize);
+	    setPageItems(results, (UserSetResultPage) resPage, resultPageSize, authentication);
 	}
 
 //	resPage.setFacetFields(results.getFacetFields());
@@ -588,18 +592,34 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    items.add(((WebUserSetImpl) set).getId());
 	}
 	resPage.setItems(items);
+	resPage.setTotalInPage(items.size());
     }
-    
+
     @SuppressWarnings("unchecked")
-    private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize) {
+    private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize,
+	    Authentication authentication) {
 	List<UserSet> items = new ArrayList<UserSet>(results.getResults().size());
-	
+
 	for (UserSet set : results.getResults()) {
-	    //items not included in results
-//	    set.setItems(null);
-	    items.add(set);
+	    // items not included in results
+	    set.setItems(null);
+	    set.setTotal(0);
+	    if (!set.isPrivate()) {
+		items.add(set);
+	    } else {
+		if (isOwner(set, authentication) || hasAdminRights(authentication)) {
+		    items.add(set);
+		} else {
+		    // inlcude only the id
+		    WebUserSetImpl id = new WebUserSetImpl();
+		    id.setIdentifier(set.getIdentifier());
+		    items.add(id);
+		}
+	    }
+
 	}
 	resPage.setItems(items);
+	resPage.setTotalInPage(items.size());
     }
 
     private String buildPageUrl(String collectionUrl, int page, int pageSize) {
@@ -649,5 +669,83 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    tmp = queryParams;
 	}
 	return tmp;
+    }
+
+    /**
+     * This method checks if user is an owner of the user set
+     * 
+     * @param userSet
+     * @param queryUser
+     * @return true if user is owner of a user set
+     */
+    public boolean isOwner(UserSet userSet, Authentication authentication) {
+	if (authentication == null) {
+	    return false;
+	}
+	String userId = buildCreatorUri((String) authentication.getPrincipal());
+	return userSet.getCreator().getName().equals(userId);
+    }
+
+    /**
+     * This method retrieves user id from authentication object
+     * 
+     * @param authentication
+     * @return the user id
+     */
+    @Override
+    public String getUserId(Authentication authentication) {
+	return buildCreatorUri((String) authentication.getPrincipal());
+    }
+
+    @Override
+    public String buildCreatorUri(String userId) {
+	return WebFields.DEFAULT_CREATOR_URL + userId;
+    }
+
+    /**
+     * This method validates input values wsKey, identifier and userToken.
+     * 
+     * @param identifier
+     * @param userId
+     * @return
+     * @return userSet object
+     * @throws HttpException
+     */
+    @Override
+    public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException {
+
+	if (authentication == null) {
+	    // access by API KEY, authentication not available
+	    throw new ApplicationAuthenticationException(I18nConstants.USER_NOT_AUTHORIZED,
+		    I18nConstants.USER_NOT_AUTHORIZED, new String[] {
+			    "Access to update operations of private User Sets require user authentication with JwtToken" });
+	}
+
+	// verify ownership
+	if (isOwner(userSet, authentication) || hasAdminRights(authentication)) {
+	    // approve owner or admin
+	    return userSet;
+	} else {
+	    // not authorized
+	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
+		    I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {
+			    "Only the creators of the annotation or admins are authorized to perform this operation." });
+	}
+    }
+
+    protected boolean hasAdminRights(Authentication authentication) {
+	if (authentication == null) {
+	    return false;
+	}
+
+	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
+		.hasNext();) {
+	    // role based authorization
+	    String role = iterator.next().getAuthority();
+	    if (Roles.ADMIN.getName().equals(role)) {
+		return true;
+	    }
+	}
+	return false;
     }
 }

@@ -9,8 +9,9 @@ public interface WebUserSetModelFields {
 	//** common fields **/
 	public static final String ID = "id";
 	public static final String TYPE = "type";
-	public static final String TYPE_OPEN = "open";
-	public static final String TYPE_CLOSED = "closed";
+	public static final String TYPE_COLLECTION = "Collection";
+	public static final String SET_OPEN = "open";
+	public static final String SET_CLOSED = "closed";
 	
 	//** user set fields **/
 	public static final String AT_CONTEXT = "@context";
