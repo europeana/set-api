@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -71,7 +72,7 @@ public class SearchUserSetRest extends BaseRest {
 	try {
 
 	    // authorization
-	    verifyReadAccess(request);
+	    Authentication authentication = verifyReadAccess(request);
 
 	    // valdidate params
 	    LdProfiles profile = getProfile(profileStr, request);
@@ -82,7 +83,7 @@ public class SearchUserSetRest extends BaseRest {
 	    @SuppressWarnings("rawtypes")
 	    BaseUserSetResultPage resultsPage;
 	    resultsPage = getUserSetService().buildResultsPage(searchQuery, results,
-		    request.getRequestURL(), request.getQueryString(), profile);
+		    request.getRequestURL(), request.getQueryString(), profile, authentication);
 
 	    String jsonLd = serializeResultsPage(resultsPage, profile);
 
@@ -128,7 +129,7 @@ public class SearchUserSetRest extends BaseRest {
 	if (queryParts.containsKey(WebUserSetFields.CREATOR)) {
 	    creatorId = queryParts.get(WebUserSetFields.CREATOR);
 	    if(!creatorId.startsWith("http://")) {
-		creatorId = buildCreatorUri(creatorId);
+		creatorId = getUserSetService().buildCreatorUri(creatorId);
 	    } 
 	}
 		

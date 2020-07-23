@@ -28,8 +28,8 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     }
     
     @Override
-//    @JsonProperty(WebUserSetFields.TOTAL)
-    @JsonIgnore
+    @JsonProperty(WebUserSetFields.TOTAL)
+//    @JsonIgnore
     public long getTotalInPage() {
         return super.getTotalInPage();
     }
@@ -53,7 +53,6 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     }
     
     @Override
-//    @JsonProperty("isPartOf")
     @JsonIgnore
     public String getCollectionUri() {
         return super.getCollectionUri();
