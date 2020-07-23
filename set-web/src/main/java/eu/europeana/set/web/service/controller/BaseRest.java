@@ -107,31 +107,6 @@ public class BaseRest extends BaseRestController {
 	return profile;
     }
 
-    /**
-     * This method checks visibility level
-     * 
-     * @param request
-     * @param userSet
-     * @throws HttpException
-     */
-    public void checkStatus(UserSet userSet, Authentication authentication) throws HttpException {
-	if (!userSet.isPrivate()) {
-	    // published: visible to all users on Collections (can only be set by an editor)
-	    return;
-	}
-
-	if (isOwner(userSet, authentication) || hasAdminRights(authentication)) {
-	    //owner and admin are allowed to perform all operations
-	    return;
-	}
-
-	if (userSet.isPrivate()) {
-	    // private: only visible to the owner
-	    throw new ParamValidationException(I18nConstants.USER_NOT_AUTHORIZED, I18nConstants.USER_NOT_AUTHORIZED,
-		    new String[] { WebUserSetFields.VISIBILITY, userSet.getVisibility() });
-	}
-
-    }
 
     /**
      * This method identifies profile from a HTTP header if it exists.
@@ -225,12 +200,14 @@ public class BaseRest extends BaseRestController {
      */
     protected UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException {
 
-	String userId = buildCreatorUri((String) authentication.getPrincipal());
-
+	if (authentication == null) {
+	    //access by API KEY, authentication not available
+	    throw new ApplicationAuthenticationException(I18nConstants.USER_NOT_AUTHORIZED, I18nConstants.USER_NOT_AUTHORIZED,
+		    new String[] { "Access to update operations of private User Sets require user authentication with JwtToken" });
+	}
+	
 	// verify ownership
-	boolean isOwner = userSet.getCreator().getName().equals(userId);
-
-	if (isOwner || hasAdminRights(authentication)) {
+	if (isOwner(userSet, authentication) || hasAdminRights(authentication)) {
 	    // approve owner or admin
 	    return userSet;
 	} else {
