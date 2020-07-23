@@ -1,7 +1,6 @@
 package eu.europeana.set.definitions.model.vocabulary.fields;
 
 public interface WebUserSetModelFields {
-
 	
 	/**
 	 * Model attribute names
@@ -9,8 +8,9 @@ public interface WebUserSetModelFields {
 	//** common fields **/
 	public static final String ID = "id";
 	public static final String TYPE = "type";
-	public static final String TYPE_OPEN = "open";
-	public static final String TYPE_CLOSED = "closed";
+	public static final String TYPE_COLLECTION = "Collection";
+	public static final String SET_OPEN = "open";
+	public static final String SET_CLOSED = "closed";
 	
 	//** user set fields **/
 	public static final String AT_CONTEXT = "@context";
@@ -27,6 +27,7 @@ public interface WebUserSetModelFields {
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
 	
-	//** user set defaults **/
+	//** user set defaults  - use userset types**/
+	@Deprecated
 	public static final String DEFAULT_FAVORITE_TYPE = "BookmarkFolder";
 }

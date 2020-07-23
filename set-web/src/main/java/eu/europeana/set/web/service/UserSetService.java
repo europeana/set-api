@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
+import org.springframework.security.core.Authentication;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -102,7 +103,7 @@ public interface UserSetService {
 
 	/**
 	 * This method validates and processes the Set description for format and mandatory fields
-	 * if false responds with HTTP 400
+     * if false responds with HTTP 400
 	 * @param webUserSet
 	 * @throws RequestBodyValidationException 
 	 */
@@ -166,7 +167,7 @@ public interface UserSetService {
 	 * @param positionInt
 	 * @param newItem
 	 */
-	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
+	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);
 
 	/**
 	 * search user sets using the given query and profile 
@@ -177,6 +178,27 @@ public interface UserSetService {
 	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
 
 	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-		    StringBuffer requestUrl, String reqParams, LdProfiles profile);
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication);
+
+	/**
+	 * This method validates input values wsKey, identifier and userToken.
+	 * 
+	 * @param identifier
+	 * @param userId
+	 * @return
+	 * @return userSet object
+	 * @throws HttpException
+	 */
+	UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
+
+	String buildCreatorUri(String userId);
+
+	/**
+	 * This method retrieves user id from authentication object
+	 * 
+	 * @param authentication
+	 * @return the user id
+	 */
+	String getUserId(Authentication authentication);
 
 }

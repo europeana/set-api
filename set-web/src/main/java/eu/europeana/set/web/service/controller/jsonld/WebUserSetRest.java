@@ -1,11 +1,14 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
+import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,6 +43,7 @@ import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.WebSoftwareAgent;
 import eu.europeana.set.web.model.vocabulary.Operations;
+import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -92,7 +96,7 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
 	    Agent user = new WebSoftwareAgent();
-	    user.setHttpUrl(getUserId(authentication));
+	    user.setHttpUrl(getUserSetService().getUserId(authentication));
 
 	    // SET DEFAULTS
 	    if (webUserSet.getCreator() == null) {
@@ -171,8 +175,8 @@ public class WebUserSetRest extends BaseRest {
 	    HttpServletRequest request) throws HttpException {
 
 	String action = "get:/set/{identifier}{.jsonld}";
-	verifyReadAccess(request);
-	return getUserSet(wskey, profile, identifier, request, action, sortField, sortOrderField, page, pageSize);
+	Authentication authentication = verifyReadAccess(request);
+	return getUserSet(wskey, profile, identifier, request, action, sortField, sortOrderField, page, pageSize, authentication);
     }
 
     /**
@@ -188,7 +192,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     private ResponseEntity<String> getUserSet(String wsKey, String profileStr, String identifier,
-	    HttpServletRequest request, String action, String sort, String sortOrder, int pageNr, int pageSize)
+	    HttpServletRequest request, String action, String sort, String sortOrder, int pageNr, int pageSize, Authentication authentication)
 	    throws HttpException {
 	try {
 	    LdProfiles profile = getProfile(profileStr, request);
@@ -199,7 +203,9 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet userSet = getUserSetService().getUserSetById(identifier);
 
 	    // check visibility level for given user
-	    checkVisibilityForRetrieve(userSet, request);
+	    if (userSet.isPrivate()) {
+		getUserSetService().verifyOwnerOrAdmin(userSet, authentication);
+	    }
 
 	    // append the HTTP parameters related to sort, page and pageSize
 	    // to URL defined in the rdfs:isDefinedBy property
@@ -234,14 +240,6 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
-    private void checkVisibilityForRetrieve(UserSet userSet, HttpServletRequest request)
-	    throws ApplicationAuthenticationException, HttpException {
-	if (!userSet.isPublished()) {
-	    // TODO: update verifyReadAccess to return the Authorization object
-	    Authentication auth = verifyWriteAccess(Operations.RETRIEVE, request);
-	    checkStatus(userSet, auth);
-	}
-    }
 
     @RequestMapping(value = { "/set/{identifier}" }, method = RequestMethod.PUT, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
@@ -362,13 +360,31 @@ public class WebUserSetRest extends BaseRest {
 
     private void checkVisibilityForUpdate(UserSet existingUserSet, Authentication authentication) throws HttpException {
 	if (hasEditorRole(authentication) && !existingUserSet.isPrivate()) {
-	    // allow editors to update visibility
-	} else {
-	    verifyOwnerOrAdmin(existingUserSet, authentication);
-	    // owners and admins are allowed to update
-	}
+	    //handle editor role
+	    return;
+	} 
+	getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
     }
 
+    /**
+     * Check if user is an editor
+     * 
+     * @param authentication
+     * @return true if user has editor role
+     */
+    protected boolean hasEditorRole(Authentication authentication) {
+
+	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
+		.hasNext();) {
+	    // role based authorization
+	    String role = iterator.next().getAuthority();
+	    if (Roles.EDITOR.getName().equals(role)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+    
     private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
 	    throws ApplicationAuthenticationException {
 	// no validation of items for open sets, they are retrieved dynamically
@@ -451,7 +467,7 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 	    // check visibility level for given user
-	    checkVisibilityForUpdate(existingUserSet, authentication);
+	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
@@ -504,15 +520,14 @@ public class WebUserSetRest extends BaseRest {
 	// check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	// check client access (a valid "wskey" must be provided)
-	verifyReadAccess(request);
-	return isItemInUserSet(request, wskey, identifier, datasetId, localId, action);
+	Authentication authentication = verifyReadAccess(request);
+	return isItemInUserSet(wskey, identifier, datasetId, localId, action, authentication);
     }
 
     /**
      * This method validates input values and checks if item is already in a user
      * set.
      * 
-     * @param request
      * @param wskey      The API key
      * @param identifier The identifier of a user set
      * @param datasetId  The identifier of the dataset, typically a number
@@ -520,11 +535,12 @@ public class WebUserSetRest extends BaseRest {
      * @param userSet    The user set fields to update in JSON format e.g. title or
      *                   description
      * @param action     The action describing the request
+     * @param authentication
      * @return response entity that comprises response body, headers and status code
      * @throws HttpException
      */
-    protected ResponseEntity<String> isItemInUserSet(HttpServletRequest request, String wsKey, String identifier,
-	    String datasetId, String localId, String action) throws HttpException {
+    protected ResponseEntity<String> isItemInUserSet(String wsKey, String identifier,
+	    String datasetId, String localId, String action, Authentication authentication) throws HttpException {
 
 	try {
 	    // check if the Set exists, if not respond with HTTP 404
@@ -532,8 +548,10 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 	    // check visibility level for given user
-	    checkVisibilityForRetrieve(existingUserSet, request);
-
+	    if (existingUserSet.isPrivate()) {
+		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
+	    }
+	    
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
 
@@ -617,7 +635,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check if the user is the owner of the set or admin, otherwise respond with
 	    // 403
-	    checkVisibilityForUpdate(existingUserSet, authentication);
+	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
     
 	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
 		    WebUserSetFields.BASE_ITEM_URL);
@@ -705,7 +723,7 @@ public class WebUserSetRest extends BaseRest {
 	    // that calls the deletion (i.e. identified by provided user token) is the same
 	    // user as the creator
 	    // of the user set
-	    verifyOwnerOrAdmin(existingUserSet, authentication);
+	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
 
 	    // check visibility level for given user - currently 
 	    //checkStatus(existingUserSet, authentication);
@@ -721,13 +739,8 @@ public class WebUserSetRest extends BaseRest {
 	    // if the user is an Administrator then permanently remove item
 	    // (and all items that are members of the user set)
 	    httpStatus = HttpStatus.NO_CONTENT;
-	    if (hasAdminRights(authentication) || isOwner(existingUserSet, authentication)) {
-		getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
-	    } else {
-	        // if the user is a registered user but not the owner, the response should be
-		// 401 (unathorized)
-		httpStatus = HttpStatus.UNAUTHORIZED;
-	    }
+	    getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
+	    
 	    // build response entity with headers
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);

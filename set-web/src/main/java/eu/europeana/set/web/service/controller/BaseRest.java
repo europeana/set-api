@@ -2,7 +2,6 @@ package eu.europeana.set.web.service.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,14 +13,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.controller.BaseRestController;
-import eu.europeana.api.commons.web.definitions.WebFields;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
@@ -30,7 +25,6 @@ import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.AuthorizationService;
@@ -107,31 +101,6 @@ public class BaseRest extends BaseRestController {
 	return profile;
     }
 
-    /**
-     * This method checks visibility level
-     * 
-     * @param request
-     * @param userSet
-     * @throws HttpException
-     */
-    public void checkStatus(UserSet userSet, Authentication authentication) throws HttpException {
-	if (!userSet.isPrivate()) {
-	    // published: visible to all users on Collections (can only be set by an editor)
-	    return;
-	}
-
-	if (isOwner(userSet, authentication) || hasAdminRights(authentication)) {
-	    //owner and admin are allowed to perform all operations
-	    return;
-	}
-
-	if (userSet.isPrivate()) {
-	    // private: only visible to the owner
-	    throw new ParamValidationException(I18nConstants.USER_NOT_AUTHORIZED, I18nConstants.USER_NOT_AUTHORIZED,
-		    new String[] { WebUserSetFields.VISIBILITY, userSet.getVisibility() });
-	}
-
-    }
 
     /**
      * This method identifies profile from a HTTP header if it exists.
@@ -191,92 +160,7 @@ public class BaseRest extends BaseRestController {
 	String serializedUserSetJsonLdStr = serializer.serialize(resUserSet);
 	return serializedUserSetJsonLdStr;
     }
-
-    /**
-     * This method checks if user is an owner of the user set
-     * 
-     * @param userSet
-     * @param queryUser
-     * @return true if user is owner of a user set
-     */
-    public boolean isOwner(UserSet userSet, Authentication authentication) {
-	String userId = buildCreatorUri((String) authentication.getPrincipal());
-	return userSet.getCreator().getName().equals(userId);
-    }
-
-    /**
-     * This method retrieves user id from authentication object
-     * 
-     * @param authentication
-     * @return the user id
-     */
-    public String getUserId(Authentication authentication) {
-	return buildCreatorUri((String) authentication.getPrincipal());
-    }
-
-    /**
-     * This method validates input values wsKey, identifier and userToken.
-     * 
-     * @param identifier
-     * @param userId
-     * @return
-     * @return userSet object
-     * @throws HttpException
-     */
-    protected UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException {
-
-	String userId = buildCreatorUri((String) authentication.getPrincipal());
-
-	// verify ownership
-	boolean isOwner = userSet.getCreator().getName().equals(userId);
-
-	if (isOwner || hasAdminRights(authentication)) {
-	    // approve owner or admin
-	    return userSet;
-	} else {
-	    // not authorized
-	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
-		    I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {
-			    "Only the creators of the annotation or admins are authorized to perform this operation." });
-	}
-    }
-
-    protected String buildCreatorUri(String userId) {
-	return WebFields.DEFAULT_CREATOR_URL + userId;
-    }
-
-    protected boolean hasAdminRights(Authentication authentication) {
-
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (Roles.ADMIN.getName().equals(role)) {
-		return true;
-	    }
-	}
-	return false;
-    }
-
-    /**
-     * Check if user is an editor
-     * 
-     * @param authentication
-     * @return true if user has editor role
-     */
-    protected boolean hasEditorRole(Authentication authentication) {
-
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (Roles.EDITOR.getName().equals(role)) {
-		return true;
-	    }
-	}
-	return false;
-    }
-
+    
     /**
      * This method parses prefer header in keys and values
      * 
