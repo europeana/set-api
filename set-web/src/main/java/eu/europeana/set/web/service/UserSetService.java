@@ -119,16 +119,8 @@ public interface UserSetService {
 	 * @param webUserSet
 	 * @throws RequestBodyValidationException 
 	 */
-	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException;
+	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, UserSetNotFoundException;
 	
-	/**
-	 * This method validates and processes the favorite set
-	 * @param webUserSet The new user set
-	 * @param existingUserSet The stored user set
-	 * @throws RequestBodyValidationException
-	 */
-	public void validateFavoriteUserSet(UserSet webUserSet, UserSet existingUserSet) throws RequestBodyValidationException, UserSetNotFoundException;
-
 	/**
 	 * This method deletes user set by user set Id value.
 	 * @param userSetId The id of the user set

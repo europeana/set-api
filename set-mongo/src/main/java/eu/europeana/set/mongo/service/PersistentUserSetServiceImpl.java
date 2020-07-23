@@ -17,6 +17,7 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -90,19 +91,14 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String, java.lang.String)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String)
 	 */
-	public boolean getBookmarksFolder(String type, String creatorId) {
+	public PersistentUserSet getBookmarksFolder(String creatorId) {
 	    Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
-	    query.filter(PersistentUserSet.FIELD_TYPE, type);
+	    query.filter(PersistentUserSet.FIELD_TYPE, WebUserSetModelFields.DEFAULT_FAVORITE_TYPE);
 	    query.filter(PersistentUserSet.FIELD_CREATOR, creatorId);
 
-	    long result = getUserSetDao().find(query).count();
-	    
-	    boolean res = false;
-	    if (result != 0) 
-	        res = true;
-	    return res;
+	    return getUserSetDao().findOne(query);
 	}
 	
 	/**

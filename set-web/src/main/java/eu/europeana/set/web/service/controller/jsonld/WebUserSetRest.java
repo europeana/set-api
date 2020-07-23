@@ -89,7 +89,6 @@ public class WebUserSetRest extends BaseRest {
 	    
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
-	    getUserSetService().validateWebUserSet(webUserSet);
 	    if (StringUtils.isEmpty(webUserSet.getContext()))
 		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
@@ -101,11 +100,11 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setCreator(user);
 	    }
 
+	    getUserSetService().validateWebUserSet(webUserSet);
+
 	    if (webUserSet.getVisibility() == null) {
 		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getName());
 	    }
-
-	    getUserSetService().validateFavoriteUserSet(webUserSet, null);
 
 	    // store the new Set with its respective id, together with all the containing
 	    // items
@@ -302,8 +301,6 @@ public class WebUserSetRest extends BaseRest {
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
 	    getUserSetService().validateWebUserSet(newUserSet);
-
-	    getUserSetService().validateFavoriteUserSet(newUserSet, existingUserSet);
 
 	    // validate items
 	    validateAndSetItems(existingUserSet, newUserSet, profile);

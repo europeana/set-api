@@ -25,11 +25,10 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	/**
 	 * This method checks if a user set with provided type and creator already exists in
 	 * database
-	 * @param type
 	 * @param creator
-	 * @return true if exists
+	 * @return user set object
 	 */
-	public abstract boolean getBookmarksFolder(String type, String creatorid);
+	public abstract PersistentUserSet getBookmarksFolder(String creatorid);
 	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string
