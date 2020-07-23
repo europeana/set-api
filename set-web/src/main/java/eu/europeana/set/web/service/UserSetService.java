@@ -5,12 +5,16 @@ import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
 
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.search.BaseUserSetResultPage;
 
 public interface UserSetService {
 
@@ -53,13 +57,6 @@ public interface UserSetService {
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
 	
 	/**
-	 * This method disables user set in database
-	 * @param existingUserSet
-	 * @return disabled user set
-	 */
-	public UserSet disableUserSet(UserSet existingUserSet);					 
-	
-	/**
 	 * This method updates user set pagination values. 
 	 * @param newUserSet
 	 * @return user set with updated pagination values
@@ -72,16 +69,6 @@ public interface UserSetService {
 	 * @return UserSet object
 	 */
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
-		
-	/**
-	 * This method returns UserSet object for given user set identifier. Additionally
-	 * this method allows to define whether disabled user sets should be searched.
-	 * Use false if disabled user sets should be returned.
-	 * @param user set ID
-	 * @param true if disabled user sets should be checked (default true)
-	 * @return UserSet object
-	 */
-	public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException; 
 		
 	/**
 	 * This method forms an identifier URL
@@ -180,5 +167,16 @@ public interface UserSetService {
 	 * @param newItem
 	 */
 	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
+
+	/**
+	 * search user sets using the given query and profile 
+	 * @param searchQuery
+	 * @param profile
+	 * @return 
+	 */
+	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
+
+	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile);
 
 }

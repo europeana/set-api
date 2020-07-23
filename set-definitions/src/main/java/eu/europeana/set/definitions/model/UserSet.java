@@ -92,10 +92,6 @@ public interface UserSet {
 	
 	public void setContext(String context);
 	
-	boolean isDisabled();
-
-	void setDisabled(boolean disabled);
-	
 	/**
 	 * @return Holds a search request to the User Set API (complete URL pointing to production). 
 	 * To reduce complexity on the API, the exhaustive listing could also be expressed as a query.

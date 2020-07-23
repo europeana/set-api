@@ -10,22 +10,27 @@ package eu.europeana.set.definitions.model.vocabulary;
 public enum VisibilityTypes {
     PRIVATE("private"), PUBLIC("public"), PUBLISHED("published");
 
-    private String name;
+    private String jsonValue;
 
-    VisibilityTypes(String name) {
-        this.name = name;
+    VisibilityTypes(String jsonValue) {
+        this.jsonValue = jsonValue;
     }
 
-    public String getName() {
-        return name;
+    public String getJsonValue() {
+        return jsonValue;
     }
     
     public static final boolean isValid(String visibility) {
+	//TODO: update to use valueOfN
 	for (VisibilityTypes type : VisibilityTypes.values()) {
-	    if(type.getName().equals(visibility)) {
+	    if(type.getJsonValue().equals(visibility)) {
 		return true;
 	    }
 	}
 	return false;
+    }
+    
+    public static final VisibilityTypes getByJsonValue(String visibility) {
+	return VisibilityTypes.valueOf(visibility.toUpperCase());
     }
 }

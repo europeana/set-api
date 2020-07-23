@@ -1,8 +1,14 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.List;
+
+import org.mongodb.morphia.query.Query;
+
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
@@ -49,6 +55,13 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return user set object
 	 */
 	public abstract void remove(String identifier);
+
+	/** 
+	 * Retrieve user sets for the given search query 
+	 * @param searchQuery
+	 * @return
+	 */
+	ResultSet<PersistentUserSet> find(UserSetQuery searchQuery);
 	
 }
 

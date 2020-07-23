@@ -34,7 +34,6 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
@@ -93,7 +92,7 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
 	    Agent user = new WebSoftwareAgent();
-	    user.setName(getUserId(authentication));
+	    user.setHttpUrl(getUserId(authentication));
 
 	    // SET DEFAULTS
 	    if (webUserSet.getCreator() == null) {
@@ -103,7 +102,7 @@ public class WebUserSetRest extends BaseRest {
 	    getUserSetService().validateWebUserSet(webUserSet);
 
 	    if (webUserSet.getVisibility() == null) {
-		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getName());
+		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	    }
 
 	    // store the new Set with its respective id, together with all the containing
@@ -161,7 +160,7 @@ public class WebUserSetRest extends BaseRest {
 		    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.SEARCH_HELP_NOTE, value = "Retrieve a user set", nickname = "retrieve", response = java.lang.Void.class)
     public ResponseEntity<String> getUserSet(
-	    @RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
@@ -290,11 +289,6 @@ public class WebUserSetRest extends BaseRest {
 	    String eTagOrigin = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 	    checkIfMatchHeader(eTagOrigin, request);
 
-	    // check if the Set is disabled, respond with HTTP 410
-	    if (existingUserSet.isDisabled()) {
-		return generateGoneResponse(existingUserSet);
-	    }
-
 	    // parse fields of the new user set to an object
 	    UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
@@ -371,21 +365,6 @@ public class WebUserSetRest extends BaseRest {
 	    verifyOwnerOrAdmin(existingUserSet, authentication);
 	    // owners and admins are allowed to update
 	}
-    }
-
-    private ResponseEntity<String> generateGoneResponse(UserSet existingUserSet) {
-	String eTag = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
-
-	// build response entity with headers
-	MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
-	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-//	    headers.add(HttpHeaders.VARY, UserSetHttpHeaders.PREFER);
-	headers.add(HttpHeaders.ETAG, eTag);
-
-	ResponseEntity<String> response = new ResponseEntity<String>("", headers, HttpStatus.GONE);
-	return response;
     }
 
     private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
@@ -477,11 +456,6 @@ public class WebUserSetRest extends BaseRest {
 	    String eTagOrigin = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 	    checkIfMatchHeader(eTagOrigin, request);
 
-	    // check if the Set is disabled, respond with HTTP 410
-	    if (existingUserSet.isDisabled()) {
-		return generateGoneResponse(existingUserSet);
-	    }
-
 	    UserSet updatedUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 
@@ -518,7 +492,7 @@ public class WebUserSetRest extends BaseRest {
 		    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
     public ResponseEntity<String> isItemInUserSet(
-	    @RequestParam(value = WebUserSetFields.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId, HttpServletRequest request)
@@ -560,10 +534,6 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
-
-	    if (existingUserSet.isDisabled()) {
-		return generateGoneResponse(existingUserSet);
-	    }
 
 	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
 		    WebUserSetFields.BASE_ITEM_URL);
@@ -647,11 +617,6 @@ public class WebUserSetRest extends BaseRest {
 	    // 403
 	    checkVisibilityForUpdate(existingUserSet, authentication);
     
-	    // check if the Set is disabled, respond with HTTP 410
-	    if (existingUserSet.isDisabled()) {
-		return generateGoneResponse(existingUserSet);
-	    }
-
 	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
 		    WebUserSetFields.BASE_ITEM_URL);
 
@@ -729,7 +694,7 @@ public class WebUserSetRest extends BaseRest {
 	try {
 	    // retrieve a user set based on its identifier
 	    // if the Set doesn’t exist, respond with HTTP 404
-	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier, false);
+	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 	    // check that only the admins and the owners of the user sets are allowed to
 	    // delete the user set.
@@ -751,40 +716,15 @@ public class WebUserSetRest extends BaseRest {
 	    // if the user set is disabled and the user is not an admin, respond with HTTP
 	    // 410
 	    HttpStatus httpStatus = null;
-	    if (existingUserSet.isDisabled()) {
-		if (!hasAdminRights(authentication)) {
-		    // if the user is the owner, the response should be 410
-		    if (isOwner(existingUserSet, authentication)) {
-			throw new OperationAuthorizationException(I18nConstants.USERSET_ALREADY_DISABLED,
-				I18nConstants.USERSET_ALREADY_DISABLED,
-				new String[] { existingUserSet.getIdentifier() }, HttpStatus.GONE);
-
-		    } else {
-			// if the user is a registered user but not the owner, the response should be
-			// 401 (unathorized)
-			httpStatus = HttpStatus.UNAUTHORIZED;
-		    }
-		} else {
-		    // if the user is admin, the set should be permanently deleted and 204 should be
-		    // returned
-		    getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
-		    httpStatus = HttpStatus.NO_CONTENT;
-		}
+	    // if the user is an Administrator then permanently remove item
+	    // (and all items that are members of the user set)
+	    httpStatus = HttpStatus.NO_CONTENT;
+	    if (hasAdminRights(authentication) || isOwner(existingUserSet, authentication)) {
+		getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
 	    } else {
-		// if the user is an Administrator then permanently remove item
-		// (and all items that are members of the user set)
-		httpStatus = HttpStatus.NO_CONTENT;
-		if (hasAdminRights(authentication)) {
-		    getUserSetService().deleteUserSet(existingUserSet.getIdentifier());
-		} else { // otherwise flag it as disabled
-		    if (isOwner(existingUserSet, authentication)) {
-			getUserSetService().disableUserSet(existingUserSet);
-		    } else {
-			// if the user is a registered user but not the owner, the response should be
-			// 401 (unathorized)
-			httpStatus = HttpStatus.UNAUTHORIZED;
-		    }
-		}
+	        // if the user is a registered user but not the owner, the response should be
+		// 401 (unathorized)
+		httpStatus = HttpStatus.UNAUTHORIZED;
 	    }
 	    // build response entity with headers
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);

@@ -95,10 +95,7 @@ public class BaseUserSet implements UserSet {
 	// web context
 	private String context;
 
-    // Indicates whether the set is disabled in database
-    private boolean disabled;
-	
-    // Contains query URI to items
+	// Contains query URI to items
 	private String isDefinedBy;
 	
 	public String getIdentifier() {
@@ -419,16 +416,6 @@ public class BaseUserSet implements UserSet {
 	}
 
 	@Override
-	public boolean isDisabled() {
-		return disabled;
-	}
-
-	@Override
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;		
-	}
-
-	@Override
 	public String getIsDefinedBy() {
 		return this.isDefinedBy;
 	}
@@ -460,16 +447,16 @@ public class BaseUserSet implements UserSet {
 
 	@Override
 	public boolean isPrivate() {
-	    return VisibilityTypes.PRIVATE.getName().contentEquals(getVisibility());
+	    return VisibilityTypes.PRIVATE.getJsonValue().contentEquals(getVisibility());
 	}
 
 	@Override
 	public boolean isPublic() {
-	    return VisibilityTypes.PUBLIC.getName().contentEquals(getVisibility());
+	    return VisibilityTypes.PUBLIC.getJsonValue().contentEquals(getVisibility());
 	}
 
 	@Override
 	public boolean isPublished() {
-	    return VisibilityTypes.PUBLISHED.getName().contentEquals(getVisibility());
+	    return VisibilityTypes.PUBLISHED.getJsonValue().contentEquals(getVisibility());
 	}
 }
