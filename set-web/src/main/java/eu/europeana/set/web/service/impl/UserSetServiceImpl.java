@@ -729,8 +729,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (authentication == null) {
 	    return false;
 	}
+	
+	if(userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
+	    return false;
+	}
 	String userId = buildCreatorUri((String) authentication.getPrincipal());
-	return userSet.getCreator().getName().equals(userId);
+	return userSet.getCreator().getHttpUrl().equals(userId);
     }
 
     /**
