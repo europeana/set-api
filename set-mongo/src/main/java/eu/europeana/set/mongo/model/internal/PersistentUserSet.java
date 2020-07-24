@@ -18,6 +18,8 @@ import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelField
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
 		public final static String FIELD_IDENTIFIER = WebUserSetModelFields.IDENTIFIER;
+		public static final String FIELD_TYPE = WebUserSetModelFields.TYPE;
+		public static final String FIELD_CREATOR = WebUserSetModelFields.CREATOR + ".httpUrl";
 		
 		public abstract ObjectId getObjectId();		
 		public abstract String getIdentifier();		

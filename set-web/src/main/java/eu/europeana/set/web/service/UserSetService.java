@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
@@ -103,11 +104,12 @@ public interface UserSetService {
 
 	/**
 	 * This method validates and processes the Set description for format and mandatory fields
-     * if false responds with HTTP 400
+	 * if false responds with HTTP 400
 	 * @param webUserSet
 	 * @throws RequestBodyValidationException 
+	 * @throws ParamValidationException 
 	 */
-	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException;
+	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException;
 	
 	/**
 	 * This method deletes user set by user set Id value.

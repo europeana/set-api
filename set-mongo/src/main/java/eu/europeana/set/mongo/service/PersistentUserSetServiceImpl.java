@@ -96,6 +96,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return getUserSetDao().findOne(query);
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String)
+	 */
+	public PersistentUserSet getBookmarksFolder(String creatorId) {
+	    Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
+	    query.filter(PersistentUserSet.FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
+	    query.filter(PersistentUserSet.FIELD_CREATOR, creatorId);
+
+	    return getUserSetDao().findOne(query);
+	}
+	
 	/**
 	 * Generate next sequence number for user set identifier in database
 	 * @param collection The collection e.g. "userset"

@@ -1,7 +1,6 @@
 package eu.europeana.set.definitions.model.vocabulary.fields;
 
 public interface WebUserSetModelFields {
-
 	
 	/**
 	 * Model attribute names
@@ -28,4 +27,7 @@ public interface WebUserSetModelFields {
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
 	
+	//** user set defaults  - use userset types**/
+//	@Deprecated
+//	public static final String DEFAULT_FAVORITE_TYPE = "BookmarkFolder";
 }

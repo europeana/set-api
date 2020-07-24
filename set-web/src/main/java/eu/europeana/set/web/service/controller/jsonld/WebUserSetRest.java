@@ -89,10 +89,9 @@ public class WebUserSetRest extends BaseRest {
 
 	    // parse user set
 	    UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-
+	    
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
-	    getUserSetService().validateWebUserSet(webUserSet);
 	    if (StringUtils.isEmpty(webUserSet.getContext()))
 		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
@@ -104,6 +103,8 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setCreator(user);
 	    }
 
+	    getUserSetService().validateWebUserSet(webUserSet);
+
 	    if (webUserSet.getVisibility() == null) {
 		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	    }
@@ -113,6 +114,7 @@ public class WebUserSetRest extends BaseRest {
 	    // following the order given by the list
 	    // generate an identifier (in sequence) for the Set
 	    // generate and add a created and modified timestamp to the Set
+	    // type should be saved now in the database and not generated on the fly during serialization
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 	    if (storedUserSet.isOpenSet()) {
 		storedUserSet = fetchItemsPage(storedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
@@ -290,6 +292,8 @@ public class WebUserSetRest extends BaseRest {
 
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
+	    newUserSet.setCreator(existingUserSet.getCreator());
+	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
 	    getUserSetService().validateWebUserSet(newUserSet);
 
 	    // validate items
