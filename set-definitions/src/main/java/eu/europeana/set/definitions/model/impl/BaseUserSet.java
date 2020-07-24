@@ -6,6 +6,7 @@ import java.util.Map;
 
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 
 /**
  * Europeana Sets API Specification
@@ -19,6 +20,9 @@ public class BaseUserSet implements UserSet {
 
 	// Type of user set e.g. Collection
     private String type;
+
+	// Visibility of user set e.g. private
+    private String visibility;
 
     // Name of user set
     private Map<String, String> title; 
@@ -91,10 +95,7 @@ public class BaseUserSet implements UserSet {
 	// web context
 	private String context;
 
-    // Indicates whether the set is disabled in database
-    private boolean disabled;
-	
-    // Contains query URI to items
+	// Contains query URI to items
 	private String isDefinedBy;
 	
 	public String getIdentifier() {
@@ -415,16 +416,6 @@ public class BaseUserSet implements UserSet {
 	}
 
 	@Override
-	public boolean isDisabled() {
-		return disabled;
-	}
-
-	@Override
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;		
-	}
-
-	@Override
 	public String getIsDefinedBy() {
 		return this.isDefinedBy;
 	}
@@ -443,4 +434,29 @@ public class BaseUserSet implements UserSet {
     		res = true;
     	return res;
     }	
+
+    @Override
+	public String getVisibility() {
+		return this.visibility;
+	}
+
+	@Override
+	public void setVisibility(String visibility) {
+		this.visibility = visibility;
+	}
+
+	@Override
+	public boolean isPrivate() {
+	    return VisibilityTypes.PRIVATE.getJsonValue().equals(getVisibility());
+	}
+
+	@Override
+	public boolean isPublic() {
+	    return VisibilityTypes.PUBLIC.getJsonValue().equals(getVisibility());
+	}
+
+	@Override
+	public boolean isPublished() {
+	    return VisibilityTypes.PUBLISHED.getJsonValue().equals(getVisibility());
+	}
 }

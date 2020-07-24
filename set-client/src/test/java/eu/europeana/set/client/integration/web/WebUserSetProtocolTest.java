@@ -73,9 +73,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 		 */
 		ResponseEntity<String> response = getApiClient().getUserSet(
 				getApiKey()
-				, TEST_SET_ID
-				, TEST_USER_TOKEN
-				);		
+				, TEST_SET_ID);		
 		validateResponse(response, HttpStatus.OK);
 	}
 	
@@ -102,9 +100,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 		 */
 		response = getApiClient().getUserSet(
 				getApiKey()
-				, testSetId
-				, TEST_USER_TOKEN
-				);		
+				, testSetId);		
 		log.info(response.toString());
 		validateResponse(response, HttpStatus.OK);
 	}

@@ -20,8 +20,8 @@ import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
-import eu.europeana.set.utils.serialize.UserSetLdSerializer;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 
 /**

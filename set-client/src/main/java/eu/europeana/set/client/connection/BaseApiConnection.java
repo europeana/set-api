@@ -6,8 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
-import com.google.gson.Gson;
-
 import eu.europeana.set.client.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
@@ -18,8 +16,6 @@ public class BaseApiConnection {
 	private HttpConnection httpConnection = new HttpConnection();
 
 	Logger logger = LogManager.getLogger(getClass().getName());
-
-	private Gson gson;
 
 	public String getApiKey() {
 		return apiKey;
@@ -160,14 +156,4 @@ public class BaseApiConnection {
 		return getHttpConnection().deleteURL(url);
 	}
 	
-
-	/**
-	 * This method encodes URLs for HTTP connection
-	 * @param url The input URL
-	 * @return encoded URL
-	 * @throws UnsupportedEncodingException
-	 */
-//	String encodeUrl(String url) throws UnsupportedEncodingException {
-//		return URLEncoder.encode(url,"UTF-8");
-//	}
 }

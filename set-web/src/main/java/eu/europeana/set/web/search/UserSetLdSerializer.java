@@ -1,4 +1,4 @@
-package eu.europeana.set.utils.serialize;
+package eu.europeana.set.web.search;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -44,6 +44,22 @@ public class UserSetLdSerializer {
 		return jsonString;
 	}
 
+	
+	/**
+	 * This method provides full serialization of a user set
+	 * @param userSet
+	 * @return full user set view
+	 * @throws IOException
+	 */
+	public String serialize(BaseUserSetResultPage<?> resultsPage) throws IOException {
+		
+		mapper.registerModule(new JsonldModule()); 
+		JsonldResourceBuilder<BaseUserSetResultPage<?>> jsonResourceBuilder = JsonldResource.Builder.create();
+		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
+		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
+		return jsonString;
+	}
+	
 	/**
 	 * This method provides response for item insert request.
 	 * @param userSet

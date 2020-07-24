@@ -14,148 +14,174 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
-import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
-@JsonPropertyOrder({ "id", "type", "title", "description", "collectionPage", "next", "prev", "creator", "created", "modified", "first", "last", "total", "items" })
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({ WebUserSetFields.ID, WebUserSetFields.TYPE, WebUserSetFields.TITLE, WebUserSetFields.DESCRIPTION,
+	WebUserSetFields.VISIBILITY, WebUserSetFields.IS_DEFINED_BY, WebUserSetFields.ITEMS, WebUserSetFields.CREATOR,
+	WebUserSetFields.CREATED, WebUserSetFields.MODIFIED, WebUserSetFields.TOTAL, WebUserSetFields.NEXT,
+	WebUserSetFields.PREV })
+@JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 public class WebUserSetImpl extends PersistentUserSetImpl {
-		
-	@JsonIgnore
-	public String getIdentifier() {
-		return super.getIdentifier();
-	}
-		
-	@JsonldProperty("type")
-	public void setType(String type) {
-		super.setType(type);
-	}
-	
-	@JsonIgnore
-	public int getNext() {
-		return super.getNext();
-	}
-	
-	@JsonIgnore
-	public int getPrev() {
-		return super.getPrev();
-	}
-	
-	@JsonldProperty("title")
-	public Map<String, String> getTitle() {
-		return super.getTitle();
-	}
 
-	@JsonldProperty("description")
-	public Map<String, String> getDescription() {
-		return super.getDescription();
-	}		
-	
-	@JsonldProperty("total")
-	@JsonInclude(value = JsonInclude.Include.ALWAYS)
-	public int getTotal() {
-		return super.getTotal();
-	}		
-	
-    @JsonldProperty(WebUserSetFields.IS_DEFINED_BY)
-    public String getIsDefinedBy() {
-    	return super.getIsDefinedBy();
+    @JsonIgnore
+    public String getIdentifier() {
+	return super.getIdentifier();
     }
-    
-	@JsonldProperty("@context")	
-	@JsonIgnore
-	public String getContext() {
-		return super.getContext();
-	}
-	
-	@JsonProperty("@context")
-	@Override
-	public void setContext(String context) {
-		super.setContext(context);
-	}
-	
-	@JsonldProperty("creator")
-	@JsonIgnore
-	public Agent getCreator() {
-		return super.getCreator();
-	}
-	
-	@JsonldProperty("items")
-	public List<String> getItems() {
-		return super.getItems();
-	}
-	
-	@JsonIgnore
-	public boolean isDisabled() {
-		return super.isDisabled();		
-	}
 
-	@JsonIgnore
-	public boolean isUgc() {
-		return super.isUgc();		
-	}
+    @JsonProperty(WebUserSetFields.TYPE)
+    public void setType(String type) {
+	super.setType(type);
+    }
 
-	@JsonIgnore
-	public String getFirst() {
-		return super.getFirst();		
-	}
+    @JsonProperty(WebUserSetFields.VISIBILITY)
+    public void setVisibility(String visibility) {
+	super.setVisibility(visibility);
+    }
 
-	@JsonIgnore
-	public String getLast() {
-		return super.getLast();		
+    @JsonIgnore
+    public int getNext() {
+	return super.getNext();
+    }
+
+    @JsonIgnore
+    public int getPrev() {
+	return super.getPrev();
+    }
+
+    @JsonProperty(WebUserSetFields.TITLE)
+    public Map<String, String> getTitle() {
+	return super.getTitle();
+    }
+
+    @JsonProperty(WebUserSetFields.DESCRIPTION)
+    public Map<String, String> getDescription() {
+	return super.getDescription();
+    }
+
+    @JsonProperty(WebUserSetFields.TOTAL)
+    @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
+    public int getTotal() {
+	return super.getTotal();
+    }
+
+    @JsonProperty(WebUserSetFields.IS_DEFINED_BY)
+    public String getIsDefinedBy() {
+	return super.getIsDefinedBy();
+    }
+
+    @JsonProperty(WebUserSetFields.CONTEXT_FIELD)
+    @JsonIgnore // avoid double serialization
+    public String getContext() {
+	return super.getContext();
+    }
+
+    @Override
+    @JsonProperty(WebUserSetFields.CONTEXT_FIELD)
+    public void setContext(String context) {
+	super.setContext(context);
+    }
+
+    @JsonProperty(WebUserSetFields.CREATOR)
+    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
+		// serialization
+    public Agent getCreator() {
+	return super.getCreator();
+    }
+
+    @JsonProperty(WebUserSetFields.ITEMS)
+    public List<String> getItems() {
+	return super.getItems();
+    }
+
+    @JsonIgnore
+    public boolean isUgc() {
+	return super.isUgc();
+    }
+
+    @JsonIgnore
+    public String getFirst() {
+	return super.getFirst();
+    }
+
+    @JsonIgnore
+    public String getLast() {
+	return super.getLast();
+    }
+
+    @JsonIgnore
+    public int getCollectionPage() {
+	return super.getCollectionPage();
+    }
+
+    /**
+     * This method presents Id as URL.
+     * 
+     * @param id   The user set id
+     * @param base The base URL
+     * @return string presenting ID as URL
+     */
+    @JsonProperty(WebUserSetFields.ID)
+    public String getId() {
+	StringBuilder urlBuilder = new StringBuilder();
+	urlBuilder.append(WebUserSetFields.BASE_SET_URL);
+	urlBuilder.append(super.getIdentifier());
+	return urlBuilder.toString();
+    }
+
+    public void setId(String id) {
+	// this method is defined just for avoiding parse errors in update method, the
+	// URI is ignored as the identifier from URL is used
+    }
+
+    public String toString() {
+	StringBuilder resBuilder = new StringBuilder();
+	resBuilder.append("WebUserSet [");
+	if (getTitle() != null && StringUtils.isNotEmpty(getTitle().toString())) {
+	    resBuilder.append("Title: ");
+	    resBuilder.append(getTitle());
 	}
-	
-	@JsonIgnore
-	public int getCollectionPage() {
-		return super.getCollectionPage();		
+	if (StringUtils.isNotEmpty(getIdentifier())) {
+	    resBuilder.append(", Identifier: ");
+	    resBuilder.append(getIdentifier());
 	}
-	
-	/**
-	 * This method presents IP as URL.
-	 * @param id The user set id
-	 * @param base The base URL
-	 * @return string presenting ID as URL
-	 */
-	@JsonldProperty("id")
-	public String getId() {
-		StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(WebUserSetFields.BASE_SET_URL); 
-        urlBuilder.append(super.getIdentifier()); 
-        return urlBuilder.toString();
+	if (StringUtils.isNotEmpty(Integer.toString(getTotal()))) {
+	    resBuilder.append(", Total items: ");
+	    resBuilder.append(getTotal());
 	}
-	
-	public String toString() {
-		StringBuilder resBuilder = new StringBuilder();
-		resBuilder.append("WebUserSet [");
-		if (getTitle() != null && StringUtils.isNotEmpty(getTitle().toString())) {
-			resBuilder.append("Title: ");
-			resBuilder.append(getTitle());
-		}
-		if (StringUtils.isNotEmpty(getIdentifier())) {
-			resBuilder.append(", Identifier: ");
-			resBuilder.append(getIdentifier());
-		}
-		if (StringUtils.isNotEmpty(Integer.toString(getTotal()))) {
-			resBuilder.append(", Total items: ");
-			resBuilder.append(getTotal());
-		}
-		if (getItems() != null && getItems().size() > 0) {
-			resBuilder.append(", Items: ");
-			resBuilder.append(getItems().size());	
-		}
-		resBuilder.append("]");
-        return resBuilder.toString();		
+	if (getItems() != null && getItems().size() > 0) {
+	    resBuilder.append(", Items: ");
+	    resBuilder.append(getItems().size());
 	}
-	
-	@Override
-	@JsonIgnore
-	public ObjectId getObjectId() {
-	    return super.getObjectId();
-	}
-	
-	@Override
-	@JsonIgnore
-	public boolean isOpenSet() {
-	    // TODO Auto-generated method stub
-	    return super.isOpenSet();
-	}
+	resBuilder.append("]");
+	return resBuilder.toString();
+    }
+
+    @Override
+    @JsonIgnore
+    public ObjectId getObjectId() {
+	return super.getObjectId();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isOpenSet() {
+	return super.isOpenSet();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isPrivate() {
+	return super.isPrivate();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isPublic() {
+	return super.isPublic();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isPublished() {
+	return super.isPublished();
+    }
 }

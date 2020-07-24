@@ -4,13 +4,19 @@ import java.io.IOException;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
+import org.springframework.security.core.Authentication;
 
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.search.BaseUserSetResultPage;
 
 public interface UserSetService {
 
@@ -32,9 +38,7 @@ public interface UserSetService {
      * @throws IOException
      * @throws JSONException
      */
-	@Deprecated
-	//TODO: refactor and remove redundant parameters
-    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey, String action,
+    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey,
     		String sort, String sortOrder, int pageNr, int pageSize)
     	    throws HttpException, IOException, JSONException;
     
@@ -55,13 +59,6 @@ public interface UserSetService {
 	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
 	
 	/**
-	 * This method disables user set in database
-	 * @param existingUserSet
-	 * @return disabled user set
-	 */
-	public UserSet disableUserSet(UserSet existingUserSet);					 
-	
-	/**
 	 * This method updates user set pagination values. 
 	 * @param newUserSet
 	 * @return user set with updated pagination values
@@ -74,16 +71,6 @@ public interface UserSetService {
 	 * @return UserSet object
 	 */
 	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
-		
-	/**
-	 * This method returns UserSet object for given user set identifier. Additionally
-	 * this method allows to define whether disabled user sets should be searched.
-	 * Use false if disabled user sets should be returned.
-	 * @param user set ID
-	 * @param true if disabled user sets should be checked (default true)
-	 * @return UserSet object
-	 */
-	public UserSet getUserSetById(String userSetId, boolean checkDisabled) throws UserSetNotFoundException; 
 		
 	/**
 	 * This method forms an identifier URL
@@ -117,11 +104,12 @@ public interface UserSetService {
 
 	/**
 	 * This method validates and processes the Set description for format and mandatory fields
-     * if false responds with HTTP 400
+	 * if false responds with HTTP 400
 	 * @param webUserSet
 	 * @throws RequestBodyValidationException 
+	 * @throws ParamValidationException 
 	 */
-	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException;
+	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException;
 	
 	/**
 	 * This method deletes user set by user set Id value.
@@ -181,6 +169,38 @@ public interface UserSetService {
 	 * @param positionInt
 	 * @param newItem
 	 */
-	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);	
+	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);
+
+	/**
+	 * search user sets using the given query and profile 
+	 * @param searchQuery
+	 * @param profile
+	 * @return 
+	 */
+	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
+
+	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication);
+
+	/**
+	 * This method validates input values wsKey, identifier and userToken.
+	 * 
+	 * @param identifier
+	 * @param userId
+	 * @return
+	 * @return userSet object
+	 * @throws HttpException
+	 */
+	UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
+
+	String buildCreatorUri(String userId);
+
+	/**
+	 * This method retrieves user id from authentication object
+	 * 
+	 * @param authentication
+	 * @return the user id
+	 */
+	String getUserId(Authentication authentication);
 
 }

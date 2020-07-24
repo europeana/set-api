@@ -32,9 +32,6 @@ public class BaseWebUserSetProtocolTest {
 
 	public String USER_SET_UPDATE_BODY_JSON = START + BODY_VALUE_TO_UPDATE + END;
 
-	public String TEST_USER_TOKEN = "tester1";
-	public String ADMIN_USER_TOKEN = "admin";
-	public String ANONYMOUS_USER_TOKEN = "anonymous";
 	public String TEST_SET_ID = "134";
 
 	private WebUserSetApi apiClient;
@@ -61,7 +58,7 @@ public class BaseWebUserSetProtocolTest {
 		/**
 		 * store set
 		 */
-		ResponseEntity<String> storedResponse = getApiClient().createUserSet(getApiKey(), requestBody, TEST_USER_TOKEN);
+		ResponseEntity<String> storedResponse = getApiClient().createUserSet(getApiKey(), requestBody);
 		return storedResponse;
 	}
 
@@ -91,13 +88,13 @@ public class BaseWebUserSetProtocolTest {
 
 	protected void deleteUserSet(String identifier) {
 		WebUserSetApi webUserSetApi = new WebUserSetApiImpl();
-		ResponseEntity<String> re = webUserSetApi.deleteUserSet(getApiKey(), identifier, TEST_USER_TOKEN);
+		ResponseEntity<String> re = webUserSetApi.deleteUserSet(getApiKey(), identifier);
 		assertEquals(HttpStatus.OK, re.getStatusCode());
 		log.trace("User set deleted: /" + identifier);
 	}
 
 	protected ResponseEntity<String> getUserSet(UserSet set) {
-		return getApiClient().getUserSet(getApiKey(), set.getIdentifier(), TEST_USER_TOKEN);
+		return getApiClient().getUserSet(getApiKey(), set.getIdentifier());
 	}
 	
 	

@@ -12,6 +12,10 @@ public interface UserSet {
 
 	void setType(String type);
 
+	String getVisibility();
+
+	void setVisibility(String visibility);
+
 	Map<String, String> getTitle();
 
 	void setTitle(Map<String, String> title);
@@ -88,10 +92,6 @@ public interface UserSet {
 	
 	public void setContext(String context);
 	
-	boolean isDisabled();
-
-	void setDisabled(boolean disabled);
-	
 	/**
 	 * @return Holds a search request to the User Set API (complete URL pointing to production). 
 	 * To reduce complexity on the API, the exhaustive listing could also be expressed as a query.
@@ -105,4 +105,11 @@ public interface UserSet {
      * @return true if it is an open set
      */
     public boolean isOpenSet();
+    
+    public boolean isPrivate();
+    
+    public boolean isPublic();
+    
+    public boolean isPublished();
+    
 }
