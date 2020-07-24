@@ -101,7 +101,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	public PersistentUserSet getBookmarksFolder(String creatorId) {
 	    Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
-	    query.filter(PersistentUserSet.FIELD_TYPE, WebUserSetModelFields.DEFAULT_FAVORITE_TYPE);
+	    query.filter(PersistentUserSet.FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
 	    query.filter(PersistentUserSet.FIELD_CREATOR, creatorId);
 
 	    return getUserSetDao().findOne(query);

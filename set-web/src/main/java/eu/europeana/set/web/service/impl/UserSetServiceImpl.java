@@ -39,6 +39,7 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
@@ -109,12 +110,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     /**
      * This method checks if a user set with provided type and user already exists in database
      * @param creator
-     * @return true if a user set object found in database
-     * @throws UserSetNotFoundException
+     * @return null or existing bookarks folder
      */
-    public UserSet getBookmarksFolder(Agent creator) throws UserSetNotFoundException {
-	UserSet res = getMongoPersistence().getBookmarksFolder(creator.getName());
-	return res;
+    public UserSet getBookmarksFolder(Agent creator){
+	return getMongoPersistence().getBookmarksFolder(creator.getHttpUrl());
     }
 
     /*
@@ -266,7 +265,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, UserSetNotFoundException {
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null) {
@@ -293,19 +292,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
 	
-	// for update use case it is not allowed to change the type. If type is present in the request body, 
-	// it must match the value from the object stored in the database.
-	if (webUserSet.getIdentifier() != null) { // that means it is an update use case
-	    // only if the type in the request body is BookmarksFolder and it is different from the type in database object, 
-	    // only in this case we have to verify if a BookmarkFolder exist in the database for the same user 
-	    UserSet existingUserSet = getUserSetById(webUserSet.getIdentifier());
-	    if (WebUserSetModelFields.DEFAULT_FAVORITE_TYPE.equals(webUserSet.getType()) 
-		    && !existingUserSet.getType().equals(webUserSet.getType())) {
-		validateFavoriteUserSet(webUserSet);
-	    }
-	} else {
-    	    validateFavoriteUserSet(webUserSet);
-	}
+	validateBookmarkFolder(webUserSet);
     }
 
     /**
@@ -313,17 +300,40 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @param webUserSet The new user set
      * @throws RequestBodyValidationException
      */
-    private void validateFavoriteUserSet(UserSet webUserSet) throws RequestBodyValidationException, UserSetNotFoundException {
+    private void validateBookmarkFolder(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException {
 
-	// verify if the "type" is set to "BookmarkFolder", if true:
-	if (WebUserSetModelFields.DEFAULT_FAVORITE_TYPE.equals(webUserSet.getType())) {
-	    // check if there is already a set with type="BookmarkFolder" for the same creator and if so return HTTP 400;
-            // only 1 set per user should have the type="BookmarkFolder"
-	if (getBookmarksFolder(webUserSet.getCreator()) != null) {
-		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-			    new String[] { WebUserSetModelFields.TYPE, webUserSet.getCreator().getName() });		
+	if(!isBookmarksFolder(webUserSet)) {
+	    return;
 	}
+	
+	if(webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
+	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
+		    I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+			new String[] { WebUserSetModelFields.CREATOR});
+	}
+	
+	
+	UserSet usersBookmarkFolder = getBookmarksFolder(webUserSet.getCreator());
+	if(usersBookmarkFolder == null) {
+	    //the user doesn't have yet a bookmark folder
+	    return;
+	}
+	
+	if(webUserSet.getIdentifier() == null) {
+	    //create method
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
+		    new String[] { usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl()});
+	}
+	
+	if(!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
+	    //update method, prevent creation of 2 BookmarkFolders
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
+		    new String[] { usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl()});
+	}	
     }
+    
+    boolean isBookmarksFolder(UserSet userSet) {
+	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(userSet.getType());	
     }
 
     /*
@@ -334,10 +344,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public void deleteUserSet(String userSetId) throws UserSetNotFoundException {
 
-	// in case it is a closed set, remove the items that are members of the Set.
-	UserSet userSet = getUserSetById(userSetId);
-
-	// if the user is an Administrator then permanently remove the Set.
 	getMongoPersistence().remove(userSetId);
     }
 
@@ -637,7 +643,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setTotalInPage(items.size());
     }
 
-    @SuppressWarnings("unchecked")
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize,
 	    Authentication authentication) {
 	List<UserSet> items = new ArrayList<UserSet>(results.getResults().size());

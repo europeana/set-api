@@ -13,6 +13,7 @@ public interface I18nConstants extends eu.europeana.api.commons.definitions.conf
 	static final String USERSET_VALIDATION_MANDATORY_PROPERTY = "error.userset_validation_mandatory_property";
 	static final String USERSET_VALIDATION_PROPERTY_VALUE = "error.userset_validation_property_value";
 	static final String USERSET_VALIDATION_PROPERTY_NOT_ALLOWED = "error.userset_validation_property_not_allowed";
+	static final String USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS = "error.userset_validation_bookmark_folder_exists";
 	static final String APIKEY_FILE_NOT_FOUND = "error.userset_apikey_file_not_found";	
 	static final String INVALID_TOKEN = "error.userset_invalid_token";
 	static final String USER_NOT_AUTHORIZED = "error.userset_user_not_authorized";	
