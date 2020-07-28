@@ -81,7 +81,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonProperty(WebUserSetFields.CREATOR)
-    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
+//    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
 		// serialization
     public Agent getCreator() {
 	return super.getCreator();
