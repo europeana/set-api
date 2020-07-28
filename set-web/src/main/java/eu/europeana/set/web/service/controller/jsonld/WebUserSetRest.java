@@ -103,11 +103,11 @@ public class WebUserSetRest extends BaseRest {
 		webUserSet.setCreator(user);
 	    }
 
-	    getUserSetService().validateWebUserSet(webUserSet);
-
 	    if (webUserSet.getVisibility() == null) {
 		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	    }
+
+	    getUserSetService().validateWebUserSet(webUserSet);
 
 	    // store the new Set with its respective id, together with all the containing
 	    // items
