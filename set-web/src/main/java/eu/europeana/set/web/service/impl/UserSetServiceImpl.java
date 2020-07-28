@@ -493,6 +493,27 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
+    @Override
+    public UserSet fetchDynamicSetItemDescriptions(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
+	    int pageSize) throws HttpException {
+
+	String url = buildSearchApiUrl(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
+
+	SearchApiResponse apiResult;
+	try {
+	    apiResult = getSearchApiClient().searchItemDescriptions(url, apiKey, "UserSet.FETCH_ITEMS");
+	    setItemDescriptions(userSet, apiResult);
+	    return userSet;
+	} catch (SearchApiClientException e) {
+	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
+		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+			new String[] { WebUserSetFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
+	    } else {
+		throw new InternalServerException(e);
+	    }
+	}
+    }
+
     private void setItems(UserSet userSet, SearchApiResponse apiResult) {
 	List<String> items = new ArrayList<String>();
 	for (String item : apiResult.getItems()) {
@@ -502,6 +523,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    userSet.setItems(items);
 	    userSet.setTotal(items.size());
 	}
+    }
+
+    /**
+     * This method completes item list
+     * @param userSet
+     * @param apiResult
+     */
+    private void setItemDescriptions(UserSet userSet, SearchApiResponse apiResult) {
+	List<String> items = new ArrayList<String>();
+	for (String item : apiResult.getItems()) {
+	    items.add(item);
+	}
+	userSet.setItems(items);
+	userSet.setTotal(items.size());
     }
 
     private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
@@ -517,7 +552,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	uriBuilder.replaceQueryParam("start", start);
 	uriBuilder.replaceQueryParam("rows", pageSize);
 	// remove apikey if exists
-	uriBuilder.replaceQueryParam(CommonApiConstants.PARAM_WSKEY, apiKey);
+	if (apiKey != null)
+	    uriBuilder.replaceQueryParam(CommonApiConstants.PARAM_WSKEY, apiKey);
 
 	if (sortOrder == null) {
 	    uriBuilder.replaceQueryParam(CommonApiConstants.QUERY_PARAM_SORT, sort);
@@ -607,6 +643,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	} else if (LdProfiles.STANDARD.equals(profile)) {
 	    resPage = new UserSetResultPage();
 	    setPageItems(results, (UserSetResultPage) resPage, resultPageSize, authentication);
+	} else if (LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
+	    resPage = new UserSetIdsResultPage();
+	    setPageItemsExt(results, (UserSetIdsResultPage) resPage, resultPageSize, WebUserSetFields.DC_DESCRIPTION);
 	}
 
 //	resPage.setFacetFields(results.getFacetFields());
@@ -637,12 +676,47 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<String>(resultPageSize);
 	for (UserSet set : results.getResults()) {
-	    items.add(((WebUserSetImpl) set).getId());
+            items.add(((WebUserSetImpl) set).getId());
 	}
 	resPage.setItems(items);
 	resPage.setTotalInPage(items.size());
     }
 
+    /**
+     * This method consturcts page items using provided field name
+     * @param results
+     * @param resPage
+     * @param resultPageSize
+     * @param fieldName
+     */
+    private void setPageItemsExt(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize, String fieldName) {
+	List<String> items = new ArrayList<String>(resultPageSize);
+	for (UserSet set : results.getResults()) {
+	    if (fieldName.equals(WebUserSetFields.DC_DESCRIPTION)) {
+    	        items.add(convertStringListToJsonString(((WebUserSetImpl) set).getItems()));
+	    } else {
+	        items.add(((WebUserSetImpl) set).getId());
+	    }
+	}
+	resPage.setItems(items);
+	resPage.setTotalInPage(items.size());
+    }
+
+    /**
+     * This method converts list of strings to JSON string
+     * @param input
+     * @return JSON string
+     */
+    private String convertStringListToJsonString(List<String> input) {
+	String res = ""; //"[{";
+	for (String str : input) {
+//	    res = res + "\\\"" + str + "\\\",";
+	    res = res + "\"" + str + "\",";
+	}
+	//res = res + "}]";
+	return res;
+    }
+    
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize,
 	    Authentication authentication) {
 	List<UserSet> items = new ArrayList<UserSet>(results.getResults().size());

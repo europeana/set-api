@@ -44,6 +44,7 @@ public interface WebUserSetFields extends WebUserSetModelFields {
     public final static String IDENTIFIER = "identifier";
     public final static String TITLE = "title";
     public final static String DESCRIPTION = "description";
+    public final static String DC_DESCRIPTION = "dcDescription";
     public final static String TYPE = "type";
     public final static String ITEMS = "items";
     

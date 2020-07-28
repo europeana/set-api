@@ -3,6 +3,7 @@ package eu.europeana.set.web.service.controller.jsonld;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +81,21 @@ public class SearchUserSetRest extends BaseRest {
 	    UserSetQuery searchQuery = buildUserSetQuery(query, sort, page, pageSize);
 
 	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile);
+	    
+	    if (profile.equals(LdProfiles.ITEMDESCRIPTIONS)) {
+    	        int index = 0;
+    	        for (Iterator<? extends UserSet> iterator = results.getResults().iterator(); iterator.hasNext();) {
+    	            UserSet userSet = iterator.next();    
+    		    if (!userSet.isOpenSet()) { 
+    		        String closedUserSetQuery = buildItemIdsQueryFromClosedUserSet(userSet);
+    		        userSet.setIsDefinedBy(closedUserSetQuery);
+    		    }
+    		    UserSet retrievedUserSet = fetchItemDescriptionsPage(userSet, null, null, page, pageSize);
+    		    results.getResults().get(index).setItems(retrievedUserSet.getItems());
+    		    index++;
+    	        }
+    	    }
+	    
 	    @SuppressWarnings("rawtypes")
 	    BaseUserSetResultPage resultsPage;
 	    resultsPage = getUserSetService().buildResultsPage(searchQuery, results,
@@ -103,6 +119,38 @@ public class SearchUserSetRest extends BaseRest {
 	}
     }
 
+    /**
+     * This method retrieves item ids from the closed userSet to build query e.g.
+     * https://api.europeana.eu/api/v2/search.json?profile=minimal&
+     * query=europeana_id%3A(%22%2F08641%2F1037479000000476635%22%20OR%20%20%22%2F08641%2F1037479000000476943%22)
+     * &rows=12&start=1
+     * @param userSet
+     * @return
+     */
+    private String buildItemIdsQueryFromClosedUserSet(UserSet userSet) {
+	// get item ids from the userSet
+        List<String> closedUserSetIds = userSet.getItems();
+	// use them to build the search query for retrieving item descriptions using minimal profile
+	// europeana_id is in format /collectionId/recordId, this can be easily extracted from the 
+        // full record ID by removing the base URL http://data.europeana.eu/item
+	// e.g. europeana_id:("/08641/1037479000000476635" OR  "/08641/1037479000000476943")
+	StringBuilder sb = new StringBuilder();
+        sb.append("https://api.europeana.eu/api/v2/search.json?profile=minimal&wskey=api2demo&query=europeana_id%3A(");
+        boolean firstPar = true;
+        for (String fullId : closedUserSetIds) {
+            String id = fullId.replace(WebUserSetFields.BASE_URL_DATA, "").replace("/", "%2F");
+    	    String elem = "%22" + id + "%22";
+            if (firstPar) {
+                sb.append(elem);
+                firstPar = false;
+            } else {
+        	sb.append("%20OR%20" + elem);
+            }
+        }
+        sb.append(")");
+	return sb.toString();
+    }
+    
     private UserSetQuery buildUserSetQuery(String query, String sort, int page, int pageSize) throws ParamValidationException {
 
 	Map<String, String> queryParts = parse(query);

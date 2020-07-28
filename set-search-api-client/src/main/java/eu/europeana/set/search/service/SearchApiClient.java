@@ -44,4 +44,19 @@ public interface SearchApiClient {
     public SearchApiResponse searchItems(String uri, String apiKey, String action) 
     		throws SearchApiClientException;
 
+    /**
+     * This method queries Europeana API by URI retrieves item descriptions
+     * @param uri
+     * @param apiKey
+     * @param action
+     * @return
+     * @throws IOException
+     * @throws JSONException
+     * @throws SearchApiClientException 
+     * @throws HttpException
+     */
+    public SearchApiResponse searchItemDescriptions(String uri, String apiKey, String action) 
+    		throws SearchApiClientException;
+
+
 }
