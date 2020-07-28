@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -304,6 +305,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	if(!isBookmarksFolder(webUserSet)) {
 	    return;
+	}
+	
+	if(!webUserSet.isPrivate()) {
+	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
+		    I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+			new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
+	}
+	
+	if(webUserSet.isOpenSet()) {
+	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED, 
+		    I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+			new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
 	}
 	
 	if(webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
@@ -729,8 +742,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (authentication == null) {
 	    return false;
 	}
+	
+	if(userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
+	    return false;
+	}
 	String userId = buildCreatorUri((String) authentication.getPrincipal());
-	return userSet.getCreator().getName().equals(userId);
+	return userSet.getCreator().getHttpUrl().equals(userId);
     }
 
     /**
@@ -765,7 +782,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    // access by API KEY, authentication not available
 	    throw new ApplicationAuthenticationException(I18nConstants.USER_NOT_AUTHORIZED,
 		    I18nConstants.USER_NOT_AUTHORIZED, new String[] {
-			    "Access to update operations of private User Sets require user authentication with JwtToken" });
+			    "Access to update operations of private User Sets require user authentication with JwtToken" },
+		    HttpStatus.FORBIDDEN);
 	}
 
 	// verify ownership
@@ -776,7 +794,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    // not authorized
 	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {
-			    "Only the creators of the annotation or admins are authorized to perform this operation." });
+			    "Only the creators of the annotation or admins are authorized to perform this operation." }, 
+		    HttpStatus.FORBIDDEN);
 	}
     }
 

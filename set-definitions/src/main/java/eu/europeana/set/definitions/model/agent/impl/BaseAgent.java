@@ -142,6 +142,12 @@ public abstract class BaseAgent implements Agent {
 	    	res = false;
 	    }
 	    
+	    if ((this.getHttpUrl() != null) && (that.getHttpUrl() != null) &&
+	    		(!this.getHttpUrl().equals(that.getHttpUrl()))) {
+	    	System.out.println("Agent objects have different 'name' fields.");
+	    	res = false;
+	    }
+	    
 	    return res;
 	}
 			
@@ -157,6 +163,8 @@ public abstract class BaseAgent implements Agent {
 			res = res + "\t\t" + "agentType:" + getType() + "\n";
 		if (getName() != null) 
 			res = res + "\t\t" + "name:" + getName() + "\n";
+		if (getHttpUrl() != null) 
+			res = res + "\t\t" + "httpUrl:" + getHttpUrl() + "\n";
 		if (getHomepage() != null) 
 			res = res + "\t\t" + "homepage:" + getHomepage() + "\n";
 		return res;
