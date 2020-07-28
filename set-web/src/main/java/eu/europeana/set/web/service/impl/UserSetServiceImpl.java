@@ -89,8 +89,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	UserSet extUserSet = getUserSetUtils().analysePagination(newUserSet);
 
 	// store in mongo database
-	UserSet res = getMongoPersistence().store(extUserSet);
-	return res;
+	return getMongoPersistence().store(extUserSet);
     }
 
     @Override
@@ -162,16 +161,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	updateUserSetPagination(persistentUserSet);
 	// update modified date
 	persistentUserSet.setModified(new Date());
-	UserSet res = getMongoPersistence().update(persistentUserSet);
-	return res;
+	return getMongoPersistence().update(persistentUserSet);
     }
 
     /**
      * @deprecated check if the update test must merge the properties or if it
      *             simply overwrites it
-     * @param UserSet
+     * @param userSet
      * @param updatedWebUserSet
      */
+    @Deprecated
     private void mergeUserSetProperties(PersistentUserSet userSet, UserSet updatedWebUserSet) {
 	if (updatedWebUserSet != null) {
 	    if (updatedWebUserSet.getContext() != null) {
@@ -378,7 +377,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	    } catch (RuntimeException e) {
 		// invalid position, assume last (-1)
-		getLogger().trace("Position validation warning: " + e.getMessage());
+		getLogger().trace("Position validation warning: {} ", e.getMessage());
 	    }
 	}
 	return positionInt;
@@ -444,7 +443,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// Respond with HTTP 200
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
-	UserSet updatedUserSet = updateUserSetInDb((PersistentUserSet) existingUserSet, null);
+	UserSet updatedUserSet = updateUserSetInDb(existingUserSet, null);
 	extUserSet = fillPagination(updatedUserSet);
 	return extUserSet;
     }
@@ -472,7 +471,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	if (existingUserSet.getItems() == null) {
 	    // empty items list
-	    List<String> list = new ArrayList<String>();
+	    List<String> list = new ArrayList<>();
 	    list.add(newItem);
 	    existingUserSet.setItems(list);
 	} else if (positionInt == -1) {
@@ -499,7 +498,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	} catch (SearchApiClientException e) {
 	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
 		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-			new String[] { WebUserSetFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
+			new String[] { WebUserSetModelFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
 	    } else {
 		throw new InternalServerException(e);
 	    }
@@ -507,11 +506,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void setItems(UserSet userSet, SearchApiResponse apiResult) {
-	List<String> items = new ArrayList<String>();
+	List<String> items = new ArrayList<>();
 	for (String item : apiResult.getItems()) {
 	    items.add(WebUserSetFields.BASE_URL_DATA + item);
 	}
-	if (items.size() > 0) {
+	if (! items.isEmpty()) {
 	    userSet.setItems(items);
 	    userSet.setTotal(items.size());
 	}
@@ -538,8 +537,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    uriBuilder.replaceQueryParam(CommonApiConstants.QUERY_PARAM_SORT, sort + "+" + sortOrder);
 	}
 
-	String uri = uriBuilder.build(true).toUriString();
-	return uri;
+	return uriBuilder.build(true).toUriString();
     }
 
     /**
@@ -584,10 +582,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
+     * @deprecated
+	 * @see
      * eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(
      * eu.europeana.set.definitions.model.UserSet, java.util.List)
+     *
      */
     @Deprecated
     // TODO: fix the implementation and remove this method
@@ -603,9 +602,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile) {
-
-	ResultSet<? extends UserSet> res = getMongoPersistance().find(searchQuery);
-	return res;
+	return  getMongoPersistance().find(searchQuery);
 }
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
@@ -648,7 +645,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
-	List<String> items = new ArrayList<String>(resultPageSize);
+	List<String> items = new ArrayList<>(resultPageSize);
 	for (UserSet set : results.getResults()) {
 	    items.add(((WebUserSetImpl) set).getId());
 	}
@@ -658,7 +655,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize,
 	    Authentication authentication) {
-	List<UserSet> items = new ArrayList<UserSet>(results.getResults().size());
+	List<UserSet> items = new ArrayList<>(results.getResults().size());
 
 	for (UserSet set : results.getResults()) {
 	    // items not included in results
@@ -735,7 +732,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * This method checks if user is an owner of the user set
      * 
      * @param userSet
-     * @param queryUser
+     * @param authentication
      * @return true if user is owner of a user set
      */
     public boolean isOwner(UserSet userSet, Authentication authentication) {
@@ -769,8 +766,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     /**
      * This method validates input values wsKey, identifier and userToken.
      * 
-     * @param identifier
-     * @param userId
+     * @param userSet
+     * @param authentication
      * @return
      * @return userSet object
      * @throws HttpException

@@ -44,22 +44,22 @@ public class UserSetApiConnection extends BaseApiConnection {
 		
 		StringBuilder urlBuilder = getUserSetServiceUri();		
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
 			.append(wskey).append(WebUserSetFields.AND);
-		
+
 		String resUrl = urlBuilder.toString();
-		
+
 		logger.trace("Ivoking create set: " + resUrl);
-		
+
 		/**
 		 * Execute Europeana API request
 		 */
-		return postURL(resUrl, set);		
+		return postURL(resUrl, set);
 	}
 
 	/**
 	 * This method retrieves UserSet object.
-	 * Example HTTP request for tag object: 
+	 * Example HTTP request for tag object:
 	 *      http://localhost:8080/set/{identifier}.jsonld?wskey=<key>&userToken=<token>
 	 * where identifier is:
 	 *     496
@@ -75,18 +75,18 @@ public class UserSetApiConnection extends BaseApiConnection {
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
 	    	.append(wskey).append(WebUserSetFields.AND);
-		
+
 		/**
 		 * Execute Europeana API request
 		 */
-		return getURL(urlBuilder.toString());		
+		return getURL(urlBuilder.toString());
 	}
 
 	/**
 	 * This method updates UserSet object by the passed Json update string.
-	 * Example HTTP request: 
+	 * Example HTTP request:
 	 *      http://localhost:8080/set/{identifier}.jsonld?wskey=<key>&userToken=<token>
 	 * where identifier is:
 	 *     496
@@ -104,18 +104,18 @@ public class UserSetApiConnection extends BaseApiConnection {
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
 		    .append(wskey).append(WebUserSetFields.AND);
-		
+
 		/**
 		 * Execute Europeana API request
 		 */
-		return putURL(urlBuilder.toString(), updateUserSet);		
+		return putURL(urlBuilder.toString(), updateUserSet);
 	}
 
 	/**
 	 * This method deletes UserSet object by the passed identifier.
-	 * Example HTTP request: 
+	 * Example HTTP request:
 	 *      http://localhost:8080/set/{identifier}.jsonld?wskey=<key>&userToken=<token>
 	 * where identifier is:
 	 *     494
@@ -127,11 +127,11 @@ public class UserSetApiConnection extends BaseApiConnection {
 	 */
 	public ResponseEntity<String> deleteUserSet(
 			String wskey, String identifier) throws IOException {
-		
+
 		StringBuilder urlBuilder = getUserSetServiceUri();
 		urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
 		urlBuilder.append(WebUserSetFields.PAR_CHAR);
-		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS)
+		urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
 		    .append(wskey).append(WebUserSetFields.AND);
 		
 		/**
