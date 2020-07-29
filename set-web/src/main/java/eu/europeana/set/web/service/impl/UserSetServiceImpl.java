@@ -808,7 +808,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		.hasNext();) {
 	    // role based authorization
 	    String role = iterator.next().getAuthority();
-	    if (Roles.ADMIN.getName().toLowerCase().equals(role.toLowerCase())) {
+	    if (Roles.ADMIN.getName().equalsIgnoreCase(role)) {
 		return true;
 	    }
 	}
