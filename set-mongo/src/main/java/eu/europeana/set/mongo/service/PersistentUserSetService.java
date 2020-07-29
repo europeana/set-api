@@ -31,27 +31,27 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	/**
 	 * This method checks if a user set with provided type and creator already exists in
 	 * database
-	 * @param creator
+	 * @param creatorid
 	 * @return user set object
 	 */
 	public abstract PersistentUserSet getBookmarksFolder(String creatorid);
 	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string
-	 * @param objectId The database object ID e.g. "15"
+	 * @param identifier The database object ID e.g. "15"
 	 * @return user set object
 	 */
 	public abstract PersistentUserSet findByID(String identifier);
 	
 	/**
 	 * This method performs update for the passed user set object
-	 * @param user set
+	 * @param userSet
 	 */
 	public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException;
 
 	/** 
 	 * This method removes user set from database by database Id provided as a string
-	 * @param objectId The database object ID e.g. "15"
+	 * @param identifier The database object ID e.g. "15"
 	 * @return user set object
 	 */
 	public abstract void remove(String identifier);

@@ -28,7 +28,6 @@ import eu.europeana.set.mongo.dao.PersistentUserSetDao;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
-
 /**
  * A service for persistence operation of user sets.
  * @author GrafR
@@ -38,8 +37,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<PersistentUserSet, String>
 		implements PersistentUserSetService {
 
-	final String NOT_PERSISTENT_OBJECT = 
-			"User set object in not an instance of persistent user set.";
+	private static final String NOT_PERSISTENT_OBJECT = "User set object in not an instance of persistent user set.";
 
 	protected final Logger logger = LogManager.getLogger(this.getClass());
 	
@@ -53,8 +51,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	public void setConfiguration(UserSetConfiguration configuration) {
 		this.configuration = configuration;
 	}
-	
-	
+
 	/**
 	 * This method validates persistent user set and generates ID if
 	 * genarateId=true.
@@ -151,7 +148,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
 	    
-	    ResultSet<PersistentUserSet> res = new ResultSet<PersistentUserSet>();
+	    ResultSet<PersistentUserSet> res = new ResultSet<>();
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
 	    
@@ -166,7 +163,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	private Query<PersistentUserSet> buildMongoQuery(UserSetQuery query) {
-	    Query<PersistentUserSet> mongoQuery = getUserSetDao(). createQuery();
+	    Query<PersistentUserSet> mongoQuery = getUserSetDao().createQuery();
 	    mongoQuery.disableValidation();
 	    
 	    if(query.getVisibility() != null) {
@@ -211,6 +208,9 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		    getDao().delete(userSet);
 	}
 
+	/**      
+	 * @deprecated     
+	 */
 	@Override
 	@Deprecated
 	//TODO: use store instead
