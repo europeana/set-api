@@ -202,5 +202,21 @@ public interface UserSetService {
 	 * @return the user id
 	 */
 	String getUserId(Authentication authentication);
+	
+	/**
+	 * This method converts close set to open set by updating respective items
+	 * and returns item descriptions
+	 * 
+	 * @param storedUserSet
+	 * @param apiKey
+	 * @param action
+	 * @return updated set
+	 * @throws HttpException
+	 * @throws IOException
+	 * @throws JSONException
+	 */
+	 public UserSet fetchDynamicSetItemDescriptions(UserSet storedUserSet, String apiKey,
+	 	String sort, String sortOrder, int pageNr, int pageSize)
+	     throws HttpException, IOException, JSONException;
 
 }
