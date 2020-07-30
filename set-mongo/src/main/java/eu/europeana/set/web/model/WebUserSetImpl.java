@@ -80,11 +80,20 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	super.setContext(context);
     }
 
-    @JsonProperty(WebUserSetFields.CREATOR)
+//    @JsonProperty(WebUserSetFields.CREATOR)
 //    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
 		// serialization
     public Agent getCreator() {
 	return super.getCreator();
+    }
+
+    @JsonProperty(WebUserSetFields.CREATOR)
+    public String getCreatorHttpUrl() {
+	String res = null;
+	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
+	    res = super.getCreator().getHttpUrl();
+	}
+	return res;
     }
 
     @JsonProperty(WebUserSetFields.ITEMS)

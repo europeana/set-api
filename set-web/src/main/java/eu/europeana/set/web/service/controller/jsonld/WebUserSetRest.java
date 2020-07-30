@@ -99,9 +99,9 @@ public class WebUserSetRest extends BaseRest {
 	    user.setHttpUrl(getUserSetService().getUserId(authentication));
 
 	    // SET DEFAULTS
-	    if (webUserSet.getCreator() == null) {
+//	    if (webUserSet.getCreator() == null) {
 		webUserSet.setCreator(user);
-	    }
+//	    }
 
 	    if (webUserSet.getVisibility() == null) {
 		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
