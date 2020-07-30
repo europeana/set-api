@@ -89,7 +89,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 
     @JsonProperty(WebUserSetFields.CREATOR)
     public String getCreatorHttpUrl() {
-	String res = "";
+	String res = null;
 	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
 	    res = super.getCreator().getHttpUrl();
 	}
