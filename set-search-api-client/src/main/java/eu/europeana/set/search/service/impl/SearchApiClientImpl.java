@@ -66,15 +66,25 @@ public class SearchApiClientImpl implements SearchApiClient {
      * @throws JSONException
      */
     protected List<String> jsonArrayToStringArray(JSONArray valueObject) throws JSONException {
-	List<String> list = new ArrayList<String>();
+	return extractItemDescriptions(valueObject, WebUserSetFields.ID);
+    }
+
+    /**
+     * Get list of values specified by field name from JSONArray
+     * 
+     * @param valueObject
+     * @return list of values
+     * @throws JSONException
+     */
+    protected List<String> extractItemDescriptions(JSONArray valueObject, String fieldName) throws JSONException {	List<String> list = new ArrayList<String>();
 	if (valueObject == null) {
 	    return list;
 	}
 	for (int i = 0; i < valueObject.length(); i++) {
 	    JSONObject guidJson = valueObject.getJSONObject(i);
-	    String id = guidJson.getString(WebUserSetFields.ID);
-	    list.add(id);
-	}
+	    String value = guidJson.getString(fieldName);
+	    if (!list.contains(value))
+		list.add(value);	}
 	return list;
     }
 
@@ -100,4 +110,48 @@ public class SearchApiClientImpl implements SearchApiClient {
 		    e);
 	}
     }
+    
+    /* (non-Javadoc)
+     * @see eu.europeana.set.search.service.SearchApiClient#searchItemDescriptions(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public SearchApiResponse searchItemDescriptions(String uri, String apiKey, String action)
+	    throws SearchApiClientException{
+
+	if (!uri.contains("wskey="))
+	    uri += ("&wskey=" + apiKey);
+	List<String> res = searchItemDescriptions(uri);
+	SearchApiResponse searchApiResponse = new SearchApiResponse(apiKey, action);
+	searchApiResponse.setItems(res);
+	return searchApiResponse;
+    }    
+    
+
+    /**
+     * This method queries Europeana API by URI and retrievs item descriptions
+     * @param uri
+     * @return item list in JSON format
+     * @throws SearchApiClientException
+     */
+    public List<String> searchItemDescriptions(String uri) throws SearchApiClientException {
+	String jsonResponse;
+	try {
+	    jsonResponse = getHttpConnection().getURLContent(uri);
+	    if (jsonResponse == null) {
+		// HTTP Error Code
+		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY, null);
+	    }
+	    JSONObject jo = new JSONObject(jsonResponse);
+	    JSONArray itemsArray = jo.getJSONArray(WebUserSetFields.ITEMS);
+	    return extractItemDescriptions(itemsArray, "dcDescription");
+
+	} catch (IOException e) {
+	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
+	} catch (JSONException e) {
+	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(),
+		    e);
+	} catch (RuntimeException e) {
+	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS + e.getMessage(),
+		    e);
+	}
+    }    
 }
