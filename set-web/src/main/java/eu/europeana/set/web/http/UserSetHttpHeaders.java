@@ -2,7 +2,7 @@ package eu.europeana.set.web.http;
 
 import eu.europeana.api.commons.web.http.HttpHeaders;
 
-public abstract class UserSetHttpHeaders implements HttpHeaders{
+public class UserSetHttpHeaders {
 
 	private UserSetHttpHeaders() {
 		//private constructor to hide implicit one
