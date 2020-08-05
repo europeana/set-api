@@ -292,7 +292,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
 	
-	validateBookmarkFolder(webUserSet);
+	validateBookmarkFolder(webUserSet);	
+	validateControlledValues(webUserSet);
     }
 
     /**
@@ -342,6 +343,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl()});
 	}	
+    }
+    
+    /**
+     * This method validates controlled values e.g. type and visibility
+     * @param webUserSet The new user set
+     * @throws RequestBodyValidationException 
+     */
+    private void validateControlledValues(UserSet webUserSet) throws RequestBodyValidationException {
+
+	if (webUserSet.getVisibility() != null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+	}
+
+	if (webUserSet.getType() != null && !UserSetTypes.isValid(webUserSet.getType())) {
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType()});
+	}
     }
     
     boolean isBookmarksFolder(UserSet userSet) {
