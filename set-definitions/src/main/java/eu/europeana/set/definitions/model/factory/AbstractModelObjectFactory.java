@@ -11,7 +11,7 @@ public abstract class AbstractModelObjectFactory<O, E extends Enum<E>> {
 	public O createObjectInstance(Enum<E> modelObjectType) {
 
 		try {
-			return (O) getClassForType(modelObjectType).newInstance();
+			return getClassForType(modelObjectType).newInstance();
 
 		} catch (UserSetInstantiationException e) {
 			throw e;

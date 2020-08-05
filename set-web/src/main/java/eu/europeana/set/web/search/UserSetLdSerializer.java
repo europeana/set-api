@@ -13,7 +13,6 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResource;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResourceBuilder;
 
-
 public class UserSetLdSerializer { 
 
     UserSetUtils userSetUtils = new UserSetUtils();
@@ -40,14 +39,12 @@ public class UserSetLdSerializer {
 		mapper.registerModule(new JsonldModule()); 
 		JsonldResourceBuilder<UserSet> jsonResourceBuilder = JsonldResource.Builder.create();
 		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
-		return jsonString;
+		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
 	}
-
 	
 	/**
 	 * This method provides full serialization of a user set
-	 * @param userSet
+	 * @param resultsPage
 	 * @return full user set view
 	 * @throws IOException
 	 */
@@ -56,8 +53,7 @@ public class UserSetLdSerializer {
 		mapper.registerModule(new JsonldModule()); 
 		JsonldResourceBuilder<BaseUserSetResultPage<?>> jsonResourceBuilder = JsonldResource.Builder.create();
 		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
-		return jsonString;
+		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
 	}
 	
 	/**
@@ -69,8 +65,7 @@ public class UserSetLdSerializer {
 	public String serialize(ItemInsertView userSet) throws IOException {		
 		mapper.registerModule(new JsonldModule()); 
 		JsonldResourceBuilder<ItemInsertView> jsonResourceBuilder = JsonldResource.Builder.create();
-		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
-		return jsonString;
+		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
 	}
 
 }

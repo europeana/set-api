@@ -3,6 +3,7 @@ package eu.europeana.set.web.model;
 import java.util.List;
 import java.util.Map;
 
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -15,9 +16,9 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 
-@JsonPropertyOrder({ WebUserSetFields.ID, WebUserSetFields.TYPE, WebUserSetFields.TITLE, WebUserSetFields.DESCRIPTION,
-	WebUserSetFields.VISIBILITY, WebUserSetFields.IS_DEFINED_BY, WebUserSetFields.ITEMS, WebUserSetFields.CREATOR,
-	WebUserSetFields.CREATED, WebUserSetFields.MODIFIED, WebUserSetFields.TOTAL, WebUserSetFields.NEXT,
+@JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TITLE, WebUserSetFields.DESCRIPTION,
+        WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR,
+        WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
 	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 public class WebUserSetImpl extends PersistentUserSetImpl {
@@ -32,7 +33,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	super.setType(type);
     }
 
-    @JsonProperty(WebUserSetFields.VISIBILITY)
+    @JsonProperty(WebUserSetModelFields.VISIBILITY)
     public void setVisibility(String visibility) {
 	super.setVisibility(visibility);
     }
@@ -57,13 +58,13 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.getDescription();
     }
 
-    @JsonProperty(WebUserSetFields.TOTAL)
+    @JsonProperty(WebUserSetModelFields.TOTAL)
     @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
     public int getTotal() {
 	return super.getTotal();
     }
 
-    @JsonProperty(WebUserSetFields.IS_DEFINED_BY)
+    @JsonProperty(WebUserSetModelFields.IS_DEFINED_BY)
     public String getIsDefinedBy() {
 	return super.getIsDefinedBy();
     }
@@ -87,7 +88,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.getCreator();
     }
 
-    @JsonProperty(WebUserSetFields.CREATOR)
+    @JsonProperty(WebUserSetModelFields.CREATOR)
     public String getCreatorHttpUrl() {
 	String res = null;
 	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
@@ -123,12 +124,10 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 
     /**
      * This method presents Id as URL.
-     * 
-     * @param id   The user set id
-     * @param base The base URL
+     *
      * @return string presenting ID as URL
      */
-    @JsonProperty(WebUserSetFields.ID)
+    @JsonProperty(WebUserSetModelFields.ID)
     public String getId() {
 	StringBuilder urlBuilder = new StringBuilder();
 	urlBuilder.append(WebUserSetFields.BASE_SET_URL);
@@ -141,6 +140,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	// URI is ignored as the identifier from URL is used
     }
 
+    @Override
     public String toString() {
 	StringBuilder resBuilder = new StringBuilder();
 	resBuilder.append("WebUserSet [");
@@ -156,7 +156,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	    resBuilder.append(", Total items: ");
 	    resBuilder.append(getTotal());
 	}
-	if (getItems() != null && getItems().size() > 0) {
+	if (! getItems().isEmpty()) {
 	    resBuilder.append(", Items: ");
 	    resBuilder.append(getItems().size());
 	}

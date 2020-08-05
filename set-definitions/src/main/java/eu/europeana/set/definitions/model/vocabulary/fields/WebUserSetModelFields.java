@@ -3,7 +3,11 @@ package eu.europeana.set.definitions.model.vocabulary.fields;
 /**
  * Model attribute names
  */
-public interface WebUserSetModelFields {
+public class WebUserSetModelFields {
+
+	public WebUserSetModelFields() {
+
+	}
 
 	//common fields constants
 	public static final String ID               = "id";
@@ -11,7 +15,7 @@ public interface WebUserSetModelFields {
 	public static final String TYPE_COLLECTION  = "Collection";
 	public static final String SET_OPEN         = "open";
 	public static final String SET_CLOSED       = "closed";
-	
+
 	//** user set fields **/
 	public static final String AT_CONTEXT       = "@context";
 	public static final String CREATOR          = "creator";

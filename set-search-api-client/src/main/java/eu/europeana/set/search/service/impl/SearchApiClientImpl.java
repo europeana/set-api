@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,7 +67,7 @@ public class SearchApiClientImpl implements SearchApiClient {
      * @throws JSONException
      */
     protected List<String> jsonArrayToStringArray(JSONArray valueObject) throws JSONException {
-	return extractItemDescriptions(valueObject, WebUserSetFields.ID);
+	return extractItemDescriptions(valueObject, WebUserSetModelFields.ID);
     }
 
     /**
@@ -76,7 +77,7 @@ public class SearchApiClientImpl implements SearchApiClient {
      * @return list of values
      * @throws JSONException
      */
-    protected List<String> extractItemDescriptions(JSONArray valueObject, String fieldName) throws JSONException {	List<String> list = new ArrayList<String>();
+    protected List<String> extractItemDescriptions(JSONArray valueObject, String fieldName) throws JSONException {	List<String> list = new ArrayList<>();
 	if (valueObject == null) {
 	    return list;
 	}
@@ -84,7 +85,8 @@ public class SearchApiClientImpl implements SearchApiClient {
 	    JSONObject guidJson = valueObject.getJSONObject(i);
 	    String value = guidJson.getString(fieldName);
 	    if (!list.contains(value))
-		list.add(value);	}
+	    	list.add(value);
+	}
 	return list;
     }
 

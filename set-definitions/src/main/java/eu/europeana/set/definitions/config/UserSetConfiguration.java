@@ -1,49 +1,48 @@
 package eu.europeana.set.definitions.config;
 
-public interface UserSetConfiguration{
+public interface UserSetConfiguration {
 
-	public static final String SUFFIX_BASEURL = "baseUrl";
-	
-	public static final String PREFIX_MAX_PAGE_SIZE = "userset.search.maxpagesize.";
-	
-	public static final String USERSET_ENVIRONMENT = "set.environment";
-	
-	public static final String VALUE_ENVIRONMENT_PRODUCTION = "production";
-	public static final String VALUE_ENVIRONMENT_TEST = "test";
-	public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
-	
-	//TODO: move constants to api commons
-	public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
-	public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
-	public static final String KEY_SEARCH_APIKEY = "europeana.search.apikey";
-	public static final String API_VERSION = "set.api.version";
-	
-	
-	public String getComponentName();
-	
-	/**
-	 * uses set.environment property
-	 */
-	public String getEnvironment();
-		
-	/**
-	 * uses annotation.environment.{$environment}.baseUrl property
-	 */
-	public String getUserSetBaseUrl();
-	
-	public int getMaxPageSize(String profile);
-	
-	public String getSearchApiKey();
-	
-	/**
-	 * checks annotation.environment=production property
-	 */
-	public boolean isProductionEnvironment();
-	
-	/**
-	 * authorization settings
-	 */
-	public String getJwtTokenSignatureKey();
-	public String getAuthorizationApiName();
-	public String getApiVersion();
+    String SUFFIX_BASEURL                = "baseUrl";
+    String PREFIX_MAX_PAGE_SIZE          = "userset.search.maxpagesize.";
+    String USERSET_ENVIRONMENT           = "set.environment";
+    String VALUE_ENVIRONMENT_PRODUCTION  = "production";
+    String VALUE_ENVIRONMENT_TEST        = "test";
+    String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
+
+    //TODO: move constants to api commons
+    String AUTHORIZATION_API_NAME           = "authorization.api.name";
+    String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
+    String KEY_SEARCH_APIKEY                = "europeana.search.apikey";
+    String API_VERSION                      = "set.api.version";
+
+
+    String getComponentName();
+
+    /**
+     * uses set.environment property
+     */
+    String getEnvironment();
+
+    /**
+     * uses annotation.environment.{$environment}.baseUrl property
+     */
+    String getUserSetBaseUrl();
+
+    int getMaxPageSize(String profile);
+
+    String getSearchApiKey();
+
+    /**
+     * checks annotation.environment=production property
+     */
+    boolean isProductionEnvironment();
+
+    /**
+     * authorization settings
+     */
+    String getJwtTokenSignatureKey();
+
+    String getAuthorizationApiName();
+
+    String getApiVersion();
 }

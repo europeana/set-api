@@ -17,7 +17,7 @@ public interface WebUserSetApi {
 	/**
 	 * This method retrieves user set from database
 	 * 
-	 * @param apiKey
+	 * @param wskey
 	 * @param identifier
 	 * @return response entity that contains response body, headers and status code.
 	 */	

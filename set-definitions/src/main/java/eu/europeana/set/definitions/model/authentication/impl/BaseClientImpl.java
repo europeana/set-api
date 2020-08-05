@@ -11,7 +11,6 @@ public class BaseClientImpl implements Client{
 	String authenticationConfigJson;
 	private Date creationDate;
 	private Date lastUpdate;
-
 	
 	@Override
 	public Date getCreationDate() {

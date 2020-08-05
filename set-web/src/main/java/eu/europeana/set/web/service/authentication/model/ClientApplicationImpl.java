@@ -12,7 +12,7 @@ public class ClientApplicationImpl implements Application {
 	private String name;
 	private Agent anonymousUser;
 	private Agent adminUser;
-	private Map<String, Agent> authenticatedUsers = new HashMap<String, Agent>();
+	private Map<String, Agent> authenticatedUsers = new HashMap<>();
 	
 	@Override
 	public String getApiKey() {

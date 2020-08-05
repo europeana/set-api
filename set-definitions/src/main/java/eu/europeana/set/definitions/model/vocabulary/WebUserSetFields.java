@@ -5,7 +5,11 @@ import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelField
 /**
  * @author GrafR
  */
-public interface WebUserSetFields extends WebUserSetModelFields {
+public class WebUserSetFields extends WebUserSetModelFields {
+
+  public WebUserSetFields() {
+       super();
+   }
 
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";

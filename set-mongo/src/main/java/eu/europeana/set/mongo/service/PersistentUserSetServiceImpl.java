@@ -37,9 +37,12 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<PersistentUserSet, String>
 		implements PersistentUserSetService {
 
-	private static final String NOT_PERSISTENT_OBJECT = "User set object in not an instance of persistent user set.";
-
 	protected final Logger logger = LogManager.getLogger(this.getClass());
+
+	private static final String NOT_PERSISTENT_OBJECT = "User set object in not an instance of persistent user set.";
+	private static final String FIELD_IDENTIFIER = WebUserSetModelFields.IDENTIFIER;
+	private static final String FIELD_TYPE       = WebUserSetModelFields.TYPE;
+	private static final String FIELD_CREATOR    = WebUserSetModelFields.CREATOR + ".httpUrl";
 	
 	@Resource
 	private UserSetConfiguration configuration;
@@ -88,7 +91,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	public PersistentUserSet getByIdentifier(String identifier) {
 		Query<PersistentUserSet> query = getUserSetDao().createQuery();
-		query.filter(PersistentUserSet.FIELD_IDENTIFIER, identifier);
+		query.filter(FIELD_IDENTIFIER, identifier);
 
 		return getUserSetDao().findOne(query);
 	}
@@ -98,8 +101,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	public PersistentUserSet getBookmarksFolder(String creatorId) {
 	    Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
-	    query.filter(PersistentUserSet.FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
-	    query.filter(PersistentUserSet.FIELD_CREATOR, creatorId);
+	    query.filter(FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
+	    query.filter(FIELD_CREATOR, creatorId);
 
 	    return getUserSetDao().findOne(query);
 	}
@@ -200,7 +203,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    }
 	    return mongoQuery;
 	}
-	
+
 	@Override
 	public void remove(String id) {
 		PersistentUserSet userSet = getByIdentifier(id);
@@ -214,7 +217,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@Override
 	@Deprecated
 	//TODO: use store instead
-	public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException {
+	public PersistentUserSet update(PersistentUserSet userSet) throws  UserSetValidationException {
 		return store(userSet);
 	}
 

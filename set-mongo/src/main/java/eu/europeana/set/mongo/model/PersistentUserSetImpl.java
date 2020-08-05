@@ -1,5 +1,6 @@
 package eu.europeana.set.mongo.model;
 
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -10,13 +11,12 @@ import eu.europeana.set.definitions.model.impl.BaseUserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 @Entity("userset")
-@Indexes(@Index(value = PersistentUserSet.FIELD_IDENTIFIER, unique = true))
+@Indexes(@Index(value = WebUserSetModelFields.IDENTIFIER, unique = true))
 public class PersistentUserSetImpl extends BaseUserSet implements PersistentUserSet {
 
 	@Id
 	private ObjectId id;
 
-	
     public ObjectId getObjectId() {
 		return id;
 	}
@@ -31,5 +31,4 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 				", Id:" + getObjectId() + ", Identifier:" + getIdentifier() + 
 				", modified: " + getModified() + "]";
 	}
-
 }

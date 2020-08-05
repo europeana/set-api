@@ -8,8 +8,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 
-@JsonPropertyOrder({WebUserSetFields.ID,  WebUserSetFields.TYPE, WebUserSetFields.PART_OF, WebUserSetFields.ITEMS, WebUserSetFields.NEXT, WebUserSetFields.PREV})
+@JsonPropertyOrder({WebUserSetModelFields.ID,  WebUserSetFields.TYPE, WebUserSetFields.PART_OF, WebUserSetFields.ITEMS, WebUserSetFields.NEXT, WebUserSetFields.PREV})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
 
@@ -28,7 +29,7 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     }
     
     @Override
-    @JsonProperty(WebUserSetFields.TOTAL)
+    @JsonProperty(WebUserSetModelFields.TOTAL)
 //    @JsonIgnore
     public long getTotalInPage() {
         return super.getTotalInPage();
@@ -59,7 +60,7 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     }
     
     @Override
-    @JsonProperty(WebUserSetFields.ID)
+    @JsonProperty(WebUserSetModelFields.ID)
     public String getCurrentPageUri() {
         return super.getCurrentPageUri();
     }

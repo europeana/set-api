@@ -4,16 +4,11 @@ import eu.europeana.set.definitions.model.UserSetId;
 
 public class BaseUserSetId implements UserSetId {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	String sequenceNumber = "";
 	String collection = "";
-	
-	public BaseUserSetId() {}
-	
+
 	public void setSequenceNumber(String sequenceNr) {
 		this.sequenceNumber = sequenceNr;
 	}

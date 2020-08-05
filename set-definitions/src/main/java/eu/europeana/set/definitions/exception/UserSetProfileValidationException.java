@@ -7,11 +7,8 @@ package eu.europeana.set.definitions.exception;
  */
 public class UserSetProfileValidationException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3417903860168591652L;
-	public static final String ERROR_INVALID_PROFILE = "Invalid value for requested profile!";
+	private static final long   serialVersionUID      = -3417903860168591652L;
+	public  static final String ERROR_INVALID_PROFILE = "Invalid value for requested profile!";
 	private String requestedProfile;
 	
 	public String getRequestedProfile() {
