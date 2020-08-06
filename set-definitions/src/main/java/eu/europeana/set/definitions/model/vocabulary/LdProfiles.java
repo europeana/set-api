@@ -47,7 +47,7 @@ public enum LdProfiles implements ProfileKeyword {
 	public static LdProfiles getByName(String name) throws UserSetProfileValidationException{
 		
 		for(LdProfiles ldType : LdProfiles.values()){
-			if(name.equals(ldType.name().toLowerCase())) {
+			if(name.equalsIgnoreCase(ldType.name())) {
 				return ldType;
 			}
 		}

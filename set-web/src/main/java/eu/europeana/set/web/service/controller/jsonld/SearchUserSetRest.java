@@ -82,20 +82,6 @@ public class SearchUserSetRest extends BaseRest {
 
             ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile);
             
-            if (profile.equals(LdProfiles.ITEMDESCRIPTIONS)) {
-    	        int index = 0;
-    	        for (Iterator<? extends UserSet> iterator = results.getResults().iterator(); iterator.hasNext();) {
-    	            UserSet userSet = iterator.next();    
-    		    if (!userSet.isOpenSet()) { 
-    		        String closedUserSetQuery = buildItemIdsQueryFromClosedUserSet(userSet);
-    		        userSet.setIsDefinedBy(closedUserSetQuery);
-    		    }
-    		    UserSet retrievedUserSet = fetchItemDescriptionsPage(userSet, null, null, page, pageSize);
-    		    results.getResults().get(index).setItems(retrievedUserSet.getItems());
-    		    index++;
-    	        }
-    	    }
-            
             @SuppressWarnings("rawtypes")
             BaseUserSetResultPage resultsPage;
             resultsPage = getUserSetService().buildResultsPage(searchQuery, results,
@@ -118,53 +104,6 @@ public class SearchUserSetRest extends BaseRest {
         }
     }
     
-    /**
-     * This method retrieves item ids from the closed userSet to build query e.g.
-     * https://api.europeana.eu/api/v2/search.json?profile=minimal&
-     * query=europeana_id%3A(%22%2F08641%2F1037479000000476635%22%20OR%20%20%22%2F08641%2F1037479000000476943%22)
-     * &rows=12&start=1
-     * @param userSet
-     * @return
-     * @throws UnsupportedEncodingException 
-     */
-    private String buildItemIdsQueryFromClosedUserSet(UserSet userSet) throws UnsupportedEncodingException {
-	// get item ids from the userSet
-        List<String> closedUserSetIds = userSet.getItems();
-	// use them to build the search query for retrieving item descriptions using minimal profile
-	// europeana_id is in format /collectionId/recordId, this can be easily extracted from the 
-        // full record ID by removing the base URL http://data.europeana.eu/item
-	// e.g. europeana_id:("/08641/1037479000000476635" OR  "/08641/1037479000000476943")
-	StringBuilder sb = new StringBuilder();
-	StringBuilder querySb = new StringBuilder();
-        sb.append("https://api.europeana.eu/api/v2/search.json?profile=minimal&wskey=api2demo&query=");
-        querySb.append("europeana_id%3A(");
-        boolean firstPar = true;
-        for (String fullId : closedUserSetIds) {
-            String id = fullId.replace(WebUserSetFields.BASE_URL_DATA, ""); //.replace("/", "%2F");
-    	    String elem = "\"" + id + "\"";
-            if (firstPar) {
-        	querySb.append(elem);
-                firstPar = false;
-            } else {
-        	querySb.append(" OR " + elem);
-            }
-        }
-        querySb.append(")");   
-        String queryStr = encodeUrl(querySb.toString());
-        sb.append(queryStr);
-	return sb.toString();
-    }
-    
-    /**
-     * This method encodes URLs for HTTP connection
-     * 
-     * @param url The input URL
-     * @return encoded URL
-     * @throws UnsupportedEncodingException
-     */
-    private String encodeUrl(String url) throws UnsupportedEncodingException {
-	return URLEncoder.encode(url, "UTF-8");
-    }
     
     private UserSetQuery buildUserSetQuery(String query, String sort, int page, int pageSize) throws ParamValidationException {
 

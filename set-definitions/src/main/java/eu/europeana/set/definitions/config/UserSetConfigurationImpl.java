@@ -59,4 +59,9 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 	return getSetProperties().getProperty(KEY_SEARCH_APIKEY);
     }
 
+    @Override
+    public String getSearchApiUrl() {
+	return getSetProperties().getProperty(KEY_SEARCH_URL);
+    }
+
 }

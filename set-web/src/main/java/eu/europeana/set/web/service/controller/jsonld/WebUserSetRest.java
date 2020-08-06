@@ -92,8 +92,8 @@ public class WebUserSetRest extends BaseRest {
 	    
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
-	    if (StringUtils.isEmpty(webUserSet.getContext()))
-		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
+//	    if (StringUtils.isEmpty(webUserSet.getContext()))
+//		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
 
 	    Agent user = new WebSoftwareAgent();
 	    user.setHttpUrl(getUserSetService().getUserId(authentication));
@@ -116,9 +116,9 @@ public class WebUserSetRest extends BaseRest {
 	    // generate and add a created and modified timestamp to the Set
 	    // type should be saved now in the database and not generated on the fly during serialization
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
-	    if (storedUserSet.isOpenSet()) {
-		storedUserSet = fetchItemsPage(storedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
-			WebUserSetFields.MAX_ITEMS_PER_PAGE);
+	    if (mustFetchItems(storedUserSet, profile)) {
+		storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
+			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
@@ -209,7 +209,9 @@ public class WebUserSetRest extends BaseRest {
 
 	    // append the HTTP parameters related to sort, page and pageSize
 	    // to URL defined in the rdfs:isDefinedBy property
-	    userSet = fetchItemsPage(userSet, sort, sortOrder, pageNr, pageSize);
+	    if(mustFetchItems(userSet, profile)) {
+		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, pageSize, profile);
+	    }
 
 	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
 
@@ -238,6 +240,12 @@ public class WebUserSetRest extends BaseRest {
 	} catch (Exception e) {
 	    throw new InternalServerException(e);
 	}
+    }
+
+    private boolean mustFetchItems(UserSet userSet, LdProfiles profile) {
+	boolean itemDescriptionsProfile = LdProfiles.ITEMDESCRIPTIONS.equals(profile); 
+	boolean fetchItemsForOpenSet = userSet.isOpenSet() && !LdProfiles.MINIMAL.equals(profile);
+	return itemDescriptionsProfile || fetchItemsForOpenSet;
     }
 
 
@@ -320,9 +328,9 @@ public class WebUserSetRest extends BaseRest {
 	    // the logic defined for retrieving a Set.
 	    // TODO: if different from "ldp:PreferMinimalContainer" is referred in the
 	    // "Prefer" header.
-	    if (updatedUserSet.isOpenSet() && LdProfiles.STANDARD.equals(profile)) {
-		updatedUserSet = fetchItemsPage(updatedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
-			WebUserSetFields.MAX_ITEMS_PER_PAGE);
+	    if (mustFetchItems(updatedUserSet, profile)) {
+		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
+			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);

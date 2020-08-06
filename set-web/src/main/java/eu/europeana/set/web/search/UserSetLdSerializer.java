@@ -40,7 +40,8 @@ public class UserSetLdSerializer {
 		mapper.registerModule(new JsonldModule()); 
 		JsonldResourceBuilder<UserSet> jsonResourceBuilder = JsonldResource.Builder.create();
 		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-		String jsonString = mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
+		JsonldResource resource = jsonResourceBuilder.build(userSet);
+		String jsonString = mapper.writer().writeValueAsString(resource);
 		return jsonString;
 	}
 
