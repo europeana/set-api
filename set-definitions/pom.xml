@@ -23,10 +23,5 @@
 			<artifactId>commons-definitions</artifactId>
 			<version>${version.commonsApi}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${version.log4j2}</version>
-		</dependency>
 	</dependencies>
 </project>

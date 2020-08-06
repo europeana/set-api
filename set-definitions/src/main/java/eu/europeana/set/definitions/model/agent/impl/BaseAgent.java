@@ -2,12 +2,8 @@ package eu.europeana.set.definitions.model.agent.impl;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public abstract class BaseAgent implements Agent {
-
-    Logger logger = LogManager.getLogger(getClass().getName());
 
     private String httpUrl;
     private String agentType;
@@ -148,25 +144,25 @@ public abstract class BaseAgent implements Agent {
          */
         if ((this.getType() != null) && (that.getType() != null) &&
                 (!this.getType().equals(that.getType()))) {
-            logger.info("Agent objects have different 'agentType' fields.");
+           System.out.println("Agent objects have different 'agentType' fields.");
             res = false;
         }
 
         if ((this.getHomepage() != null) && (that.getHomepage() != null) &&
                 (!this.getHomepage().equals(that.getHomepage()))) {
-            logger.info("Agent objects have different 'hompage' fields.");
+            System.out.println("Agent objects have different 'hompage' fields.");
             res = false;
         }
 
         if ((this.getName() != null) && (that.getName() != null) &&
                 (!this.getName().equals(that.getName()))) {
-            logger.info("Agent objects have different 'name' fields.");
+            System.out.println("Agent objects have different 'name' fields.");
             res = false;
         }
 
         if ((this.getHttpUrl() != null) && (that.getHttpUrl() != null) &&
                 (!this.getHttpUrl().equals(that.getHttpUrl()))) {
-            logger.info("Agent objects have different 'name' fields.");
+            System.out.println("Agent objects have different 'name' fields.");
             res = false;
         }
         return res;
