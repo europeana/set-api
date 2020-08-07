@@ -59,5 +59,5 @@ public interface WebUserSetFields extends WebUserSetModelFields {
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     // Europeana API Constants
-    public static final String BASE_URL_DATA              = "http://data.europeana.eu/item";
+//    public static final String BASE_ITEM_URL              = "http://data.europeana.eu/item";
 }

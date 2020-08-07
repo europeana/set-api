@@ -1,0 +1,1 @@
+db.getCollection('userset').update({"visibility": {$exists:false}}, {$set : {"visibility":true}}, {"multi":true})

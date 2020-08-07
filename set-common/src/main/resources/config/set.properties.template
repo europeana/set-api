@@ -43,6 +43,9 @@ europeana.apikey.serviceurl=
 #API key used for invocation of search api
 europeana.search.apikey=
 
+#API key used for invocation of search api
+europeana.search.url=https://api.europeana.eu/api/v2/search.json?profile=minimal&wskey=MY_KEY&query=
+
 #the name for annotation api resources in keykloack tokens
 authorization.api.name=usersets
 

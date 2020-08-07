@@ -10,10 +10,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
+import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
 @JsonPropertyOrder({ WebUserSetFields.ID, WebUserSetFields.TYPE, WebUserSetFields.TITLE, WebUserSetFields.DESCRIPTION,
 	WebUserSetFields.VISIBILITY, WebUserSetFields.IS_DEFINED_BY, WebUserSetFields.ITEMS, WebUserSetFields.CREATOR,
@@ -21,6 +23,30 @@ import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 public class WebUserSetImpl extends PersistentUserSetImpl {
+
+    List<String> serializedItems;
+
+    @Override
+    @JsonProperty(WebUserSetFields.ITEMS)
+    public void setItems(List<String> items) {
+	super.setItems(items);
+    }
+
+    @JsonProperty(WebUserSetFields.ITEMS)
+    @JsonRawValue
+    public List<String> getSerializedItems() {
+	return serializedItems;
+    }
+
+    @JsonIgnore //use serializedItems for serialization
+    public List<String> getItems() {
+	return super.getItems();
+    }
+
+    @JsonIgnore //use setItems for deserialization
+    public void setSerializedItems(List<String> serializedItems) {
+	this.serializedItems = serializedItems;
+    }
 
     @JsonIgnore
     public String getIdentifier() {
@@ -68,23 +94,29 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.getIsDefinedBy();
     }
 
-    @JsonProperty(WebUserSetFields.CONTEXT_FIELD)
-    @JsonIgnore // avoid double serialization
-    public String getContext() {
-	return super.getContext();
-    }
+//    @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
+//    @JsonIgnore // avoid double serialization
+//    public String getContext() {
+//	return super.getContext();
+//    }
 
-    @Override
-    @JsonProperty(WebUserSetFields.CONTEXT_FIELD)
+    @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
     public void setContext(String context) {
-	super.setContext(context);
+	// do nothing, just to allow cotnext in input
     }
 
 //    @JsonProperty(WebUserSetFields.CREATOR)
 //    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
-		// serialization
+    // serialization
+    @JsonIgnore
     public Agent getCreator() {
 	return super.getCreator();
+    }
+
+    @Override
+    @JsonIgnore
+    public void setCreator(Agent creator) {
+	super.setCreator(creator);
     }
 
     @JsonProperty(WebUserSetFields.CREATOR)
@@ -94,11 +126,6 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	    res = super.getCreator().getHttpUrl();
 	}
 	return res;
-    }
-
-    @JsonProperty(WebUserSetFields.ITEMS)
-    public List<String> getItems() {
-	return super.getItems();
     }
 
     @JsonIgnore

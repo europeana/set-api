@@ -31,15 +31,15 @@ public interface UserSetService {
      * This method converts close set to open set by updating respective items
      * 
      * @param storedUserSet
-     * @param apiKey
+     * @param profile 
      * @param action
      * @return updated set
      * @throws HttpException
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey,
-    		String sort, String sortOrder, int pageNr, int pageSize)
+    public UserSet fetchItems(UserSet storedUserSet,
+    		String sort, String sortOrder, int pageNr, int pageSize, LdProfiles profile)
     	    throws HttpException, IOException, JSONException;
     
     /**
@@ -180,7 +180,7 @@ public interface UserSetService {
 	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
 
 	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication);
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
 
 	/**
 	 * This method validates input values wsKey, identifier and userToken.
@@ -204,19 +204,12 @@ public interface UserSetService {
 	String getUserId(Authentication authentication);
 	
 	/**
-	 * This method converts close set to open set by updating respective items
-	 * and returns item descriptions
+	 * This methods applies Linked Data profile to a user set
 	 * 
-	 * @param storedUserSet
-	 * @param apiKey
-	 * @param action
-	 * @return updated set
-	 * @throws HttpException
-	 * @throws IOException
-	 * @throws JSONException
+	 * @param userSet The given user set
+	 * @param profile Provided Linked Data profile
+	 * @return profiled user set value
 	 */
-	 public UserSet fetchDynamicSetItemDescriptions(UserSet storedUserSet, String apiKey,
-	 	String sort, String sortOrder, int pageNr, int pageSize)
-	     throws HttpException, IOException, JSONException;
+	UserSet applyProfile(UserSet userSet, LdProfiles profile);
 
 }
