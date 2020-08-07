@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.controller;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -11,7 +12,6 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
@@ -149,13 +149,12 @@ public class BaseRest extends BaseRestController {
      * @throws IOException
      */
     protected String serializeUserSet(LdProfiles profile, UserSet storedUserSet) throws IOException {
-        // apply linked data profile from header
-        UserSet resUserSet = applyProfile(storedUserSet, profile);
+	//prepare data for serialization according to the profile
+	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
 
-        // serialize Set description in JSON-LD and respond with HTTP 201 if
-        // successful
-        UserSetLdSerializer serializer = new UserSetLdSerializer();
-        return serializer.serialize(resUserSet);
+	UserSetLdSerializer serializer = new UserSetLdSerializer();
+	String serializedUserSetJsonLdStr = serializer.serialize(set);
+	return serializedUserSetJsonLdStr;
     }
 
     /**
@@ -181,83 +180,24 @@ public class BaseRest extends BaseRestController {
         return resMap;
     }
 
-    /**
-     * This methods applies Linked Data profile to a user set
-     *
-     * @param userSet The given user set
-     * @param profile Provided Linked Data profile
-     * @return profiled user set value
-     */
-    public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
-
-        // check that not more then maximal allowed number of items are
-        // presented
-        if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
-            int itemsCount = userSet.getItems().size();
-            if (itemsCount > WebUserSetFields.MAX_ITEMS_TO_PRESENT) {
-                List<String> itemsPage = userSet.getItems().subList(0, WebUserSetFields.MAX_ITEMS_TO_PRESENT);
-                userSet.setItems(itemsPage);
-                profile = LdProfiles.MINIMAL;
-                getLogger().debug("Profile switched to minimal, due to set size!");
-            }
-        }
-
-        // set unnecessary fields to null - the empty fields will not be
-        // presented
-        switch (profile) {
-            case STANDARD:
-                // not for stadard profile
-                break;
-            case MINIMAL:
-            case ITEMDESCRIPTIONS:
-            default:
-                if (userSet.getIsDefinedBy() == null)
-                    userSet.setItems(null);
-                break;
-        }
-
-        return userSet;
-    }
-
-
-    /**
-     * This method performs query to Europeana API using URI defined in isDefinedBy
-     * parameter and returning descriptions.
-     *
-     * @param userSet
-     * @return user set updated with items from Europeana API
-     * @throws HttpException
-     * @throws IOException
-     * @throws JSONException
-     */
-    public UserSet fetchItemDescriptionsPage(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize)
-            throws HttpException, IOException, JSONException {
-        String apiKey = getConfiguration().getSearchApiKey();
-        userSet = getUserSetService().fetchDynamicSetItemDescriptions(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
-        return userSet;
-    }
-
+//    /**
+//     * This method performs query to Europeana API using URI defined in isDefinedBy
+//     * parameter and returning descriptions.
+//     * 
+//     * @param userSet
+//     * @return user set updated with items from Europeana API
+//     * @throws HttpException
+//     * @throws IOException
+//     * @throws JSONException
+//     */
+//    public UserSet fetchItemDescriptionsPage(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize)
+//	    throws HttpException, IOException, JSONException {
+//	String apiKey = getConfiguration().getSearchApiKey();
+//	userSet = getUserSetService().fetchDynamicSetItemDescriptions(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
+//	return userSet;
+//    }
+    
     public String getApiVersion() {
         return getConfiguration().getApiVersion();
-    }
-
-    /**
-     * This method performs query to Europeana API using URI defined in isDefinedBy
-     * parameter.
-     *
-     * @param userSet
-     * @return user set updated with items from Europeana API
-     * @throws HttpException
-     * @throws IOException
-     * @throws JSONException
-     */
-    public UserSet fetchItemsPage(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize)
-            throws HttpException, IOException, JSONException {
-        if (userSet.isOpenSet()) {
-            String apiKey = getConfiguration().getSearchApiKey();
-
-            userSet = getUserSetService().fetchDynamicSetItems(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
-        }
-        return userSet;
     }
 }

@@ -14,6 +14,15 @@ public class SearchApiResponse extends ApiResponse{
 	}
 
     private List<String> items = new ArrayList<>();
+    private int total;
+
+    public int getTotal() {
+        return total;
+    }
+
+    public void setTotal(int total) {
+        this.total = total;
+    }
 
     public List<String> getItems() {
         return items;

@@ -31,20 +31,20 @@ public interface UserSetService {
      * This method converts close set to open set by updating respective items
      *
      * @param storedUserSet
-     * @param apiKey
      * @param sort
      * @param sortOrder
      * @param pageNr
      * @param pageSize
+     * @param profile
      * @return updated set
      * @throws HttpException
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey,
-                                        String sort, String sortOrder, int pageNr, int pageSize)
-            throws HttpException, IOException, JSONException;
-
+    public UserSet fetchItems(UserSet storedUserSet,
+    		String sort, String sortOrder, int pageNr, int pageSize, LdProfiles profile)
+    	    throws HttpException, IOException, JSONException;
+    
     /**
      * This method converts open set to close set by updating respective items
      *
@@ -104,138 +104,123 @@ public interface UserSetService {
      */
     public UserSet updatePagination(UserSet userSet);
 
-    /**
-     * This methods converts user set object from JsonLd string format to a UserSet object
-     *
-     * @param userSetJsonLdStr
-     * @return a UserSet object
-     * @throws HttpException
-     */
-    public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException;
+	
+	/**
+	 * This methods converts user set object from JsonLd string format to a UserSet object
+	 * @param userSetJsonLdStr
+	 * @return a UserSet object
+	 * @throws HttpException
+	 */
+	public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException;
 
-    /**
-     * This method validates and processes the Set description for format and mandatory fields
-     * if false responds with HTTP 400
-     *
-     * @param webUserSet
-     * @throws RequestBodyValidationException
-     * @throws ParamValidationException
-     */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException;
+	/**
+	 * This method validates and processes the Set description for format and mandatory fields
+	 * if false responds with HTTP 400
+	 * @param webUserSet
+	 * @throws RequestBodyValidationException 
+	 * @throws ParamValidationException 
+	 */
+	public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException;
+	
+	/**
+	 * This method deletes user set by user set Id value.
+	 * @param userSetId The id of the user set
+	 * @throws UserSetNotFoundException 
+	 */
+	public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
+	
+	/**
+	 * remove duplicate items in the user set by preserving the order of items
+	 * @param userSet
+	 */
+	public void removeItemDuplicates(UserSet userSet);
+	
+	/**
+	 * This method validates position input, if false responds with -1
+	 * 
+	 * @param position
+	 *            The given position
+	 * @param items
+	 *            The item list
+	 * @return position The validated position in list to insert
+	 * @throws ApplicationAuthenticationException
+	 */
+	public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException;
 
-    /**
-     * This method deletes user set by user set Id value.
-     *
-     * @param userSetId The id of the user set
-     * @throws UserSetNotFoundException
-     */
-    public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
+	/**
+	 * This method enriches user set by provided item
+	 * @param datasetId The id of dataset
+	 * @param localId The id in collection
+	 * @param position The position in item list
+	 * @param existingUserSet
+	 * @return user set enriched by new item
+	 * @throws ApplicationAuthenticationException
+	 */
+	public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
+			throws ApplicationAuthenticationException;
 
-    /**
-     * remove duplicate items in the user set by preserving the order of items
-     *
-     * @param userSet
-     */
-    public void removeItemDuplicates(UserSet userSet);
+	/**
+	 * This method updates existing item list
+	 * @param existingUserSet
+	 * @return updated user set
+	 */
+	public UserSet updateItemList(UserSet existingUserSet);
 
-    /**
-     * This method validates position input, if false responds with -1
-     *
-     * @param position The given position
-     * @param items    The item list
-     * @return position The validated position in list to insert
-     * @throws ApplicationAuthenticationException
-     */
-    public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException;
+	/**
+	 * This method replaces item in user set
+	 * @param existingUserSet
+	 * @param positionInt
+	 * @param newItem
+	 */
+	public void replaceItem(UserSet existingUserSet, int positionInt, String newItem);
 
-    /**
-     * This method enriches user set by provided item
-     *
-     * @param datasetId       The id of dataset
-     * @param localId         The id in collection
-     * @param position        The position in item list
-     * @param existingUserSet
-     * @return user set enriched by new item
-     * @throws ApplicationAuthenticationException
-     */
-    public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
-            throws ApplicationAuthenticationException;
+	/**
+	 * Add item to the list in given position if provided.
+	 * @param existingUserSet
+	 * @param positionInt
+	 * @param newItem
+	 */
+	public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);
 
-    /**
-     * This method updates existing item list
-     *
-     * @param existingUserSet
-     * @return updated user set
-     */
-    public UserSet updateItemList(UserSet existingUserSet);
+	/**
+	 * search user sets using the given query and profile 
+	 * @param searchQuery
+	 * @param profile
+	 * @return 
+	 */
+	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
 
-    /**
-     * This method replaces item in user set
-     *
-     * @param existingUserSet
-     * @param positionInt
-     * @param newItem
-     */
-    public void replaceItem(UserSet existingUserSet, int positionInt, String newItem);
+	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
 
-    /**
-     * Add item to the list in given position if provided.
-     *
-     * @param existingUserSet
-     * @param positionInt
-     * @param newItem
-     */
-    public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);
+	/**
+	 * This method validates input values wsKey, identifier and userToken.
+	 * 
+	 * @param identifier
+	 * @param userId
+	 * @return
+	 * @return userSet object
+	 * @throws HttpException
+	 */
+	UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
 
-    /**
-     * search user sets using the given query and profile
-     *
-     * @param searchQuery
-     * @param profile
-     * @return
-     */
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
+	String buildCreatorUri(String userId);
 
-    public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-                                                     StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication);
-
-    /**
-     * This method validates input values wsKey, identifier and userToken.
-     *
-     * @param userSet
-     * @param authentication
-     * @return userSet object
-     * @throws HttpException
-     */
-    UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
-
-    String buildCreatorUri(String userId);
-
-    /**
-     * This method retrieves user id from authentication object
-     *
-     * @param authentication
-     * @return the user id
-     */
-    String getUserId(Authentication authentication);
-
-    /**
-     * This method converts close set to open set by updating respective items
-     * and returns item descriptions
-     *
-     * @param storedUserSet
-     * @param apiKey
-     * @param sort
-     * @param sortOrder
-     * @param pageNr
-     * @param pageSize
-     * @return updated set
-     * @throws HttpException
-     * @throws IOException
-     * @throws JSONException
-     */
-    public UserSet fetchDynamicSetItemDescriptions(UserSet storedUserSet, String apiKey,
-                                                   String sort, String sortOrder, int pageNr, int pageSize)
-            throws HttpException, IOException, JSONException;
+	/**
+	 * This method retrieves user id from authentication object
+	 * 
+	 * @param authentication
+	 * @return the user id
+	 */
+	String getUserId(Authentication authentication);
+	
+	/**
+	 * This methods applies Linked Data profile to a user set
+	 * 
+	 * @param userSet The given user set
+	 * @param profile Provided Linked Data profile
+	 * @return profiled user set value
+	 */
+	UserSet applyProfile(UserSet userSet, LdProfiles profile);
 
 }
