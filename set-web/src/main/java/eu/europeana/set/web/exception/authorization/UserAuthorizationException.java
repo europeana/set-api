@@ -6,9 +6,6 @@ import eu.europeana.api.commons.web.exception.HttpException;
 
 public class UserAuthorizationException extends HttpException{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8607706374204067442L;
 	
 	public UserAuthorizationException(String message, String i18nKey, String[] i18nParams){

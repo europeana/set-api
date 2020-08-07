@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -26,7 +27,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
-import eu.europeana.api.common.config.I18nConstants;
+import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -112,7 +113,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
 	UserSet res = getMongoPersistence().getByIdentifier(userSetId);
 	if (res == null) {
-	    throw new UserSetNotFoundException(I18nConstants.USERSET_NOT_FOUND, I18nConstants.USERSET_NOT_FOUND,
+	    throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND, UserSetI18nConstants.USERSET_NOT_FOUND,
 		    new String[] { userSetId });
 	}
 	return res;
@@ -258,7 +259,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    removeItemDuplicates(userSet);
 	    return userSet;
 	} catch (UserSetAttributeInstantiationException e) {
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_CANT_PARSE_BODY,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
 		    new String[] { e.getMessage() }, e);
 	} catch (JsonParseException e) {
 	    throw new UserSetInstantiationException("Json formating exception! " + e.getMessage(), e);
@@ -297,7 +298,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// validate isDefinedBy and items - we should not have both of them
 	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
 	
@@ -319,20 +320,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	
 	if(!webUserSet.isPrivate()) {
-	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
-		    I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
 	}
 	
 	if(webUserSet.isOpenSet()) {
-	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED, 
-		    I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+		    UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
 	}
 	
 	if(webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
-	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
-		    I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+		    UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 			new String[] { WebUserSetModelFields.CREATOR});
 	}
 	
@@ -355,6 +356,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
+
 	}	
     }
     
@@ -542,7 +544,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    return userSet;
 	} catch (SearchApiClientException e) {
 	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
-		throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
 	    } else {
 		throw new InternalServerException(e);
@@ -635,13 +637,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return searchQuery.toString();
     }
 
-    /*
+    /**
      * (non-Javadoc)
      * 
      * @deprecated
      * 
 	 * @see
-     * eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(
+     * eu.europeana.set.web.service.UserSetService(
      * eu.europeana.set.definitions.model.UserSet, java.util.List)
      *
      */
@@ -778,16 +780,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	String tmp;
 	// avoid name conflicts search "queryParam="
 	int startPos = queryParams.indexOf(queryParam + "=");
-	int startEndPos = queryParams.indexOf("&", startPos + 1);
+	int startEndPos = queryParams.indexOf('&', startPos + 1);
 
 	if (startPos >= 0) {
 	    // make sure to remove the "&" if not the first param
 	    if (startPos > 0)
-		startPos--;
+	    	startPos--;
 	    tmp = queryParams.substring(0, startPos);
 
 	    if (startEndPos > 0)
-		tmp += queryParams.substring(startEndPos);
+	    	tmp += queryParams.substring(startEndPos);
 	} else {
 	    tmp = queryParams;
 	}

@@ -8,18 +8,18 @@ import eu.europeana.set.client.exception.TechnicalRuntimeException;
 
 public class ClientConfiguration {
 
-	protected static final String SET_CLIENT_PROPERTIES_FILE = "/set-client.properties";
-	protected static final String PROP_SET_API_KEY = "set.api.key";
-	protected static final String PROP_SET_SERVICE_URI = "set.service.uri";
-	private static Properties properties = null;
+	protected static final String SET_CLIENT_PROPERTIES_FILE  = "/set-client.properties";
+	protected static final String PROP_SET_API_KEY            = "set.api.key";
+	protected static final String PROP_SET_SERVICE_URI        = "set.service.uri";
 
+	private static Properties          properties = null;
 	private static ClientConfiguration singleton;
 
 	/**
 	 * Hide the default constructor
 	 */
 	private ClientConfiguration() {
-	};
+	}
 
 	/**
 	 * Accessor method for the singleton

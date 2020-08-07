@@ -13,9 +13,6 @@ import org.mongodb.morphia.annotations.Id;
 @Entity(value="userSetIdGenerator", noClassnameStored=true)
 public class GeneratedUserSetIdImpl {
 
-	/**
-	 * 
-	 */
 	@SuppressWarnings("unused")
 	private static final long serialVersionUID = -4554805997975526594L;
 	

@@ -6,16 +6,8 @@ import eu.europeana.api.commons.web.exception.HttpException;
 
 public class UserSetNotFoundException extends HttpException{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3050674865876453650L;
 
-
-	/**
-	 * 
-	 */
-			
 	public UserSetNotFoundException(String message, String i18nKey, String[] i18nParams){
 		this(message, i18nKey, i18nParams, HttpStatus.NOT_FOUND, null);
 	}

@@ -24,7 +24,7 @@
    	<!--  ApiKeyService -->
 	 		
     <!--  AuthenticationService -->
-   	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.AuthorizationServiceImpl">
+   	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl">
     </beans:bean>
     
     

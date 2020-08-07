@@ -24,7 +24,7 @@ public enum LdProfiles implements ProfileKeyword {
 	/**
 	 * Identifying requested profile by Linked Data value.
 	 * For user friendliness the the comparison is case insensitive  
-	 * @param ldValue
+	 * @param headerValue
 	 * @return
 	 * @throws UserSetProfileValidationException 
 	 */

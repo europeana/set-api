@@ -1,9 +1,5 @@
 package eu.europeana.set.mongo.service;
 
-import java.util.List;
-
-import org.mongodb.morphia.query.Query;
-
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
@@ -19,14 +15,14 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 * @throws UserSetValidationException
 	 */
-	public abstract UserSet store(UserSet object) throws UserSetValidationException;
+	UserSet store(UserSet object) throws UserSetValidationException;
 		
 	/**
 	 * This method retrieves user set from database by set identifier string
 	 * @param identifier The set identifier e.g. http://localhost:8080/set6
 	 * @return user set object
 	 */
-	public abstract PersistentUserSet getByIdentifier(String identifier);
+	PersistentUserSet getByIdentifier(String identifier);
 	
 	/**
 	 * This method checks if a user set with provided type and creator already exists in
@@ -34,27 +30,27 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @param creatorid
 	 * @return user set object
 	 */
-	public abstract PersistentUserSet getBookmarksFolder(String creatorid);
+	PersistentUserSet getBookmarksFolder(String creatorid);
 	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string
 	 * @param identifier The database object ID e.g. "15"
 	 * @return user set object
 	 */
-	public abstract PersistentUserSet findByID(String identifier);
+	PersistentUserSet findByID(String identifier);
 	
 	/**
 	 * This method performs update for the passed user set object
 	 * @param userSet
 	 */
-	public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException;
+	PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException;
 
 	/** 
 	 * This method removes user set from database by database Id provided as a string
 	 * @param identifier The database object ID e.g. "15"
 	 * @return user set object
 	 */
-	public abstract void remove(String identifier);
+	void remove(String identifier);
 
 	/** 
 	 * Retrieve user sets for the given search query 

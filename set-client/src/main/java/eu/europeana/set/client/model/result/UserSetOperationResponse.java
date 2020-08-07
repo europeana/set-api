@@ -20,6 +20,4 @@ public class UserSetOperationResponse extends AbstractUserSetApiResponse{
 	public void setJson(String json) {
 		this.json = json;
 	}
-	
-	
 }

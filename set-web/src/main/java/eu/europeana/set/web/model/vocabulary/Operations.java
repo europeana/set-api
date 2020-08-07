@@ -1,7 +1,7 @@
 package eu.europeana.set.web.model.vocabulary;
 
-public interface Operations extends eu.europeana.api.commons.web.model.vocabulary.Operations {
-	
+public class Operations {
+
 	//admin
 	public static final String ADMIN_ALL = "admin_all";
 	public static final String ADMIN_UNLOCK = "admin_unlock";

@@ -11,7 +11,7 @@ import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
-public class AuthorizationServiceImpl extends BaseAuthorizationService implements AuthorizationService {
+public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService implements UserSetAuthorizationService {
 
     protected final Logger logger = LogManager.getLogger(getClass());
     
@@ -20,11 +20,6 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
 
     @Resource(name = "commons_oauth2_europeanaClientDetailsService")
     ClientDetailsService clientDetailsService;
-
-    public AuthorizationServiceImpl() {
-
-    }
-
 
     @Override
     protected ClientDetailsService getClientDetailsService() {

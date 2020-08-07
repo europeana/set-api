@@ -3,33 +3,24 @@
  */
 package eu.europeana.set.search.service;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**      
+ * refactor code to remove dependency on web modules and change this class
+ * @deprecated
+ */
 @Deprecated
-/** refactor code to remove dependency on web modules and change this class */
 @JsonInclude(Include.NON_NULL)
 public abstract class ApiResponse {
 
-	public String apikey;
+	private String apikey;
 
-	public String action;
+	private String action;
 
-	public boolean success = true;
+	private String status;
 
-	public String error;
-
-	public Date statsStartTime;
-
-	public Long statsDuration;
-
-	public Long requestNumber;
-
-	String status;
-
-	String stackTrace;
+	private String stackTrace;
 
 	public ApiResponse(String apikey, String action) {
 		this.apikey = apikey;
@@ -38,6 +29,22 @@ public abstract class ApiResponse {
 
 	public ApiResponse() {
 		// used by Jackson
+	}
+
+	public String getApikey() {
+		return apikey;
+	}
+
+	public void setApikey(String apikey) {
+		this.apikey = apikey;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 	public String getStatus() {

@@ -2,16 +2,13 @@ package eu.europeana.set.mongo.model.internal;
 
 import java.util.Date;
 
-public interface PersistentObject{
+public interface PersistentObject {
 
-	public Date getCreated();
+    Date getCreated();
 
-	public void setCreated(Date creationDate);
+    void setCreated(Date creationDate);
 
-	public Date getLastUpdate();
+    Date getLastUpdate();
 
-	public void setLastUpdate(Date lastUpdate);
-
-	
-
+    void setLastUpdate(Date lastUpdate);
 }

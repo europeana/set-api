@@ -28,9 +28,9 @@ public interface Agent {
 
 	public abstract String getEmail();
 
-	public abstract void setEmail_Sha1(String email_sha1);
+	public abstract void setEmailSha1(String emailSha1);
 
-	public abstract String getEmail_Sha1();
+	public abstract String getEmailSha1();
 
 	public abstract void setNickname(String nickname);
 

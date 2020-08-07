@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -134,7 +135,6 @@ public class SearchApiClientImpl implements SearchApiClient {
 	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(),
 		    e);
 	}
-
     }
 
     /**
@@ -152,7 +152,7 @@ public class SearchApiClientImpl implements SearchApiClient {
 	if (valueObject == null) {
 	    return list;
 	}
-
+      
 	try {
 	    for (int i = 0; i < valueObject.length(); i++) {
 		JSONObject guidJson = valueObject.getJSONObject(i);

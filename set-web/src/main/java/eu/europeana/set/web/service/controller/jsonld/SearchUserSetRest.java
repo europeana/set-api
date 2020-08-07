@@ -1,7 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
