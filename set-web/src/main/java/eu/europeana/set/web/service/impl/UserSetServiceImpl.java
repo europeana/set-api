@@ -285,7 +285,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// validate title
 	if (webUserSet.getTitle() == null && !isBookmarksFolder(webUserSet)) {
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 		    new String[] { WebUserSetModelFields.TITLE });
 	}
 
@@ -346,14 +346,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	if(webUserSet.getIdentifier() == null) {
 	    //create method
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
 	}
 	
 	if(!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
 	    //update method, prevent creation of 2 BookmarkFolders
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
 
@@ -368,12 +368,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private void validateControlledValues(UserSet webUserSet) throws RequestBodyValidationException {
 
 	if (webUserSet.getVisibility() != null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
 	}
 
 	if (webUserSet.getType() != null && !UserSetTypes.isValid(webUserSet.getType())) {
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType()});
 	}
     }
@@ -845,8 +845,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	if (authentication == null) {
 	    // access by API KEY, authentication not available
-	    throw new ApplicationAuthenticationException(I18nConstants.USER_NOT_AUTHORIZED,
-		    I18nConstants.USER_NOT_AUTHORIZED,
+	    throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
+		    UserSetI18nConstants.USER_NOT_AUTHORIZED,
 		    new String[] {
 			    "Access to update operations of private User Sets require user authentication with JwtToken" },
 		    HttpStatus.FORBIDDEN);
