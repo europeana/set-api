@@ -31,6 +31,7 @@ import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -529,8 +530,7 @@ public class WebUserSetRest extends BaseRest {
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
 
-	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
-		    WebUserSetFields.BASE_ITEM_URL);
+	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 
 	    // check if item already exists in the Set, if so respond with
 	    // HTTP 200, otherwise respond with HTTP 404.
@@ -605,8 +605,7 @@ public class WebUserSetRest extends BaseRest {
 	    // 403
 	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
     
-	    String newItem = getUserSetService().buildIdentifierUrl(datasetId + "/" + localId,
-		    WebUserSetFields.BASE_ITEM_URL);
+	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 
 	    // check if item already exists in the Set, if not respond with HTTP 404
 	    boolean hasItem = existingUserSet.getItems() != null && existingUserSet.getItems().contains(newItem);

@@ -47,6 +47,10 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String TYPE                       = "type";
     public static final String ITEMS                      = "items";
 
+    //additional search fields  
+    public static final String ITEM                      = "item";
+
+    
     //results page
     public static final String PART_OF = "partOf";
     public static final String NEXT = "next";
@@ -61,6 +65,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Serialization Constants
     public static final String SEPARATOR_SEMICOLON        = ":";
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    public static final String DEFAULT_CREATOR_URL        = "http://data.europeana.eu/user/";
 
     // Europeana API Constants
 //    public static final String BASE_ITEM_URL              = "http://data.europeana.eu/item";
