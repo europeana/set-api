@@ -125,7 +125,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @param creator
      * @return null or existing bookarks folder
      */
-    public UserSet getBookmarksFolder(Agent creator) {
+    public UserSet getBookmarksFolder(Agent creator){
 	return getMongoPersistence().getBookmarksFolder(creator.getHttpUrl());
     }
 
@@ -283,7 +283,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException {
 
 	// validate title
-	if (webUserSet.getTitle() == null) {
+	if (webUserSet.getTitle() == null && !isBookmarksFolder(webUserSet)) {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 		    new String[] { WebUserSetModelFields.TITLE });
 	}
@@ -295,19 +295,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //		    new String[] { WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext() });
 //	}
 
-	// validate visibility
-	if (webUserSet.getVisibility() != null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
-	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
-	}
-
 	// validate isDefinedBy and items - we should not have both of them
 	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
-
-	validateBookmarkFolder(webUserSet);
+	
+	validateBookmarkFolder(webUserSet);	
+	validateControlledValues(webUserSet);
     }
 
     /**
@@ -319,51 +314,70 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private void validateBookmarkFolder(UserSet webUserSet)
 	    throws RequestBodyValidationException, ParamValidationException {
 
-	if (!isBookmarksFolder(webUserSet)) {
+	if(!isBookmarksFolder(webUserSet)) {
 	    return;
 	}
-
-	if (!webUserSet.isPrivate()) {
-	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+	
+	if(!webUserSet.isPrivate()) {
+	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
 		    I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
+			new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
 	}
-
-	if (webUserSet.isOpenSet()) {
-	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+	
+	if(webUserSet.isOpenSet()) {
+	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED, 
 		    I18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
+			new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
 	}
-
-	if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
-	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+	
+	if(webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
+	    throw new ParamValidationException(I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
 		    I18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    new String[] { WebUserSetModelFields.CREATOR });
+			new String[] { WebUserSetModelFields.CREATOR});
 	}
-
+	
+	
 	UserSet usersBookmarkFolder = getBookmarksFolder(webUserSet.getCreator());
-	if (usersBookmarkFolder == null) {
-	    // the user doesn't have yet a bookmark folder
+	if(usersBookmarkFolder == null) {
+	    //the user doesn't have yet a bookmark folder
 	    return;
 	}
-
-	if (webUserSet.getIdentifier() == null) {
-	    // create method
+	
+	if(webUserSet.getIdentifier() == null) {
+	    //create method
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
 	}
-
-	if (!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
-	    // update method, prevent creation of 2 BookmarkFolders
+	
+	if(!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
+	    //update method, prevent creation of 2 BookmarkFolders
 	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
+	}	
+    }
+    
+    /**
+     * This method validates controlled values e.g. type and visibility
+     * @param webUserSet The new user set
+     * @throws RequestBodyValidationException 
+     */
+    private void validateControlledValues(UserSet webUserSet) throws RequestBodyValidationException {
+
+	if (webUserSet.getVisibility() != null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+	}
+
+	if (webUserSet.getType() != null && !UserSetTypes.isValid(webUserSet.getType())) {
+	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType()});
 	}
     }
-
+    
     boolean isBookmarksFolder(UserSet userSet) {
-	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(userSet.getType());
+	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(userSet.getType());	
     }
 
     /*
@@ -514,7 +528,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	String apiKey = getConfiguration().getSearchApiKey();
 	String url = buildSearchApiUrl(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
-
 //    	uri = userSet.getIsDefinedBy() + additionalParameters;
 
 	SearchApiResponse apiResult;
@@ -543,21 +556,21 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    items.add(WebUserSetFields.BASE_ITEM_URL + item);
 	}
 	setItems(userSet, items, apiResult.getTotal());
-    }
+	}
 
     private void setItems(UserSet userSet, List<String> items, int total) {
 //	if (!items.isEmpty()) {
-	userSet.setItems(items);
+	    userSet.setItems(items);
 	userSet.setTotal(total);
 //	}
-    }
+	}
 
     private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
 	    int pageSize) throws HttpException {
 
 	if (!userSet.isOpenSet()) {
 	    return buildSearchApiUrlForClosedSets(userSet, apiKey);
-	}
+    }
 
 	// String uri;
 	// String additionalParameters;
@@ -627,7 +640,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * 
      * @deprecated
      * 
-     * @see
+	 * @see
      * eu.europeana.set.web.service.UserSetService#updateUserSetsWithCloseSetItems(
      * eu.europeana.set.definitions.model.UserSet, java.util.List)
      *
@@ -646,9 +659,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile) {
-	return getMongoPersistance().find(searchQuery);
-    }
-
+	return  getMongoPersistance().find(searchQuery);
+}
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
@@ -705,12 +717,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// TODO: define a second parameter for itemset page size
 	int setPageSize = CommonApiConstants.DEFAULT_PAGE_SIZE;
-
+    
 	for (UserSet userSet : results.getResults()) {
 	    if (profile.equals(LdProfiles.ITEMDESCRIPTIONS)) {
 		fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, setPageSize, profile);
-	    }
-
+    }
+    
 	    // items not included in results
 //	    set.setItems(null);
 //	    set.setTotal(0);
@@ -736,7 +748,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private String buildPageUrl(String collectionUrl, int page, int pageSize) {
 	StringBuilder builder = new StringBuilder(collectionUrl);
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
+
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
+
 	return builder.toString();
     }
 
@@ -791,8 +805,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (authentication == null) {
 	    return false;
 	}
-
-	if (userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
+	
+	if(userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
 	    return false;
 	}
 	String userId = buildCreatorUri((String) authentication.getPrincipal());
@@ -845,7 +859,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    new String[] {
-			    "Only the creators of the annotation or admins are authorized to perform this operation." },
+			    "Only the creators of the annotation or admins are authorized to perform this operation." }, 
 		    HttpStatus.FORBIDDEN);
 	}
     }
@@ -865,7 +879,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	return false;
     }
-
+    
     /**
      * This method retrieves item ids from the closed userSet to build query e.g.
      * https://api.europeana.eu/api/v2/search.json?profile=minimal&
@@ -897,7 +911,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    }
 	    id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
 	    query.append('"').append("/").append(id).append('"');
-	}
+	    }
 	// close bracket
 	query.append(")");
 	StringBuilder url = new StringBuilder(getConfiguration().getSearchApiUrl());
@@ -909,7 +923,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 	return url.toString();
     }
-
+    
     /**
      * This methods applies Linked Data profile to a user set
      * 
@@ -964,5 +978,5 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	((WebUserSetImpl) userSet).setSerializedItems(jsonSerialized);
 //	userSet.setItems(null);
-    }
+    }    
 }
