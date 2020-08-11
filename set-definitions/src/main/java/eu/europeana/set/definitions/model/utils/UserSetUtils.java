@@ -1,11 +1,11 @@
 package eu.europeana.set.definitions.model.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class supports conversion methods for user set object.
@@ -37,7 +37,7 @@ public class UserSetUtils {
      */
     public UserSet analysePagination(UserSet userSet) {
         UserSet res = userSet;
-        res.setIdentifier(buildIdentifierUrl(userSet.getIdentifier(), WebUserSetFields.BASE_SET_URL));
+        res.setIdentifier(WebUserSetFields.BASE_SET_URL + userSet.getIdentifier());
         res = updatePagination(res);
         return res;
     }
@@ -72,13 +72,33 @@ public class UserSetUtils {
      * @param base The base URL
      * @return identifier URL
      */
-    public String buildIdentifierUrl(String id, String base) {
-        StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(base);
-        urlBuilder.append(id);
-        return urlBuilder.toString();
+    public static String buildItemUrl(String recordId) {
+	if(recordId.startsWith(WebUserSetFields.SLASH)) {
+	    return WebUserSetFields.BASE_ITEM_URL + recordId.substring(1);    
+	} else {
+	    return WebUserSetFields.BASE_ITEM_URL + recordId;
+	}
+        
     }
 
+    /**
+     * This method forms an identifier URL
+     *
+     * @param base The base URL
+     * @param dataset   The sequential ID
+     * @param id   The sequential ID
+     * @return identifier URL
+     */
+    public static String buildItemUrl(String baseUrl, String dataset, String id) {
+	StringBuilder builder = new StringBuilder(baseUrl);
+	if(!baseUrl.endsWith(WebUserSetFields.SLASH)) {
+	    builder.append(WebUserSetFields.SLASH);
+	}
+	builder.append(dataset);
+	builder.append(WebUserSetFields.SLASH).append(id);
+	return builder.toString();
+    }
+    
     /**
      * This method fills in pagination strings to the user set object. Format is '<id url>?page=0&pageSize=10'
      *
@@ -119,4 +139,9 @@ public class UserSetUtils {
                 , CommonApiConstants.QUERY_PARAM_PAGE_SIZE, WebUserSetFields.MAX_ITEMS_PER_PAGE
         )).toString();
     }
+    
+    public static String buildCreatorUri(String userId) {
+   	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
+    }
+ 
 }

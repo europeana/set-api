@@ -5,6 +5,27 @@ import eu.europeana.api.commons.definitions.search.impl.QueryImpl;
 public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
 
     String creator;
+    String visibility;
+    String type;
+    Boolean admin;
+    String item;
+    
+    @Override
+    public Boolean isAdmin() {
+        return admin;
+    }
+    @Override
+    public void setAdmin(Boolean admin) {
+        this.admin = admin;
+    }
+    @Override
+    public String getItem() {
+        return item;
+    }
+    @Override
+    public void setItem(String item) {
+        this.item = item;
+    }
     @Override
     public String getCreator() {
         return creator;
@@ -29,7 +50,5 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     public void setType(String type) {
         this.type = type;
     }
-    String visibility;
-    String type;
     
 }

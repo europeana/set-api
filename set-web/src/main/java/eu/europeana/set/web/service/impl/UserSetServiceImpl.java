@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -23,16 +22,15 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -128,17 +126,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet getBookmarksFolder(Agent creator){
 	return getMongoPersistence().getBookmarksFolder(creator.getHttpUrl());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.europeana.set.web.service.UserSetService#buildIdentifierUrl(java.lang.
-     * String, java.lang.String)
-     */
-    public String buildIdentifierUrl(String id, String base) {
-	return getUserSetUtils().buildIdentifierUrl(id, base);
     }
 
     /*
@@ -431,7 +418,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int positionInt = validatePosition(position, existingUserSet.getItems());
 
 	// build new item URL
-	String newItem = buildIdentifierUrl(datasetId + "/" + localId, WebUserSetFields.BASE_ITEM_URL);
+	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 
 	// check if item already exists in the Set, if so remove it
 	// insert item to Set in the indicated position (or last position if no position
@@ -811,7 +798,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if(userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
 	    return false;
 	}
-	String userId = buildCreatorUri((String) authentication.getPrincipal());
+	String userId = UserSetUtils.buildCreatorUri((String) authentication.getPrincipal());
 	return userSet.getCreator().getHttpUrl().equals(userId);
     }
 
@@ -823,12 +810,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     @Override
     public String getUserId(Authentication authentication) {
-	return buildCreatorUri((String) authentication.getPrincipal());
-    }
-
-    @Override
-    public String buildCreatorUri(String userId) {
-	return WebFields.DEFAULT_CREATOR_URL + userId;
+	return UserSetUtils.buildCreatorUri((String) authentication.getPrincipal());
     }
 
     /**

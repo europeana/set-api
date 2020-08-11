@@ -80,15 +80,6 @@ public interface UserSetService {
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
 
     /**
-     * This method forms an identifier URL
-     *
-     * @param id   The sequential ID
-     * @param base The base URL
-     * @return identifier URL
-     */
-    public String buildIdentifierUrl(String id, String base);
-
-    /**
      * This method computes pagination values for user set
      *
      * @param userSet
@@ -203,8 +194,6 @@ public interface UserSetService {
 	 * @throws HttpException
 	 */
 	UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
-
-	String buildCreatorUri(String userId);
 
 	/**
 	 * This method retrieves user id from authentication object
