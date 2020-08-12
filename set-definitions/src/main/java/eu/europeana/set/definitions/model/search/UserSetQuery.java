@@ -20,8 +20,12 @@ public interface UserSetQuery extends Query{
 
     String getItem();
 
-    void setAdmin(Boolean admin);
+    void setAdmin(boolean admin);
 
-    Boolean isAdmin();
+    boolean isAdmin();
+
+    void setUser(String user);
+
+    String getUser();
     
 }

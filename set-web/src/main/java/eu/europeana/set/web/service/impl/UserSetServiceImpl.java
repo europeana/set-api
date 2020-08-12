@@ -647,7 +647,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     @Override
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile) {
+    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile, Authentication authentication) {
+	//add user information for visibility filtering criteria
+	searchQuery.setAdmin(hasAdminRights(authentication));
+	searchQuery.setUser(getUserId(authentication));
+	
 	return  getMongoPersistance().find(searchQuery);
 }
     @Override

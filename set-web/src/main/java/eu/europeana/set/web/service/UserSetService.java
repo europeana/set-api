@@ -177,9 +177,10 @@ public interface UserSetService {
 	 * search user sets using the given query and profile 
 	 * @param searchQuery
 	 * @param profile
+	 * @param authentication 
 	 * @return 
 	 */
-	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
+	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile, Authentication authentication);
 
 	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;

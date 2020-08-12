@@ -69,7 +69,7 @@ public class SearchUserSetRest extends BaseRest {
 
             UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
-            ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile);
+            ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile, authentication);
             
             @SuppressWarnings("rawtypes")
             BaseUserSetResultPage resultsPage;
