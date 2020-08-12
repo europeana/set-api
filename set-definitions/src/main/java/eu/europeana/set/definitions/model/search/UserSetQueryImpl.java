@@ -7,15 +7,24 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     String creator;
     String visibility;
     String type;
-    Boolean admin;
+    boolean admin;
     String item;
+    String user;
     
     @Override
-    public Boolean isAdmin() {
+    public String getUser() {
+        return user;
+    }
+    @Override
+    public void setUser(String user) {
+        this.user = user;
+    }
+    @Override
+    public boolean isAdmin() {
         return admin;
     }
     @Override
-    public void setAdmin(Boolean admin) {
+    public void setAdmin(boolean admin) {
         this.admin = admin;
     }
     @Override

@@ -1,5 +1,6 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -9,6 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainerImpl;
+import org.mongodb.morphia.query.FieldEnd;
 import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
@@ -22,6 +26,7 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
@@ -43,6 +48,9 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	private static final String FIELD_IDENTIFIER = WebUserSetModelFields.IDENTIFIER;
 	private static final String FIELD_TYPE       = WebUserSetModelFields.TYPE;
 	private static final String FIELD_CREATOR    = WebUserSetModelFields.CREATOR + ".httpUrl";
+	
+	List<String> publicPublishedList = Arrays.asList(new String[]{
+		VisibilityTypes.PUBLIC.getJsonValue(), VisibilityTypes.PUBLISHED.getJsonValue()});  
 	
 	@Resource
 	private UserSetConfiguration configuration;
@@ -118,17 +126,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@Override
 	public UserSet store(UserSet userSet) {
-		
-		PersistentUserSet persistentObject = null;
-		
-		if (userSet instanceof PersistentUserSet) {
-			persistentObject = (PersistentUserSetImpl) userSet;
-		}else {
-    	    throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);			
-		}
-		
-		validatePersistentUserSet(persistentObject);
-		return this.store(persistentObject);
+
+	    PersistentUserSet persistentObject = null;
+
+	    if (userSet instanceof PersistentUserSet) {
+		persistentObject = (PersistentUserSetImpl) userSet;
+	    } else {
+		throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);
+	    }
+
+	    validatePersistentUserSet(persistentObject);
+	    return this.store(persistentObject);
 	}
 
 	protected PersistentUserSetDao<PersistentUserSet, String> getUserSetDao() {
@@ -166,6 +174,32 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	private Query<PersistentUserSet> buildMongoQuery(UserSetQuery query) {
+	    
+	    Query<PersistentUserSet> searchQuery = buildUserConditionsQuery(query);
+	    if (query.isAdmin()) {
+		//admin can see all
+		return searchQuery;
+	    }
+	    
+//	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions) 
+	    if(query.getVisibility() == null) {
+		//all public, published, and user's private
+//		searchQuery.filter(WebUserSetModelFields.VISIBILITY+" in", publicPublishedList);
+		
+		Criteria publicCriterion= searchQuery.criteria(WebUserSetModelFields.VISIBILITY).in(publicPublishedList);
+		Criteria ownerCriterion= searchQuery.criteria(FIELD_CREATOR).equal(query.getUser());
+		searchQuery.and(
+			searchQuery.or(publicCriterion, ownerCriterion));
+		
+	    } else if (VisibilityTypes.PRIVATE.getJsonValue().equals(query.getVisibility())) {
+		//private only, user can see only his private sets
+		searchQuery.filter(FIELD_CREATOR, query.getUser());
+	    } 
+	    
+	    return searchQuery;
+	}
+
+	private Query<PersistentUserSet> buildUserConditionsQuery(UserSetQuery query) {
 	    Query<PersistentUserSet> mongoQuery = getUserSetDao().createQuery();
 	    mongoQuery.disableValidation();
 	    
