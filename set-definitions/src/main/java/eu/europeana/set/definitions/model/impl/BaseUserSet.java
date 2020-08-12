@@ -93,7 +93,7 @@ public class BaseUserSet implements UserSet {
 	private String identifier;
 
 	// web context
-	private String context;
+//	private String context;
 
 	// Contains query URI to items
 	private String isDefinedBy;
@@ -106,13 +106,13 @@ public class BaseUserSet implements UserSet {
 		this.identifier = sequenceIdentifier;
 	}
 	
-	public String getContext() {
-		return context;
-	}
-	
-	public void setContext(String context) {
-		this.context = context;
-	}	
+//	public String getContext() {
+//		return context;
+//	}
+//	
+//	public void setContext(String context) {
+//		this.context = context;
+//	}	
 	
 	/* (non-Javadoc)
 	 * @see eu.europeana.set.definitions.model.impl.UserSet#getType()

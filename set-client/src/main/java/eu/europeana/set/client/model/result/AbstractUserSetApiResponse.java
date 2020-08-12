@@ -9,7 +9,6 @@ public abstract class AbstractUserSetApiResponse {
 	private String action;
 	private String success;
 	private String error;
-	
 
 	public String getAction() {
 		return action;

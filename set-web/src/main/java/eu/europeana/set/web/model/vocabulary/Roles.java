@@ -1,11 +1,12 @@
 package eu.europeana.set.web.model.vocabulary;
 
 import eu.europeana.api.commons.definitions.vocabulary.Role;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
 
 public enum Roles implements Role {
 
-	ANONYMOUS(new String[]{Operations.RETRIEVE}), 
-	USER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}), 
+	ANONYMOUS(new String[]{Operations.RETRIEVE}),
+	USER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
 	EDITOR(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}), 
 	ADMIN(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, Operations.ADMIN_ALL});
 	
@@ -42,7 +43,7 @@ public enum Roles implements Role {
 	public static Role getRoleByName(String name) {
 	    Role userRole = null;
 	    for(Roles role : Roles.values()) {
-			if(role.name().toLowerCase().equals(name)) {
+			if(role.name().equalsIgnoreCase(name)) {
 			    userRole = role;
 			    break;
 			}

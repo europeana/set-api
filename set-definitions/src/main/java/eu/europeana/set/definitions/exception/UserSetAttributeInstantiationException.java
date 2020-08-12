@@ -7,18 +7,15 @@ package eu.europeana.set.definitions.exception;
  */
 public class UserSetAttributeInstantiationException extends RuntimeException{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6895963160368650224L;
-	public static final String BASE_MESSAGE = "Cannot instantiate user set attribute. ";
-	public static final String DEFAULT_MESSAGE = "Cannot instantiate user set attribute for type: ";
-	public static final String MESSAGE_UNKNOWN_TYPE = "Unknown/unsurported property. Cannot instantiate user set attribute for type: ";
+	private static final long serialVersionUID         = -6895963160368650224L;
+	public static final String BASE_MESSAGE            = "Cannot instantiate user set attribute. ";
+	public static final String DEFAULT_MESSAGE         = "Cannot instantiate user set attribute for type: ";
+	public static final String MESSAGE_UNKNOWN_TYPE    = "Unknown/unsurported property. Cannot instantiate user set attribute for type: ";
 	public static final String MESSAGE_UNKNOWN_KEYWORD = "Unknown/unsurported keyword. Cannot instantiate value of the user set attribute using the keyword: ";
-	public static final String MESSAGE_ID_NOT_URL = "ID value must be a valid URL";
+	public static final String MESSAGE_ID_NOT_URL      = "ID value must be a valid URL";
 	
-	String propertyName;
-	String propertyValue;
+	public final String propertyName;
+	public final String propertyValue;
 	
 	public UserSetAttributeInstantiationException(String propertyName){
 		this(propertyName, DEFAULT_MESSAGE);

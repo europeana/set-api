@@ -15,5 +15,17 @@ public interface UserSetQuery extends Query{
     void setCreator(String creator);
 
     String getCreator();
+
+    void setItem(String item);
+
+    String getItem();
+
+    void setAdmin(boolean admin);
+
+    boolean isAdmin();
+
+    void setUser(String user);
+
+    String getUser();
     
 }

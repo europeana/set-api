@@ -12,18 +12,16 @@ import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
  */
 public interface PersistentClient extends Client, NoSqlEntity {
 
-	public final static String FIELD_CLIENT_ID = "clientId";
-
 	/**
 	 * 
 	 * @return the generated mongo id
 	 */
-	public ObjectId getId();
+	ObjectId getId();
 	
 	/**
 	 * This method is necessary for the update
 	 * @param id
 	 */
-	public void setId(ObjectId id);
+	void setId(ObjectId id);
 
 }

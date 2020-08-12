@@ -10,6 +10,7 @@ public interface Client {
 	 * @deprecated EA-760 to be removed in follow up versions
 	 * @return
 	 */
+	@Deprecated
 	String getAuthenticationConfigJson();
 
 	/**

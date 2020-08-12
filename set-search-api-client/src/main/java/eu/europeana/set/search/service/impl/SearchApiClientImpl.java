@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,11 +25,14 @@ import eu.europeana.set.search.service.SearchApiResponse;
  */
 public class SearchApiClientImpl implements SearchApiClient {
 
-    private HttpConnection httpConnection = new HttpConnection();
+    private HttpConnection httpConnection;
 
     Logger logger = LogManager.getLogger(getClass().getName());
 
     public HttpConnection getHttpConnection() {
+	if(httpConnection == null) {
+	    httpConnection = new HttpConnection();
+	}
 	return httpConnection;
     }
 
@@ -36,26 +40,56 @@ public class SearchApiClientImpl implements SearchApiClient {
 	this.httpConnection = httpConnection;
     }
 
-    /**
-     * This method queries Europeana API by URI
-     * 
-     * @param apiKey
-     * @param action
-     * @param uri    The query URL from isDefinedBy field.
-     * @return response from Europeana API in JSON-LD format
-     * @throws IOException
-     * @throws JSONException
-     * @throws HttpException
-     */
-    public SearchApiResponse searchItems(String uri, String apiKey, String action)
-	    throws SearchApiClientException{
+    @Override
+    public SearchApiResponse searchItems(String uri, String apiKey, boolean descriptions) throws SearchApiClientException {
 
-	if (!uri.contains("wskey="))
-	    uri += ("&wskey=" + apiKey);
-	List<String> res = searchItems(uri);
-	SearchApiResponse searchApiResponse = new SearchApiResponse(apiKey, action);
-	searchApiResponse.setItems(res);
+	SearchApiResponse searchApiResponse = new SearchApiResponse(apiKey, null);
+	uri = appendApiKey(uri, apiKey);
+	JSONObject jo = searchItems(uri);
+	List<String> res;
+	if(isSuccessfull(jo)) {
+	    if(descriptions) {
+		res = extractItemDescriptions(jo);
+	    }else {
+		res = extractItemIds(jo);
+	    }
+	    int total = extractTotalResults(jo);
+	    searchApiResponse.setItems(res);
+	    searchApiResponse.setTotal(total);
+	}
+	
 	return searchApiResponse;
+    }
+
+    private boolean isSuccessfull(JSONObject jo){
+	String key_success = "success";
+	try {
+	    return jo.has(key_success) && jo.getBoolean(key_success);
+	} catch (JSONException e) {
+	    //actually it shouldn't happen
+	    return false;
+	}	
+    }
+
+    private int extractTotalResults(JSONObject jo) throws SearchApiClientException {
+	int total = -1;
+	String key = "totalResults";
+	try {
+	    if (jo.has(key)) {
+		total = jo.getInt(key);
+	    }
+	} catch (JSONException e) {
+	    throw new SearchApiClientException("Cannot extract total number of results!",
+		    e);
+	}
+	return total;
+    }
+
+    private String appendApiKey(String uri, String apiKey) {
+	if (!uri.contains("wskey=")) {
+	    uri += ("&wskey=" + apiKey);
+	}
+	return uri;
     }
 
     /**
@@ -65,20 +99,77 @@ public class SearchApiClientImpl implements SearchApiClient {
      * @return
      * @throws JSONException
      */
-    protected List<String> jsonArrayToStringArray(JSONArray valueObject) throws JSONException {
+    protected List<String> extractItemIds(JSONObject jo) throws SearchApiClientException {
+	try {
+	    JSONArray itemsArray = jo.getJSONArray(WebUserSetFields.ITEMS);
+	    return extractItemsFromSearchResponse(itemsArray, WebUserSetFields.ID);
+	} catch (JSONException e) {
+	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(),
+		    e);
+	}
+
+    }
+
+    /**
+     * Get list of IDs from JSONArray
+     * 
+     * @param valueObject
+     * @return
+     * @throws JSONException
+     */
+    protected List<String> extractItemDescriptions(JSONObject jo) throws SearchApiClientException {
+	List<String> list = new ArrayList<String>();
+	if (jo == null) {
+	    return list;
+	}
+
+	try {
+	    JSONArray itemsArray = jo.getJSONArray(WebUserSetFields.ITEMS);
+	    for (int i = 0; i < itemsArray.length(); i++) {
+		JSONObject itemAsJson = itemsArray.getJSONObject(i);
+		list.add(itemAsJson.toString(4));
+	    }
+	    return list;
+
+	} catch (JSONException e) {
+	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(),
+		    e);
+	}
+    }
+
+    /**
+     * Get list of values specified by field name from JSONArray
+     * 
+     * @param valueObject
+     * @return list of values
+     * @throws JSONException
+     * @throws SearchApiClientException
+     */
+    protected List<String> extractItemsFromSearchResponse(JSONArray valueObject, String fieldName)
+	    throws SearchApiClientException {
+
 	List<String> list = new ArrayList<String>();
 	if (valueObject == null) {
 	    return list;
 	}
-	for (int i = 0; i < valueObject.length(); i++) {
-	    JSONObject guidJson = valueObject.getJSONObject(i);
-	    String id = guidJson.getString(WebUserSetFields.ID);
-	    list.add(id);
+      
+	try {
+	    for (int i = 0; i < valueObject.length(); i++) {
+		JSONObject guidJson = valueObject.getJSONObject(i);
+		String value = guidJson.getString(fieldName);
+		if (!list.contains(value))
+		    list.add(value);
+	    }
+	    return list;
+	} catch (JSONException e) {
+	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(),
+		    e);
+
 	}
-	return list;
+
     }
 
-    public List<String> searchItems(String uri) throws SearchApiClientException {
+    JSONObject searchItems(String uri) throws SearchApiClientException {
 	String jsonResponse;
 	try {
 	    jsonResponse = getHttpConnection().getURLContent(uri);
@@ -86,10 +177,7 @@ public class SearchApiClientImpl implements SearchApiClient {
 		// HTTP Error Code
 		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY, null);
 	    }
-	    JSONObject jo = new JSONObject(jsonResponse);
-	    JSONArray itemsArray = jo.getJSONArray(WebUserSetFields.ITEMS);
-	    return jsonArrayToStringArray(itemsArray);
-	    
+	    return new JSONObject(jsonResponse);
 	} catch (IOException e) {
 	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
 	} catch (JSONException e) {
@@ -100,4 +188,16 @@ public class SearchApiClientImpl implements SearchApiClient {
 		    e);
 	}
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * eu.europeana.set.search.service.SearchApiClient#searchItemDescriptions(java.
+     * lang.String, java.lang.String)
+     */
+    public SearchApiResponse searchItemDescriptions(String uri, String apiKey) throws SearchApiClientException {
+	return searchItems(uri, apiKey, true);
+    }
+
 }

@@ -11,18 +11,23 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 public class BaseApiConnection {
 
+	Logger logger = LogManager.getLogger(getClass().getName());
+
+	private static final String URL_RESPONSE        = " . Returns body, headers and status code.";
+	private static final String DELETE_URL_RESPONSE = ". Returns headers and status code.";
+	private static final String API_ADMIN_KEY       = "apiadmin";
+
 	private String apiKey;
 	private String setServiceUri = "";
 	private HttpConnection httpConnection = new HttpConnection();
 
-	Logger logger = LogManager.getLogger(getClass().getName());
 
 	public String getApiKey() {
 		return apiKey;
 	}
 
 	public String getAdminApiKey() {
-		return "apiadmin";
+		return API_ADMIN_KEY;
 	}
 	
 	public void setApiKey(String apiKey) {
@@ -75,24 +80,22 @@ public class BaseApiConnection {
 		this.apiKey = apiKey;
 		this.setServiceUri = setServiceUri;
 	}
-
 	
 	String getJSONResult(String url) throws IOException {
-		logger.trace("Call to UserSet API (GET): " + url);
+		logger.trace("Call to UserSet API (GET): {} ", url);
 		return getHttpConnection().getURLContent(url);
 	}
 	
 	String getJSONResult(String url, String paramName, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST): " + url);
+		logger.trace("Call to UserSet API (POST): {} ", url);
 		return getHttpConnection().getURLContent(url, paramName, jsonPost);
 	}
 	
 	String getJSONResultWithBody(String url, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: " + url);
+		logger.trace("Call to UserSet API (POST) with body: {} ", url);
 		return getHttpConnection().getURLContentWithBody(url, jsonPost);
 	}
-	
-	
+
 	/**
 	 * This method makes POST request for given URL and JSON body parameter that returns
 	 * response body, response headers and status code.
@@ -102,32 +105,24 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	ResponseEntity<String> postURL(String url, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: " + url + 
-				". Returns body, headers and status code.");
-		//System.out.println("post: " + url);
+		logger.trace("Call to UserSet API (POST) with body: {} {}", url , URL_RESPONSE);
 		return getHttpConnection().postURL(url, jsonPost);
 	}
-	
-	
+
 	/**
 	 * This method makes PUT request for given URL and JSON body parameter that returns
 	 * response body, response headers and status code.
 	 * @param url
-	 * @param jsonPost
+	 * @param jsonPut
 	 * @return The response body, response headers and status code.
 	 * @throws IOException
 	 */
 	ResponseEntity<String> putURL(String url, String jsonPut) throws IOException {
-		logger.trace("Call to UserSet API (PUT) with body: " + url + 
-				". Returns body, headers and status code.");
-		
+		logger.trace("Call to UserSet API (PUT) with body: {} {} ", url, URL_RESPONSE);
 		ResponseEntity<String> response = getHttpConnection().putURL(url, jsonPut);
-		
 		response.getStatusCode();
-		
 		return response;
 	}
-	
 
 	/**
 	 * This method makes GET request for given URL and returns
@@ -137,12 +132,10 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> getURL(String url) throws IOException {
-		logger.trace("Call to UserSet API (GET): " + url + 
-				". Returns body, headers and status code.");
+		logger.trace("Call to UserSet API (GET): {} {}", url, URL_RESPONSE);
 		return getHttpConnection().getURL(url);
 	}
-	
-	
+
 	/**
 	 * This method makes DELETE request for given URL that returns
 	 * response headers and status code.
@@ -151,8 +144,7 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	ResponseEntity<String> deleteURL(String url) throws IOException {
-		logger.trace("Call to UserSet API (DELETE): " + url + 
-				". Returns headers and status code.");
+		logger.trace("Call to UserSet API (DELETE): {} {} ", url, DELETE_URL_RESPONSE);
 		return getHttpConnection().deleteURL(url);
 	}
 	

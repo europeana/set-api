@@ -33,8 +33,7 @@ public class ItemInsertViewAdapter implements ItemInsertView {
 	@Override
 	public String getModified() {
 		DateFormat df = new SimpleDateFormat(WebUserSetFields.SET_DATE_FORMAT);
-		String resDate = df.format(userSet.getModified());		
-		return resDate;
+		return df.format(userSet.getModified());
 	}
 
 }

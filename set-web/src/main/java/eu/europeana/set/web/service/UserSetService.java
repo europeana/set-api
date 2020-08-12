@@ -1,11 +1,5 @@
 package eu.europeana.set.web.service;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.codehaus.jettison.json.JSONException;
-import org.springframework.security.core.Authentication;
-
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -17,82 +11,90 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.search.BaseUserSetResultPage;
+import org.codehaus.jettison.json.JSONException;
+import org.springframework.security.core.Authentication;
+
+import java.io.IOException;
+import java.util.List;
 
 public interface UserSetService {
 
-	/**
-	 * This method stores UserSet object in database and in Solr.
-	 * @param UserSet
-	 * @return UserSet object
-	 */
-	public UserSet storeUserSet(UserSet UserSet);
+    /**
+     * This method stores UserSet object in database and in Solr.
+     *
+     * @param userSet
+     * @return UserSet object
+     */
+    public UserSet storeUserSet(UserSet userSet);
 
     /**
      * This method converts close set to open set by updating respective items
-     * 
+     *
      * @param storedUserSet
-     * @param apiKey
-     * @param action
+     * @param sort
+     * @param sortOrder
+     * @param pageNr
+     * @param pageSize
+     * @param profile
      * @return updated set
      * @throws HttpException
      * @throws IOException
      * @throws JSONException
      */
-    public UserSet fetchDynamicSetItems(UserSet storedUserSet, String apiKey,
-    		String sort, String sortOrder, int pageNr, int pageSize)
+    public UserSet fetchItems(UserSet storedUserSet,
+    		String sort, String sortOrder, int pageNr, int pageSize, LdProfiles profile)
     	    throws HttpException, IOException, JSONException;
     
     /**
      * This method converts open set to close set by updating respective items
+     *
      * @param storedUserSet
      * @param items
      * @return updated set
      */
     public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items);
-    
-	/**
-	 * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
-	 * @param persistentUserSet
-	 * @param webUserSet
-	 * @return
-	 */
-	public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
-	
-	/**
-	 * This method updates user set pagination values. 
-	 * @param newUserSet
-	 * @return user set with updated pagination values
-	 */
-	public void updateUserSetPagination(UserSet newUserSet);		
-	
-	/**
-	 * This method returns UserSet object for given user set identifier.
-	 * @param
-	 * @return UserSet object
-	 */
-	public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException; 
-		
-	/**
-	 * This method forms an identifier URL
-	 * @param id The sequential ID
-	 * @param base The base URL
-	 * @return identifier URL
-	 */
-	public String buildIdentifierUrl(String id, String base);
-	
+
+    /**
+     * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
+     *
+     * @param persistentUserSet
+     * @param webUserSet
+     * @return
+     */
+    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
+
+    /**
+     * This method updates user set pagination values.
+     *
+     * @param newUserSet
+     * @return user set with updated pagination values
+     */
+    public void updateUserSetPagination(UserSet newUserSet);
+
+    /**
+     * This method returns UserSet object for given user set identifier.
+     *
+     * @param
+     * @return UserSet object
+     */
+    public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
+
     /**
      * This method computes pagination values for user set
+     *
      * @param userSet
      * @return enriched user set
      */
     public UserSet fillPagination(UserSet userSet);
-	
+
     /**
      * This method computes pagination values for user set without update of identifier
+     *
      * @param userSet
      * @return enriched user set
      */
     public UserSet updatePagination(UserSet userSet);
+
 	
 	/**
 	 * This methods converts user set object from JsonLd string format to a UserSet object
@@ -175,12 +177,13 @@ public interface UserSetService {
 	 * search user sets using the given query and profile 
 	 * @param searchQuery
 	 * @param profile
+	 * @param authentication 
 	 * @return 
 	 */
-	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile);
+	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile, Authentication authentication);
 
 	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication);
+		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
 
 	/**
 	 * This method validates input values wsKey, identifier and userToken.
@@ -193,8 +196,6 @@ public interface UserSetService {
 	 */
 	UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
 
-	String buildCreatorUri(String userId);
-
 	/**
 	 * This method retrieves user id from authentication object
 	 * 
@@ -202,5 +203,14 @@ public interface UserSetService {
 	 * @return the user id
 	 */
 	String getUserId(Authentication authentication);
+	
+	/**
+	 * This methods applies Linked Data profile to a user set
+	 * 
+	 * @param userSet The given user set
+	 * @param profile Provided Linked Data profile
+	 * @return profiled user set value
+	 */
+	UserSet applyProfile(UserSet userSet, LdProfiles profile);
 
 }

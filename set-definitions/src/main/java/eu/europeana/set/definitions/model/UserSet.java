@@ -88,9 +88,9 @@ public interface UserSet {
 	
 	public void setIdentifier(String sequenceIdentifier);
 	
-	public String getContext();
-	
-	public void setContext(String context);
+//	public String getContext();
+//	
+//	public void setContext(String context);
 	
 	/**
 	 * @return Holds a search request to the User Set API (complete URL pointing to production). 

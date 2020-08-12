@@ -5,6 +5,7 @@
 package eu.europeana.set.search.connection;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
@@ -21,10 +22,9 @@ public class HttpConnection {
 
     private static final int CONNECTION_RETRIES = 3;
     private static final int TIMEOUT_CONNECTION = 40000;
-    private static final int STATUS_OK_START = 200;
-    private static final int STATUS_OK_END = 299;
-    private static final String ENCODING = "UTF-8";
-    private HttpClient httpClient = null;
+    private static final int STATUS_OK_START    = 200;
+    private static final int STATUS_OK_END      = 299;
+    private HttpClient httpClient               = null;
 
     public String getURLContent(String url) throws IOException {
         HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
@@ -36,8 +36,7 @@ public class HttpConnection {
 
             if (get.getStatusCode() >= STATUS_OK_START && get.getStatusCode() <= STATUS_OK_END) {
                 byte[] byteResponse = get.getResponseBody();
-                String res = new String(byteResponse, ENCODING);
-                return res;
+                return new String(byteResponse, StandardCharsets.UTF_8);
             } else {
                 return null;
             }

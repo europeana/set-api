@@ -7,9 +7,6 @@ package eu.europeana.set.definitions.exception;
  */
 public class UserSetInstantiationException extends RuntimeException{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6895963160368650224L;
 	public static final String DEFAULT_MESSAGE = "Cannot instantiate user set attribute: ";
 	

@@ -10,7 +10,7 @@ import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
  */
 public enum LdProfiles implements ProfileKeyword {
 
-	MINIMAL(VALUE_LD_MINIMAL, VALUE_PREFER_MINIMAL), STANDARD(VALUE_LD_CONTAINEDIRIS, VALUE_PREFER_CONTAINEDIRIS);
+	MINIMAL(VALUE_LD_MINIMAL, VALUE_PREFER_MINIMAL), STANDARD(VALUE_LD_CONTAINEDIRIS, VALUE_PREFER_CONTAINEDIRIS), ITEMDESCRIPTIONS(VALUE_LD_ITEM_DESCRIPTIONS, VALUE_PREFER_ITEM_DESCRIPTIONS);
 	
 	private String headerValue;
 	private String preferHeaderValue;
@@ -24,7 +24,7 @@ public enum LdProfiles implements ProfileKeyword {
 	/**
 	 * Identifying requested profile by Linked Data value.
 	 * For user friendliness the the comparison is case insensitive  
-	 * @param ldValue
+	 * @param headerValue
 	 * @return
 	 * @throws UserSetProfileValidationException 
 	 */
@@ -47,7 +47,7 @@ public enum LdProfiles implements ProfileKeyword {
 	public static LdProfiles getByName(String name) throws UserSetProfileValidationException{
 		
 		for(LdProfiles ldType : LdProfiles.values()){
-			if(name.equals(ldType.name().toLowerCase())) {
+			if(name.equalsIgnoreCase(ldType.name())) {
 				return ldType;
 			}
 		}

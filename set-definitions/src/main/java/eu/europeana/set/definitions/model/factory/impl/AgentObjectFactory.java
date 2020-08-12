@@ -15,7 +15,7 @@ public class AgentObjectFactory extends
 
 	// force singleton usage
 	private AgentObjectFactory() {
-	};
+	}
 
 	public static synchronized AgentObjectFactory getInstance() {
 

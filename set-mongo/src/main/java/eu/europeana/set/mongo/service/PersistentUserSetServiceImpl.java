@@ -1,5 +1,6 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -9,6 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainerImpl;
+import org.mongodb.morphia.query.FieldEnd;
 import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
@@ -22,6 +26,7 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
@@ -37,9 +42,15 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<PersistentUserSet, String>
 		implements PersistentUserSetService {
 
-	private static final String NOT_PERSISTENT_OBJECT = "User set object in not an instance of persistent user set.";
-
 	protected final Logger logger = LogManager.getLogger(this.getClass());
+
+	private static final String NOT_PERSISTENT_OBJECT = "User set object in not an instance of persistent user set.";
+	private static final String FIELD_IDENTIFIER = WebUserSetModelFields.IDENTIFIER;
+	private static final String FIELD_TYPE       = WebUserSetModelFields.TYPE;
+	private static final String FIELD_CREATOR    = WebUserSetModelFields.CREATOR + ".httpUrl";
+	
+	List<String> publicPublishedList = Arrays.asList(new String[]{
+		VisibilityTypes.PUBLIC.getJsonValue(), VisibilityTypes.PUBLISHED.getJsonValue()});  
 	
 	@Resource
 	private UserSetConfiguration configuration;
@@ -88,7 +99,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	public PersistentUserSet getByIdentifier(String identifier) {
 		Query<PersistentUserSet> query = getUserSetDao().createQuery();
-		query.filter(PersistentUserSet.FIELD_IDENTIFIER, identifier);
+		query.filter(FIELD_IDENTIFIER, identifier);
 
 		return getUserSetDao().findOne(query);
 	}
@@ -98,8 +109,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	public PersistentUserSet getBookmarksFolder(String creatorId) {
 	    Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
-	    query.filter(PersistentUserSet.FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
-	    query.filter(PersistentUserSet.FIELD_CREATOR, creatorId);
+	    query.filter(FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
+	    query.filter(FIELD_CREATOR, creatorId);
 
 	    return getUserSetDao().findOne(query);
 	}
@@ -115,17 +126,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@Override
 	public UserSet store(UserSet userSet) {
-		
-		PersistentUserSet persistentObject = null;
-		
-		if (userSet instanceof PersistentUserSet) {
-			persistentObject = (PersistentUserSetImpl) userSet;
-		}else {
-    	    throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);			
-		}
-		
-		validatePersistentUserSet(persistentObject);
-		return this.store(persistentObject);
+
+	    PersistentUserSet persistentObject = null;
+
+	    if (userSet instanceof PersistentUserSet) {
+		persistentObject = (PersistentUserSetImpl) userSet;
+	    } else {
+		throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);
+	    }
+
+	    validatePersistentUserSet(persistentObject);
+	    return this.store(persistentObject);
 	}
 
 	protected PersistentUserSetDao<PersistentUserSet, String> getUserSetDao() {
@@ -163,6 +174,32 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	private Query<PersistentUserSet> buildMongoQuery(UserSetQuery query) {
+	    
+	    Query<PersistentUserSet> searchQuery = buildUserConditionsQuery(query);
+	    if (query.isAdmin()) {
+		//admin can see all
+		return searchQuery;
+	    }
+	    
+//	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions) 
+	    if(query.getVisibility() == null) {
+		//all public, published, and user's private
+//		searchQuery.filter(WebUserSetModelFields.VISIBILITY+" in", publicPublishedList);
+		
+		Criteria publicCriterion= searchQuery.criteria(WebUserSetModelFields.VISIBILITY).in(publicPublishedList);
+		Criteria ownerCriterion= searchQuery.criteria(FIELD_CREATOR).equal(query.getUser());
+		searchQuery.and(
+			searchQuery.or(publicCriterion, ownerCriterion));
+		
+	    } else if (VisibilityTypes.PRIVATE.getJsonValue().equals(query.getVisibility())) {
+		//private only, user can see only his private sets
+		searchQuery.filter(FIELD_CREATOR, query.getUser());
+	    } 
+	    
+	    return searchQuery;
+	}
+
+	private Query<PersistentUserSet> buildUserConditionsQuery(UserSetQuery query) {
 	    Query<PersistentUserSet> mongoQuery = getUserSetDao().createQuery();
 	    mongoQuery.disableValidation();
 	    
@@ -178,6 +215,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    
 	    if(query.getCreator() != null) {
 		mongoQuery.filter("creator.httpUrl", query.getCreator());
+	    }
+	    
+	    if(query.getItem() != null) {
+		mongoQuery.filter(WebUserSetModelFields.ITEMS + " in", query.getItem());
 	    }
 	    
 	    if(query.getSortCriteria() == null) {
@@ -200,7 +241,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    }
 	    return mongoQuery;
 	}
-	
+
 	@Override
 	public void remove(String id) {
 		PersistentUserSet userSet = getByIdentifier(id);
@@ -214,7 +255,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@Override
 	@Deprecated
 	//TODO: use store instead
-	public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException {
+	public PersistentUserSet update(PersistentUserSet userSet) throws  UserSetValidationException {
 		return store(userSet);
 	}
 
