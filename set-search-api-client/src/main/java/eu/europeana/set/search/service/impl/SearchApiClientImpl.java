@@ -25,21 +25,13 @@ import eu.europeana.set.search.service.SearchApiResponse;
  */
 public class SearchApiClientImpl implements SearchApiClient {
 
-    private HttpConnection httpConnection;
-
     Logger logger = LogManager.getLogger(getClass().getName());
 
-    public HttpConnection getHttpConnection() {
-	if(httpConnection == null) {
-	    httpConnection = new HttpConnection();
-	}
-	return httpConnection;
+    public HttpConnection createHttpConnection() {
+	return new HttpConnection();
     }
 
-    public void setHttpConnection(HttpConnection httpConnection) {
-	this.httpConnection = httpConnection;
-    }
-
+   
     @Override
     public SearchApiResponse searchItems(String uri, String apiKey, boolean descriptions) throws SearchApiClientException {
 
@@ -172,7 +164,7 @@ public class SearchApiClientImpl implements SearchApiClient {
     JSONObject searchItems(String uri) throws SearchApiClientException {
 	String jsonResponse;
 	try {
-	    jsonResponse = getHttpConnection().getURLContent(uri);
+	    jsonResponse = createHttpConnection().getURLContent(uri);
 	    if (jsonResponse == null) {
 		// HTTP Error Code
 		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY, null);
