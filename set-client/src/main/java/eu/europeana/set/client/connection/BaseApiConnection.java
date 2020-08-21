@@ -110,6 +110,24 @@ public class BaseApiConnection {
 	}
 
 	/**
+	 * This method makes POST request for given URL, header and JSON body parameter that returns
+	 * response body, response headers and status code.
+	 * @param url
+	 * @param jsonPost
+         * @param requestHeaderName
+         * @param requestHeaderValue
+	 * @return The response body, response headers and status code.
+	 * @throws IOException
+	 */
+	ResponseEntity<String> postURL(String url, String jsonPost, String headerName, String headerValue) throws IOException {
+		logger.trace("Call to UserSet API (POST) with body: " + url + 
+				". Returns body, headers and status code.");
+		return getHttpConnection().postURL(url, jsonPost, headerName, headerValue);
+	}
+	
+	
+	
+	/**
 	 * This method makes PUT request for given URL and JSON body parameter that returns
 	 * response body, response headers and status code.
 	 * @param url
@@ -125,6 +143,27 @@ public class BaseApiConnection {
 	}
 
 	/**
+	 * This method makes PUT request for given URL and JSON body parameter that returns
+	 * response body, response headers and status code.
+	 * @param url
+	 * @param jsonPut
+	 * @param headerName
+	 * @param headerValue
+	 * @return The response body, response headers and status code.
+	 * @throws IOException
+	 */
+	ResponseEntity<String> putURL(String url, String jsonPut, String headerName, String headerValue) throws IOException {
+		logger.trace("Call to UserSet API (PUT) with body: " + url + 
+				". Returns body, headers and status code.");
+		
+		ResponseEntity<String> response = getHttpConnection().putURL(url, jsonPut, headerName, headerValue);
+		
+		response.getStatusCode();
+		
+		return response;
+	}
+	
+	/**
 	 * This method makes GET request for given URL and returns
 	 * response body, response headers and status code.
 	 * @param url
@@ -137,6 +176,22 @@ public class BaseApiConnection {
 	}
 
 	/**
+	 * This method makes GET request for given URL and returns
+	 * response body, response headers and status code.
+	 * @param url
+	 * @param headerName
+	 * @param headerValue
+	 * @return The response body, response headers and status code.
+	 * @throws IOException
+	 */
+	public ResponseEntity<String> getURL(String url, String headerName, String headerValue) throws IOException {
+		logger.trace("Call to UserSet API (GET): " + url + 
+				". Returns body, headers and status code.");
+		return getHttpConnection().getURL(url, headerName, headerValue);
+	}
+	
+	
+	/**
 	 * This method makes DELETE request for given URL that returns
 	 * response headers and status code.
 	 * @param url
@@ -148,4 +203,19 @@ public class BaseApiConnection {
 		return getHttpConnection().deleteURL(url);
 	}
 	
+	/**
+	 * This method makes DELETE request for given URL that returns
+	 * response headers and status code.
+	 * @param url
+	 * @param headerName
+	 * @param headerValue
+	 * @return The response headers and status code.
+	 * @throws IOException
+	 */
+	ResponseEntity<String> deleteURL(String url, String headerName, String headerValue) throws IOException {
+		logger.trace("Call to UserSet API (DELETE): " + url + 
+				". Returns headers and status code.");
+		return getHttpConnection().deleteURL(url, headerName, headerValue);
+	}
+		
 }

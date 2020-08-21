@@ -10,11 +10,11 @@ import eu.europeana.set.client.exception.TechnicalRuntimeException;
 public class WebUserSetApiImpl extends BaseUserSetApi implements WebUserSetApi {
 
 	@Override
-	public ResponseEntity<String> createUserSet(String wskey, String set) {
+	public ResponseEntity<String> createUserSet(String set, String profile) {
 
 		ResponseEntity<String> res;
 		try {
-			res = apiConnection.createUserSet(wskey, set);
+			res = apiConnection.createUserSet(set, profile);
 		} catch (IOException e) {
 			throw new TechnicalRuntimeException(
 					"Exception occured when invoking the UserSetJsonApi createUserSet method", e);
@@ -24,10 +24,10 @@ public class WebUserSetApiImpl extends BaseUserSetApi implements WebUserSetApi {
 	}
 	
 	@Override
-	public ResponseEntity<String> deleteUserSet(String wskey, String identifier) {
+	public ResponseEntity<String> deleteUserSet(String identifier) {
 		ResponseEntity<String> res;
 		try {
-			res = apiConnection.deleteUserSet(wskey, identifier);
+			res = apiConnection.deleteUserSet(identifier);
 		} catch (IOException e) {
 			throw new TechnicalRuntimeException(
 					"Exception occured when invoking the UserSetJsonApi deleteUserSet method", e);
@@ -37,11 +37,11 @@ public class WebUserSetApiImpl extends BaseUserSetApi implements WebUserSetApi {
 	}
 
 	@Override
-	public ResponseEntity<String> getUserSet(String wskey, String identifier) {
+	public ResponseEntity<String> getUserSet(String identifier, String profile) {
 
 		ResponseEntity<String> res;
 		try {
-			res = apiConnection.getUserSet(wskey, identifier);
+			res = apiConnection.getUserSet(identifier, profile);
 		} catch (IOException e) {
 			throw new TechnicalRuntimeException(
 					"Exception occured when invoking the UserSetJsonApi getUserSet method", e);
@@ -51,10 +51,10 @@ public class WebUserSetApiImpl extends BaseUserSetApi implements WebUserSetApi {
 	}
 
 	@Override
-	public ResponseEntity<String> updateUserSet(String wskey, String identifier, String set) {
+	public ResponseEntity<String> updateUserSet(String identifier, String set, String profile) {
 		ResponseEntity<String> res;
 		try {
-			res = apiConnection.updateUserSet(wskey, identifier, set);
+			res = apiConnection.updateUserSet(identifier, set, profile);
 		} catch (IOException e) {
 			throw new TechnicalRuntimeException(
 					"Exception occured when invoking the UserSetJsonApi updateUserSet method", e);
