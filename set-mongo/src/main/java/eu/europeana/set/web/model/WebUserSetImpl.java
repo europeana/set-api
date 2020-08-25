@@ -85,7 +85,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonProperty(WebUserSetModelFields.TOTAL)
-    @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
+    @JsonInclude(value = JsonInclude.Include.ALWAYS)
     public int getTotal() {
 	return super.getTotal();
     }
