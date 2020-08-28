@@ -4,8 +4,6 @@ import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,12 +11,19 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonParseException;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.definitions.WebFields;
@@ -26,6 +31,7 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
@@ -119,7 +125,8 @@ public class WebUserSetRest extends BaseRest {
 			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
 	    }
 
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
+	    UserSet resUserSet = setTotalField(profile, storedUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
 
 	    String etag = generateETag(storedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -200,7 +207,8 @@ public class WebUserSetRest extends BaseRest {
 		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, pageSize, profile);
 	    }
 
-	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
+	    UserSet resUserSet = setTotalField(profile, userSet);
+	    String userSetJsonLdStr = serializeUserSet(profile, resUserSet);
 
 	    String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -315,7 +323,8 @@ public class WebUserSetRest extends BaseRest {
 			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
 	    }
 
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+	    UserSet resUserSet = setTotalField(profile, updatedUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
 
 	    // TODO: refactor to use a build response method
 	    // generate “ETag”;
@@ -457,7 +466,8 @@ public class WebUserSetRest extends BaseRest {
 	    checkIfMatchHeader(eTagOrigin, request);
 
 	    UserSet updatedUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+	    UserSet resUserSet = setTotalField(profile, updatedUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
 
 	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -624,7 +634,8 @@ public class WebUserSetRest extends BaseRest {
 		    null);
 
 	    // serialize to JsonLd
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+	    UserSet resUserSet = setTotalField(profile, updatedUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
 	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	    // respond with HTTP 200 containing the updated Set description as body.
