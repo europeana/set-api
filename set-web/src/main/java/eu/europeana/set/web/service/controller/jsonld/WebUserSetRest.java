@@ -125,8 +125,7 @@ public class WebUserSetRest extends BaseRest {
 			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
 	    }
 
-	    UserSet resUserSet = setTotalField(profile, storedUserSet);
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
 
 	    String etag = generateETag(storedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -207,8 +206,7 @@ public class WebUserSetRest extends BaseRest {
 		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, pageSize, profile);
 	    }
 
-	    UserSet resUserSet = setTotalField(profile, userSet);
-	    String userSetJsonLdStr = serializeUserSet(profile, resUserSet);
+	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
 
 	    String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -323,8 +321,7 @@ public class WebUserSetRest extends BaseRest {
 			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
 	    }
 
-	    UserSet resUserSet = setTotalField(profile, updatedUserSet);
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 
 	    // TODO: refactor to use a build response method
 	    // generate “ETag”;
@@ -466,8 +463,7 @@ public class WebUserSetRest extends BaseRest {
 	    checkIfMatchHeader(eTagOrigin, request);
 
 	    UserSet updatedUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-	    UserSet resUserSet = setTotalField(profile, updatedUserSet);
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 
 	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -634,8 +630,7 @@ public class WebUserSetRest extends BaseRest {
 		    null);
 
 	    // serialize to JsonLd
-	    UserSet resUserSet = setTotalField(profile, updatedUserSet);
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, resUserSet);
+	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	    // respond with HTTP 200 containing the updated Set description as body.

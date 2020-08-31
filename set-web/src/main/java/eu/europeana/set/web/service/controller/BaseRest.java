@@ -200,17 +200,4 @@ public class BaseRest extends BaseRestController {
         return getConfiguration().getApiVersion();
     }
     
-    /**
-     * For the open sets with minimal profile we set the value to -1 so that the total will not be serialized
-     * @param profile
-     * @param userSet
-     * @return user set with updated total field
-     */
-    protected UserSet setTotalField(LdProfiles profile, UserSet userSet) {
-	if (userSet.isOpenSet() && LdProfiles.MINIMAL.equals(profile)) {
-	    userSet.setTotal(-1);
-	}
-	return userSet;	
-    }
-    
 }
