@@ -12,6 +12,9 @@ import java.io.IOException;
  */
 public class UserSetApiConnection extends BaseApiConnection {
 
+    String authorizationHeaderName = null;
+    String regularUserAuthorizationValue = null;
+
     /**
      * Create a new connection to the UserSet Service (REST API).
      *
@@ -19,31 +22,37 @@ public class UserSetApiConnection extends BaseApiConnection {
      */
     public UserSetApiConnection(String setServiceUri, String apiKey) {
         super(setServiceUri, apiKey);
+        initConfigurations();
     }
 
     public UserSetApiConnection() {
         this(ClientConfiguration.getInstance().getServiceUri(),
                 ClientConfiguration.getInstance().getApiKey());
+        initConfigurations();
     }
 
+    private void initConfigurations() {
+	authorizationHeaderName = ClientConfiguration.getInstance().getHeaderName();
+	regularUserAuthorizationValue = ClientConfiguration.getInstance().getAuthorizationHeaderValue();
+    }
+    
     /**
      * This method creates UserSet object from Json string.
      * Example HTTP request for tag object:
-     * http://localhost:8080/set/?wskey=<key>&userToken=<token>
+     * http://localhost:8080/set/?profile=minimal
      *
-     * @param wskey
      * @param set       The UserSet body
-     * @param userToken
+     * @param profile
      * @return response entity that comprises response body, headers and status code.
      * @throws IOException
      */
     public ResponseEntity<String> createUserSet(
-            String wskey, String set) throws IOException {
+            String set, String profile) throws IOException {
 
         StringBuilder urlBuilder = getUserSetServiceUri();
         urlBuilder.append(WebUserSetFields.PAR_CHAR);
-        urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
-                .append(wskey).append(WebUserSetFields.AND);
+        urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE).append(WebUserSetFields.EQUALS_PARAMETER)
+            .append(profile);
 
         String resUrl = urlBuilder.toString();
 
@@ -52,93 +61,90 @@ public class UserSetApiConnection extends BaseApiConnection {
         /**
          * Execute Europeana API request
          */
-        return postURL(resUrl, set);
+        return postURL(resUrl, set, authorizationHeaderName, regularUserAuthorizationValue);
     }
 
     /**
      * This method retrieves UserSet object.
      * Example HTTP request for tag object:
-     * http://localhost:8080/set/{identifier}.jsonld?wskey=<key>&userToken=<token>
+     * http://localhost:8080/set/{identifier}.jsonld?profile=minimal
      * where identifier is:
      * 496
      *
-     * @param wskey
      * @param identifier
-     * @param userToken
+     * @param profile
      * @return response entity that comprises response body, headers and status code.
      * @throws IOException
      */
     public ResponseEntity<String> getUserSet(
-            String wskey, String identifier) throws IOException {
+            String identifier, String profile) throws IOException {
 
         StringBuilder urlBuilder = getUserSetServiceUri();
         urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
         urlBuilder.append(WebUserSetFields.PAR_CHAR);
-        urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
-                .append(wskey).append(WebUserSetFields.AND);
+        urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE).append(WebUserSetFields.EQUALS_PARAMETER)
+            .append(profile);
 
         /**
          * Execute Europeana API request
          */
-        return getURL(urlBuilder.toString());
+        return getURL(urlBuilder.toString(), authorizationHeaderName, regularUserAuthorizationValue);
     }
 
     /**
      * This method updates UserSet object by the passed Json update string.
      * Example HTTP request:
-     * http://localhost:8080/set/{identifier}.jsonld?wskey=<key>&userToken=<token>
+     * http://localhost:8080/set/{identifier}.jsonld?profile=standard
      * where identifier is:
      * 496
      * and the update JSON string is:
      * { "title": {"en":"Sport"},"description": {"en":"Best sport"} }
      *
-     * @param wskey
      * @param identifier    The identifier that comprise set ID
      * @param updateUserSet The update UserSet body in JSON format
+     * @param profile
      * @return response entity that comprises response body, headers and status code.
      * @throws IOException
      */
     public ResponseEntity<String> updateUserSet(
-            String wskey, String identifier, String updateUserSet) throws IOException {
+            String identifier, String updateUserSet, String profile) throws IOException {
 
         StringBuilder urlBuilder = getUserSetServiceUri();
         urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
         urlBuilder.append(WebUserSetFields.PAR_CHAR);
-        urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
-                .append(wskey).append(WebUserSetFields.AND);
+        urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE).append(WebUserSetFields.EQUALS_PARAMETER)
+            .append(profile);
 
         /**
          * Execute Europeana API request
          */
-        return putURL(urlBuilder.toString(), updateUserSet);
+        return putURL(urlBuilder.toString(), updateUserSet, authorizationHeaderName, regularUserAuthorizationValue);
     }
 
     /**
      * This method deletes UserSet object by the passed identifier.
      * Example HTTP request:
-     * http://localhost:8080/set/{identifier}.jsonld?wskey=<key>&userToken=<token>
+     * http://localhost:8080/set/{identifier}.jsonld?profile=minimal
      * where identifier is:
      * 494
      *
-     * @param wskey
      * @param identifier The identifier that comprise set ID
-     * @param userToken
      * @return response entity that comprises response headers and status code.
      * @throws IOException
      */
     public ResponseEntity<String> deleteUserSet(
-            String wskey, String identifier) throws IOException {
+            String identifier) throws IOException {
 
         StringBuilder urlBuilder = getUserSetServiceUri();
         urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
         urlBuilder.append(WebUserSetFields.PAR_CHAR);
-        urlBuilder.append(CommonApiConstants.PARAM_WSKEY).append(WebUserSetFields.EQUALS_PARAMETER)
-                .append(wskey).append(WebUserSetFields.AND);
+        urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE).append(WebUserSetFields.EQUALS_PARAMETER)
+            .append(CommonApiConstants.PROFILE_MINIMAL);
 
         /**
          * Execute Europeana API request
          */
-        return deleteURL(urlBuilder.toString());
+        return deleteURL(urlBuilder.toString(), authorizationHeaderName, regularUserAuthorizationValue);
     }
 
 }

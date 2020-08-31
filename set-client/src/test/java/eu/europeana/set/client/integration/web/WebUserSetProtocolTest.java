@@ -8,10 +8,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 
 /**
@@ -19,18 +20,15 @@ import org.springframework.http.ResponseEntity;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-@Ignore
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest { 
 
-	private static final String USER_SET_PATH = "http://data.europeana.eu/set/";
+    private static final String USER_SET_PATH = "http://data.europeana.eu/set/";
 		
-//	@Test
-	public void createUserSet() throws IOException {
+    @Test
+    public void createUserSet() throws IOException {
 		
-		ResponseEntity<String> response = storeTestUserSet();
-
-		validateResponse(response);
-	}
+	createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+    }
 
     /**
      * This method matches response body to get user set ID
@@ -64,20 +62,6 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 		assertEquals(response.getStatusCode(), status);
 	}
 	
-	@Test
-	public void getUserSet() throws IllegalAccessException, IllegalArgumentException
-		, InvocationTargetException, IOException {
-		
-		/**
-		 * get user set by ID and user identifier
-		 */
-		ResponseEntity<String> response = getApiClient().getUserSet(
-				getApiKey()
-				, TEST_SET_ID);		
-		validateResponse(response, HttpStatus.OK);
-	}
-	
-					
 	/**
 	 * This method creates and retrieves user set 
 	 * @throws IllegalAccessException
@@ -89,21 +73,62 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 	public void retrieveUserSet() throws IllegalAccessException, IllegalArgumentException
 		, InvocationTargetException, IOException {
 		
-		ResponseEntity<String> response = storeTestUserSet();
-
-		validateResponse(response);
-		
-		String testSetId = matchSetId(response.getBody().toString());
+		ResponseEntity<String> response;
+		String testSetId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
 
 		/**
 		 * get user set by ID and user identifier
 		 */
 		response = getApiClient().getUserSet(
-				getApiKey()
-				, testSetId);		
+				testSetId, LdProfiles.MINIMAL.name());		
 		log.info(response.toString());
 		validateResponse(response, HttpStatus.OK);
 	}
+
+	/**
+	 * This method creates test user set object
+	 * @param content
+	 * @param profile
+	 * @return id of created user set
+	 * @throws IOException
+	 */
+	private String createTestUserSet(String content, String profile) throws IOException {
+	    ResponseEntity<String> response = storeTestUserSet(content, profile);
+
+	    validateResponse(response);
+	    
+	    String testSetId = matchSetId(response.getBody().toString());
+	    return testSetId;
+	}
 	
-					
+	@Test
+	public void updateUserSet() throws IOException {
+				
+		String testSetId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+
+		// updated user set value
+		String requestBody = getJsonStringInput(USER_SET_UPDATE_CONTENT);
+				
+                // update user set by identifier URL
+		ResponseEntity<String> updateResponse = getApiClient().updateUserSet(
+			testSetId, requestBody, LdProfiles.STANDARD.name());
+		
+		assertEquals( HttpStatus.OK, updateResponse.getStatusCode());
+	}
+	
+	@Test
+	public void deleteUserSet() throws IOException {
+				
+		String testSetId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+
+		// delete user set by identifier URL
+		ResponseEntity<String> deleteResponse = getApiClient().deleteUserSet(
+			testSetId);
+		
+		log.debug("Response body: " + deleteResponse.getBody());
+		if(!HttpStatus.NO_CONTENT.equals(deleteResponse.getStatusCode()))
+			log.error("Wrong status code: " + deleteResponse.getStatusCode());
+		assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
+	}
+
 }
