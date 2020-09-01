@@ -532,7 +532,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	} catch (SearchApiClientException e) {
 	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-			new String[] { WebUserSetModelFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
+			new String[] { WebUserSetModelFields.IS_DEFINED_BY, url }, e);
 	    } else {
 		throw new InternalServerException(e);
 	    }
