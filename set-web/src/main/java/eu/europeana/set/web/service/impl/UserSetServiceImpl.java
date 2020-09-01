@@ -847,7 +847,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    new String[] {
-			    "Only the creators of the annotation or admins are authorized to perform this operation." }, 
+			    "Only the creators of the user set or admins are authorized to perform this operation." }, 
 		    HttpStatus.FORBIDDEN);
 	}
     }
