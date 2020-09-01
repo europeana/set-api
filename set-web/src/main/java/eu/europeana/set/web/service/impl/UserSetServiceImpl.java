@@ -945,6 +945,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    setSerializedItemIds(userSet);
 	    break;
 	case MINIMAL:
+	    // for the open sets with minimal profile we set the value to -1 
+	    // so that the total will not be serialized
+	    if (userSet.isOpenSet()) {
+		userSet.setTotal(-1);
+	    }	    
 	default:
 //	    if (userSet.getIsDefinedBy() == null) {
 	    userSet.setItems(null);
