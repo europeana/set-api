@@ -200,8 +200,6 @@ public class WebUserSetRest extends BaseRest {
 		getUserSetService().verifyOwnerOrAdmin(userSet, authentication);
 	    }
 
-	    // append the HTTP parameters related to sort, page and pageSize
-	    // to URL defined in the rdfs:isDefinedBy property
 	    if(mustFetchItems(userSet, profile)) {
 		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, pageSize, profile);
 	    }
