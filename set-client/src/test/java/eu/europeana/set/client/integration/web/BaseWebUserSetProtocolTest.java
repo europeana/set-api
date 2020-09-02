@@ -13,26 +13,20 @@ import org.junit.Before;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApiImpl;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 public class BaseWebUserSetProtocolTest {
 
 	protected Logger log = LogManager.getLogger(getClass());
 
 	public static final String USER_SET_CONTENT = "/content/userset.json";
+	public static final String USER_SET_UPDATE_CONTENT = "/content/usersetupdate.json";
 
 	String START = "{";
 	String END = "}";
-
-	String BODY_VALUE_TO_UPDATE = "\"title\": {" + "\"en\": \"Sport\"}," 
-			+ "\"description\": {" + "\"en\": \"Best sport\"}";
-
-	public String USER_SET_UPDATE_BODY_JSON = START + BODY_VALUE_TO_UPDATE + END;
-
-	public String TEST_SET_ID = "134";
 
 	private WebUserSetApi apiClient;
 
@@ -48,23 +42,20 @@ public class BaseWebUserSetProtocolTest {
 	/**
 	 * This method creates test set object
 	 * 
+	 * @param resource JSON test file
+	 * @parem profile
 	 * @return response entity that contains response body, headers and status code.
 	 * @throws IOException
 	 */
-	protected ResponseEntity<String> storeTestUserSet() throws IOException {
+	protected ResponseEntity<String> storeTestUserSet(String resource, String profile) throws IOException {
 
-		String requestBody = getJsonStringInput(USER_SET_CONTENT);
+		String requestBody = getJsonStringInput(resource);
 
 		/**
 		 * store set
 		 */
-		ResponseEntity<String> storedResponse = getApiClient().createUserSet(getApiKey(), requestBody);
+		ResponseEntity<String> storedResponse = getApiClient().createUserSet(requestBody, profile);
 		return storedResponse;
-	}
-
-	public String getApiKey() {
-
-		return ClientConfiguration.getInstance().getApiKey();
 	}
 
 	protected String getJsonStringInput(String resource) throws IOException {
@@ -88,13 +79,13 @@ public class BaseWebUserSetProtocolTest {
 
 	protected void deleteUserSet(String identifier) {
 		WebUserSetApi webUserSetApi = new WebUserSetApiImpl();
-		ResponseEntity<String> re = webUserSetApi.deleteUserSet(getApiKey(), identifier);
+		ResponseEntity<String> re = webUserSetApi.deleteUserSet(identifier);
 		assertEquals(HttpStatus.OK, re.getStatusCode());
 		log.trace("User set deleted: /" + identifier);
 	}
 
 	protected ResponseEntity<String> getUserSet(UserSet set) {
-		return getApiClient().getUserSet(getApiKey(), set.getIdentifier());
+		return getApiClient().getUserSet(set.getIdentifier(), LdProfiles.MINIMAL.name());
 	}
 	
 	

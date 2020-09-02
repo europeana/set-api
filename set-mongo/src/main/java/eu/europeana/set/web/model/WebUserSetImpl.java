@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
+import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
@@ -85,7 +86,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @JsonProperty(WebUserSetModelFields.TOTAL)
-    @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveIntegerFilter.class)
     public int getTotal() {
 	return super.getTotal();
     }
@@ -94,7 +95,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     public String getIsDefinedBy() {
 	return super.getIsDefinedBy();
     }
-
+    
 //    @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
 //    @JsonIgnore // avoid double serialization
 //    public String getContext() {

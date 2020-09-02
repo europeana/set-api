@@ -3,4 +3,9 @@
 set.service.uri = http://localhost:8080/set
 
 # the user key used to access Europeana API. For more information see http://pro.europeana.eu/api 
-set.api.key = 
+set.api.key =
+
+# the set validation header definitions
+set.header.name=Authorization
+set.regular.authorization.value=
+ 

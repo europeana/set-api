@@ -9,13 +9,15 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+
 
 /**
  * This class aims at testing of different exceptions related to set methods.
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-@Ignore
+//@Ignore
 public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest {
 	
     public String CORRUPTED_JSON = 
@@ -43,22 +45,10 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
     public String UNKNOWN_PROVIDED_IDENTIFIER = "unknown_provided_identifier";
        
 	@Test
-	public void createWebUserSetWithWrongWskey() throws IOException {
-		
-		String requestBody = getJsonStringInput(USER_SET_CONTENT);
-		
-		ResponseEntity<String> response = getApiClient().createUserSet(
-				UNKNOWN_WSKEY, requestBody);
-		
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-	}
-	
-
-	@Test
 	public void createWebsetUserSetWithoutBody() {
 		
 		ResponseEntity<String> response = getApiClient().createUserSet(
-				getApiKey(), null);
+				null, LdProfiles.MINIMAL.name());
 		
 		assertEquals( HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
@@ -68,8 +58,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 	public void createWebUserSetWithCorruptedBody() {
 		
 		ResponseEntity<String> response = getApiClient().createUserSet(
-				getApiKey()
-				, CORRUPTED_JSON);
+				CORRUPTED_JSON, LdProfiles.MINIMAL.name());
 		
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
@@ -78,7 +67,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 	public void getWebUserSetWithWrongIdentifier() {
 		
 		ResponseEntity<String> response = getApiClient().getUserSet(
-				getApiKey(), WRONG_GENERATED_IDENTIFIER);
+				WRONG_GENERATED_IDENTIFIER, LdProfiles.MINIMAL.name());
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 	
@@ -88,9 +77,9 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 		String requestBody = getJsonStringInput(USER_SET_CONTENT);
 		
 		ResponseEntity<String> response = getApiClient().updateUserSet(
-				getApiKey()
-				, WRONG_GENERATED_IDENTIFIER
-				, requestBody);
+				WRONG_GENERATED_IDENTIFIER
+				, requestBody
+				, LdProfiles.MINIMAL.name());
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 			
@@ -100,9 +89,9 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 		String requestBody = getJsonStringInput(USER_SET_CONTENT);
 		
 		ResponseEntity<String> response = getApiClient().updateUserSet(
-				getApiKey()
-				, WRONG_GENERATED_IDENTIFIER
-				, requestBody);
+				WRONG_GENERATED_IDENTIFIER
+				, requestBody
+				, LdProfiles.MINIMAL.name());
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 	
@@ -114,53 +103,11 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest
 //		 */
 //		UserSet set = createTestUserSet();
 //		ResponseEntity<String> response = getApiClient().updateUserSet(
-//				getApiKey()
-//				, set.getIdentifier()
+//				set.getIdentifier()
 //				, CORRUPTED_UPDATE_JSON
 //				, TEST_USER_TOKEN
 //				);
 //		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 //	}
-	
-		
-//	@Test
-//	public void updateWebUserSetWithWrongUserToken() throws JsonParseException, IOException { 
-//		
-//		/**
-//		 * store set and retrieve its id
-//		 */
-//		UserSet set = createTestUserSet();
-//		
-//		String requestBody = getJsonStringInput(USER_SET_CONTENT);
-//		
-//		ResponseEntity<String> response = getApiClient().updateUserSet(
-//				getApiKey()
-//				, set.getIdentifier()
-//				, requestBody
-//				, INVALID_USER_TOKEN
-//				);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
-	
-		
-//	@Test()
-//	public void updateWebUserSetWithUnknownWskey() throws JsonParseException, IOException { 
-//		
-//		/**
-//		 * store set and retrieve its id
-//		 */
-//		UserSet set = createTestUserSet();
-//		
-//		String requestBody = getJsonStringInput(USER_SET_CONTENT);
-//		
-//		ResponseEntity<String> response = getApiClient().updateUserSet(
-//				UNKNOWN_WSKEY
-//				, set.getIdentifier()
-//				, requestBody
-//				, TEST_USER_TOKEN
-//				);
-//		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//	}
-	
-		
+			
 }

@@ -11,6 +11,8 @@ public class ClientConfiguration {
 	protected static final String SET_CLIENT_PROPERTIES_FILE  = "/set-client.properties";
 	protected static final String PROP_SET_API_KEY            = "set.api.key";
 	protected static final String PROP_SET_SERVICE_URI        = "set.service.uri";
+	protected static final String PROP_AUTHORIZATION_HEADER_NAME = "set.header.name";
+	protected static final String PROP_REGULAR_AUTHORIZATION_HEADER_VALUE = "set.regular.authorization.value";
 
 	private static Properties          properties = null;
 	private static ClientConfiguration singleton;
@@ -94,4 +96,26 @@ public class ClientConfiguration {
 	public String getServiceUri() {
 		return getProperties().getProperty(PROP_SET_SERVICE_URI);
 	}
+
+	/**
+	 * This method provides access to the header name defined in the configuration
+	 * file
+	 * @see PROP_EUROPEANA_SEARCH_URI
+	 * 
+	 * @return
+	 */
+	public String getHeaderName() {
+		return getProperties().getProperty(PROP_AUTHORIZATION_HEADER_NAME).trim();
+	}
+	
+	/**
+	 * This method provides access to the header value defined in the configuration
+	 * file
+	 * 
+	 * @return
+	 */
+	public String getAuthorizationHeaderValue() {
+		return getProperties().getProperty(PROP_REGULAR_AUTHORIZATION_HEADER_VALUE).trim();
+	}
+		
 }

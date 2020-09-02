@@ -526,13 +526,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		setItemIds(userSet, apiResult);
 	    } else if (LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
 		apiResult = getSearchApiClient().searchItems(url, apiKey, true);
-		setItems(userSet, apiResult.getItems(), apiResult.getTotal());
+		int total = apiResult.getTotal();
+		if(!userSet.isOpenSet()) {
+		    //dereferenciation of closed sets is limited to 100
+		    //use the number of item ids
+		    total = userSet.getItems().size();
+		}
+		setItems(userSet, apiResult.getItems(), total);
 	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
 	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-			new String[] { WebUserSetModelFields.IS_DEFINED_BY, userSet.getIsDefinedBy() });
+			new String[] { WebUserSetModelFields.IS_DEFINED_BY, url }, e);
 	    } else {
 		throw new InternalServerException(e);
 	    }
@@ -559,7 +565,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	if (!userSet.isOpenSet()) {
 	    return buildSearchApiUrlForClosedSets(userSet, apiKey);
-    }
+	}
 
 	// String uri;
 	// String additionalParameters;
@@ -847,7 +853,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    new String[] {
-			    "Only the creators of the annotation or admins are authorized to perform this operation." }, 
+			    "Only the creators of the user set or admins are authorized to perform this operation." }, 
 		    HttpStatus.FORBIDDEN);
 	}
     }
@@ -887,19 +893,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// full record ID by removing the base URL http://data.europeana.eu/item
 	// e.g. europeana_id:("/08641/1037479000000476635" OR
 	// "/08641/1037479000000476943")
+	String id, fullId;
+	int MAX_DEREF_ITEMS = 100;
+	int maxItems = Math.min(userSet.getItems().size(), MAX_DEREF_ITEMS);
+	
 	StringBuilder query = new StringBuilder();
 	query.append("europeana_id:(");
-	boolean firstId = true;
-	String id;
-	for (String fullId : userSet.getItems()) {
-	    if (firstId) {
-		firstId = false;
-	    } else {
+	for (int i = 0; i < maxItems; i++) {
+	    fullId = userSet.getItems().get(i);
+	    if (i > 0) {
 		query.append(" OR ");
 	    }
 	    id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
 	    query.append('"').append("/").append(id).append('"');
-	    }
+	}
 	// close bracket
 	query.append(")");
 	StringBuilder url = new StringBuilder(getConfiguration().getSearchApiUrl());
@@ -909,8 +916,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new InternalServerException("Cannot URL encode records ids: " + query.toString(), e);
 	}
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+	//append rows=100
+	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(MAX_DEREF_ITEMS);
+	
 	return url.toString();
     }
+
+    
     
     /**
      * This methods applies Linked Data profile to a user set
@@ -945,6 +957,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    setSerializedItemIds(userSet);
 	    break;
 	case MINIMAL:
+	    // for the open sets with minimal profile we set the value to -1 
+	    // so that the total will not be serialized
+	    if (userSet.isOpenSet()) {
+		userSet.setTotal(-1);
+	    }	    
 	default:
 //	    if (userSet.getIsDefinedBy() == null) {
 	    userSet.setItems(null);
