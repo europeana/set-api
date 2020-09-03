@@ -167,25 +167,22 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
-	String action = "get:/set/{identifier}{.jsonld}";
 	Authentication authentication = verifyReadAccess(request);
-	return getUserSet(wskey, profile, identifier, request, action, sortField, sortOrderField, page, pageSize, authentication);
+	return getUserSet(profile, identifier, request, sortField, sortOrderField, page, pageSize, authentication);
     }
 
     /**
      * This method retrieves an existing user set identified by given identifier,
      * which is a number in string format.
      * 
-     * @param wsKey      The API key
      * @param profileStr The profile definition
      * @param identifier The identifier
      * @param request    HTTP request
-     * @param action     The action describing the request
      * @return response entity that comprises response body, headers and status code
      * @throws HttpException
      */
-    private ResponseEntity<String> getUserSet(String wsKey, String profileStr, String identifier,
-	    HttpServletRequest request, String action, String sort, String sortOrder, int pageNr, int pageSize, Authentication authentication)
+    private ResponseEntity<String> getUserSet(String profileStr, String identifier,
+	    HttpServletRequest request, String sort, String sortOrder, int pageNr, int pageSize, Authentication authentication)
 	    throws HttpException {
 	try {
 	    LdProfiles profile = getProfile(profileStr, request);
@@ -243,10 +240,9 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
-	String action = "put:/set/{identifier}";
 	// check user credentials, if invalid respond with HTTP 401,
 	Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
-	return updateUserSet(request, authentication, identifier, userSet, profile, action);
+	return updateUserSet(request, authentication, identifier, userSet, profile);
     }
 
     /**
@@ -258,12 +254,11 @@ public class WebUserSetRest extends BaseRest {
      * @param userSetJsonLdStr The user set fields to update in JSON format e.g. title
      *                           or description
      * @param profileStr       The profile definition
-     * @param action           The action describing the request
      * @return response entity that comprises response body, headers and status code
      * @throws HttpException
      */
     protected ResponseEntity<String> updateUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String userSetJsonLdStr, String profileStr, String action) throws HttpException {
+	    String identifier, String userSetJsonLdStr, String profileStr) throws HttpException {
 
 	try {
 	    LdProfiles profile = getProfile(profileStr, request);
@@ -417,12 +412,10 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
-	String action = "put:/set/{identifier}/{dataset_id}/{local_id}?position=POSITION";
 	// check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
-	return insertItemIntoUserSet(request, authentication, identifier, datasetId, localId, position, profile,
-		action);
+	return insertItemIntoUserSet(request, authentication, identifier, datasetId, localId, position, profile);
     }
 
     /**
@@ -437,12 +430,11 @@ public class WebUserSetRest extends BaseRest {
      * @param localId        The local identifier within the provider
      * @param position       The position in the existin item list
      * @param profileStr     The profile definition
-     * @param action         The action describing the request
      * @return response entity that comprises response body, headers and status code
      * @throws HttpException
      */
     protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String datasetId, String localId, String position, String profileStr, String action)
+	    String identifier, String datasetId, String localId, String position, String profileStr)
 	    throws HttpException {
 
 	try {
@@ -497,12 +489,11 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId, HttpServletRequest request)
 	    throws HttpException {
 
-	String action = "get:/set/{identifier}/{dataset_id}/{local_id}";
 	// check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	// check client access (a valid "wskey" must be provided)
 	Authentication authentication = verifyReadAccess(request);
-	return isItemInUserSet(wskey, identifier, datasetId, localId, action, authentication);
+	return isItemInUserSet(wskey, identifier, datasetId, localId, authentication);
     }
 
     /**
@@ -513,13 +504,12 @@ public class WebUserSetRest extends BaseRest {
      * @param identifier The identifier of a user set
      * @param datasetId  The identifier of the dataset, typically a number
      * @param localId    The local identifier within the provider
-     * @param action     The action describing the request
      * @param authentication
      * @return response entity that comprises response body, headers and status code
      * @throws HttpException
      */
     protected ResponseEntity<String> isItemInUserSet(String wsKey, String identifier,
-	    String datasetId, String localId, String action, Authentication authentication) throws HttpException {
+	    String datasetId, String localId, Authentication authentication) throws HttpException {
 
 	try {
 	    // check if the Set exists, if not respond with HTTP 404
@@ -572,11 +562,10 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
-	String action = "delete:/set/{identifier}/{dataset_id}/{local_id}";
 	// check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-	return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId, profile, action);
+	return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId, profile);
     }
 
     /**
@@ -590,12 +579,11 @@ public class WebUserSetRest extends BaseRest {
      * @param userSet        The user set fields to update in JSON format e.g. title
      *                       or description
      * @param profile        The profile definition
-     * @param action         The action describing the request
      * @return response entity that comprises response body, headers and status code
      * @throws HttpException
      */
     protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String datasetId, String localId, String profileStr, String action)
+	    String identifier, String datasetId, String localId, String profileStr)
 	    throws HttpException {
 
 	try {
