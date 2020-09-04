@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -62,6 +66,7 @@ import eu.europeana.set.web.search.UserSetIdsResultPage;
 import eu.europeana.set.web.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
+
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
@@ -291,6 +296,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	validateBookmarkFolder(webUserSet);	
 	validateControlledValues(webUserSet);
+	validateSearchUri(webUserSet);
     }
 
     /**
@@ -363,6 +369,59 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType()});
 	}
+    }
+    
+    /**
+     * The value of isDefinedBy is validated (e.g. search URL https://api.europeana.eu/record/search.json?) 
+     * to point to the Search API.
+     * We make a GET request upon creation to see if the request returns a 200 (meaning is valid).
+     * @param webUserSet
+     * @throws ParamValidationException 
+     * @throws RequestBodyValidationException
+     */
+    private void validateSearchUri(UserSet webUserSet) 
+	    throws ParamValidationException, RequestBodyValidationException {
+	
+	int STATUS_OK = 200;
+
+	if (webUserSet.getIsDefinedBy() != null) {
+            String searchUrl = getBaseSearchUrl(getConfiguration().getSearchApiUrl());
+            String queryUrl = getBaseSearchUrl(webUserSet.getIsDefinedBy());
+            if (!queryUrl.equals(searchUrl)) {	    
+    	        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_INVALID_SEARCH_URL,
+		    UserSetI18nConstants.USERSET_VALIDATION_INVALID_SEARCH_URL,
+		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, queryUrl});
+            }
+        	
+    	    String apiKey = getConfiguration().getSearchApiKey();
+    	    int getStatus = 0; 
+    	    try {
+		getStatus = getSearchApiClient().validateUrl(webUserSet.getIsDefinedBy(), apiKey);
+	    } catch (SearchApiClientException e) {
+    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_SEARCH_API_NOT_ACCESSIBLE,
+    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, queryUrl});
+	    }  
+    		
+            if (getStatus != STATUS_OK) {
+    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_SEARCH_API_NOT_ACCESSIBLE,
+    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, queryUrl});
+            }
+	}	
+    }
+    
+    /**
+     * This method extracts base URL from the search URL
+     * @param searchUrl
+     * @return base URL
+     */
+    private String getBaseSearchUrl(String searchUrl) {
+	String res = searchUrl;
+    
+	int endPos = searchUrl.indexOf("?");
+	if (endPos >= 0) {
+	    res = searchUrl.substring(0, endPos);
+	}
+	return res;
     }
     
     boolean isBookmarksFolder(UserSet userSet) {

@@ -38,4 +38,14 @@ public interface SearchApiClient {
      */
     public SearchApiResponse searchItemDescriptions(String uri, String apiKey) 
     		throws SearchApiClientException;
+    
+    /**
+     * This method is used to validate service URL
+     * @param uri
+     * @param apiKey
+     * @return status code
+     * @throws SearchApiClientException
+     */
+    int validateUrl(String uri, String apiKey) throws SearchApiClientException;
+    
 }
