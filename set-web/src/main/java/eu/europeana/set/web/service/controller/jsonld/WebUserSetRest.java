@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.oauth2.model.ApiCredentials;
 import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -46,7 +47,7 @@ import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
-import eu.europeana.set.web.model.WebSoftwareAgent;
+import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
@@ -96,16 +97,10 @@ public class WebUserSetRest extends BaseRest {
 	    
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
-//	    if (StringUtils.isEmpty(webUserSet.getContext()))
-//		webUserSet.setContext(WebUserSetFields.VALUE_CONTEXT_EUROPEANA_COLLECTION);
-
-	    Agent user = new WebSoftwareAgent();
+	    Agent user = new WebUser();
 	    user.setHttpUrl(getUserSetService().getUserId(authentication));
-
-	    // SET DEFAULTS
-//	    if (webUserSet.getCreator() == null) {
-		webUserSet.setCreator(user);
-//	    }
+	    user.setNickname(((ApiCredentials)authentication.getCredentials()).getUserName());
+	    webUserSet.setCreator(user);
 
 	    if (webUserSet.getVisibility() == null) {
 		webUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
@@ -281,6 +276,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
+	    //set immutable fields before validation
 	    newUserSet.setCreator(existingUserSet.getCreator());
 	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
 	    getUserSetService().validateWebUserSet(newUserSet);

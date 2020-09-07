@@ -3,7 +3,6 @@ package eu.europeana.set.web.model;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -13,9 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
-import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
@@ -107,28 +106,25 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	// do nothing, just to allow cotnext in input
     }
 
-//    @JsonProperty(WebUserSetFields.CREATOR)
-//    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
-    // serialization
-    @JsonIgnore
+    @JsonProperty(WebUserSetFields.CREATOR)
     public Agent getCreator() {
 	return super.getCreator();
     }
 
     @Override
-    @JsonIgnore
+    @JsonIgnore //creator is set by the system
     public void setCreator(Agent creator) {
 	super.setCreator(creator);
     }
   
-    @JsonProperty(WebUserSetModelFields.CREATOR)
-    public String getCreatorHttpUrl() {
-	String res = null;
-	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
-	    res = super.getCreator().getHttpUrl();
-	}
-	return res;
-    }
+//    @JsonProperty(WebUserSetModelFields.CREATOR)
+//    public String getCreatorHttpUrl() {
+//	String res = null;
+//	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
+//	    res = super.getCreator().getHttpUrl();
+//	}
+//	return res;
+//    }
 
     @JsonIgnore
     public boolean isUgc() {
