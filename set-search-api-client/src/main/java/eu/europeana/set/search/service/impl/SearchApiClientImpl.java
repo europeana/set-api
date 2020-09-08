@@ -179,27 +179,6 @@ public class SearchApiClientImpl implements SearchApiClient {
 	}
     }
 
-    /* (non-Javadoc)
-     * @see eu.europeana.set.search.service.SearchApiClient#validateUrl(java.lang.String, java.lang.String)
-     */
-    public int validateUrl(String uri, String apiKey) throws SearchApiClientException {
-	int urlResponse;
-	try {
-	    uri = appendApiKey(uri, apiKey);	    
-	    urlResponse = createHttpConnection().getURLStatus(uri);
-	    if (urlResponse == 0) {
-		// HTTP Error Code
-		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY, null);
-	    }
-	    return urlResponse;
-	} catch (IOException e) {
-	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
-	} catch (RuntimeException e) {
-	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS + e.getMessage(),
-		    e);
-	}
-    }
-
     /*
      * (non-Javadoc)
      * 

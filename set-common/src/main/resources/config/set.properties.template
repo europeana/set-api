@@ -51,6 +51,3 @@ authorization.api.name=usersets
 
 # User set API version
 set.api.version=
-
-# search URL
-europeana.search.url=

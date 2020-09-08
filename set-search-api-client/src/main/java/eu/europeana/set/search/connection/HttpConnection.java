@@ -47,25 +47,6 @@ public class HttpConnection {
     }
    
     /**
-     * This method is used for service URL validation
-     * @param url
-     * @return status code
-     * @throws IOException
-     */
-    public int getURLStatus(String url) throws IOException {
-        HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-        GetMethod get = new GetMethod(url);
-        get.setRequestHeader("Accept", "application/json");
-
-        try {
-            client.executeMethod(get);
-            return get.getStatusCode();
-        } finally {
-            get.releaseConnection();
-        }
-    }
-   
-    /**
      * Perform HTTP request
      * @param connectionRetry
      * @param conectionTimeout
