@@ -221,7 +221,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     @Override
-    public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException {
+    public UserSet parseUserSetLd(String userSetJsonLdStr) throws RequestBodyValidationException,  UserSetInstantiationException{
 
 	JsonParser parser;
 	ObjectMapper mapper = new ObjectMapper();
@@ -284,7 +284,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	}
 
 	// validate isDefinedBy and items - we should not have both of them
-	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
+	if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}

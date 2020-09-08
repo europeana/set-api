@@ -2,6 +2,11 @@ package eu.europeana.set.definitions.model.factory;
 
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 
+/**
+ * @deprecated not used by Jackson or morphia, but could be used in the future
+ * @author GordeaS
+ *
+ */
 public abstract class AbstractModelObjectFactory<O, E extends Enum<E>> {
 
 	public O createModelObjectInstance(String modelObjectType) {

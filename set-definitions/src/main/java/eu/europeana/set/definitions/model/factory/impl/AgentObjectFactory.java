@@ -8,6 +8,11 @@ import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
 import eu.europeana.set.definitions.model.factory.AbstractModelObjectFactory;
 import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 
+/**
+ * @deprecated not used by Jackson or morphia, but could be used in the future
+ * @author GordeaS
+ *
+ */
 public class AgentObjectFactory extends
 		AbstractModelObjectFactory<Agent, AgentTypes> {
 

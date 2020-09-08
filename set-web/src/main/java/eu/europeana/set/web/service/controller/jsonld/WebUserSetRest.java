@@ -42,8 +42,10 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
+import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
@@ -280,6 +282,12 @@ public class WebUserSetRest extends BaseRest {
 	    newUserSet.setCreator(existingUserSet.getCreator());
 	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
 	    getUserSetService().validateWebUserSet(newUserSet);
+	    //TODO: move verification to validateMethod when new specs are available
+	    if(existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
+		//isDefinedBy is mandatory for open sets
+		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, 
+			new String[] {WebUserSetModelFields.IS_DEFINED_BY +  " (for open sets)"});
+	    }
 
 	    // validate items
 	    validateAndSetItems(existingUserSet, newUserSet, profile);
@@ -440,6 +448,12 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+	    if(existingUserSet.isOpenSet()) {
+		//cannot add items to open sets
+		throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED, 
+			new String[] {"'Insert item to existing user set'", "open"});
+	    }
+	    
 	    // check visibility level for given user
 	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
 
@@ -461,12 +475,10 @@ public class WebUserSetRest extends BaseRest {
 	    headers.add(UserSetHttpHeaders.ETAG, etag);
 	    return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
-	} catch (UserSetValidationException | UserSetInstantiationException e) {
-	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
+	} catch (UserSetValidationException e) {
+	    throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION,
 		    new String[] { e.getMessage() }, e);
 	} catch (HttpException e) {
-	    // TODO: change this when OAUTH is implemented and the user information is
-	    // available in service
 	    throw e;
 	} catch (Exception e) {
 	    throw new InternalServerException(e);
