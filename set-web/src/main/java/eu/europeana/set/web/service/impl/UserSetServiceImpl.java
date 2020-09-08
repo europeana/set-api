@@ -169,60 +169,60 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     /**
      * @deprecated check if the update test must merge the properties or if it
      *             simply overwrites it
-     * @param userSet
-     * @param updatedWebUserSet
+     * @param persistedSet
+     * @param updates
      */
     @Deprecated
-    private void mergeUserSetProperties(PersistentUserSet userSet, UserSet updatedWebUserSet) {
-	if (updatedWebUserSet != null) {
+    private void mergeUserSetProperties(PersistentUserSet persistedSet, UserSet updates) {
+	if (updates != null) {
 //	    if (updatedWebUserSet.getContext() != null) {
 //		userSet.setContext(updatedWebUserSet.getContext());
 //	    }
 
-	    if (updatedWebUserSet.getType() != null) {
-		userSet.setType(updatedWebUserSet.getType());
+	    if (updates.getType() != null) {
+		persistedSet.setType(updates.getType());
 	    }
 
-	    if (updatedWebUserSet.getVisibility() != null) {
-		userSet.setVisibility(updatedWebUserSet.getVisibility());
+	    if (updates.getVisibility() != null) {
+		persistedSet.setVisibility(updates.getVisibility());
 	    }
 
-	    if (updatedWebUserSet.getTitle() != null) {
-		if (userSet.getTitle() != null) {
-		    for (Map.Entry<String, String> entry : updatedWebUserSet.getTitle().entrySet()) {
-			userSet.getTitle().put(entry.getKey(), entry.getValue());
+	    if (updates.getTitle() != null) {
+		if (persistedSet.getTitle() != null) {
+		    for (Map.Entry<String, String> entry : updates.getTitle().entrySet()) {
+			persistedSet.getTitle().put(entry.getKey(), entry.getValue());
 		    }
 		} else {
-		    userSet.setTitle(updatedWebUserSet.getTitle());
+		    persistedSet.setTitle(updates.getTitle());
 		}
 	    }
 
-	    if (updatedWebUserSet.getDescription() != null) {
-		if (userSet.getDescription() != null) {
-		    for (Map.Entry<String, String> entry : updatedWebUserSet.getDescription().entrySet()) {
-			userSet.getDescription().put(entry.getKey(), entry.getValue());
+	    if (updates.getDescription() != null) {
+		if (persistedSet.getDescription() != null) {
+		    for (Map.Entry<String, String> entry : updates.getDescription().entrySet()) {
+			persistedSet.getDescription().put(entry.getKey(), entry.getValue());
 		    }
 		} else {
-		    userSet.setDescription(updatedWebUserSet.getDescription());
+		    persistedSet.setDescription(updates.getDescription());
 		}
 	    }
 
-	    if (updatedWebUserSet.getCreator() != null) {
-		userSet.setCreator(updatedWebUserSet.getCreator());
+	    if (updates.getCreator() != null) {
+		persistedSet.setCreator(updates.getCreator());
 	    }
 
-	    if (updatedWebUserSet.getCreated() != null) {
-		userSet.setCreated(updatedWebUserSet.getCreated());
+	    if (updates.getCreated() != null) {
+		persistedSet.setCreated(updates.getCreated());
 	    }
 
-	    if (updatedWebUserSet.getIsDefinedBy() != null) {
-		userSet.setIsDefinedBy(updatedWebUserSet.getIsDefinedBy());
+	    if (updates.getIsDefinedBy() != null) {
+		persistedSet.setIsDefinedBy(updates.getIsDefinedBy());
 	    }
 	}
     }
 
     @Override
-    public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException {
+    public UserSet parseUserSetLd(String userSetJsonLdStr) throws RequestBodyValidationException,  UserSetInstantiationException{
 
 	JsonParser parser;
 	ObjectMapper mapper = new ObjectMapper();
@@ -285,7 +285,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	}
 
 	// validate isDefinedBy and items - we should not have both of them
-	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
+	if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
@@ -580,7 +580,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		setItemIds(userSet, apiResult);
 	    } else if (LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
 		apiResult = getSearchApiClient().searchItems(url, apiKey, true);
-		setItems(userSet, apiResult.getItems(), apiResult.getTotal());
+		int total = apiResult.getTotal();
+		if(!userSet.isOpenSet()) {
+		    //dereferenciation of closed sets is limited to 100
+		    //use the number of item ids
+		    total = userSet.getItems().size();
+		}
+		setItems(userSet, apiResult.getItems(), total);
 	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
@@ -596,24 +602,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	List<String> items = new ArrayList<>();
 	for (String item : apiResult.getItems()) {
-	    items.add(WebUserSetFields.BASE_ITEM_URL + item);
+	    items.add(UserSetUtils.buildItemUrl(item));
 	}
 	setItems(userSet, items, apiResult.getTotal());
-	}
+    }
 
     private void setItems(UserSet userSet, List<String> items, int total) {
 //	if (!items.isEmpty()) {
-	    userSet.setItems(items);
+	userSet.setItems(items);
 	userSet.setTotal(total);
 //	}
-	}
+    }
 
     private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
 	    int pageSize) throws HttpException {
 
 	if (!userSet.isOpenSet()) {
 	    return buildSearchApiUrlForClosedSets(userSet, apiKey);
-    }
+	}
 
 	// String uri;
 	// String additionalParameters;
@@ -941,19 +947,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// full record ID by removing the base URL http://data.europeana.eu/item
 	// e.g. europeana_id:("/08641/1037479000000476635" OR
 	// "/08641/1037479000000476943")
+	String id, fullId;
+	int MAX_DEREF_ITEMS = 100;
+	int maxItems = Math.min(userSet.getItems().size(), MAX_DEREF_ITEMS);
+	
 	StringBuilder query = new StringBuilder();
 	query.append("europeana_id:(");
-	boolean firstId = true;
-	String id;
-	for (String fullId : userSet.getItems()) {
-	    if (firstId) {
-		firstId = false;
-	    } else {
+	for (int i = 0; i < maxItems; i++) {
+	    fullId = userSet.getItems().get(i);
+	    if (i > 0) {
 		query.append(" OR ");
 	    }
 	    id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
 	    query.append('"').append("/").append(id).append('"');
-	    }
+	}
 	// close bracket
 	query.append(")");
 	StringBuilder url = new StringBuilder(getConfiguration().getSearchApiUrl());
@@ -963,8 +970,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new InternalServerException("Cannot URL encode records ids: " + query.toString(), e);
 	}
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+	//append rows=100
+	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(MAX_DEREF_ITEMS);
+	
 	return url.toString();
     }
+
+    
     
     /**
      * This methods applies Linked Data profile to a user set

@@ -15,12 +15,13 @@ public class UserSetI18nConstants {
     public static final String INVALID_HEADER_FORMAT  = "error.userset_invalid_header_format";
     public static final String INVALID_HEADER_VALUE   = "error.userset_invalid_header_value";
 
-    public static final String USERSET_VALIDATION_MANDATORY_PROPERTY        = "error.userset_validation_mandatory_property";
-    public static final String USERSET_VALIDATION_PROPERTY_VALUE            = "error.userset_validation_property_value";
-    public static final String USERSET_VALIDATION_PROPERTY_NOT_ALLOWED      = "error.userset_validation_property_not_allowed";
-    public static final String USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS     = "error.userset_validation_bookmark_folder_exists";
-    public static final String INVALID_IF_MATCH_TIMESTAMP                   = "error.userset_if_match_timestamp";
-    public static final String INVALID_UPDATE_HEADER_PROFILE                = "error.userset_invalid_update_profile";
+    public static final String USERSET_VALIDATION    			= "error.userset_validation";
+    public static final String USERSET_VALIDATION_MANDATORY_PROPERTY    = "error.userset_validation_mandatory_property";
+    public static final String USERSET_VALIDATION_PROPERTY_VALUE        = "error.userset_validation_property_value";
+    public static final String USERSET_VALIDATION_PROPERTY_NOT_ALLOWED  = "error.userset_validation_property_not_allowed";
+    public static final String USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS = "error.userset_validation_bookmark_folder_exists";
+    public static final String INVALID_IF_MATCH_TIMESTAMP               = "error.userset_if_match_timestamp";
+    public static final String INVALID_UPDATE_HEADER_PROFILE            = "error.userset_invalid_update_profile";
     public static final String USERSET_VALIDATION_INVALID_SEARCH_URL        = "error.userset_validation_invalid_search_url";
     public static final String USERSET_VALIDATION_SEARCH_API_NOT_ACCESSIBLE = "error.userset_validation_search_api_not_accessible";
 
@@ -34,4 +35,6 @@ public class UserSetI18nConstants {
     public static final String USERSET_ALREADY_DISABLED       = "error.userset_already_disabled";
     public static final String USERSET_MINIMAL_UPDATE_PROFILE = "error.userset_minimal_update_profile";
     public static final String USER_SET_NOT_AVAILABLE         = "error.userset_not_available";
+    
+    public static final String USER_SET_OPERATION_NOT_ALLOWED = "error.userset_operation_not_allowed"; 
 }
