@@ -548,17 +548,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	List<String> items = new ArrayList<>();
 	for (String item : apiResult.getItems()) {
-	    items.add(WebUserSetFields.BASE_ITEM_URL + item);
+	    items.add(UserSetUtils.buildItemUrl(item));
 	}
 	setItems(userSet, items, apiResult.getTotal());
-	}
+    }
 
     private void setItems(UserSet userSet, List<String> items, int total) {
 //	if (!items.isEmpty()) {
-	    userSet.setItems(items);
+	userSet.setItems(items);
 	userSet.setTotal(total);
 //	}
-	}
+    }
 
     private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
 	    int pageSize) throws HttpException {
