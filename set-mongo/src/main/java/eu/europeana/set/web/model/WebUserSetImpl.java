@@ -106,7 +106,8 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	// do nothing, just to allow cotnext in input
     }
 
-    @JsonProperty(WebUserSetFields.CREATOR)
+//    @JsonProperty(WebUserSetFields.CREATOR)
+    @JsonIgnore //creator is set by the system, proper serialization postponed for next version
     public Agent getCreator() {
 	return super.getCreator();
     }
@@ -117,14 +118,14 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	super.setCreator(creator);
     }
   
-//    @JsonProperty(WebUserSetModelFields.CREATOR)
-//    public String getCreatorHttpUrl() {
-//	String res = null;
-//	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
-//	    res = super.getCreator().getHttpUrl();
-//	}
-//	return res;
-//    }
+    @JsonProperty(WebUserSetModelFields.CREATOR)
+    public String getCreatorHttpUrl() {
+	String res = null;
+	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
+	    res = super.getCreator().getHttpUrl();
+	}
+	return res;
+    }
 
     @JsonIgnore
     public boolean isUgc() {
