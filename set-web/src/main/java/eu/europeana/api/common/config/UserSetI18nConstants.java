@@ -22,6 +22,8 @@ public class UserSetI18nConstants {
     public static final String USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS = "error.userset_validation_bookmark_folder_exists";
     public static final String INVALID_IF_MATCH_TIMESTAMP               = "error.userset_if_match_timestamp";
     public static final String INVALID_UPDATE_HEADER_PROFILE            = "error.userset_invalid_update_profile";
+    public static final String USERSET_VALIDATION_INVALID_SEARCH_URL        = "error.userset_validation_invalid_search_url";
+    public static final String USERSET_VALIDATION_SEARCH_API_NOT_ACCESSIBLE = "error.userset_validation_search_api_not_accessible";
 
     public static final String APIKEY_FILE_NOT_FOUND  = "error.userset_apikey_file_not_found";
     public static final String INVALID_TOKEN          = "error.userset_invalid_token";
