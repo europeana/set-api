@@ -144,25 +144,21 @@ public abstract class BaseAgent implements Agent {
          */
         if ((this.getType() != null) && (that.getType() != null) &&
                 (!this.getType().equals(that.getType()))) {
-           System.out.println("Agent objects have different 'agentType' fields.");
             res = false;
         }
 
         if ((this.getHomepage() != null) && (that.getHomepage() != null) &&
                 (!this.getHomepage().equals(that.getHomepage()))) {
-            System.out.println("Agent objects have different 'hompage' fields.");
             res = false;
         }
 
         if ((this.getName() != null) && (that.getName() != null) &&
                 (!this.getName().equals(that.getName()))) {
-            System.out.println("Agent objects have different 'name' fields.");
             res = false;
         }
 
         if ((this.getHttpUrl() != null) && (that.getHttpUrl() != null) &&
                 (!this.getHttpUrl().equals(that.getHttpUrl()))) {
-            System.out.println("Agent objects have different 'name' fields.");
             res = false;
         }
         return res;

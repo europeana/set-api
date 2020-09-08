@@ -168,60 +168,60 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     /**
      * @deprecated check if the update test must merge the properties or if it
      *             simply overwrites it
-     * @param userSet
-     * @param updatedWebUserSet
+     * @param persistedSet
+     * @param updates
      */
     @Deprecated
-    private void mergeUserSetProperties(PersistentUserSet userSet, UserSet updatedWebUserSet) {
-	if (updatedWebUserSet != null) {
+    private void mergeUserSetProperties(PersistentUserSet persistedSet, UserSet updates) {
+	if (updates != null) {
 //	    if (updatedWebUserSet.getContext() != null) {
 //		userSet.setContext(updatedWebUserSet.getContext());
 //	    }
 
-	    if (updatedWebUserSet.getType() != null) {
-		userSet.setType(updatedWebUserSet.getType());
+	    if (updates.getType() != null) {
+		persistedSet.setType(updates.getType());
 	    }
 
-	    if (updatedWebUserSet.getVisibility() != null) {
-		userSet.setVisibility(updatedWebUserSet.getVisibility());
+	    if (updates.getVisibility() != null) {
+		persistedSet.setVisibility(updates.getVisibility());
 	    }
 
-	    if (updatedWebUserSet.getTitle() != null) {
-		if (userSet.getTitle() != null) {
-		    for (Map.Entry<String, String> entry : updatedWebUserSet.getTitle().entrySet()) {
-			userSet.getTitle().put(entry.getKey(), entry.getValue());
+	    if (updates.getTitle() != null) {
+		if (persistedSet.getTitle() != null) {
+		    for (Map.Entry<String, String> entry : updates.getTitle().entrySet()) {
+			persistedSet.getTitle().put(entry.getKey(), entry.getValue());
 		    }
 		} else {
-		    userSet.setTitle(updatedWebUserSet.getTitle());
+		    persistedSet.setTitle(updates.getTitle());
 		}
 	    }
 
-	    if (updatedWebUserSet.getDescription() != null) {
-		if (userSet.getDescription() != null) {
-		    for (Map.Entry<String, String> entry : updatedWebUserSet.getDescription().entrySet()) {
-			userSet.getDescription().put(entry.getKey(), entry.getValue());
+	    if (updates.getDescription() != null) {
+		if (persistedSet.getDescription() != null) {
+		    for (Map.Entry<String, String> entry : updates.getDescription().entrySet()) {
+			persistedSet.getDescription().put(entry.getKey(), entry.getValue());
 		    }
 		} else {
-		    userSet.setDescription(updatedWebUserSet.getDescription());
+		    persistedSet.setDescription(updates.getDescription());
 		}
 	    }
 
-	    if (updatedWebUserSet.getCreator() != null) {
-		userSet.setCreator(updatedWebUserSet.getCreator());
+	    if (updates.getCreator() != null) {
+		persistedSet.setCreator(updates.getCreator());
 	    }
 
-	    if (updatedWebUserSet.getCreated() != null) {
-		userSet.setCreated(updatedWebUserSet.getCreated());
+	    if (updates.getCreated() != null) {
+		persistedSet.setCreated(updates.getCreated());
 	    }
 
-	    if (updatedWebUserSet.getIsDefinedBy() != null) {
-		userSet.setIsDefinedBy(updatedWebUserSet.getIsDefinedBy());
+	    if (updates.getIsDefinedBy() != null) {
+		persistedSet.setIsDefinedBy(updates.getIsDefinedBy());
 	    }
 	}
     }
 
     @Override
-    public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException {
+    public UserSet parseUserSetLd(String userSetJsonLdStr) throws RequestBodyValidationException,  UserSetInstantiationException{
 
 	JsonParser parser;
 	ObjectMapper mapper = new ObjectMapper();
@@ -284,7 +284,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	}
 
 	// validate isDefinedBy and items - we should not have both of them
-	if (webUserSet.getItems() != null && webUserSet.getIsDefinedBy() != null) {
+	if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
@@ -548,17 +548,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	List<String> items = new ArrayList<>();
 	for (String item : apiResult.getItems()) {
-	    items.add(WebUserSetFields.BASE_ITEM_URL + item);
+	    items.add(UserSetUtils.buildItemUrl(item));
 	}
 	setItems(userSet, items, apiResult.getTotal());
-	}
+    }
 
     private void setItems(UserSet userSet, List<String> items, int total) {
 //	if (!items.isEmpty()) {
-	    userSet.setItems(items);
+	userSet.setItems(items);
 	userSet.setTotal(total);
 //	}
-	}
+    }
 
     private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
 	    int pageSize) throws HttpException {

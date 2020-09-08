@@ -3,7 +3,6 @@ package eu.europeana.set.web.model;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
@@ -13,9 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
-import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
@@ -108,15 +107,13 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
 //    @JsonProperty(WebUserSetFields.CREATOR)
-//    @JsonIgnore // creator is automatically set by the system, temporarily excluded from
-    // serialization
-    @JsonIgnore
+    @JsonIgnore //creator is set by the system, proper serialization postponed for next version
     public Agent getCreator() {
 	return super.getCreator();
     }
 
     @Override
-    @JsonIgnore
+    @JsonIgnore //creator is set by the system
     public void setCreator(Agent creator) {
 	super.setCreator(creator);
     }
