@@ -63,6 +63,7 @@ import eu.europeana.set.web.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
+
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
     @Resource
@@ -291,6 +292,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	validateBookmarkFolder(webUserSet);	
 	validateControlledValues(webUserSet);
+	validateIsDefinedBy(webUserSet);
     }
 
     /**
@@ -363,6 +365,61 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType()});
 	}
+    }
+    
+    /**
+     * The value of isDefinedBy is validated (e.g. search URL https://api.europeana.eu/record/search.json?) 
+     * to point to the Search API.
+     * We make a GET request upon creation to see if the request total items returns more then 0 
+     * and success is true (meaning is valid).
+     * @param webUserSet
+     * @throws ParamValidationException 
+     * @throws RequestBodyValidationException
+     */
+    private void validateIsDefinedBy(UserSet webUserSet) 
+	    throws ParamValidationException, RequestBodyValidationException {
+	
+	if (webUserSet.isOpenSet()) {
+            String searchUrl = getBaseSearchUrl(getConfiguration().getSearchApiUrl());
+            String validateUrl = webUserSet.getIsDefinedBy();
+	    String queryUrl = getBaseSearchUrl(validateUrl);
+            if (!searchUrl.equals(queryUrl)) {	    
+    	        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, " the access to api endpoint is not allowed: " + queryUrl});
+            }
+        	
+    	    String apiKey = getConfiguration().getSearchApiKey();
+    	    SearchApiResponse apiResult;
+    	    try {
+    		//the items are not required for validation
+    		validateUrl += "&rows=0";
+    		apiResult = getSearchApiClient().searchItems(validateUrl, apiKey, false);
+	    } catch (SearchApiClientException e) {
+    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, "an error occured when calling " + validateUrl}, e);
+	    }  
+    		
+            if (!(apiResult.getTotal() > 0)) {
+    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, "no items returned when calling " + validateUrl});
+            }
+	}	
+    }
+    
+    /**
+     * This method extracts base URL from the search URL
+     * @param searchUrl
+     * @return base URL
+     */
+    private String getBaseSearchUrl(String searchUrl) {
+	String res = searchUrl;
+    
+	int endPos = searchUrl.indexOf("?");
+	if (endPos >= 0) {
+	    res = searchUrl.substring(0, endPos);
+	}
+	return res;
     }
     
     boolean isBookmarksFolder(UserSet userSet) {
@@ -536,7 +593,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
-	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
+	    if (SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY.equals(e.getMessage())) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY, url }, e);
 	    } else {

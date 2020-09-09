@@ -165,7 +165,7 @@ public class SearchApiClientImpl implements SearchApiClient {
 	    jsonResponse = createHttpConnection().getURLContent(uri);
 	    if (jsonResponse == null) {
 		// HTTP Error Code
-		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY, null);
+		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY, null);
 	    }
 	    return new JSONObject(jsonResponse);
 	} catch (IOException e) {

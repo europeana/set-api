@@ -38,4 +38,5 @@ public interface SearchApiClient {
      */
     public SearchApiResponse searchItemDescriptions(String uri, String apiKey) 
     		throws SearchApiClientException;
+    
 }
