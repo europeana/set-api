@@ -292,7 +292,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	validateBookmarkFolder(webUserSet);	
 	validateControlledValues(webUserSet);
-	validateIsShownBy(webUserSet);
+	validateIsDefinedBy(webUserSet);
     }
 
     /**
@@ -376,30 +376,33 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @throws ParamValidationException 
      * @throws RequestBodyValidationException
      */
-    private void validateIsShownBy(UserSet webUserSet) 
+    private void validateIsDefinedBy(UserSet webUserSet) 
 	    throws ParamValidationException, RequestBodyValidationException {
 	
 	if (webUserSet.isOpenSet()) {
             String searchUrl = getBaseSearchUrl(getConfiguration().getSearchApiUrl());
-            String queryUrl = getBaseSearchUrl(webUserSet.getIsDefinedBy());
+            String validateUrl = webUserSet.getIsDefinedBy();
+	    String queryUrl = getBaseSearchUrl(validateUrl);
             if (!searchUrl.equals(queryUrl)) {	    
-    	        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_INVALID_SEARCH_URL,
-		    UserSetI18nConstants.USERSET_VALIDATION_INVALID_SEARCH_URL,
-		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, queryUrl});
+    	        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, " the access to api endpoint is not allowed: " + queryUrl});
             }
         	
     	    String apiKey = getConfiguration().getSearchApiKey();
     	    SearchApiResponse apiResult;
     	    try {
-    		apiResult = getSearchApiClient().searchItems(webUserSet.getIsDefinedBy(), apiKey, false);
+    		//the items are not required for validation
+    		validateUrl += "&rows=0";
+    		apiResult = getSearchApiClient().searchItems(validateUrl, apiKey, false);
 	    } catch (SearchApiClientException e) {
-    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_SEARCH_API_NOT_ACCESSIBLE,
-    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, queryUrl});
+    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, "an error occured when calling " + validateUrl}, e);
 	    }  
     		
-            if (apiResult.getTotal() <= 0) {
-    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_SEARCH_API_NOT_ACCESSIBLE,
-    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, queryUrl});
+            if (!(apiResult.getTotal() > 0)) {
+    	        throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+    		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, "no items returned when calling " + validateUrl});
             }
 	}	
     }
@@ -590,7 +593,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
-	    if (SearchApiClientException.MESSAGE_INVALID_ISSHOWNBY.equals(e.getMessage())) {
+	    if (SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY.equals(e.getMessage())) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY, url }, e);
 	    } else {
