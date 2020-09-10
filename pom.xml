@@ -20,16 +20,12 @@
 			<name>europeana-snapshots</name>
 			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
-
-		
-		
 	</repositories>
-	
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<version.setApi>0.2</version.setApi>
+		<version.setApi>0.2.1-SNAPSHOT</version.setApi>
 		<version.java>1.8</version.java>
 		<version.junit>4.12</version.junit>
 		<version.spring>5.1.7.RELEASE</version.spring>
