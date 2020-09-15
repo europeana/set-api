@@ -55,6 +55,7 @@
 		<module>set-web</module>
 		<module>set-client</module>
 		<module>set-search-api-client</module>
+		<module>set-integration-testing</module>
 	</modules>
 	<build>
 		<!--  configure source and output locations -->
