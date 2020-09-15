@@ -772,7 +772,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	List<UserSet> items = new ArrayList<>(results.getResults().size());
 
 	// TODO: define a second parameter for itemset page size
-	int setPageSize = CommonApiConstants.DEFAULT_PAGE_SIZE;
+	int setPageSize = WebUserSetFields.DEFAULT_DEREF_ITEMS;
     
 	for (UserSet userSet : results.getResults()) {
 	    if (profile.equals(LdProfiles.ITEMDESCRIPTIONS)) {

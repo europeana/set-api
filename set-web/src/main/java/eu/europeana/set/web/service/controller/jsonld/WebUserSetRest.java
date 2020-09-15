@@ -119,7 +119,7 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet);
 	    if (mustFetchItems(storedUserSet, profile)) {
 		storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
-			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
+			WebUserSetFields.DEFAULT_DEREF_ITEMS, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
@@ -315,7 +315,7 @@ public class WebUserSetRest extends BaseRest {
 	    // "Prefer" header.
 	    if (mustFetchItems(updatedUserSet, profile)) {
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null, CommonApiConstants.DEFAULT_PAGE,
-			WebUserSetFields.MAX_ITEMS_PER_PAGE, profile);
+			WebUserSetFields.DEFAULT_DEREF_ITEMS, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
@@ -486,7 +486,7 @@ public class WebUserSetRest extends BaseRest {
     }
 
     @RequestMapping(value = { "/set/{identifier}/{datasetId}/{localId}" },
-			method = { RequestMethod.GET, RequestMethod.HEAD },
+			method = { RequestMethod.GET},
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
 		    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.CHECK_ITEM_NOTE, value = "Check if item is member of the Set", nickname = "check item", response = java.lang.Void.class)
