@@ -5,117 +5,112 @@ import java.util.Properties;
 
 import eu.europeana.set.client.exception.TechnicalRuntimeException;
 
-
 public class ClientConfiguration {
 
-	protected static final String SET_CLIENT_PROPERTIES_FILE  = "/set-client.properties";
-	protected static final String PROP_SET_API_KEY            = "set.api.key";
-	protected static final String PROP_SET_SERVICE_URI        = "set.service.uri";
-	protected static final String PROP_AUTHORIZATION_HEADER_NAME = "set.header.name";
-	protected static final String PROP_REGULAR_AUTHORIZATION_HEADER_VALUE = "set.regular.authorization.value";
+    protected static final String SET_CLIENT_PROPERTIES_FILE = "/set-client.properties";
+    protected static final String PROP_SET_API_KEY = "set.api.key";
+    protected static final String PROP_SET_SERVICE_URI = "set.service.uri";
+    protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
+    protected static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
 
-	private static Properties          properties = null;
-	private static ClientConfiguration singleton;
+    private static Properties properties = null;
+    private static ClientConfiguration singleton;
 
-	/**
-	 * Hide the default constructor
-	 */
-	private ClientConfiguration() {
+    /**
+     * Hide the default constructor
+     */
+    private ClientConfiguration() {
+    }
+
+    /**
+     * Accessor method for the singleton
+     * 
+     * @return
+     */
+    public static synchronized ClientConfiguration getInstance() {
+	if (singleton == null) {
+	    singleton = new ClientConfiguration();
+	    singleton.loadProperties();
+	}
+	return singleton;
+    }
+
+    /**
+     * Laizy loading of configuration properties
+     */
+    public synchronized void loadProperties() {
+	try {
+	    properties = new Properties();
+	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
+	    if (resourceAsStream != null)
+		getProperties().load(resourceAsStream);
+	    else
+		throw new TechnicalRuntimeException(
+			"No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);
+
+	} catch (Exception e) {
+	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_CLIENT_PROPERTIES_FILE, e);
 	}
 
-	/**
-	 * Accessor method for the singleton
-	 * 
-	 * @return
-	 */
-	public static synchronized ClientConfiguration getInstance() {
-		singleton = new ClientConfiguration();
-		singleton.loadProperties();
-		return singleton;
-	}
+    }
 
-	/**
-	 * Laizy loading of configuration properties
-	 */
-	public synchronized void loadProperties() {
-		try {
-			properties = new Properties();
-			InputStream resourceAsStream = getClass().getResourceAsStream(
-					SET_CLIENT_PROPERTIES_FILE);
-			if (resourceAsStream != null)
-				getProperties().load(resourceAsStream);
-			else
-				throw new TechnicalRuntimeException(
-						"No properties file found in classpath! "
-								+ SET_CLIENT_PROPERTIES_FILE);
+    /**
+     * provides access to the configuration properties. It is not recommended to use
+     * the properties directly, but the
+     * 
+     * @return
+     */
+    Properties getProperties() {
+	return properties;
+    }
 
-		} catch (Exception e) {
-			throw new TechnicalRuntimeException(
-					"Cannot read configuration file: "
-							+ SET_CLIENT_PROPERTIES_FILE, e);
-		}
+    /**
+     * 
+     * @return the name of the file storing the client configuration
+     */
+    String getConfigurationFile() {
+	return SET_CLIENT_PROPERTIES_FILE;
+    }
 
-	}
+    /**
+     * This method provides access to the API key defined in the configuration file
+     * 
+     * @see PROP_EUROPEANA_API_KEY
+     * 
+     * @return
+     */
+    public String getApiKey() {
+	return getProperties().getProperty(PROP_SET_API_KEY);
+    }
 
-	/**
-	 * provides access to the configuration properties. It is not recommended to
-	 * use the properties directly, but the
-	 * 
-	 * @return
-	 */
-	Properties getProperties() {
-		return properties;
-	}
+    /**
+     * This method provides access to the search uri value defined in the
+     * configuration file
+     * 
+     * @see PROP_EUROPEANA_SEARCH_URI
+     * 
+     * @return
+     */
+    public String getServiceUri() {
+	return getProperties().getProperty(PROP_SET_SERVICE_URI);
+    }
+   
+    /**
+     * This method returns the uri of the oauth service as configured in
+     * 
+     * @return
+     */
+    public String getOauthServiceUri() {
+	return getProperties().getProperty(PROP_OAUTH_SERVICE_URI);
+    }
 
-	/**
-	 * 
-	 * @return the name of the file storing the client configuration
-	 */
-	String getConfigurationFile() {
-		return SET_CLIENT_PROPERTIES_FILE;
-	}
+    /**
+     * This method returns the request params needed to acquire a new token
+     * 
+     * @return
+     */
+    public String getOauthRequestParams() {
+	return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS);
+    }
 
-	/**
-	 * This method provides access to the API key defined in the configuration
-	 * file
-	 * @see PROP_EUROPEANA_API_KEY
-	 * 
-	 * @return
-	 */
-	public String getApiKey() {
-		return getProperties().getProperty(PROP_SET_API_KEY);
-	}
-	
-	/**
-	 * This method provides access to the search uri value defined in the configuration
-	 * file
-	 * @see PROP_EUROPEANA_SEARCH_URI
-	 * 
-	 * @return
-	 */
-	public String getServiceUri() {
-		return getProperties().getProperty(PROP_SET_SERVICE_URI);
-	}
-
-	/**
-	 * This method provides access to the header name defined in the configuration
-	 * file
-	 * @see PROP_EUROPEANA_SEARCH_URI
-	 * 
-	 * @return
-	 */
-	public String getHeaderName() {
-		return getProperties().getProperty(PROP_AUTHORIZATION_HEADER_NAME).trim();
-	}
-	
-	/**
-	 * This method provides access to the header value defined in the configuration
-	 * file
-	 * 
-	 * @return
-	 */
-	public String getAuthorizationHeaderValue() {
-		return getProperties().getProperty(PROP_REGULAR_AUTHORIZATION_HEADER_VALUE).trim();
-	}
-		
 }
