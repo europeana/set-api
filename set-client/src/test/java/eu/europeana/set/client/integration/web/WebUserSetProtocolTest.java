@@ -57,9 +57,9 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 		validateResponse(response, HttpStatus.CREATED);
 	}
 	
-	protected void validateResponse(ResponseEntity<String> response, HttpStatus status) {
+	protected void validateResponse(ResponseEntity<String> response, HttpStatus expectedStatus) {
 		assertNotNull(response.getBody());
-		assertEquals(response.getStatusCode(), status);
+		assertEquals(expectedStatus, response.getStatusCode());
 	}
 	
 	/**
