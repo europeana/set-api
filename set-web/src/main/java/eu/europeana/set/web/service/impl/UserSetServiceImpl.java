@@ -846,12 +846,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	if (startPos >= 0) {
 	    // make sure to remove the "&" if not the first param
-	    if (startPos > 0)
+	    if (startPos > 0) {
 		startPos--;
+	    }	
+	    
 	    tmp = queryParams.substring(0, startPos);
 
-	    if (startEndPos > 0)
+	    if (startEndPos > 0) {
 		tmp += queryParams.substring(startEndPos);
+	    }
 	} else {
 	    tmp = queryParams;
 	}
