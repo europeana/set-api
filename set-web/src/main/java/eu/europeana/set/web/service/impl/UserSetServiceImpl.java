@@ -712,10 +712,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Deprecated
     // TODO: fix the implementation and remove this method
     public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items) {
-//    	if (items.size() > 0) {
-//	    	storedUserSet.setItems(items);
-//	    	storedUserSet.setTotal(items.size());
-//    	}
 	storedUserSet.setModified(new Date());
 	// simply store userSet
 	return getMongoPersistence().update((PersistentUserSet) storedUserSet);
@@ -739,16 +735,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
 
-	if (LdProfiles.MINIMAL.equals(profile)) {
-	    resPage = new UserSetIdsResultPage();
-	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
-	} else if (LdProfiles.STANDARD.equals(profile) || LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
+	if (LdProfiles.STANDARD.equals(profile) || LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
 	    resPage = new UserSetResultPage();
 	    setPageItems(results, (UserSetResultPage) resPage, resultPageSize, authentication, profile);
+	} else {
+	    //LdProfiles.MINIMAL.equals(profile) - default
+	    resPage = new UserSetIdsResultPage();
+	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
 	}
-
-//	resPage.setFacetFields(results.getFacetFields());
-//	resPage.setTotalInPage(resultPageSize);
 
 	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
 	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize()));
@@ -1031,10 +1025,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    if (userSet.isOpenSet()) {
 		userSet.setTotal(-1);
 	    }
-	default:
-//	    if (userSet.getIsDefinedBy() == null) {
 	    userSet.setItems(null);
-//	    }
+	    break;
+	default:
+	    userSet.setItems(null);
 	    break;
 	}
 
