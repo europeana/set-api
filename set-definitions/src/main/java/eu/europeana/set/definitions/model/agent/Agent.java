@@ -44,8 +44,6 @@ public interface Agent {
 	
 	public abstract String getInputString();
 	
-	public boolean equalsContent(Object other);
-
 	void setUserGroup(String userGroup);
 	
 	String getUserGroup();

@@ -130,6 +130,10 @@ public abstract class BaseAgent implements Agent {
     protected BaseAgent() {
     }
 
+    protected BaseAgent(AgentTypes type) {
+	agentType = type.name();
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof Agent)) {
@@ -164,8 +168,13 @@ public abstract class BaseAgent implements Agent {
         return res;
     }
 
-    public boolean equalsContent(Object other) {
-        return equals(other);
+    @Override
+    public int hashCode() {
+	if(getHttpUrl() != null) {
+	    return getHttpUrl().hashCode();
+	} else {
+	    return super.hashCode();
+	}
     }
 
     @Override

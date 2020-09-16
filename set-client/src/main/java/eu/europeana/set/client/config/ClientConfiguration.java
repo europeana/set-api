@@ -42,11 +42,12 @@ public class ClientConfiguration {
 	try {
 	    properties = new Properties();
 	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
-	    if (resourceAsStream != null)
+	    if (resourceAsStream != null) {
 		getProperties().load(resourceAsStream);
-	    else
+	    } else {
 		throw new TechnicalRuntimeException(
 			"No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);
+	    }
 
 	} catch (Exception e) {
 	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_CLIENT_PROPERTIES_FILE, e);

@@ -5,7 +5,6 @@ import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 public class SoftwareAgent extends BaseAgent{
 
 	public SoftwareAgent(){
-		super();
-		setAgentTypeEnum(AgentTypes.SOFTWARE);
+		super(AgentTypes.SOFTWARE);
 	}
 }
