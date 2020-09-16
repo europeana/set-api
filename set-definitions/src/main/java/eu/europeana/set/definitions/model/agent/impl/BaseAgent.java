@@ -179,16 +179,16 @@ public abstract class BaseAgent implements Agent {
 
     @Override
     public String toString() {
-        String res = "\t### Agent ###\n";
+        StringBuilder res = new StringBuilder("\t### Agent ###\n");
 
         if (getType() != null)
-            res = res + "\t\t" + "agentType:" + getType() + "\n";
+            res.append("\t\t").append("agentType:").append(getType()).append("\n");
         if (getName() != null)
-            res = res + "\t\t" + "name:" + getName() + "\n";
+            res.append("\t\t").append("name:").append(getName()).append("\n");
         if (getHttpUrl() != null)
-            res = res + "\t\t" + "httpUrl:" + getHttpUrl() + "\n";
+            res.append("\t\t").append("httpUrl:").append(getHttpUrl()).append("\n");
         if (getHomepage() != null)
-            res = res + "\t\t" + "homepage:" + getHomepage() + "\n";
-        return res;
+            res.append("\t\t").append("homepage:").append(getHomepage()).append("\n");
+        return res.toString();
     }
 }

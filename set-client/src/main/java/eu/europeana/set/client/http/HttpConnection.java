@@ -6,7 +6,6 @@ package eu.europeana.set.client.http;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -22,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import eu.europeana.set.client.connection.UserSetApiConnection;
 
 /**
