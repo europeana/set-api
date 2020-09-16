@@ -17,7 +17,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
  * @author GrafR
  */
 //@Ignore
-public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocolTest {
+public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 	
     public String CORRUPTED_JSON = 
     		START +

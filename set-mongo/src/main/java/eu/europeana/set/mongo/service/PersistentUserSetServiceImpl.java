@@ -11,8 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainerImpl;
-import org.mongodb.morphia.query.FieldEnd;
 import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
@@ -23,7 +21,6 @@ import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
@@ -87,10 +84,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 		long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER); 
 		object.setIdentifier("" + sequenceId);
-
+		
+		String NOT_INITIALIZED_LONG_ID = "-1";
+		
 		// validate user set ID
 		if (StringUtils.isBlank(object.getIdentifier()) 
-				|| UserSetId.NOT_INITIALIZED_LONG_ID.equals(object.getIdentifier()))
+				|| NOT_INITIALIZED_LONG_ID.equals(object.getIdentifier()))
 				throw new UserSetValidationException("UserSet.UserSetId.identifier must be a valid alpha-numeric value or a positive number!");
 	}
 

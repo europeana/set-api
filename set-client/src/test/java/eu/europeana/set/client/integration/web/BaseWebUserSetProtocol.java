@@ -18,7 +18,7 @@ import eu.europeana.set.client.web.WebUserSetApiImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
-public class BaseWebUserSetProtocolTest {
+public class BaseWebUserSetProtocol {
 
 	protected Logger log = LogManager.getLogger(getClass());
 

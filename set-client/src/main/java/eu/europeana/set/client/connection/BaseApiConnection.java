@@ -119,8 +119,7 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	ResponseEntity<String> postURL(String url, String jsonPost, String headerValue) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: " + url + 
-				". Returns body, headers and status code.");
+		logger.trace("Call to UserSet API (POST) with body: {}. Returns body, headers and status code.", url);
 		return getHttpConnection().postURL(url, jsonPost, headerValue);
 	}
 	
@@ -134,8 +133,7 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	ResponseEntity<String> putURL(String url, String jsonPut, String authorizationHeaderValue) throws IOException {
-		logger.trace("Call to UserSet API (PUT) with body: " + url + 
-				". Returns body, headers and status code.");
+		logger.trace("Call to UserSet API (PUT) with body: {}. Returns body, headers and status code.", url);
 		
 		ResponseEntity<String> response = getHttpConnection().putURL(url, jsonPut, authorizationHeaderValue);
 		
@@ -165,8 +163,7 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> getURL(String url, String authorizationHeaderValue) throws IOException {
-		logger.trace("Call to UserSet API (GET): " + url + 
-				". Returns body, headers and status code.");
+		logger.trace("Call to UserSet API (GET): {}. Returns body, headers and status code.", url);
 		return getHttpConnection().getURL(url, authorizationHeaderValue);
 	}
 	
@@ -192,8 +189,7 @@ public class BaseApiConnection {
 	 * @throws IOException
 	 */
 	ResponseEntity<String> deleteURL(String url, String authorizationHeaderValue) throws IOException {
-		logger.trace("Call to UserSet API (DELETE): " + url + 
-				". Returns headers and status code.");
+		logger.trace("Call to UserSet API (DELETE): {}. Returns headers and status code.", url);
 		return getHttpConnection().deleteURL(url, authorizationHeaderValue);
 	}
 		

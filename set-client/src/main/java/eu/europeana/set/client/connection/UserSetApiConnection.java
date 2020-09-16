@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.config.ClientConfiguration;
+import eu.europeana.set.client.exception.TechnicalRuntimeException;
 import eu.europeana.set.client.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
@@ -50,20 +51,20 @@ public class UserSetApiConnection extends BaseApiConnection {
 	    ResponseEntity<String> response;
 	    response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded");
 
-	    if (HttpStatus.OK.equals(response.getStatusCode())) {
+	    if (HttpStatus.OK == response.getStatusCode()) {
 		String body = response.getBody();
 		JSONObject json = new JSONObject(body);
 		if (json.has(ACCESS_TOKEN)) {
 		    return "Bearer " + json.getString(ACCESS_TOKEN);
 		} else {
-		    throw new RuntimeException("Cannot extract authentication token from reponse:" + body);
+		    throw new TechnicalRuntimeException("Cannot extract authentication token from reponse:" + body);
 		}
 	    } else {
-		throw new RuntimeException(
+		throw new TechnicalRuntimeException(
 			"Error occured when calling oath service! " + response);
 	    }
 	} catch (IOException | JSONException e) {
-	    throw new RuntimeException("Cannot retrieve authentication token!", e);
+	    throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);
 	}
 
     }

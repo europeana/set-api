@@ -1,5 +1,6 @@
 package eu.europeana.set.client.config;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -49,7 +50,7 @@ public class ClientConfiguration {
 			"No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);
 	    }
 
-	} catch (Exception e) {
+	} catch ( RuntimeException | IOException e) {
 	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_CLIENT_PROPERTIES_FILE, e);
 	}
 
