@@ -1,11 +1,11 @@
-package eu.europeana.set.definitions.model.vocabulary.fields;
+package eu.europeana.set.definitions.model.vocabulary;
 
 /**
  * Model attribute names
  */
 public class WebUserSetModelFields {
 
-	public WebUserSetModelFields() {
+	WebUserSetModelFields() {
 
 	}
 

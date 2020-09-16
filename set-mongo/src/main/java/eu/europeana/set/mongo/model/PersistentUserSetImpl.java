@@ -1,6 +1,5 @@
 package eu.europeana.set.mongo.model;
 
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -8,6 +7,7 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.Indexes;
 
 import eu.europeana.set.definitions.model.impl.BaseUserSet;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 @Entity("userset")

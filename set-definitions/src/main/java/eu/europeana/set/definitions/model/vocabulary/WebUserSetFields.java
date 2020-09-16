@@ -1,15 +1,12 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
-
 /**
  * @author GrafR
  */
 public class WebUserSetFields extends WebUserSetModelFields {
 
-  public WebUserSetFields() {
-       super();
-   }
+    WebUserSetFields() {
+    }
 
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";

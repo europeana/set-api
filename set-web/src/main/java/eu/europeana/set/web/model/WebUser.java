@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import eu.europeana.set.definitions.model.agent.impl.Person;
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
 //@JsonldType("http://europeana.eu/schemas/context/collection/Agent")
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
