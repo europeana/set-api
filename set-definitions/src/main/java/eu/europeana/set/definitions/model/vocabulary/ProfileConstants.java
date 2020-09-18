@@ -11,4 +11,5 @@ public abstract class ProfileConstants {
     public static final String VALUE_PREFER_MINIMAL = COMMON_STRING + VALUE_LD_MINIMAL + "\"";
     public static final String VALUE_PREFER_ITEM_DESCRIPTIONS = COMMON_STRING + VALUE_LD_ITEM_DESCRIPTIONS + "\"";
 
+    private ProfileConstants() {}
 }

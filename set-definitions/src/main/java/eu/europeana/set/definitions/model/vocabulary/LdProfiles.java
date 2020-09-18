@@ -1,12 +1,5 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
-import static eu.europeana.set.definitions.model.vocabulary.ProfileConstants.VALUE_LD_CONTAINEDIRIS;
-import static eu.europeana.set.definitions.model.vocabulary.ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS;
-import static eu.europeana.set.definitions.model.vocabulary.ProfileConstants.VALUE_LD_MINIMAL;
-import static eu.europeana.set.definitions.model.vocabulary.ProfileConstants.VALUE_PREFER_CONTAINEDIRIS;
-import static eu.europeana.set.definitions.model.vocabulary.ProfileConstants.VALUE_PREFER_ITEM_DESCRIPTIONS;
-import static eu.europeana.set.definitions.model.vocabulary.ProfileConstants.VALUE_PREFER_MINIMAL;
-
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 
 /**
@@ -17,8 +10,8 @@ import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
  */
 public enum LdProfiles implements ProfileKeyword {
 
-    MINIMAL(VALUE_LD_MINIMAL, VALUE_PREFER_MINIMAL), STANDARD(VALUE_LD_CONTAINEDIRIS, VALUE_PREFER_CONTAINEDIRIS),
-    ITEMDESCRIPTIONS(VALUE_LD_ITEM_DESCRIPTIONS, VALUE_PREFER_ITEM_DESCRIPTIONS);
+    MINIMAL(ProfileConstants.VALUE_LD_MINIMAL, ProfileConstants.VALUE_PREFER_MINIMAL), STANDARD(ProfileConstants.VALUE_LD_CONTAINEDIRIS, ProfileConstants.VALUE_PREFER_CONTAINEDIRIS),
+    ITEMDESCRIPTIONS(ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS, ProfileConstants.VALUE_PREFER_ITEM_DESCRIPTIONS);
 
     private String headerValue;
     private String preferHeaderValue;

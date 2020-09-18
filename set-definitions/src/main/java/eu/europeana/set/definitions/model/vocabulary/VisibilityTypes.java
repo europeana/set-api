@@ -1,5 +1,7 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
+import java.util.Locale;
+
 /**
  *	The following states cover different levels of visibility:
  *   
@@ -31,6 +33,6 @@ public enum VisibilityTypes {
     }
     
     public static final VisibilityTypes getByJsonValue(String visibility) {
-	return VisibilityTypes.valueOf(visibility.toUpperCase());
+	return VisibilityTypes.valueOf(visibility.toUpperCase(Locale.ROOT));
     }
 }

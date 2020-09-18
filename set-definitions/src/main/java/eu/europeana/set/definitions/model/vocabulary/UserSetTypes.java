@@ -27,7 +27,7 @@ public enum UserSetTypes implements JsonKeyword {
      * @return
      */
     public static UserSetTypes getByJsonValue(String jsonValue) {
-	return valueOf(jsonValue.toUpperCase(Locale.ENGLISH));
+	return valueOf(jsonValue.toUpperCase(Locale.ROOT));
     }
 
     @Override

@@ -56,7 +56,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return configuration;
 	}
 
-	public void setConfiguration(UserSetConfiguration configuration) {
+	public synchronized void setConfiguration(UserSetConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
@@ -129,7 +129,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    PersistentUserSet persistentObject = null;
 
 	    if (userSet instanceof PersistentUserSet) {
-		persistentObject = (PersistentUserSetImpl) userSet;
+		persistentObject = (PersistentUserSet) userSet;
 	    } else {
 		throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);
 	    }
@@ -224,21 +224,25 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		//default ordering if none is defined by the user
 		mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));
 	    } else {
-		for (String sortField : query.getSortCriteria()) {
-		    if(!sortField.contains(" ")) {
-			mongoQuery.order(Sort.ascending(sortField));
-		    }else {
-			String[] sortParts = sortField.split(" ", 2);
-			if(!"desc".contentEquals(sortParts[1])) {
-			    mongoQuery.order(Sort.ascending(sortParts[0]));
-			}else {
-			    mongoQuery.order(Sort.descending(sortParts[0]));
-			}
-			
-		    }
-		}
+		buildSortCriteria(query, mongoQuery);
 	    }
 	    return mongoQuery;
+	}
+
+	private void buildSortCriteria(UserSetQuery query, Query<PersistentUserSet> mongoQuery) {
+	    for (String sortField : query.getSortCriteria()) {
+	        if(!sortField.contains(" ")) {
+	    	mongoQuery.order(Sort.ascending(sortField));
+	        }else {
+	    	String[] sortParts = sortField.split(" ", 2);
+	    	if(!"desc".contentEquals(sortParts[1])) {
+	    	    mongoQuery.order(Sort.ascending(sortParts[0]));
+	    	}else {
+	    	    mongoQuery.order(Sort.descending(sortParts[0]));
+	    	}
+	    	
+	        }
+	    }
 	}
 
 	@Override
