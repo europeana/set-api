@@ -56,19 +56,6 @@ public class BaseApiConnection {
 		this.httpConnection = httpConnection;
 	}
 	
-//	public Gson getUserSetGson() {
-//		if (gson == null) {
-//			// Load results object from JSON
-//			GsonBuilder builder = new GsonBuilder();
-//			UserSetDeserializer annoDeserializer = new UserSetDeserializer();
-//			
-//			builder.registerTypeHierarchyAdapter(UserSet.class,
-//					annoDeserializer);
-//			
-//			gson = builder.setDateFormat(ModelConst.GSON_DATE_FORMAT).create();
-//		}
-//		return gson;
-//	}
 
 	/**
 	 * Create a new connection to the UserSet Service (REST API).
@@ -81,21 +68,7 @@ public class BaseApiConnection {
 		this.setServiceUri = setServiceUri;
 	}
 	
-	String getJSONResult(String url) throws IOException {
-		logger.trace("Call to UserSet API (GET): {} ", url);
-		return getHttpConnection().getURLContent(url);
-	}
 	
-	String getJSONResult(String url, String paramName, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST): {} ", url);
-		return getHttpConnection().getURLContent(url, paramName, jsonPost);
-	}
-	
-	String getJSONResultWithBody(String url, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: {} ", url);
-		return getHttpConnection().getURLContentWithBody(url, jsonPost);
-	}
-
 	/**
 	 * This method makes POST request for given URL and JSON body parameter that returns
 	 * response body, response headers and status code.
