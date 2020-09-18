@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.TechnicalRuntimeException;
-import eu.europeana.set.client.http.HttpConnection;
+import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 /**
@@ -18,7 +18,6 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
  */
 public class UserSetApiConnection extends BaseApiConnection {
 
-    public static final String HEADER_AUTHORIZATION = "Authorization";
     String regularUserAuthorizationValue = null;
 
     /**

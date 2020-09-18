@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
-import eu.europeana.set.client.http.HttpConnection;
+import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 public class BaseApiConnection {

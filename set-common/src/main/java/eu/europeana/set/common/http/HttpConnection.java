@@ -2,14 +2,14 @@
  * HttpConnector.java - europeana4j
  * (C) 2011 Digibis S.L.
  */
-package eu.europeana.set.client.http;
+package eu.europeana.set.common.http;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import eu.europeana.set.client.connection.UserSetApiConnection;
 
 /**
  * The class encapsulating simple HTTP access.
@@ -32,6 +31,8 @@ import eu.europeana.set.client.connection.UserSetApiConnection;
  */
 public class HttpConnection {
 
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+    
     private static final int CONNECTION_RETRIES = 3;
     private static final int TIMEOUT_CONNECTION = 40000;
     private static final int STATUS_OK_START = 200;
@@ -66,7 +67,7 @@ public class HttpConnection {
      * @throws IOException
      */
     public ResponseEntity<String> postURL(String url, String body, String authorizationHeaderValue) throws IOException {
-	PostMethod post = buildPostMethod(url, body, UserSetApiConnection.HEADER_AUTHORIZATION,
+	PostMethod post = buildPostMethod(url, body, HEADER_AUTHORIZATION,
 		authorizationHeaderValue);
 	return fetchHttpMethodResponse(post);
     }
@@ -110,7 +111,7 @@ public class HttpConnection {
 	    throws IOException {
 	PutMethod put = new PutMethod(url);
 	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
-	    put.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
+	    put.setRequestHeader(HEADER_AUTHORIZATION, authorizationHeaderValue);
 	}
 	put.setRequestBody(jsonParamValue);
 
@@ -140,7 +141,7 @@ public class HttpConnection {
     public ResponseEntity<String> deleteURL(String url, String authorizationtHeaderValue) throws IOException {
 	DeleteMethod delete = new DeleteMethod(url);
 	if (StringUtils.isNotBlank(authorizationtHeaderValue)) {
-	    delete.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationtHeaderValue);
+	    delete.setRequestHeader(HEADER_AUTHORIZATION, authorizationtHeaderValue);
 	}
 
 	return fetchHttpMethodResponse(delete);
@@ -193,7 +194,7 @@ public class HttpConnection {
     public ResponseEntity<String> getURL(String url, String authorizationHeaderValue) throws IOException {
 	GetMethod get = new GetMethod(url);
 	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
-	    get.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
+	    get.setRequestHeader(HEADER_AUTHORIZATION, authorizationHeaderValue);
 	}
 
 	return fetchHttpMethodResponse(get);
@@ -217,7 +218,14 @@ public class HttpConnection {
 	return callHttpMethod(post);
     }
 
-    private String callHttpMethod(EntityEnclosingMethod httpMethod) throws IOException {
+    
+    public String getJsonResponse(String url) throws IOException {
+        GetMethod get = new GetMethod(url);
+        get.setRequestHeader("Accept", "application/json");
+        return callHttpMethod(get);
+    }
+    
+    private String callHttpMethod(HttpMethod httpMethod) throws IOException {
 	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
 	try {
 	    client.executeMethod(httpMethod);

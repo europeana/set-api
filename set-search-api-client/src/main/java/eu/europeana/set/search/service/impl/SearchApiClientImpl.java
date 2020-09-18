@@ -11,7 +11,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.search.connection.HttpConnection;
+import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
@@ -162,7 +162,7 @@ public class SearchApiClientImpl implements SearchApiClient {
     JSONObject searchItems(String uri) throws SearchApiClientException {
 	String jsonResponse;
 	try {
-	    jsonResponse = createHttpConnection().getURLContent(uri);
+	    jsonResponse = createHttpConnection().getJsonResponse(uri);
 	    if (jsonResponse == null) {
 		// HTTP Error Code
 		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY, null);

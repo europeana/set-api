@@ -17,11 +17,12 @@ public class PositiveIntegerFilter {
 	if (other == null) {
 	    return true;
 	}
-	
-	if(!(other instanceof Number)) {
-	    //true means filter out	
-	    return true;
-	}
+
+//not helping sonarcube	
+//	if(!(other instanceof Number)) {
+//	    //true means filter out	
+//	    return true;
+//	}
 	
 	int value = (Integer) other;
 	return value < 0;

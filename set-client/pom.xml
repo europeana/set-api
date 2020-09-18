@@ -39,11 +39,11 @@
 			<artifactId>set-definitions</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
-
+		
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-common</artifactId>
+			<version>${version.setApi}</version>
 		</dependency>
 		
 		<dependency>
