@@ -37,7 +37,7 @@ public class SearchUserSetRest extends BaseRest {
 
     UserSetQueryBuilder queryBuilder;
 
-    public UserSetQueryBuilder getQueryBuilder() {
+    public synchronized UserSetQueryBuilder getQueryBuilder() {
         if (queryBuilder == null) {
             queryBuilder = new UserSetQueryBuilder();
         }
@@ -76,7 +76,7 @@ public class SearchUserSetRest extends BaseRest {
             resultsPage = getUserSetService().buildResultsPage(searchQuery, results,
                     request.getRequestURL(), request.getQueryString(), profile, authentication);
 
-            String jsonLd = serializeResultsPage(resultsPage, profile);
+            String jsonLd = serializeResultsPage(resultsPage);
 
             // build response
             MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
@@ -88,14 +88,14 @@ public class SearchUserSetRest extends BaseRest {
 
         } catch (HttpException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             throw new InternalServerException(e);
         }
     }
     
  
     @SuppressWarnings("rawtypes")
-    private String serializeResultsPage(BaseUserSetResultPage resultsPage, LdProfiles profile) throws IOException {
+    private String serializeResultsPage(BaseUserSetResultPage resultsPage) throws IOException {
         UserSetLdSerializer serializer = new UserSetLdSerializer();
         return serializer.serialize(resultsPage);
     }

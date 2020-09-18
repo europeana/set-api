@@ -1,9 +1,11 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -144,7 +146,7 @@ public class WebUserSetRest extends BaseRest {
 	} catch (HttpException e) {
 	    // avoid wrapping HttpExceptions
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException | IOException | JSONException e) {
 	    throw new InternalServerException(e);
 	}
 
@@ -217,14 +219,14 @@ public class WebUserSetRest extends BaseRest {
 	} catch (HttpException e) {
 	    // avoid wrapping http exception
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException | IOException | JSONException e) {
 	    throw new InternalServerException(e);
 	}
     }
 
     private boolean mustFetchItems(UserSet userSet, LdProfiles profile) {
-	boolean itemDescriptionsProfile = LdProfiles.ITEMDESCRIPTIONS.equals(profile); 
-	boolean fetchItemsForOpenSet = userSet.isOpenSet() && !LdProfiles.MINIMAL.equals(profile);
+	boolean itemDescriptionsProfile = LdProfiles.ITEMDESCRIPTIONS == profile; 
+	boolean fetchItemsForOpenSet = userSet.isOpenSet() && LdProfiles.MINIMAL != profile;
 	return itemDescriptionsProfile || fetchItemsForOpenSet;
     }
 
@@ -340,7 +342,7 @@ public class WebUserSetRest extends BaseRest {
 		    new String[] { e.getMessage() }, e);
 	} catch (HttpException e) {
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException | IOException | JSONException e) {
 	    throw new InternalServerException(e);
 	}
     }
@@ -388,7 +390,7 @@ public class WebUserSetRest extends BaseRest {
 	// if the provided userset contains a list of items and the profile is set to
 	// minimal,
 	// respond with HTTP 412)
-	if (LdProfiles.MINIMAL.equals(profile)) {
+	if (LdProfiles.MINIMAL == profile) {
 	    if (updateUserSet.getItems() != null && updateUserSet.getItems().size() > 0) { // new user set contains
 											   // items
 		throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
@@ -480,7 +482,7 @@ public class WebUserSetRest extends BaseRest {
 		    new String[] { e.getMessage() }, e);
 	} catch (HttpException e) {
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException | IOException e) {
 	    throw new InternalServerException(e);
 	}
     }
@@ -555,7 +557,7 @@ public class WebUserSetRest extends BaseRest {
 	    // TODO: change this when OAUTH is implemented and the user information is
 	    // available in service
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException e) {
 	    throw new InternalServerException(e);
 	}
     }
@@ -643,7 +645,7 @@ public class WebUserSetRest extends BaseRest {
 		    new String[] { e.getMessage() }, e);
 	} catch (HttpException e) {
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException | IOException e) {
 	    throw new InternalServerException(e);
 	}
     }
@@ -711,7 +713,7 @@ public class WebUserSetRest extends BaseRest {
 	    return new ResponseEntity<>(identifier, headers, httpStatus);
 	} catch (HttpException e) {
 	    throw e;
-	} catch (Exception e) {
+	} catch (RuntimeException e) {
 	    throw new InternalServerException(e);
 	}
     }

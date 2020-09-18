@@ -18,13 +18,13 @@ public class PositiveIntegerFilter {
 	    return true;
 	}
 
-//not helping sonarcube	
-//	if(!(other instanceof Number)) {
-//	    //true means filter out	
-//	    return true;
-//	}
+	//avoid critical sonar cube issue
+	if(!(other instanceof Number)) {
+	    //true means filter out	
+	    return true;
+	}
 	
-	int value = (Integer) other;
+	Integer value = (Integer) other;
 	return value < 0;
     }
 

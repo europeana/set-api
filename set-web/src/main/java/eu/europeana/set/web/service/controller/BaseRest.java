@@ -93,7 +93,7 @@ public class BaseRest extends BaseRestController {
                 profile = LdProfiles.getByName(paramProfile);
             } catch (UserSetProfileValidationException e) {
                 throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-                        new String[]{CommonApiConstants.QUERY_PARAM_PROFILE, paramProfile});
+                        new String[]{CommonApiConstants.QUERY_PARAM_PROFILE, paramProfile}, e);
             }
         }
         return profile;
@@ -127,13 +127,13 @@ public class BaseRest extends BaseRestController {
                     profile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
                 } catch (UserSetProfileValidationException e) {
                     throw new HttpException(UserSetI18nConstants.INVALID_HEADER_VALUE, UserSetI18nConstants.INVALID_HEADER_VALUE,
-                            new String[]{HttpHeaders.PREFER, preferHeader}, HttpStatus.BAD_REQUEST, null);
+                            new String[]{HttpHeaders.PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
                 } catch (RuntimeException e) {
                     throw new HttpException(UserSetI18nConstants.INVALID_HEADER_FORMAT, UserSetI18nConstants.INVALID_HEADER_FORMAT,
-                            new String[]{HttpHeaders.PREFER, preferHeader}, HttpStatus.BAD_REQUEST, null);
+                            new String[]{HttpHeaders.PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
                 }
             }
-            getLogger().debug("Profile identified by prefer header: {} ", (profile != null ? profile.name() : " "));
+            getLogger().debug("Profile identified by prefer header: {} ", profile);
 
         }
         return profile;
@@ -169,7 +169,7 @@ public class BaseRest extends BaseRestController {
         int keyPos = 0;
         int valuePos = 1;
 
-        Map<String, String> resMap = new HashMap<>();
+        Map<String, String> resMap = new HashMap<>(3);
 
         headerParts = preferHeader.split(";");
         for (String headerPart : headerParts) {

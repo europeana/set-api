@@ -65,28 +65,7 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
-    @Resource
-    I18nService i18nService;
-
-    UserSetUtils userSetUtils = new UserSetUtils();
-
-    @Resource
-    UserSetConfiguration configuration;
-
-    private SearchApiClient setApiService = new SearchApiClientImpl();
-
-    public UserSetUtils getUserSetUtils() {
-	return userSetUtils;
-    }
-
-    public SearchApiClient getSearchApiClient() {
-	return setApiService;
-    }
-
-    protected UserSetConfiguration getConfiguration() {
-	return configuration;
-    }
-
+ 
     /*
      * (non-Javadoc)
      * 
@@ -100,11 +79,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// store in mongo database
 	return getMongoPersistence().store(extUserSet);
-    }
-
-    @Override
-    public void updateUserSetPagination(UserSet newUserSet) {
-	getUserSetUtils().updatePagination(newUserSet);
     }
 
     @Override
@@ -149,84 +123,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet updatePagination(UserSet userSet) {
 	return getUserSetUtils().updatePagination(userSet);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
-     * europeana.UserSet.definitions.model.UserSet, boolean)
-     */
-    @Override
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
-	mergeUserSetProperties(persistentUserSet, webUserSet);
-	updateUserSetPagination(persistentUserSet);
-	// update modified date
-	persistentUserSet.setModified(new Date());
-	return getMongoPersistence().update(persistentUserSet);
-    }
-
-    /**
-     * @deprecated check if the update test must merge the properties or if it
-     *             simply overwrites it
-     * @param persistedSet
-     * @param updates
-     */
-    @Deprecated
-    private void mergeUserSetProperties(PersistentUserSet persistedSet, UserSet updates) {
-	if (updates == null) {
-	    return;
-	}
-
-	mergeDescriptiveProperties(persistedSet, updates);
-
-	mergeProvenanceProperties(persistedSet, updates);
-
-	if (updates.getIsDefinedBy() != null) {
-	    persistedSet.setIsDefinedBy(updates.getIsDefinedBy());
-	}
-
-    }
-
-    private void mergeProvenanceProperties(PersistentUserSet persistedSet, UserSet updates) {
-	if (updates.getCreator() != null) {
-	    persistedSet.setCreator(updates.getCreator());
-	}
-
-	if (updates.getCreated() != null) {
-	    persistedSet.setCreated(updates.getCreated());
-	}
-    }
-
-    private void mergeDescriptiveProperties(PersistentUserSet persistedSet, UserSet updates) {
-	if (updates.getType() != null) {
-	    persistedSet.setType(updates.getType());
-	}
-
-	if (updates.getVisibility() != null) {
-	    persistedSet.setVisibility(updates.getVisibility());
-	}
-
-	if (updates.getTitle() != null) {
-	    if (persistedSet.getTitle() != null) {
-		for (Map.Entry<String, String> entry : updates.getTitle().entrySet()) {
-		    persistedSet.getTitle().put(entry.getKey(), entry.getValue());
-		}
-	    } else {
-		persistedSet.setTitle(updates.getTitle());
-	    }
-	}
-
-	if (updates.getDescription() != null) {
-	    if (persistedSet.getDescription() != null) {
-		for (Map.Entry<String, String> entry : updates.getDescription().entrySet()) {
-		    persistedSet.getDescription().put(entry.getKey(), entry.getValue());
-		}
-	    } else {
-		persistedSet.setDescription(updates.getDescription());
-	    }
-	}
-    }
-
+   
     @Override
     public UserSet parseUserSetLd(String userSetJsonLdStr)
 	    throws RequestBodyValidationException, UserSetInstantiationException {

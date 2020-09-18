@@ -52,7 +52,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@Resource
 	private UserSetConfiguration configuration;
 
-	public UserSetConfiguration getConfiguration() {
+	public synchronized UserSetConfiguration getConfiguration() {
 		return configuration;
 	}
 

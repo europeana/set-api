@@ -1,9 +1,8 @@
 package eu.europeana.set.web.search;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,9 +18,10 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
 public class UserSetQueryBuilder extends QueryBuilder {
-
-    List<String> suportedFields = Arrays.asList(WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-	    WebUserSetFields.TYPE, WebUserSetFields.ITEM);
+    
+    String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
+	    WebUserSetFields.TYPE, WebUserSetFields.ITEM}; 
+    Set<String> suportedFields = Set.of(fields);
 
     private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();

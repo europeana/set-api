@@ -57,6 +57,7 @@ public class SearchApiClientImpl implements SearchApiClient {
 	    return jo.has(key_success) && jo.getBoolean(key_success);
 	} catch (JSONException e) {
 	    //actually it shouldn't happen
+	    logger.trace(e);
 	    return false;
 	}	
     }
