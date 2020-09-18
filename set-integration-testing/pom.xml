@@ -107,6 +107,12 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-web</artifactId>
+			<version>${version.setApi}</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
 			<version>${version.jettison}</version>
