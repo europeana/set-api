@@ -1,0 +1,16 @@
+# the uri of the user set service (REST API) => 
+# for testing within the development environment a local URI can be used e.g. localhost:8080/set-web/sets  
+set.service.uri = http://localhost:8080/set
+
+# the user key used to access Europeana API. For more information see http://pro.europeana.eu/api 
+set.api.key = apidemo
+
+# the set validation header definitions
+set.header.name=Authorization
+set.regular.authorization.value=
+
+#the URL for the endpoint of OAuth service  
+oauth.service.uri=https://auth.europeana.eu/auth/realms/europeana/protocol/openid-connect/token
+
+#The parameters sent for retrieving a new ticket   
+oauth.token.request.params=username=test_userset_regular&password=pwd&grant_type=password&client_id=test_client_userset&client_secret=secret&scope=usersets

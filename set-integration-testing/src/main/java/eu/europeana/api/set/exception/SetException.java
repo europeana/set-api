@@ -1,15 +1,15 @@
-package eu.europeana.api.myapi.exception;
+package eu.europeana.api.set.exception;
 
 /**
  * Base error class for this application. All other application errors should extend this class
  */
-public class MyApiException extends Exception {
+public class SetException extends Exception {
 
-    public MyApiException(String msg, Throwable t) {
+    public SetException(String msg, Throwable t) {
         super(msg, t);
     }
 
-    public MyApiException(String msg) {
+    public SetException(String msg) {
         super(msg);
     }
 

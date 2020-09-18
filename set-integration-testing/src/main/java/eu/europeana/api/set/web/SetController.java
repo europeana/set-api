@@ -1,4 +1,4 @@
-package eu.europeana.api.myapi.web;
+package eu.europeana.api.set.web;
 
 import org.springframework.http.MediaType;
 import javax.validation.constraints.Pattern;
@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Validated
-public class MyApiController {
+public class SetController {
 
     private static final String MY_REGEX = "^[a-zA-Z0-9_]*$";
     private static final String INVALID_REQUEST_MESSAGE = "Invalid parameter.";
 
-    @GetMapping(value = "/myApi/{someRequest}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object handleMyApiRequest(
+    @GetMapping(value = "/set/{someRequest}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object handleSetRequest(
         @PathVariable(value = "someRequest")
             @Pattern(regexp = MY_REGEX, message = INVALID_REQUEST_MESSAGE) String someRequest) {
         return "It works!";

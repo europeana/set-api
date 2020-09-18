@@ -1,4 +1,4 @@
-package eu.europeana.api.myapi.exception;
+package eu.europeana.api.set.exception;
 
 import io.micrometer.core.instrument.util.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
@@ -22,10 +22,10 @@ public class GlobalExceptionHandler {
     /**
      * Checks if we should log an error and rethrows it
      * @param e caught exception
-     * @throws MyApiException rethrown exception
+     * @throws SetException rethrown exception
      */
-    @ExceptionHandler(MyApiException.class)
-    public void handleBaseException(MyApiException e) throws MyApiException {
+    @ExceptionHandler(SetException.class)
+    public void handleBaseException(SetException e) throws SetException {
         if (e.doLog()) {
             if (e.doLogStacktrace()) {
                 LOG.error("Caught exception", e);

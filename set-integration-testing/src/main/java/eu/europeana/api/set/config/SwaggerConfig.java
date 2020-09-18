@@ -1,4 +1,4 @@
-package eu.europeana.api.myapi.config;
+package eu.europeana.api.set.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

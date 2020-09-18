@@ -1,4 +1,4 @@
-package eu.europeana.api.myapi.config;
+package eu.europeana.api.set.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
