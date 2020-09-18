@@ -1,5 +1,7 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
+import java.util.Locale;
+
 /**
  * This enumeration lists supported user set types
  * 
@@ -25,7 +27,7 @@ public enum UserSetTypes implements JsonKeyword {
      * @return
      */
     public static UserSetTypes getByJsonValue(String jsonValue) {
-	return valueOf(jsonValue.toUpperCase());
+	return valueOf(jsonValue.toUpperCase(Locale.ENGLISH));
     }
 
     @Override

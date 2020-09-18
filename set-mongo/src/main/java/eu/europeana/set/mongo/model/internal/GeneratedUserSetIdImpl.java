@@ -43,7 +43,7 @@ public class GeneratedUserSetIdImpl {
 	 * @param identifier - must be a long number
 	 */
 	public GeneratedUserSetIdImpl(String provider, String identifier){
-		this(provider, Long.parseLong(identifier));
+		this(provider, Long.valueOf(identifier));
 	}
 	
 	public GeneratedUserSetIdImpl(String provider, Long userSetId){
@@ -56,7 +56,7 @@ public class GeneratedUserSetIdImpl {
 	}
 
 	public void setIdentifier(String identifier) {
-		setUserSetId(Long.parseLong(identifier));
+		setUserSetId(Long.valueOf(identifier));
 	}
 	
 }

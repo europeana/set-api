@@ -70,19 +70,6 @@ public class BaseApiConnection {
 	
 	
 	/**
-	 * This method makes POST request for given URL and JSON body parameter that returns
-	 * response body, response headers and status code.
-	 * @param url
-	 * @param jsonPost
-	 * @return The response body, response headers and status code.
-	 * @throws IOException
-	 */
-	ResponseEntity<String> postURL(String url, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: {} {}", url , URL_RESPONSE);
-		return getHttpConnection().postURL(url, jsonPost);
-	}
-
-	/**
 	 * This method makes POST request for given URL, header and JSON body parameter that returns
 	 * response body, response headers and status code.
 	 * @param url

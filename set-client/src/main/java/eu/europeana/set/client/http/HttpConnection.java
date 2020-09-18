@@ -6,7 +6,6 @@ package eu.europeana.set.client.http;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -24,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import eu.europeana.set.client.connection.UserSetApiConnection;
 
 /**
@@ -44,20 +42,6 @@ public class HttpConnection {
      * This method makes POST request for given URL and JSON body parameter.
      *
      * @param url
-     * @param jsonParamValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> postURL(String url, String jsonParamValue) throws IOException {
-	return postURL(url, jsonParamValue, null);
-
-    }
-
-    /**
-     * This method makes POST request for given URL and JSON body parameter.
-     *
-     * @param url
      * @param requestBody
      * @param contentType
      * @return ResponseEntity that comprises response body in JSON format, headers
@@ -68,9 +52,7 @@ public class HttpConnection {
 	PostMethod post = buildPostMethod(url, requestBody, HttpHeaders.CONTENT_TYPE, contentType);
 	return fetchHttpMethodResponse(post);
     }
-    
-    
-    
+
     /**
      * This method makes POST request for given URL and JSON body parameter with
      * header.
@@ -83,9 +65,9 @@ public class HttpConnection {
      *         and status code.
      * @throws IOException
      */
-    public ResponseEntity<String> postURL(String url, String body, 
-	    String authorizationHeaderValue) throws IOException {
-	PostMethod post = buildPostMethod(url, body, UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
+    public ResponseEntity<String> postURL(String url, String body, String authorizationHeaderValue) throws IOException {
+	PostMethod post = buildPostMethod(url, body, UserSetApiConnection.HEADER_AUTHORIZATION,
+		authorizationHeaderValue);
 	return fetchHttpMethodResponse(post);
     }
 
@@ -124,8 +106,8 @@ public class HttpConnection {
      * @throws IOException
      */
     @SuppressWarnings("deprecation")
-    public ResponseEntity<String> putURL(String url, String jsonParamValue,
-	    String authorizationHeaderValue) throws IOException {
+    public ResponseEntity<String> putURL(String url, String jsonParamValue, String authorizationHeaderValue)
+	    throws IOException {
 	PutMethod put = new PutMethod(url);
 	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
 	    put.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
@@ -149,7 +131,7 @@ public class HttpConnection {
     /**
      * This method makes DELETE request for given identifier URL.
      * 
-     * @param url                The identifier URL
+     * @param url                       The identifier URL
      * @param requestHeaderName
      * @param authorizationtHeaderValue
      * @return ResponseEntity that comprises response headers and status code.
@@ -208,8 +190,7 @@ public class HttpConnection {
      *         and status code.
      * @throws IOException
      */
-    public ResponseEntity<String> getURL(String url, String authorizationHeaderValue)
-	    throws IOException {
+    public ResponseEntity<String> getURL(String url, String authorizationHeaderValue) throws IOException {
 	GetMethod get = new GetMethod(url);
 	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
 	    get.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
@@ -218,7 +199,7 @@ public class HttpConnection {
 	return fetchHttpMethodResponse(get);
     }
 
-    private ResponseEntity<String> fetchHttpMethodResponse(HttpMethod http) throws IOException, HttpException {
+    private ResponseEntity<String> fetchHttpMethodResponse(HttpMethod http) throws IOException{
 	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
 	try {
 	    client.executeMethod(http);
@@ -236,7 +217,7 @@ public class HttpConnection {
 	return callHttpMethod(post);
     }
 
-    private String callHttpMethod(EntityEnclosingMethod httpMethod) throws IOException, HttpException {
+    private String callHttpMethod(EntityEnclosingMethod httpMethod) throws IOException {
 	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
 	try {
 	    client.executeMethod(httpMethod);
