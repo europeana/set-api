@@ -1,16 +1,13 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -23,10 +20,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
-import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -35,7 +30,6 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -49,9 +43,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.exception.SearchApiClientException;
-import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
-import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -364,8 +356,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    positionInt = -1;
 		}
 	    } catch (RuntimeException e) {
+		getLogger().trace("Position validation warning: {} ", e);
 		// invalid position, assume last (-1)
-		getLogger().trace("Position validation warning: {} ", e.getMessage());
 	    }
 	}
 	return positionInt;
@@ -475,11 +467,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
 	    LdProfiles profile) throws HttpException {
 
-	if (!userSet.isOpenSet()) {
+	if (!userSet.isOpenSet() && (userSet.getItems() == null) || userSet.getItems().isEmpty()) {
 	    // if empty closed userset, nothing to do
-	    if ((userSet.getItems() == null) || userSet.getItems().isEmpty()) {
-		return userSet;
-	    }
+	    return userSet;
 	}
 
 	String apiKey = getConfiguration().getSearchApiKey();
@@ -488,10 +478,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	SearchApiResponse apiResult;
 	try {
-	    if (LdProfiles.STANDARD.equals(profile)) {
+	    if (LdProfiles.STANDARD == profile) {
 		apiResult = getSearchApiClient().searchItems(url, apiKey, false);
 		setItemIds(userSet, apiResult);
-	    } else if (LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
+	    } else if (LdProfiles.ITEMDESCRIPTIONS == profile) {
 		apiResult = getSearchApiClient().searchItems(url, apiKey, true);
 		int total = apiResult.getTotal();
 		if (!userSet.isOpenSet()) {
@@ -513,7 +503,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
-	List<String> items = new ArrayList<>();
+	if(apiResult.getItems() == null) {
+	    return;
+	}  
+	
+	List<String> items = new ArrayList<>(apiResult.getItems().size());
 	for (String item : apiResult.getItems()) {
 	    items.add(UserSetUtils.buildItemUrl(item));
 	}
@@ -556,47 +550,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	return uriBuilder.build(true).toUriString();
     }
-
-    /**
-     * This method appends additional search parameter from HTTP request
-     * 
-     * @param sort
-     * @param sortOrder
-     * @param pageNr
-     * @param pageSize
-     * @return additional search Query string
-     */
-    public String buildSearchQuery(String sort, String sortOrder, int pageNr, int pageSize) {
-	// TODO use SearchQuery object from api commons
-	StringBuilder searchQuery = new StringBuilder();
-
-	searchQuery.append(WebUserSetFields.AND);
-	searchQuery.append(pageNr);
-	searchQuery.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=");
-	if (pageNr < 0)
-	    searchQuery.append(CommonApiConstants.DEFAULT_PAGE);
-	else
-	    searchQuery.append(pageNr);
-
-	searchQuery.append(WebUserSetFields.AND);
-	searchQuery.append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=");
-	if (pageSize < 0)
-	    searchQuery.append(WebUserSetFields.MAX_ITEMS_PER_PAGE);
-	else
-	    searchQuery.append(pageSize);
-
-	searchQuery.append(WebUserSetFields.AND);
-	if (!Strings.isNullOrEmpty(sort)) {
-	    searchQuery.append(CommonApiConstants.QUERY_PARAM_SORT).append("=");
-	    searchQuery.append(sort);
-//	    searchQuery.append(WebUserSetFields.AND);
-//	    searchQuery.append(WebUserSetFields.PARAM_SORT_ORDER).append("=");
-//	    searchQuery.append(sortOrder);
-	}
-
-	return searchQuery.toString();
-    }
-
+    
     /**
      * (non-Javadoc)
      * 
@@ -632,9 +586,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
 
-	if (LdProfiles.STANDARD.equals(profile) || LdProfiles.ITEMDESCRIPTIONS.equals(profile)) {
+	if (LdProfiles.STANDARD == profile || LdProfiles.ITEMDESCRIPTIONS == profile) {
 	    resPage = new UserSetResultPage();
-	    setPageItems(results, (UserSetResultPage) resPage, resultPageSize, authentication, profile);
+	    setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
 	} else {
 	    //LdProfiles.MINIMAL.equals(profile) - default
 	    resPage = new UserSetIdsResultPage();
@@ -672,16 +626,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setTotalInPage(items.size());
     }
 
-    private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, int resultPageSize,
+    private void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage,
 	    Authentication authentication, LdProfiles profile) throws HttpException {
 	List<UserSet> items = new ArrayList<>(results.getResults().size());
 
 	// TODO: define a second parameter for itemset page size
-	int setPageSize = WebUserSetFields.DEFAULT_DEREF_ITEMS;
+	int derefItems = WebUserSetFields.DEFAULT_DEREF_ITEMS;
 
 	for (UserSet userSet : results.getResults()) {
 	    if (profile.equals(LdProfiles.ITEMDESCRIPTIONS)) {
-		fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, setPageSize, profile);
+		fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
 	    // items not included in results
@@ -750,7 +704,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    tmp = queryParams.substring(0, startPos);
 
 	    if (startEndPos > 0) {
-		tmp += queryParams.substring(startEndPos);
+		//tmp += queryParams.substring(startEndPos);
+		tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
 	    }
 	} else {
 	    tmp = queryParams;
@@ -862,7 +817,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int MAX_DEREF_ITEMS = 100;
 	int maxItems = Math.min(userSet.getItems().size(), MAX_DEREF_ITEMS);
 
-	StringBuilder query = new StringBuilder();
+	StringBuilder query = new StringBuilder(100);
 	query.append("europeana_id:(");
 	for (int i = 0; i < maxItems; i++) {
 	    fullId = userSet.getItems().get(i);
@@ -870,16 +825,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		query.append(" OR ");
 	    }
 	    id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
-	    query.append('"').append("/").append(id).append('"');
+	    query.append('"').append('/').append(id).append('"');
 	}
 	// close bracket
-	query.append(")");
+	query.append(')');
 	StringBuilder url = new StringBuilder(getConfiguration().getSearchApiUrl());
-	try {
-	    url.append(URLEncoder.encode(query.toString(), "UTF-8"));
-	} catch (UnsupportedEncodingException e) {
-	    throw new InternalServerException("Cannot URL encode records ids: " + query.toString(), e);
-	}
+	url.append(URLEncoder.encode(query.toString(), StandardCharsets.UTF_8));
+	
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 	// append rows=100
 	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(MAX_DEREF_ITEMS);
