@@ -61,7 +61,7 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @Controller
-@RestController
+//@RestController
 @SwaggerSelect
 @Api(tags = "Web User Set API")
 public class WebUserSetRest extends BaseRest {

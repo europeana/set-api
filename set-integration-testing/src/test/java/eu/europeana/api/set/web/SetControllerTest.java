@@ -4,6 +4,7 @@ import org.junit.Before;
 //import org.junit.jupiter.api.Test;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.set.BaseUserSetApi;
@@ -51,11 +53,17 @@ public class SetControllerTest {
     
     private BaseUserSetApi apiClient;
 
+    //@Autowired
+    private MockMvc mockMvc;
+    private WebUserSetRest webUserSetRestContoller;
+    
     @Before
     public void initObjects() {
         apiClient = new BaseUserSetApi();
+        webUserSetRestContoller = Mockito.spy(WebUserSetRest.class);
+        mockMvc = MockMvcBuilders.standaloneSetup(webUserSetRestContoller).build();
     }
-
+    
     public BaseUserSetApi getApiClient() {
         return apiClient;
     }
@@ -71,8 +79,8 @@ public class SetControllerTest {
 //    public static final String TOKEN           = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1SW55MldXRkhZQ1YxcFNNc0NKXzl2LVhaUUgwUk84c05KNUxLd2JHcmk0In0.eyJqdGkiOiIyMWYwZTA1Ny03YzVjLTQ2MTItOWZkZi0xNTQzNGRiYTk2NWYiLCJleHAiOjE2MDAxMjc1MTAsIm5iZiI6MCwiaWF0IjoxNjAwMDkxNTEwLCJpc3MiOiJodHRwczovL2F1dGguZXVyb3BlYW5hLmV1L2F1dGgvcmVhbG1zL2V1cm9wZWFuYSIsImF1ZCI6WyJ1c2Vyc2V0cyIsImFjY291bnQiXSwic3ViIjoiNjkzNTViODctOWY4NC00OGE4LTkwZDAtNDdhMjZlOWIyYTgyIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoidGVzdF9jbGllbnRfdXNlcnNldCIsImF1dGhfdGltZSI6MCwic2Vzc2lvbl9zdGF0ZSI6ImYxOGUxZjNkLWMxNDEtNGFmMC1hZGIyLWNmMmIwYTk2MGJiNSIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7InVzZXJzZXRzIjp7InJvbGVzIjpbInVzZXIiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiY2xpZW50X2luZm8gcHJvZmlsZSB1c2Vyc2V0cyBlbWFpbCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJjbGllbnRfcHVibGljX2lkIjoiZjUwNGEwOTktODZkMS00NmMwLWJiMzItMDY5MWI2M2M1ZTQ5IiwibmFtZSI6IlVzZXJTZXQgUmVndWxhciBSdW5zY29wZSBUZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdF91c2Vyc2V0X3JlZ3VsYXIiLCJnaXZlbl9uYW1lIjoiVXNlclNldCBSZWd1bGFyIiwiZmFtaWx5X25hbWUiOiJSdW5zY29wZSBUZXN0IiwiY2xpZW50X25hbWUiOiJSdW5zY29wZSBUZXN0IENsaWVudCIsImVtYWlsIjoidGVzdF91c2Vyc2V0X3JlZ3VsYXJAZXVyb3BlYW5hLmV1In0.HT6VszLoKqemD05N8i10VK2BOMlXpHc7SqtVjENwQ_s11gnbq8hN5oIlA9EB7WS1oJ1cXoxZY7GFqWPzrXuey-KCC3Uni0uoYREw1O1nppliEoHPmBWfotLNEXfwyAdcT-7P-LtIYwEIDYWdCTYUlxoB6Um5OqSZRHXtQv2rBnSPPzGIvU_M1zAJesRzXWf_CysJEvAHrbxeUL-m9Ww7dwlJJy52YHYM1WthJFCfZArEukS9xw8XVB9hRpEqpWE0zx3XmDgtTWSRR9IWM1zx-CT5ZUjzO-yEa7hkW6GrATObS-bhaZTD8-D-yDq0VwbzZPnUzgRdhH06fKg1h5KT2w";
 
     
-    @Autowired
-    private MockMvc mockMvc;
+//    @Autowired
+//    private MockMvc mockMvc;
     
     /**
      * Test createUserSet 200 Ok response
