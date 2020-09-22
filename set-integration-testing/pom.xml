@@ -75,11 +75,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- 
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
             <version>${swagger.version}</version>
         </dependency>
+         -->
 
         <!-- for securing (error) output -->
         <dependency>
@@ -94,29 +96,33 @@
             <scope>provided</scope>
         </dependency>
 
+<!-- 
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
 			<version>3.1</version>
 		</dependency>
 		
+		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
+		 -->
 		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
-		
+<!-- 	
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
 			<version>${version.jettison}</version>
 		</dependency>
+ -->		
 		
         <!-- Test dependencies -->
         <dependency>
