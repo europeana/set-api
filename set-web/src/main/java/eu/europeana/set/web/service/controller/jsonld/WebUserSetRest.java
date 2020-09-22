@@ -66,6 +66,11 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "Web User Set API")
 public class WebUserSetRest extends BaseRest {
 
+    public WebUserSetRest() {
+	super();
+    }
+    
+    
     @PostMapping(value = "/set/",
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
@@ -73,11 +78,9 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
-	System.out.println("step 1");
 	// validate user - check user credentials (all registered users can create)
 	// if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
 	Authentication authentication = verifyWriteAccess(Operations.CREATE, request);
-	System.out.println("step 2");
 	return storeUserSet(userSet, authentication, profile, request);
     }
 
@@ -97,12 +100,10 @@ public class WebUserSetRest extends BaseRest {
 	try {
 
 	    LdProfiles profile = getProfile(profileStr, request);
-	    System.out.println("step 3");
-
+	    
 	    // parse user set
 	    UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-	    System.out.println("step 4");
-
+	    
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
 	    Agent user = new WebUser();
