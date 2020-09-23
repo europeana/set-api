@@ -1,4 +1,4 @@
-package eu.europeana.api.set.exception;
+package eu.europeana.api.set.integration.exception;
 
 /**
  * Base error class for this application. All other application errors should extend this class

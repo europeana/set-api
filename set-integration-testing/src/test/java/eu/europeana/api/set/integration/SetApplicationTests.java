@@ -1,4 +1,4 @@
-package eu.europeana.api.set;
+package eu.europeana.api.set.integration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

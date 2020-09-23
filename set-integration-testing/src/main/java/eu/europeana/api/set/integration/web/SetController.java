@@ -1,4 +1,4 @@
-package eu.europeana.api.set.web;
+package eu.europeana.api.set.integration.web;
 
 import org.springframework.http.MediaType;
 import javax.validation.constraints.Pattern;

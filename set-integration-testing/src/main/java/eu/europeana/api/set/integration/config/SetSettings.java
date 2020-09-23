@@ -1,4 +1,4 @@
-package eu.europeana.api.set.config;
+package eu.europeana.api.set.integration.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,12 +1,11 @@
-package eu.europeana.api.set;
+package eu.europeana.api.set.integration.connection;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import eu.europeana.api.set.config.SetIntegrationConfiguration;
-import eu.europeana.api.set.connection.UserSetApiConnection;
+import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 
 public class BaseUserSetApi {
 

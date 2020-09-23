@@ -1,4 +1,4 @@
-package eu.europeana.api.set.connection;
+package eu.europeana.api.set.integration.connection;
 
 import java.io.IOException;
 
@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.set.config.SetIntegrationConfiguration;
-import eu.europeana.api.set.connection.http.HttpConnection;
+import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
+import eu.europeana.api.set.integration.connection.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 /**

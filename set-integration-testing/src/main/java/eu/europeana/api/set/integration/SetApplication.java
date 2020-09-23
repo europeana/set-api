@@ -1,4 +1,4 @@
-package eu.europeana.api.set;
+package eu.europeana.api.set.integration;
 
 import org.apache.logging.log4j.LogManager;
 import org.springframework.boot.SpringApplication;

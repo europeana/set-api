@@ -1,9 +1,9 @@
-package eu.europeana.api.set.config;
+package eu.europeana.api.set.integration.config;
 
 import java.io.InputStream;
 import java.util.Properties;
 
-import eu.europeana.api.set.exception.TechnicalRuntimeException;
+import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
 
 public class SetIntegrationConfiguration {
 

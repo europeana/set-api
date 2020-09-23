@@ -1,4 +1,4 @@
-package eu.europeana.api.set.exception;
+package eu.europeana.api.set.integration.exception;
 
 import io.micrometer.core.instrument.util.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;

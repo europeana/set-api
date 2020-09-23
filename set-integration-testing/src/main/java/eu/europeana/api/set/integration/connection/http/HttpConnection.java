@@ -2,7 +2,7 @@
  * HttpConnector.java - europeana4j
  * (C) 2011 Digibis S.L.
  */
-package eu.europeana.api.set.connection.http;
+package eu.europeana.api.set.integration.connection.http;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import eu.europeana.api.set.connection.UserSetApiConnection;
+import eu.europeana.api.set.integration.connection.UserSetApiConnection;
 
 /**
  * The class encapsulating simple HTTP access.

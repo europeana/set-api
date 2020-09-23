@@ -1,4 +1,4 @@
-package eu.europeana.api.set.config;
+package eu.europeana.api.set.integration.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;

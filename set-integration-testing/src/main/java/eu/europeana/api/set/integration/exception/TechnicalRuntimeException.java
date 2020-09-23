@@ -1,4 +1,4 @@
-package eu.europeana.api.set.exception;
+package eu.europeana.api.set.integration.exception;
 
 /**
  * This class is meant to be used for marking and handling technical exceptions that might occur within the system
