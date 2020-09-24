@@ -24,3 +24,7 @@ hs_err_pid*
 **.project
 **.classpath
 **/target
+
+#IntelliJ project files
+.idea
+*.iml
