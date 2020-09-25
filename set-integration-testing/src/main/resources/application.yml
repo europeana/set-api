@@ -1,0 +1,9 @@
+# Port for local testing
+server.port: 8086
+
+server:
+  error:
+    include-message: always
+    include-exception: false
+    include-stacktrace: on_param
+

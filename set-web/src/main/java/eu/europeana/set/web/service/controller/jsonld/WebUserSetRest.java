@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
 
@@ -62,10 +63,16 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @Controller
+//@RestController
 @SwaggerSelect
 @Api(tags = "Web User Set API")
 public class WebUserSetRest extends BaseRest {
 
+    public WebUserSetRest() {
+	super();
+    }
+    
+    
     @PostMapping(value = "/set/",
 			produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.SAMPLES_JSONLD, value = "Create user set", nickname = "createUserSet", response = java.lang.Void.class)
@@ -95,7 +102,7 @@ public class WebUserSetRest extends BaseRest {
 	try {
 
 	    LdProfiles profile = getProfile(profileStr, request);
-
+	    
 	    // parse user set
 	    UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 	    
