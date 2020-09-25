@@ -20,10 +20,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <spring-boot.version>2.3.1.RELEASE</spring-boot.version>
-        <!-- TODO for some reason the Swagger /v2/api-docs endpoint is not available for newer Swagger versions -->
-        <swagger.version>2.9.2</swagger.version>
+      
     </properties>
 
     <dependencyManagement>
@@ -32,7 +29,7 @@
                 <!-- Import dependency management from Spring Boot (because we don't use Spring-Boot as parent pom)-->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
+                <version>${version.springBoot}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -64,31 +61,14 @@
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${swagger.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- 
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-         -->
-
         <!-- for securing (error) output -->
+        <!-- 
         <dependency>
             <groupId>org.owasp.encoder</groupId>
             <artifactId>encoder</artifactId>
             <version>1.2.2</version>
         </dependency>
+         -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -96,33 +76,12 @@
             <scope>provided</scope>
         </dependency>
 
-<!-- 
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
-		</dependency>
-		
-		
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-definitions</artifactId>
-			<version>${version.setApi}</version>
-		</dependency>
-		 -->
 		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
-<!-- 	
-		<dependency>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-			<version>${version.jettison}</version>
-		</dependency>
- -->		
 		
         <!-- Test dependencies -->
         <dependency>
@@ -147,7 +106,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
                 <executions>
                     <execution>
                         <goals>

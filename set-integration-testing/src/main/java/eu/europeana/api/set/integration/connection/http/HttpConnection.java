@@ -11,19 +11,13 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import eu.europeana.api.set.integration.connection.UserSetApiConnection;
 
 /**
  * The class encapsulating simple HTTP access.
@@ -34,70 +28,7 @@ public class HttpConnection {
 
     private static final int CONNECTION_RETRIES = 3;
     private static final int TIMEOUT_CONNECTION = 40000;
-    private static final int STATUS_OK_START = 200;
-    private static final int STATUS_OK_END = 299;
     private HttpClient httpClient = null;
-
-    public String getURLContent(String url) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	GetMethod get = new GetMethod(url);
-
-	try {
-	    client.executeMethod(get);
-
-	    if (get.getStatusCode() >= STATUS_OK_START && get.getStatusCode() <= STATUS_OK_END) {
-		byte[] byteResponse = get.getResponseBody();
-		return new String(byteResponse, StandardCharsets.UTF_8);
-	    } else {
-		return null;
-	    }
-
-	} finally {
-	    get.releaseConnection();
-	}
-    }
-
-    public String getURLContent(String url, String jsonParamName, String jsonParamValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	PostMethod post = new PostMethod(url);
-	post.setParameter(jsonParamName, jsonParamValue);
-
-	try {
-	    client.executeMethod(post);
-
-	    if (post.getStatusCode() >= STATUS_OK_START && post.getStatusCode() <= STATUS_OK_END) {
-		byte[] byteResponse = post.getResponseBody();
-		return new String(byteResponse, StandardCharsets.UTF_8);
-	    } else {
-		return null;
-	    }
-
-	} finally {
-	    post.releaseConnection();
-	}
-    }
-
-    /**
-     * This method makes POST request for given URL and JSON body parameter.
-     *
-     * @param url
-     * @param jsonParamValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> postURL(String url, String jsonParamValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	PostMethod post = new PostMethod(url);
-	post.setRequestBody(jsonParamValue);
-
-	try {
-	    client.executeMethod(post);
-	    return buildResponseEntity(post);
-	} finally {
-	    post.releaseConnection();
-	}
-    }
 
     /**
      * This method makes POST request for given URL and JSON body parameter.
@@ -109,6 +40,7 @@ public class HttpConnection {
      *         and status code.
      * @throws IOException
      */
+    @SuppressWarnings("deprecation")
     public ResponseEntity<String> post(String url, String requestBody, String contentType) throws IOException {
 	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
 	PostMethod post = new PostMethod(url);
@@ -125,131 +57,7 @@ public class HttpConnection {
     
     
     
-    /**
-     * This method makes POST request for given URL and JSON body parameter with
-     * header.
-     * 
-     * @param url
-     * @param jsonParamValue
-     * @param requestHeaderName
-     * @param authorizationHeaderValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    @SuppressWarnings("deprecation")
-    public ResponseEntity<String> postURL(String url, String jsonParamValue, 
-	    String authorizationHeaderValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	PostMethod post = new PostMethod(url);
-	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
-	    post.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
-	}
-	post.setRequestBody(jsonParamValue);
-
-	try {
-	    client.executeMethod(post);
-	    return buildResponseEntity(post);
-	} finally {
-	    post.releaseConnection();
-	}
-    }
-
-    /**
-     * This method makes PUT request for given URL and JSON body parameter.
-     *
-     * @param url
-     * @param jsonParamValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> putURL(String url, String jsonParamValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	PutMethod put = new PutMethod(url);
-	put.setRequestBody(jsonParamValue);
-
-	try {
-	    client.executeMethod(put);
-	    return buildResponseEntity(put);
-	} finally {
-	    put.releaseConnection();
-	}
-    }
-
-    /**
-     * This method makes PUT request for given URL and JSON body parameter.
-     * 
-     * @param url
-     * @param jsonParamValue
-     * @param requestHeaderName
-     * @param authorizationHeaderValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    @SuppressWarnings("deprecation")
-    public ResponseEntity<String> putURL(String url, String jsonParamValue,
-	    String authorizationHeaderValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	PutMethod put = new PutMethod(url);
-	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
-	    put.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
-	}
-	put.setRequestBody(jsonParamValue);
-
-	try {
-	    client.executeMethod(put);
-	    return buildResponseEntity(put);
-	} finally {
-	    put.releaseConnection();
-	}
-    }
-
-    /**
-     * This method makes DELETE request for given identifier URL.
-     *
-     * @param url The identifier URL
-     * @return ResponseEntity that comprises response headers and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> deleteURL(String url) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	DeleteMethod delete = new DeleteMethod(url);
-
-	try {
-	    client.executeMethod(delete);
-	    return buildResponseEntity(delete);
-	} finally {
-	    delete.releaseConnection();
-	}
-    }
-
-    /**
-     * This method makes DELETE request for given identifier URL.
-     * 
-     * @param url                The identifier URL
-     * @param requestHeaderName
-     * @param authorizationtHeaderValue
-     * @return ResponseEntity that comprises response headers and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> deleteURL(String url, String authorizationtHeaderValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	DeleteMethod delete = new DeleteMethod(url);
-	if (StringUtils.isNotBlank(authorizationtHeaderValue)) {
-	    delete.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationtHeaderValue);
-	}
-
-	try {
-	    client.executeMethod(delete);
-	    return buildResponseEntity(delete);
-	} finally {
-	    delete.releaseConnection();
-	}
-    }
-
-    /**
+      /**
      * This method builds a response entity that comprises response body, headers
      * and status code for the passed HTTP method
      *
@@ -271,72 +79,7 @@ public class HttpConnection {
 	return new ResponseEntity<>(res, headers, HttpStatus.valueOf(method.getStatusCode()));
     }
 
-    /**
-     * This method makes GET request for given URL.
-     *
-     * @param url
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> getURL(String url) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	GetMethod get = new GetMethod(url);
-
-	try {
-	    client.executeMethod(get);
-	    return buildResponseEntity(get);
-	} finally {
-	    get.releaseConnection();
-	}
-    }
-
-    /**
-     * This method makes GET request for given URL.
-     * 
-     * @param url
-     * @param requestHeaderName
-     * @param authorizationHeaderValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     *         and status code.
-     * @throws IOException
-     */
-    public ResponseEntity<String> getURL(String url, String authorizationHeaderValue)
-	    throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	GetMethod get = new GetMethod(url);
-	if (StringUtils.isNotBlank(authorizationHeaderValue)) {
-	    get.setRequestHeader(UserSetApiConnection.HEADER_AUTHORIZATION, authorizationHeaderValue);
-	}
-
-	try {
-	    client.executeMethod(get);
-	    return buildResponseEntity(get);
-	} finally {
-	    get.releaseConnection();
-	}
-    }
-
-    public String getURLContentWithBody(String url, String jsonParamValue) throws IOException {
-	HttpClient client = this.getHttpClient(CONNECTION_RETRIES, TIMEOUT_CONNECTION);
-	PostMethod post = new PostMethod(url);
-	post.setRequestBody(jsonParamValue);
-
-	try {
-	    client.executeMethod(post);
-
-	    if (post.getStatusCode() >= STATUS_OK_START && post.getStatusCode() <= STATUS_OK_END) {
-		byte[] byteResponse = post.getResponseBody();
-		return new String(byteResponse, StandardCharsets.UTF_8);
-	    } else {
-		return null;
-	    }
-
-	} finally {
-	    post.releaseConnection();
-	}
-    }
-
+ 
     private HttpClient getHttpClient(int connectionRetry, int conectionTimeout) {
 	if (this.httpClient == null) {
 	    HttpClient client = new HttpClient();
