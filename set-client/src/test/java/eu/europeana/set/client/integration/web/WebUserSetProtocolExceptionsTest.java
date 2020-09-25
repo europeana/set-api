@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-//@Ignore
+@Ignore
 public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 	
     public String CORRUPTED_JSON = 
