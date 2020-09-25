@@ -1,5 +1,6 @@
 package eu.europeana.api.set.integration.config;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -7,9 +8,7 @@ import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
 
 public class SetIntegrationConfiguration {
 
-    protected static final String SET_CLIENT_PROPERTIES_FILE = "/set-integration-testing.properties";
-    protected static final String PROP_SET_API_KEY = "set.api.key";
-    protected static final String PROP_SET_SERVICE_URI = "set.service.uri";
+    protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "/set-integration-testing.properties";
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
     protected static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
 
@@ -41,15 +40,15 @@ public class SetIntegrationConfiguration {
     public synchronized void loadProperties() {
 	try {
 	    properties = new Properties();
-	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
+	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_INTEGRATION_TESTING_PROPERTIES_FILE);
 	    if (resourceAsStream != null)
 		getProperties().load(resourceAsStream);
 	    else
 		throw new TechnicalRuntimeException(
-			"No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);
+			"No properties file found in classpath! " + SET_INTEGRATION_TESTING_PROPERTIES_FILE);
 
-	} catch (Exception e) {
-	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_CLIENT_PROPERTIES_FILE, e);
+	} catch (IOException e) {
+	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_INTEGRATION_TESTING_PROPERTIES_FILE, e);
 	}
 
     }
@@ -69,30 +68,7 @@ public class SetIntegrationConfiguration {
      * @return the name of the file storing the client configuration
      */
     String getConfigurationFile() {
-	return SET_CLIENT_PROPERTIES_FILE;
-    }
-
-    /**
-     * This method provides access to the API key defined in the configuration file
-     * 
-     * @see PROP_EUROPEANA_API_KEY
-     * 
-     * @return
-     */
-    public String getApiKey() {
-	return getProperties().getProperty(PROP_SET_API_KEY);
-    }
-
-    /**
-     * This method provides access to the search uri value defined in the
-     * configuration file
-     * 
-     * @see PROP_EUROPEANA_SEARCH_URI
-     * 
-     * @return
-     */
-    public String getServiceUri() {
-	return getProperties().getProperty(PROP_SET_SERVICE_URI);
+	return SET_INTEGRATION_TESTING_PROPERTIES_FILE;
     }
    
     /**

@@ -1,14 +1,7 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,12 +52,11 @@ public class SetControllerTest extends BaseUserSetTest {
     
     @BeforeAll
     public static void initToken() {
-	initUserSetApi();
 	token = getToken();
     }
     
     @BeforeEach
-    public void initObjects() {
+    public void initApplication() {
 	this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
@@ -92,23 +84,7 @@ public class SetControllerTest extends BaseUserSetTest {
 		.andExpect(status().is(HttpStatus.CREATED.value()));
     }
 
-    /**
-     * This method extracts JSON content from a file
-     * @param resource
-     * @return JSON string
-     * @throws IOException
-     */
-    protected String getJsonStringInput(String resource) throws IOException {
-	InputStream resourceAsStream = getClass().getResourceAsStream(resource);
-
-	StringBuilder out = new StringBuilder();
-	BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
-	for (String line = br.readLine(); line != null; line = br.readLine())
-	    out.append(line);
-	br.close();
-	return out.toString();
-
-    }
+   
 
     @Test
     public void create_UserSet_401_bad_request_InvalidInput() throws Exception {
