@@ -10,11 +10,10 @@
 	</parent>
 
     <artifactId>set-integration-testing</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>API template</name>
-    <description>Template for creating a new Spring-Boot2 API</description>
+    <name>Europeana (User) Sets  - Integration Testing</name>
+    <description>Module containing integration tests</description>
 
     <properties>
         <java.version>11</java.version>
