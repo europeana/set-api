@@ -467,7 +467,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
 	    LdProfiles profile) throws HttpException {
 
-	if (!userSet.isOpenSet() && (userSet.getItems() == null) || userSet.getItems().isEmpty()) {
+    	System.out.println("USERSETS "+userSet.isOpenSet());
+		System.out.println("USERSETS "+userSet.getItems());
+		System.out.println("USERSETS "+userSet.getItems().isEmpty());
+
+		if (!userSet.isOpenSet() && (userSet.getItems() == null) || userSet.getItems().isEmpty()) {
 	    // if empty closed userset, nothing to do
 	    return userSet;
 	}

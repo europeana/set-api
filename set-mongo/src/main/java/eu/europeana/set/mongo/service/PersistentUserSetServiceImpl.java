@@ -230,7 +230,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		buildSortCriteria(query, mongoQuery);
 	    }
 
-	    System.out.println("MONGO QUERY " +mongoQuery);
 	    return mongoQuery;
 	}
 

@@ -109,7 +109,6 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	String field;
 	String value;
 
-	System.out.println(suportedFields);
 	while (toParse.contains(separator)) {
 	    field = StringUtils.substringBefore(toParse, separator);
 	    toParse = StringUtils.substringAfter(toParse, separator);
