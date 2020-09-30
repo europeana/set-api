@@ -1,8 +1,6 @@
 package eu.europeana.set.web.search;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,7 +19,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
 	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID};
-    Set<String> suportedFields = Set.of(fields);
+    Set<String> suportedFields = new HashSet<>(Arrays.asList(fields));
 
     private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();
@@ -111,6 +109,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	String field;
 	String value;
 
+	System.out.println(suportedFields);
 	while (toParse.contains(separator)) {
 	    field = StringUtils.substringBefore(toParse, separator);
 	    toParse = StringUtils.substringAfter(toParse, separator);
