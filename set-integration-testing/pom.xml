@@ -80,6 +80,10 @@
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
 			<version>${version.setApi}</version>
+			<!-- 
+			<type>war</type>
+			 -->
+			<classifier>classes</classifier>
 		</dependency>
 		
         <!-- Test dependencies -->
