@@ -41,11 +41,12 @@ public class SetIntegrationConfiguration {
 	try {
 	    properties = new Properties();
 	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_INTEGRATION_TESTING_PROPERTIES_FILE);
-	    if (resourceAsStream != null)
+	    if (resourceAsStream != null) {
 		getProperties().load(resourceAsStream);
-	    else
+	    } else {
 		throw new TechnicalRuntimeException(
 			"No properties file found in classpath! " + SET_INTEGRATION_TESTING_PROPERTIES_FILE);
+	    }
 
 	} catch (IOException e) {
 	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_INTEGRATION_TESTING_PROPERTIES_FILE, e);
