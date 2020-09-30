@@ -46,6 +46,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
 
     //additional search fields  
     public static final String ITEM                      = "item";
+    public static final String SET_ID                    = "set_id";
 
     
     //results page

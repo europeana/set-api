@@ -143,5 +143,20 @@ public class UserSetUtils {
     public static String buildCreatorUri(String userId) {
    	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
     }
+
+    /**
+     * This method is to check if setId is numeric
+     *
+     * @param setId
+     * @return true if numeric
+     */
+    public static boolean isSetIdNumeric(String setId) {
+        try {
+             Integer.parseInt(setId);
+             return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
  
 }
