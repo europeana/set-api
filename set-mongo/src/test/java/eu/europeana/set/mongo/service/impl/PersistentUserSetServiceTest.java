@@ -23,7 +23,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = { "classpath:set-mongo-test.xml", "classpath:set-mongo-context.xml" })
+@ContextConfiguration(locations = { "classpath:set-mongo-test.xml"})
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
     public PersistentUserSetServiceTest() {
