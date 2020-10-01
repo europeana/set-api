@@ -80,6 +80,7 @@
 			<version>${version.spring}</version>
 			<scope>test</scope>			
 		</dependency>
+		
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
@@ -108,6 +109,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
 	</dependencies>
 
 	<build>
@@ -124,6 +126,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			        <!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+            </plugin>
 		</plugins>
 	</build>
+	
 </project>

@@ -10,7 +10,6 @@ import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -24,21 +23,21 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = { "classpath:set-mongo-test.xml" })
+@ContextConfiguration(locations = { "classpath:set-mongo-test.xml", "classpath:set-mongo-context.xml" })
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
     public PersistentUserSetServiceTest() {
 	super(null);
     }
 
-    @Resource(name = "set_db_setService")
-    PersistentUserSetService userSetService;
-
     @Resource(name = "configuration")
     UserSetConfiguration configuration;
 
     @Resource(name = "set_db_setDao")
     NosqlDao<PersistentUserSet, UserSetId> userSetDao;
+
+    @Resource(name = "set_db_setService")
+    PersistentUserSetService userSetService;
 
     UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();
 
