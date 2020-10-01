@@ -39,14 +39,10 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	@Resource(name = "set_db_setDao")
 	NosqlDao<PersistentUserSet, UserSetId> userSetDao;
 
-	UserSetTestObjectBuilder objectBuilder;
+	UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();
 	
 	public UserSetTestObjectBuilder getObjectBuilder() {
 		return objectBuilder;
-	}
-
-	public void setObjectBuilder(UserSetTestObjectBuilder objectBuilder) {
-		this.objectBuilder = objectBuilder;
 	}
 
 	/**
@@ -59,7 +55,6 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 		//mongo server is started as resoource
 //		userSetDao.getCollection().drop();
 		setBaseUserSetUrl(configuration.getUserSetBaseUrl());
-		objectBuilder = new UserSetTestObjectBuilder();
 	}
 
 	@Test

@@ -53,15 +53,12 @@ public class WebUserSetServiceTest {
 	@Resource 
 	UserSetService webUserSetService;
 	
-	UserSetTestObjectBuilder objectBuilder;
+	UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();
 	
 	public UserSetTestObjectBuilder getObjectBuilder() {
 		return objectBuilder;
 	}
-
-	public void setObjectBuilder(UserSetTestObjectBuilder objectBuilder) {
-		this.objectBuilder = objectBuilder;
-	}
+	
 	
 //	@Rule public ExpectedException thrown= ExpectedException.none();
 	
@@ -72,7 +69,6 @@ public class WebUserSetServiceTest {
 	 */
 	@BeforeEach
 	public void setup() throws IOException {
-		objectBuilder = new UserSetTestObjectBuilder();
 	}
 	
 //	@Test
