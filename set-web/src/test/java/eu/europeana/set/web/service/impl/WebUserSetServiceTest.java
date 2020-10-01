@@ -26,7 +26,7 @@ import eu.europeana.set.web.service.UserSetService;
  * Unit test for the Web UserSet service
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"classpath:set-web-test.xml", "classpath:set-web-context.xml"})
+@ContextConfiguration(locations = {"classpath:set-web-test.xml", "classpath:set-web-context.xml", "classpath:set-web-beans.xml"})
 public class WebUserSetServiceTest { 
 
 	private String TEST_DATASET_ID = "000000";
