@@ -42,6 +42,8 @@
 		<version.jaxb>2.3.1</version.jaxb>
 		<version.org.junit.jupiter>5.6.2</version.org.junit.jupiter>
 		<version.commonsIO>2.4</version.commonsIO>
+		<version.surefire>2.22.0</version.surefire>
+		
 		<!-- 
 		<version.apikeyUtils>1.4</version.apikeyUtils>
 		 -->
