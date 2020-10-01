@@ -50,7 +50,7 @@ public class WebUserSetServiceTest {
 		return baseUserSetUrl;
 	}
 	
-	@Resource 
+	@Resource(name = "setService") 
 	UserSetService webUserSetService;
 	
 	UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();
