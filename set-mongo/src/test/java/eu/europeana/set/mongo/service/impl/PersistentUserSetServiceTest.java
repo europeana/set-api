@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -23,79 +24,83 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"classpath:set-mongo-test.xml"})
+@ContextConfiguration(locations = { "classpath:set-mongo-test.xml" })
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
-	
-	public PersistentUserSetServiceTest() {
-		super(null);
-	}
 
-	@Resource(name = "set_db_setService")
-	PersistentUserSetService userSetService;
+    public PersistentUserSetServiceTest() {
+	super(null);
+    }
 
-	@Resource(name = "configuration") 
-	UserSetConfiguration configuration;
+    @Resource(name = "set_db_setService")
+    PersistentUserSetService userSetService;
 
-	@Resource(name = "set_db_setDao")
-	NosqlDao<PersistentUserSet, UserSetId> userSetDao;
+    @Resource(name = "configuration")
+    UserSetConfiguration configuration;
 
-	UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();
-	
-	public UserSetTestObjectBuilder getObjectBuilder() {
-		return objectBuilder;
-	}
+    @Resource(name = "set_db_setDao")
+    NosqlDao<PersistentUserSet, UserSetId> userSetDao;
 
-	/**
-	 * Initialize the testing session
-	 * 
-	 * @throws IOException
-	 */
-	@BeforeEach
-	public void setup() throws IOException {
-		//mongo server is started as resoource
+    UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();
+
+    public UserSetTestObjectBuilder getObjectBuilder() {
+	return objectBuilder;
+    }
+
+    /**
+     * Initialize the testing session
+     * 
+     * @throws IOException
+     */
+    @BeforeEach
+    public void setup() throws IOException {
+	// mongo server is started as resoource
 //		userSetDao.getCollection().drop();
-		setBaseUserSetUrl(configuration.getUserSetBaseUrl());
-	}
+	System.out.println("before test");
+	System.out.println("configuration: " + configuration);
+	System.out.println("usersetDao: " + userSetDao);
+	System.out.println("userSetService: " + userSetService);
+	
+	setBaseUserSetUrl(configuration.getUserSetBaseUrl());
+    }
 
-	@Test
-	public void testStoreUserSet() {
+    @Test
+    public void testStoreUserSet() {
 
-		UserSet storedUserSet = storeUserSet(); 
-		assertTrue(storedUserSet instanceof UserSet);
-	}
-		 
-	@Test
-	public void testGetUserSetById() {
+	UserSet storedUserSet = storeUserSet();
+	assertTrue(storedUserSet instanceof UserSet);
+    }
 
-		UserSet storedUserSet = storeUserSet(); 
-		UserSet foundUserSet = userSetService
-				.findByID(((PersistentUserSetImpl) storedUserSet).getObjectId().toString());
-		checkUserSet(foundUserSet, storedUserSet);
+    @Test
+    public void testGetUserSetById() {
 
-		assertTrue(storedUserSet instanceof UserSet);
-		assertEquals(((PersistentUserSetImpl) storedUserSet).getObjectId().toString(),
-				((PersistentUserSetImpl) foundUserSet).getObjectId().toString());
-	}
+	UserSet storedUserSet = storeUserSet();
+	UserSet foundUserSet = userSetService
+		.findByID(((PersistentUserSetImpl) storedUserSet).getObjectId().toString());
+	checkUserSet(foundUserSet, storedUserSet);
 
-	private UserSet storeUserSet() {
-		UserSet userSet = new PersistentUserSetImpl();
-		UserSet persistentUserSet = getObjectBuilder().buildUserSet(userSet);
-		UserSet storedUserSet = userSetService.store(persistentUserSet);
-		checkUserSet(persistentUserSet, storedUserSet);
-		return storedUserSet;
-	}
-		 
-	@Test
-	public void testGetUserSetByIdentifier() {
+	assertTrue(storedUserSet instanceof UserSet);
+	assertEquals(((PersistentUserSetImpl) storedUserSet).getObjectId().toString(),
+		((PersistentUserSetImpl) foundUserSet).getObjectId().toString());
+    }
 
-		UserSet storedUserSet = storeUserSet(); 
-		UserSet foundUserSet = userSetService
-				.getByIdentifier(((PersistentUserSetImpl) storedUserSet).getIdentifier());
-		checkUserSet(foundUserSet, storedUserSet);
+    private UserSet storeUserSet() {
+	UserSet userSet = new PersistentUserSetImpl();
+	UserSet persistentUserSet = getObjectBuilder().buildUserSet(userSet);
+	UserSet storedUserSet = userSetService.store(persistentUserSet);
+	checkUserSet(persistentUserSet, storedUserSet);
+	return storedUserSet;
+    }
 
-		assertTrue(storedUserSet instanceof UserSet);
-		assertEquals(((PersistentUserSetImpl) storedUserSet).getIdentifier(),
-				((PersistentUserSetImpl) foundUserSet).getIdentifier());
-	}
-		 
+    @Test
+    public void testGetUserSetByIdentifier() {
+
+	UserSet storedUserSet = storeUserSet();
+	UserSet foundUserSet = userSetService.getByIdentifier(((PersistentUserSetImpl) storedUserSet).getIdentifier());
+	checkUserSet(foundUserSet, storedUserSet);
+
+	assertTrue(storedUserSet instanceof UserSet);
+	assertEquals(((PersistentUserSetImpl) storedUserSet).getIdentifier(),
+		((PersistentUserSetImpl) foundUserSet).getIdentifier());
+    }
+
 }
