@@ -30,10 +30,10 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 		super(null);
 	}
 
-	@Resource 
+	@Resource(name = "set_db_setService")
 	PersistentUserSetService userSetService;
 
-	@Resource 
+	@Resource(name = "configuration") 
 	UserSetConfiguration configuration;
 
 	@Resource(name = "set_db_setDao")
