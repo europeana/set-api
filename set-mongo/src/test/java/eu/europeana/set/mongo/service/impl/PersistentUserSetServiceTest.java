@@ -1,17 +1,17 @@
 package eu.europeana.set.mongo.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import javax.annotation.Resource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import eu.europeana.api.commons.nosql.dao.NosqlDao;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -22,8 +22,7 @@ import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
-
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration({ "/set-mongo-test.xml"})
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	
@@ -55,7 +54,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 	 * 
 	 * @throws IOException
 	 */
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		//mongo server is started as resoource
 //		userSetDao.getCollection().drop();

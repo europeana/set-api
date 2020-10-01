@@ -1,19 +1,17 @@
 package eu.europeana.set.web.service.impl;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 import javax.annotation.Resource;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
@@ -27,7 +25,7 @@ import eu.europeana.set.web.service.UserSetService;
 /**
  * Unit test for the Web UserSet service
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration({ "/set-web-test.xml"})
 public class WebUserSetServiceTest { 
 
@@ -65,14 +63,14 @@ public class WebUserSetServiceTest {
 		this.objectBuilder = objectBuilder;
 	}
 	
-	@Rule public ExpectedException thrown= ExpectedException.none();
+//	@Rule public ExpectedException thrown= ExpectedException.none();
 	
 	/**
 	 * Initialize the testing session
 	 * 
 	 * @throws IOException
 	 */
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		objectBuilder = new UserSetTestObjectBuilder();
 	}

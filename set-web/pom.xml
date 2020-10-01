@@ -57,11 +57,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- europeana api key client -->
-		<!-- <dependency> <groupId>eu.europeana.apikey-utils</groupId> <artifactId>apikey-client</artifactId> 
-			<version>${version.apiKeyClient}</version> <exclusions> <exclusion> <groupId>org.apache.httpcomponents</groupId> 
-			<artifactId>httpclient</artifactId> </exclusion> </exclusions> </dependency> -->
-
 		<!-- set projects -->
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
@@ -154,16 +149,21 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> <groupId>eu.europeana.api.commons</groupId> <version>${version.commonsApi}</version> 
-			<artifactId>commons-nosql</artifactId> <classifier>tests</classifier> <type>test-jar</type> 
-			<scope>test</scope> </dependency> -->
+		
 		<dependency>
-			<groupId>de.flapdoodle.embed</groupId>
-			<artifactId>de.flapdoodle.embed.mongo</artifactId>
-			<version>2.0.3</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+			<version>${version.org.junit.jupiter}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIO}</version>
 			<scope>test</scope>
 		</dependency>
-
+		
 		<!-- swagger -->
 		<dependency>
 			<groupId>io.springfox</groupId>
@@ -175,19 +175,6 @@
 					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${version.junit}</version>
-			<scope>test</scope>
 		</dependency>
 
 		<!-- fixes for JDK 11 -->

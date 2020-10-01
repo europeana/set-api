@@ -45,22 +45,15 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${version.commonsLang3}</version>
-		</dependency>
+		</dependency>	
 
-	<!--  apis not included in JDK 11 -->
-	<dependency>
+		<!--  apis not included in JDK 11 -->
+		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 			<version>${version.javax.annotation}</version>
 		</dependency>	
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${version.junit}</version>
-			<scope>test</scope>
-		</dependency>
-
+		
 		<!-- overwrite -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -81,39 +74,40 @@
 		
 
 		<!-- TESTING PURPOSES -->
-<!--  
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<version>${version.commonsApi}</version>
-			<artifactId>commons-nosql</artifactId>
-			<classifier>tests</classifier>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		 -->
-		
-		<dependency>
-			<scope>test</scope>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<!-- <version>${version.springCore}</version> -->
 			<version>${version.spring}</version>
+			<scope>test</scope>			
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+			<version>${version.org.junit.jupiter}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIO}</version>
+			<scope>test</scope>
 		</dependency>
 		
 		<!-- it seems that the test dependencies from api-commons-nosql are not imported automatically -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb</artifactId>
-			<version>${version.springBootMongoStarter}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>de.flapdoodle.embed</groupId>
-			<artifactId>de.flapdoodle.embed.mongo</artifactId>
-			<version>2.0.3</version>
-			<scope>test</scope>
-		</dependency>
+		<!-- Test dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${version.springBoot}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 	</dependencies>
 
 	<build>

@@ -13,10 +13,7 @@
 
 	<!-- TEST BEANS AND PROPERTIES First  -->
 	<util:properties id="setProperties" 
-		location="test-config/set-mongo-test.properties" />
-	<!-- Embedded mongo server -->
-	<bean id="set_embedded_mongo" class="eu.europeana.api.commons.nosql.embedded.EmbeddedMongoServer" init-method="start" destroy-method="stop"/>
+		location="config/set.properties" />
 	
 	<import resource="set-mongo-context.xml"/>
-	
 </beans>
