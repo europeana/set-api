@@ -53,12 +53,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     @BeforeEach
     public void setup() throws IOException {
 	// mongo server is started as resoource
-//		userSetDao.getCollection().drop();
-	System.out.println("before test");
-	System.out.println("configuration: " + configuration);
-	System.out.println("usersetDao: " + userSetDao);
-	System.out.println("userSetService: " + userSetService);
-	
+//		userSetDao.getCollection().drop();	
 	setBaseUserSetUrl(configuration.getUserSetBaseUrl());
     }
 

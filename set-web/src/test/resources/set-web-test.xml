@@ -11,9 +11,6 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 
-	<!-- 
-	<context:property-override location="test-config/set-web-test.properties" order="0" />
-	 -->
 	<util:properties id="setProperties" 
 		location="config/set.properties" />
 	
