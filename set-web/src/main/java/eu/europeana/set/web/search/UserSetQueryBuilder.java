@@ -19,7 +19,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
 	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID};
-    Set<String> suportedFields = new HashSet<>(Arrays.asList(fields));
+    Set<String> suportedFields = Set.of(fields);
 
     private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();
@@ -65,9 +65,9 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
 	if (searchCriteria.containsKey(WebUserSetFields.SET_ID)) {
 		String setId = searchCriteria.get(WebUserSetFields.SET_ID);
-		if (setId != null && ! UserSetUtils.isSetIdNumeric(setId)) {
+		if (! UserSetUtils.isInteger(setId)) {
 			throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-					new String[] { "invalid value for search field " + WebUserSetFields.SET_ID,
+					new String[] { WebUserSetFields.SET_ID,
 							setId });
 		}
 		searchQuery.setSetId(setId);

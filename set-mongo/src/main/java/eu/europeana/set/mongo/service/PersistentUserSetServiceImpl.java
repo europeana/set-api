@@ -220,7 +220,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    }
 
 		if(query.getSetId() != null) {
-			mongoQuery.filter(WebUserSetModelFields.IDENTIFIER + " in",   query.getSetId());
+			mongoQuery.filter(WebUserSetModelFields.IDENTIFIER,   query.getSetId());
 		}
 	    
 	    if(query.getSortCriteria() == null) {

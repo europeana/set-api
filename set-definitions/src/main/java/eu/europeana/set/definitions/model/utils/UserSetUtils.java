@@ -150,7 +150,7 @@ public class UserSetUtils {
      * @param setId
      * @return true if numeric
      */
-    public static boolean isSetIdNumeric(String setId) {
+    public static boolean isInteger(String setId) {
         try {
              Integer.parseInt(setId);
              return true;
