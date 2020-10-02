@@ -23,18 +23,15 @@
 	</repositories>
 	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<version.setApi>0.2.1-SNAPSHOT</version.setApi>
-		<version.java>1.8</version.java>
-		<version.junit>4.12</version.junit>
-		<version.spring>5.1.7.RELEASE</version.spring>
+		<version.java>11</version.java>
+		<version.spring>5.2.7.RELEASE</version.spring>
 		<version.aspectj>1.8.8</version.aspectj>
 		<version.log4j2>2.9.1</version.log4j2>
 		<version.commonsLang3>3.9</version.commonsLang3>
 		<version.commonsIo>2.6</version.commonsIo>
 		<version.jackson>2.9.4</version.jackson>
-		<version.commonsApi>0.2.10</version.commonsApi>
+		<version.commonsApi>0.2.11-SNAPSHOT</version.commonsApi>
 		<version.springBoot>2.3.1.RELEASE</version.springBoot>
 		<version.slf4j>1.7.5</version.slf4j>
 		<version.servletJstl>1.2</version.servletJstl>
@@ -43,11 +40,22 @@
 		<version.javax.annotation>1.3.2</version.javax.annotation>
 		<version.jettison>1.3</version.jettison>
 		<version.jaxb>2.3.1</version.jaxb>
+		<version.org.junit.jupiter>5.6.2</version.org.junit.jupiter>
+		<version.commonsIO>2.4</version.commonsIO>
+		<version.surefire>2.22.0</version.surefire>
+		
 		<!-- 
 		<version.apikeyUtils>1.4</version.apikeyUtils>
 		 -->
 		
-	</properties>
+		<!--  java version properties -->
+	    <maven.compiler.source>${version.java}</maven.compiler.source>
+        <maven.compiler.target>${version.java}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		
+      
+    </properties>
 	<modules>
 		<module>set-definitions</module>
 		<module>set-common</module>

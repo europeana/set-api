@@ -1,6 +1,6 @@
 package eu.europeana.set.mongo.service.impl;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;

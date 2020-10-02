@@ -20,7 +20,6 @@ import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 
