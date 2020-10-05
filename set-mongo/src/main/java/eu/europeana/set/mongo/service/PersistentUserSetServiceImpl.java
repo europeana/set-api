@@ -1,5 +1,6 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,6 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 /**
@@ -261,11 +261,13 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@Override
 	public void removeAll(List<PersistentUserSet> userSets) {
+		List<ObjectId> objectIds = new ArrayList<>();
 		if (!userSets.isEmpty()) {
 			for( PersistentUserSet userSet : userSets) {
-				getDao().delete(userSet);
+				objectIds.add(userSet.getObjectId());
 			}
 		}
+		getUserSetDao().deleteByObjectId(objectIds);
 		logger.info("All {} user sets deleted for the user", userSets.size());
 	}
 

@@ -725,7 +725,8 @@ public class WebUserSetRest extends BaseRest {
 	    throw new InternalServerException(e);
 	}
     }
-	@DeleteMapping(value = { "/set/delete/" })
+
+	@DeleteMapping(value = { "/set/" })
 	@ApiOperation(value = "Delete sets associated with user", nickname = "delete user's sets", response = java.lang.Void.class)
 	public ResponseEntity<String> deleteUserAssociatedSet(
 			HttpServletRequest request)
@@ -746,15 +747,9 @@ public class WebUserSetRest extends BaseRest {
 	 */
 	protected ResponseEntity<String> deleteUserAssociatedSets(Authentication authentication) throws HttpException {
 	try {
-		// get the user from authentication
-		Agent user = new WebUser();
-		user.setHttpUrl(getUserSetService().getUserId(authentication));
-		user.setNickname(((ApiCredentials)authentication.getCredentials()).getUserName());
-
-		List<PersistentUserSet> userSets = getUserSetService().getUserSetByCreatorId(user.getHttpUrl());
-
-		// generate “ETag”;
-		String eTagNew = generateETag(userSets.get(0).getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+		// get the creator from authentication
+		String creatorId = getUserSetService().getUserId(authentication);
+		List<PersistentUserSet> userSets = getUserSetService().getUserSetByCreatorId(creatorId);
 
 		// if the user set is disabled and the user is not an admin, respond with HTTP
 		// 410
@@ -766,11 +761,9 @@ public class WebUserSetRest extends BaseRest {
 
 		// build response entity with headers
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-		headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-		headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-		headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-		headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-		headers.add(UserSetHttpHeaders.ETAG, eTagNew);
+
+		headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PGD);
+		headers.add(UserSetHttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
 
 		return new ResponseEntity<>(headers, httpStatus);
 		} catch (HttpException e) {

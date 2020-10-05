@@ -111,7 +111,7 @@ public class SetControllerTest extends BaseUserSetTest {
     @Test
     public void testDeleteUserAssociatedSets_Success() throws Exception {
 
-        mockMvc.perform(delete(BASE_URL + "delete/")
+        mockMvc.perform(delete(BASE_URL )
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 //		.andDo(print())
@@ -121,7 +121,7 @@ public class SetControllerTest extends BaseUserSetTest {
     @Test
     public void testDeleteUserAssociatedSets_NotAuthorised() throws Exception {
 
-        mockMvc.perform(delete(BASE_URL + "delete/")
+        mockMvc.perform(delete(BASE_URL)
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 //		.andDo(print())

@@ -86,10 +86,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	@Override
 	public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException {
 		List<PersistentUserSet> res = getMongoPersistence().getByCreator(creatorId).asList();
-		if (res.isEmpty()) {
-			throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND_FOR_USER,
-					UserSetI18nConstants.USERSET_NOT_FOUND_FOR_USER, new String[] {});
-		}
 		return res;
 	}
 
