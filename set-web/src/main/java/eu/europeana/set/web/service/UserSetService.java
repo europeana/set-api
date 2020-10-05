@@ -79,7 +79,15 @@ public interface UserSetService {
      */
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
 
-    /**
+	/**
+	 * This method returns List<UserSet> for given user set creatorId
+	 *
+	 * @param
+	 * @return List<PersistentUserSet>
+	 */
+	public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
+
+	/**
      * This method computes pagination values for user set
      *
      * @param userSet
@@ -119,7 +127,14 @@ public interface UserSetService {
 	 * @throws UserSetNotFoundException 
 	 */
 	public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
-	
+
+	/**
+	 * This method deletes list of  user set.
+	 * @param userSets The list of user sets.
+	 * @throws UserSetNotFoundException
+	 */
+	public void deleteUserSets(List<PersistentUserSet> userSets) throws UserSetNotFoundException;
+
 	/**
 	 * remove duplicate items in the user set by preserving the order of items
 	 * @param userSet

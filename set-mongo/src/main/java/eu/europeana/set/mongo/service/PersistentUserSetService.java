@@ -6,6 +6,9 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import org.mongodb.morphia.query.QueryResults;
+
+import java.util.List;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
 
@@ -23,7 +26,15 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return user set object
 	 */
 	PersistentUserSet getByIdentifier(String identifier);
-	
+
+
+	/**
+	 * This method retrieves user sets from database by creatorId string
+	 * @param creatorId The creator id  e.g. http://localhost:8080/user/12345
+	 * @return QueryResults of user set object
+	 */
+	QueryResults<PersistentUserSet> getByCreator(String creatorId);
+
 	/**
 	 * This method checks if a user set with provided type and creator already exists in
 	 * database
@@ -51,6 +62,13 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return user set object
 	 */
 	void remove(String identifier);
+
+	/**
+	 * This method removes List of user sets from database
+	 * @param userSets
+	 * @return user set object
+	 */
+	void removeAll(List<PersistentUserSet> userSets);
 
 	/** 
 	 * Retrieve user sets for the given search query 

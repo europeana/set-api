@@ -10,10 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.FindOptions;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.Sort;
+import org.mongodb.morphia.query.*;
 import org.springframework.stereotype.Component;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -102,7 +99,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 		return getUserSetDao().findOne(query);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getByCreator(java.lang.String)
+	 */
+	public QueryResults<PersistentUserSet> getByCreator(String creatorId) {
+		Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
+		query.filter(FIELD_CREATOR, creatorId);
+
+		return getUserSetDao().find(query);
+	}
+
 	/* (non-Javadoc)
 	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String)
 	 */
@@ -250,6 +257,16 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		PersistentUserSet userSet = getByIdentifier(id);
 		if (userSet != null)
 		    getDao().delete(userSet);
+	}
+
+	@Override
+	public void removeAll(List<PersistentUserSet> userSets) {
+		if (!userSets.isEmpty()) {
+			for( PersistentUserSet userSet : userSets) {
+				getDao().delete(userSet);
+			}
+		}
+		logger.info("All {} user sets deleted for the user", userSets.size());
 	}
 
 	/**      
