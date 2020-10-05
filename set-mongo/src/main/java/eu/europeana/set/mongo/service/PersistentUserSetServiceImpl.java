@@ -157,7 +157,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    
 	    FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
-	    
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
@@ -180,7 +179,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return searchQuery;
 	    }
 	    
-//	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions) 
+//	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions)
 	    if(query.getVisibility() == null) {
 		//all public, published, and user's private
 //		searchQuery.filter(WebUserSetModelFields.VISIBILITY+" in", publicPublishedList);
@@ -219,6 +218,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if(query.getItem() != null) {
 		mongoQuery.filter(WebUserSetModelFields.ITEMS + " in", query.getItem());
 	    }
+
+		if(query.getSetId() != null) {
+			mongoQuery.filter(WebUserSetModelFields.IDENTIFIER,   query.getSetId());
+		}
 	    
 	    if(query.getSortCriteria() == null) {
 		//default ordering if none is defined by the user
@@ -226,6 +229,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    } else {
 		buildSortCriteria(query, mongoQuery);
 	    }
+
 	    return mongoQuery;
 	}
 

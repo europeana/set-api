@@ -10,11 +10,13 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     boolean admin;
     String item;
     String user;
+    String setId;
     
     @Override
     public String getUser() {
         return user;
     }
+
     @Override
     public void setUser(String user) {
         this.user = user;
@@ -59,5 +61,16 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public String getSetId() {
+        return setId;
+    }
+
+    @Override
+    public void setSetId(String setId) {
+        this.setId = setId;
+    }
+
     
 }
