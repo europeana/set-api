@@ -1,5 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,7 +58,7 @@ public class SetControllerTest extends BaseUserSetTest {
     
     @BeforeEach
     public void initApplication() {
-	this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
     String BASE_URL = "/set/";
@@ -104,6 +105,27 @@ public class SetControllerTest extends BaseUserSetTest {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 //		.andDo(print())
 		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));	
+    }
+
+
+    @Test
+    public void testDeleteUserAssociatedSets_Success() throws Exception {
+
+        mockMvc.perform(delete(BASE_URL )
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+//		.andDo(print())
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+    }
+
+    @Test
+    public void testDeleteUserAssociatedSets_NotAuthorised() throws Exception {
+
+        mockMvc.perform(delete(BASE_URL)
+                .header(HttpHeaders.AUTHORIZATION, "")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+//		.andDo(print())
+                .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
     }
 
 }

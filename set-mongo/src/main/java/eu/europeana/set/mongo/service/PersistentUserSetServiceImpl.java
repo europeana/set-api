@@ -1,5 +1,6 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -10,10 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.FindOptions;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.Sort;
+import org.mongodb.morphia.query.*;
 import org.springframework.stereotype.Component;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -27,7 +25,6 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 /**
@@ -102,7 +99,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 		return getUserSetDao().findOne(query);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getByCreator(java.lang.String)
+	 */
+	public QueryResults<PersistentUserSet> getByCreator(String creatorId) {
+		Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
+		query.filter(FIELD_CREATOR, creatorId);
+
+		return getUserSetDao().find(query);
+	}
+
 	/* (non-Javadoc)
 	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String)
 	 */
@@ -254,6 +261,18 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		PersistentUserSet userSet = getByIdentifier(id);
 		if (userSet != null)
 		    getDao().delete(userSet);
+	}
+
+	@Override
+	public void removeAll(List<PersistentUserSet> userSets) {
+		List<ObjectId> objectIds = new ArrayList<>();
+		if (!userSets.isEmpty()) {
+			for( PersistentUserSet userSet : userSets) {
+				objectIds.add(userSet.getObjectId());
+			}
+		}
+		getUserSetDao().deleteByObjectId(objectIds);
+		logger.info("All {} user sets deleted for the user", userSets.size());
 	}
 
 	/**      

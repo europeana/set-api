@@ -83,7 +83,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return res;
     }
 
-    /**
+	@Override
+	public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException {
+		List<PersistentUserSet> res = getMongoPersistence().getByCreator(creatorId).asList();
+		return res;
+	}
+
+	/**
      * This method checks if a user set with provided type and user already exists
      * in database
      * 
@@ -338,6 +344,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	getMongoPersistence().remove(userSetId);
     }
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see
+	 * eu.europeana.set.web.service.UserSetService#deleteUserSets(java.lang.String)
+	 */
+	public void deleteUserSets(List<PersistentUserSet> userSets) throws UserSetNotFoundException {
+
+    getMongoPersistance().removeAll(userSets);
+	}
 
     /**
      * This method validates position input, if false responds with -1

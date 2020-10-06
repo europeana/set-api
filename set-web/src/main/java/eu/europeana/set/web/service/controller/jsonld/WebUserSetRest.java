@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -725,4 +726,50 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
+	@DeleteMapping(value = { "/set/" })
+	@ApiOperation(value = "Delete sets associated with user", nickname = "delete user's sets", response = java.lang.Void.class)
+	public ResponseEntity<String> deleteUserAssociatedSet(
+			HttpServletRequest request)
+			throws HttpException {
+
+		// check user credentials, if invalid respond with HTTP 401,
+		// or if unauthorized respond with HTTP 403
+		Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
+
+		return deleteUserAssociatedSets(authentication);
+	}
+
+	/**
+	 * This method implements removal of a all sets associated to a user
+	 *
+	 * @param authentication
+	 * @throws HttpException
+	 */
+	protected ResponseEntity<String> deleteUserAssociatedSets(Authentication authentication) throws HttpException {
+	try {
+		// get the creator from authentication
+		String creatorId = getUserSetService().getUserId(authentication);
+		List<PersistentUserSet> userSets = getUserSetService().getUserSetByCreatorId(creatorId);
+
+		// if the user set is disabled and the user is not an admin, respond with HTTP
+		// 410
+		HttpStatus httpStatus = null;
+		httpStatus = HttpStatus.NO_CONTENT;
+
+		// delete user sets
+		getUserSetService().deleteUserSets(userSets);
+
+		// build response entity with headers
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+
+		headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PGD);
+		headers.add(UserSetHttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
+
+		return new ResponseEntity<>(headers, httpStatus);
+		} catch (HttpException e) {
+			throw e;
+		} catch (RuntimeException e) {
+			throw new InternalServerException(e);
+		}
+	}
 }
