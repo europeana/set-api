@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,8 +59,9 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
- 
-    /*
+	protected final Logger logger = LogManager.getLogger(this.getClass());
+
+	/*
      * (non-Javadoc)
      * 
      * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
@@ -351,9 +354,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @see
 	 * eu.europeana.set.web.service.UserSetService#deleteUserSets(java.lang.String)
 	 */
-	public void deleteUserSets(List<PersistentUserSet> userSets) throws UserSetNotFoundException {
-
+	public void deleteUserSets(String creatorId, List<PersistentUserSet> userSets) {
+	List<String> setsToBeDeleted = new ArrayList<>();
+	if (!userSets.isEmpty()) {
+		for (PersistentUserSet userSet : userSets) {
+			setsToBeDeleted.add(userSet.getIdentifier());
+		}
+	}
     getMongoPersistance().removeAll(userSets);
+    logger.info("User sets deleted for user {}. Sets deleted are : {} " , creatorId, setsToBeDeleted);
 	}
 
     /**

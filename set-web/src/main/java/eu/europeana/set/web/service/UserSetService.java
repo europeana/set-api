@@ -131,9 +131,9 @@ public interface UserSetService {
 	/**
 	 * This method deletes list of  user set.
 	 * @param userSets The list of user sets.
-	 * @throws UserSetNotFoundException
+	 * @param creatorId Creator of the user Sets
 	 */
-	public void deleteUserSets(List<PersistentUserSet> userSets) throws UserSetNotFoundException;
+	public void deleteUserSets(String creatorId, List<PersistentUserSet> userSets);
 
 	/**
 	 * remove duplicate items in the user set by preserving the order of items

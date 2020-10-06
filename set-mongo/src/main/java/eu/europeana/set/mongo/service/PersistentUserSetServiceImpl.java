@@ -272,7 +272,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 			}
 		}
 		getUserSetDao().deleteByObjectId(objectIds);
-		logger.info("All {} user sets deleted for the user", userSets.size());
 	}
 
 	/**      

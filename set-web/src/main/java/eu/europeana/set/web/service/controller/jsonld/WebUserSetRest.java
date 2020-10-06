@@ -757,7 +757,7 @@ public class WebUserSetRest extends BaseRest {
 		httpStatus = HttpStatus.NO_CONTENT;
 
 		// delete user sets
-		getUserSetService().deleteUserSets(userSets);
+		getUserSetService().deleteUserSets(creatorId, userSets);
 
 		// build response entity with headers
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
