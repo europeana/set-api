@@ -93,12 +93,15 @@
 				<inherited>true</inherited>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
 				<configuration>
+					<!-- to be used starting with version 3.5.0 
+						<release>${version.javac.release}</release>
+					-->
 					<source>${version.java}</source>
 					<target>${version.java}</target>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>
