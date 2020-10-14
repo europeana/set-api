@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
+import eu.europeana.set.common.http.HttpConnection;
 
 /**
  * @author GrafR
