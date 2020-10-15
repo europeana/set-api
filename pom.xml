@@ -24,7 +24,8 @@
 	
 	<properties>
 		<version.setApi>0.2.1-SNAPSHOT</version.setApi>
-		<version.java>11</version.java>
+		<version.java>1.9</version.java>
+		<version.javac.release>9</version.javac.release>
 		<version.spring>5.2.7.RELEASE</version.spring>
 		<version.aspectj>1.8.8</version.aspectj>
 		<version.log4j2>2.9.1</version.log4j2>
