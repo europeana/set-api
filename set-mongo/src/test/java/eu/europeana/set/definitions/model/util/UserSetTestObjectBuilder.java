@@ -6,20 +6,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import eu.europeana.set.definitions.exception.UserSetAccessException;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
-import eu.europeana.set.definitions.model.agent.impl.SoftwareAgent;
+import eu.europeana.set.definitions.model.agent.impl.Person;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import org.apache.commons.io.IOUtils;
 
 
@@ -47,25 +45,32 @@ public class UserSetTestObjectBuilder {
       return userSetUtils;
     }
     
-	public UserSet buildUserSet(UserSet userSet){
-		return buildUserSet(userSet, ITEMS_TEST_INPUT_FILE);
+	public UserSet buildUserSet(UserSet userSet, boolean isCollection){
+		return buildUserSet(userSet, ITEMS_TEST_INPUT_FILE, isCollection);
 	}
 
-	public UserSet buildUserSet(UserSet userSet, String classpathFile){
+	public UserSet buildUserSet(UserSet userSet, String classpathFile, boolean isCollection){
 
 		userSet.setTitle(getUserSetUtils().createMap(Locale.ENGLISH.getLanguage(),
 				TEST_TITLE));
 		userSet.setDescription(getUserSetUtils().createMap(Locale.ENGLISH.getLanguage(),
 				TEST_DESCRIPTION));
 
-		userSet.setType(UserSetTypes.COLLECTION.name());
-        
+		if(isCollection) {
+			userSet.setType(UserSetTypes.COLLECTION.getJsonValue());
+			userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+		} else {
+			userSet.setType(UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
+			userSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
+		}
+
 		Date now = new Date();
 		userSet.setCreated(now);
 		userSet.setModified(now);
 		
-		Agent creator = new SoftwareAgent();
+		Agent creator = new Person();
 		creator.setName(TEST_AGENT);
+		creator.setHttpUrl(UserSetUtils.buildCreatorUri(TEST_AGENT));
 		creator.setHomepage(TEST_HOMEPAGE);
 		userSet.setCreator(creator);
 		try {

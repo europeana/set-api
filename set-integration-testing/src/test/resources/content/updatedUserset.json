@@ -1,0 +1,10 @@
+{
+  "type": "Collection",
+  "title": {
+     "en": "SportsCollection"
+  },
+  "description": {
+     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
+  },
+  "isDefinedBy": "https://api.europeana.eu/record/v2/search.json?query=*:*&profile=minimal&wskey=api2demo"
+}

@@ -91,7 +91,7 @@ public class WebUserSetServiceTest {
 													  // {
 
 	UserSet userSet = new PersistentUserSetImpl();
-	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
+	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 
 	/**
 	 * Store UserSet in database.
@@ -116,7 +116,7 @@ public class WebUserSetServiceTest {
 	    throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
 
 	UserSet userSet = new PersistentUserSetImpl();
-	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
+	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 
 	// store user set in database
 	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
@@ -136,9 +136,9 @@ public class WebUserSetServiceTest {
 
 	UserSet userSet = new PersistentUserSetImpl();
 	UserSet userSet1200 = new PersistentUserSetImpl();
-	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
+	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 	UserSet test1200UserSet = getObjectBuilder().buildUserSet(userSet1200,
-		UserSetTestObjectBuilder.ITEMS_1200_TEST_INPUT_FILE);
+		UserSetTestObjectBuilder.ITEMS_1200_TEST_INPUT_FILE, true);
 
 	// store user set in database
 	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
@@ -160,7 +160,7 @@ public class WebUserSetServiceTest {
 	    UserSetNotFoundException, ApplicationAuthenticationException {
 
 	UserSet userSet = new PersistentUserSetImpl();
-	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE);
+	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 	testUserSet.setItems(null);
 
 	// store user set in database
