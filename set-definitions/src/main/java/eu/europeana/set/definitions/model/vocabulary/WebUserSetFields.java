@@ -29,7 +29,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
      *     
      * @deprecated    
      */
-    @Deprecated
+    @Deprecated(since = "")
     public static final String PARAM_SORT_ORDER           = "sortOrder";
 
     // Mongo Constants

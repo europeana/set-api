@@ -78,6 +78,7 @@ public class UserSetTestObjectBuilder {
 		} catch (IOException e) {
 			throw new UserSetAttributeInstantiationException("items", null, "cannot read item list from classpath: " + classpathFile, e);
 		}
+		userSet.setTotal(userSet.getItems().size());
 			
 		return userSet;
 	}

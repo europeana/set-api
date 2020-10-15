@@ -13,16 +13,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import eu.europeana.api.commons.nosql.dao.NosqlDao;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
-import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
@@ -156,8 +152,7 @@ public class WebUserSetServiceTest {
     }
 
     @Test
-    public void testInsertItemUserSet() throws MalformedURLException, IOException, UserSetServiceException,
-	    UserSetNotFoundException, ApplicationAuthenticationException {
+    public void testInsertItemUserSet() throws ApplicationAuthenticationException {
 
 	UserSet userSet = new PersistentUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);

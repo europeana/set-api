@@ -198,7 +198,7 @@ public interface UserSetService {
 	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile, Authentication authentication);
 
 	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
+		    StringBuilder requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
 
 	/**
 	 * This method validates input values wsKey, identifier and userToken.
