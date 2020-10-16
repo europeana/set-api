@@ -633,8 +633,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setCurrentPageUri(currentPageUrl);
 
 	if (currentPage > 0) {
-	String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
-	resPage.setPrevPageUri(prevPage);
+		String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
+		resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
