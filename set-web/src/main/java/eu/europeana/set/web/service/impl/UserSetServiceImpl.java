@@ -653,9 +653,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @return
 	 */
     protected static int getLastPage(long totalResults, int pageSize) {
-    long lastPage = 0;
-	if (totalResults > 0) {
-		long reaminder = (totalResults % pageSize);
+     long lastPage = 0;
+     if (totalResults > 0) {
+     	long reaminder = (totalResults % pageSize);
 		int extraPage = (reaminder == 0 ? 0 : 1);
 		lastPage =  ((totalResults / pageSize) + extraPage) - 1;
 	}
@@ -670,7 +670,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @return
 	 */
 	private boolean isLastPage(int currentPage, int lastPage) {
-    return (currentPage == lastPage);
+		return (currentPage == lastPage);
 	}
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
