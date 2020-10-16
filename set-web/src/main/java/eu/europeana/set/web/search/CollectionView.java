@@ -11,11 +11,6 @@ public class CollectionView {
         super();
     }
 
-    public CollectionView(String id, Long total) {
-        this.id = id;
-        this.total = total;
-    }
-
     public CollectionView(String id, Long total, String first, String last) {
         this.id = id;
         this.total = total;
