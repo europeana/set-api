@@ -646,10 +646,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	// if current page is not the last one
-	boolean isLastPage = resPage.getTotalInCollection() <= ((currentPage + 1) * searchQuery.getPageSize());
-		System.out.println("is last page   " +isLastPage);
-	if (!isLastPage) {
-		System.out.println(" next page   " +isLastPage);
+	if (!isLastPage(currentPage, totalPages)) {
+		System.out.println("islast page false");
 	    String nextPage = buildPageUrl(collectionUrl, currentPage + 1, searchQuery.getPageSize());
 	    resPage.setNextPageUri(nextPage);
 	}
@@ -662,13 +660,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		if(totalResults >0) {
 			long reaminder = (totalResults % pageSize);
 			System.out.println("reaminder  " +reaminder);
-			int extraPage = reaminder == 0 ? 0 : 1;
+			int extraPage = (reaminder == 0 ? 0 : 1);
 			totalPages =  ((totalResults / pageSize) + extraPage)-1;
            System.out.println("total pages " +totalPages);
 		}
 		return totalPages;
 	}
 
+	private boolean isLastPage(int currentPage, int lastPage) {
+    	return (currentPage == lastPage);
+	}
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
