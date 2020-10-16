@@ -654,7 +654,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 */
     protected static int getLastPage(long totalResults, int pageSize) {
     long lastPage = 0;
-	if(totalResults > 0) {
+	if (totalResults > 0) {
 		long reaminder = (totalResults % pageSize);
 		int extraPage = (reaminder == 0 ? 0 : 1);
 		lastPage =  ((totalResults / pageSize) + extraPage) - 1;
