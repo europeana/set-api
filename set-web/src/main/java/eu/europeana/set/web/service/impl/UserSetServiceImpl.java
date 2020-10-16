@@ -625,9 +625,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		// last <endpoint>/search?query=xpto&page=9&pageSize=10
 	//	"next": "<endpoint>/search?query=xpto&page=2&pageSize=10",
 	//			"prev": "<endpoint>/search?query=xpto&page=0&pageSize=10"
+		System.out.println("resPage.getTotalInCollection()  "+resPage.getTotalInCollection());
+		System.out.println("results.getResultSize()  "+results.getResultSize());
+	int totalPages = Math.toIntExact(getTotalPages(results.getResultSize(), searchQuery.getPageSize()));
+
 	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
 	String first = buildPageUrl(collectionUrl,0, searchQuery.getPageSize());
-	String last= buildPageUrl(collectionUrl,searchQuery.getPageSize()-1 , searchQuery.getPageSize());
+	String last= buildPageUrl(collectionUrl, totalPages , searchQuery.getPageSize());
+
 	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize(), first, last));
 
 	int currentPage = searchQuery.getPageNr();
@@ -641,7 +646,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	// if current page is not the last one
-	boolean isLastPage = resPage.getTotalInCollection() <= (currentPage + 1) * searchQuery.getPageSize();
+	boolean isLastPage = resPage.getTotalInCollection() <= ((currentPage + 1) * searchQuery.getPageSize());
 		System.out.println("is last page   " +isLastPage);
 	if (!isLastPage) {
 		System.out.println(" next page   " +isLastPage);
@@ -651,6 +656,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	return resPage;
     }
+
+    private static long getTotalPages(long totalResults, int pageSize) {
+    	long totalPages=0;
+		if(totalResults >0) {
+			long reaminder = (totalResults % pageSize);
+			System.out.println("reaminder  " +reaminder);
+			int extraPage = reaminder == 0 ? 0 : 1;
+			totalPages =  ((totalResults / pageSize) + extraPage)-1;
+           System.out.println("total pages " +totalPages);
+		}
+		return totalPages;
+	}
+
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
