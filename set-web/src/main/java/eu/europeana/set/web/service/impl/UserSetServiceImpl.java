@@ -621,21 +621,30 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
 	}
 
+	// first : <endpoint>/search?query=xpto&page=0&pageSize=10
+		// last <endpoint>/search?query=xpto&page=9&pageSize=10
+	//	"next": "<endpoint>/search?query=xpto&page=2&pageSize=10",
+	//			"prev": "<endpoint>/search?query=xpto&page=0&pageSize=10"
 	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
-	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize()));
+	String first = buildPageUrl(collectionUrl,0, searchQuery.getPageSize());
+	String last= buildPageUrl(collectionUrl,searchQuery.getPageSize()-1 , searchQuery.getPageSize());
+	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize(), first, last));
 
 	int currentPage = searchQuery.getPageNr();
+	System.out.println("currentPage page  "+currentPage);
 	String currentPageUrl = buildPageUrl(collectionUrl, currentPage, searchQuery.getPageSize());
 	resPage.setCurrentPageUri(currentPageUrl);
 
 	if (currentPage > 0) {
-	    String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
+		String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
 	    resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
 	boolean isLastPage = resPage.getTotalInCollection() <= (currentPage + 1) * searchQuery.getPageSize();
+		System.out.println("is last page   " +isLastPage);
 	if (!isLastPage) {
+		System.out.println(" next page   " +isLastPage);
 	    String nextPage = buildPageUrl(collectionUrl, currentPage + 1, searchQuery.getPageSize());
 	    resPage.setNextPageUri(nextPage);
 	}
@@ -692,6 +701,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
 
+	System.out.println(" Page url : " + builder.toString());
 	return builder.toString();
     }
 

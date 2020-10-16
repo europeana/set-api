@@ -74,7 +74,7 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     @Override
     @JsonProperty(WebUserSetFields.PREV)
     public String getPrevPageUri() {
-        return super.getNextPageUri();
+        return super.getPrevPageUri();
     }
 
     
