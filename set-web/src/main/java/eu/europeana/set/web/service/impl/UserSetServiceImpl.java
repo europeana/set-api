@@ -616,27 +616,57 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
 	}
 
+	int lastPage = getLastPage(results.getResultSize(), searchQuery.getPageSize());
 	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
-	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize()));
+	String first = buildPageUrl(collectionUrl,0, searchQuery.getPageSize());
+	String last= buildPageUrl(collectionUrl, lastPage , searchQuery.getPageSize());
+
+	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize(), first, last));
 
 	int currentPage = searchQuery.getPageNr();
 	String currentPageUrl = buildPageUrl(collectionUrl, currentPage, searchQuery.getPageSize());
 	resPage.setCurrentPageUri(currentPageUrl);
 
 	if (currentPage > 0) {
-	    String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
-	    resPage.setPrevPageUri(prevPage);
+		String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
+		resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
-	boolean isLastPage = resPage.getTotalInCollection() <= (currentPage + 1) * searchQuery.getPageSize();
-	if (!isLastPage) {
+	if (!isLastPage(currentPage, lastPage)) {
 	    String nextPage = buildPageUrl(collectionUrl, currentPage + 1, searchQuery.getPageSize());
 	    resPage.setNextPageUri(nextPage);
 	}
 
 	return resPage;
     }
+
+	/**
+	 * calculates the last Page
+	 * @param totalResults
+	 * @param pageSize
+	 * @return
+	 */
+    protected static int getLastPage(long totalResults, int pageSize) {
+     long lastPage = 0;
+     if (totalResults > 0) {
+     	long reaminder = (totalResults % pageSize);
+		int extraPage = (reaminder == 0 ? 0 : 1);
+		lastPage =  ((totalResults / pageSize) + extraPage) - 1;
+	}
+
+	return Math.toIntExact(lastPage);
+	}
+
+	/**
+	 * Checks if the currentPage is LastPage
+	 * @param currentPage
+	 * @param lastPage
+	 * @return
+	 */
+	private boolean isLastPage(int currentPage, int lastPage) {
+		return (currentPage == lastPage);
+	}
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
@@ -681,7 +711,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setTotalInPage(items.size());
     }
 
-    private String buildPageUrl(String collectionUrl, int page, int pageSize) {
+    protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
 	StringBuilder builder = new StringBuilder(collectionUrl);
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
 
