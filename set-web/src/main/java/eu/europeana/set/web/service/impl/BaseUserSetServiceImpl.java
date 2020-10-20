@@ -71,7 +71,7 @@ public abstract class BaseUserSetServiceImpl {
      * @param persistedSet
      * @param updates
      */
-    @Deprecated
+    @Deprecated(since = "")
     void mergeUserSetProperties(PersistentUserSet persistedSet, UserSet updates) {
 	if (updates == null) {
 	    return;

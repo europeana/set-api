@@ -1,7 +1,5 @@
 package eu.europeana.set.client.integration.web;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +7,7 @@ import java.io.InputStreamReader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -17,6 +15,7 @@ import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApiImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BaseWebUserSetProtocol {
 
@@ -30,7 +29,7 @@ public class BaseWebUserSetProtocol {
 
 	private WebUserSetApi apiClient;
 
-	@Before
+	@BeforeEach
 	public void initObjects() {
 		apiClient = new WebUserSetApiImpl();
 	}

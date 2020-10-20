@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * refactor code to remove dependency on web modules and change this class
  * @deprecated
  */
-@Deprecated
+@Deprecated(since = "", forRemoval = true)
 @JsonInclude(Include.NON_NULL)
 public abstract class ApiResponse {
 

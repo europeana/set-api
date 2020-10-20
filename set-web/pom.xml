@@ -156,7 +156,15 @@
 			<scope>test</scope>
 			<version>${version.org.junit.jupiter}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>3.5.13</version>
+			<scope>test</scope>
+		</dependency>
+
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -183,7 +191,6 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>${version.jaxb}</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
