@@ -67,7 +67,7 @@ public class UserSetServiceImplTest {
         String next = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() + 1, userSetQuery.getPageSize());
         String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(), userSetQuery.getPageSize());
 
-        StringBuffer buffer = new StringBuffer(REQUEST_URL);
+        StringBuilder buffer = new StringBuilder(REQUEST_URL);
         BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet,
                 buffer, "",
                 LdProfiles.STANDARD, authentication
@@ -93,7 +93,7 @@ public class UserSetServiceImplTest {
         String prev = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() - 1, userSetQuery.getPageSize());
         String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(), userSetQuery.getPageSize());
 
-        StringBuffer buffer = new StringBuffer(REQUEST_URL);
+        StringBuilder buffer = new StringBuilder(REQUEST_URL);
         BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet,
                 buffer, "",
                 LdProfiles.MINIMAL, authentication
@@ -118,7 +118,7 @@ public class UserSetServiceImplTest {
         String prev = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() - 1, userSetQuery.getPageSize());
         String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(), userSetQuery.getPageSize());
 
-        StringBuffer buffer = new StringBuffer(REQUEST_URL);
+        StringBuilder buffer = new StringBuilder(REQUEST_URL);
         BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet,
                 buffer, "",
                 LdProfiles.ITEMDESCRIPTIONS, authentication
@@ -145,7 +145,7 @@ public class UserSetServiceImplTest {
         String prev = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() - 1, userSetQuery.getPageSize());
         String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(), userSetQuery.getPageSize());
 
-        StringBuffer buffer = new StringBuffer(REQUEST_URL);
+        StringBuilder buffer = new StringBuilder(REQUEST_URL);
         BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet,
                 buffer, "",
                 LdProfiles.ITEMDESCRIPTIONS, authentication
