@@ -36,7 +36,7 @@ public class SearchUserSetRestTest {
     private static final String PRIVATE_VISIBILITY    = WebUserSetFields.VISIBILITY + ":" + VisibilityTypes.PRIVATE.getJsonValue();
     private static final String PUBLISHED_VISIBILITY  = WebUserSetFields.VISIBILITY + ":" + VisibilityTypes.PUBLISHED.getJsonValue();
     private static final String CREATOR               = WebUserSetFields.CREATOR + ":test";
-    private static final String COLLECTION_TYPE       = WebUserSetFields.TYPE + ":" + UserSetTypes.COLLECTION;
+   private static final String COLLECTION_TYPE       = WebUserSetFields.TYPE + ":" + UserSetTypes.COLLECTION;
 
     private static final String PAGE_SIZE = "100";
 

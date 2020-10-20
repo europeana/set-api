@@ -31,7 +31,7 @@ public class EuropeanaOauthClient{
 	    ResponseEntity<String> response;
 	    response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded");
 
-	    if (HttpStatus.OK.value() == response.getStatusCode().value()) {
+	    if (HttpStatus.OK == response.getStatusCode()) {
 		String body = response.getBody();
 		JSONObject json = new JSONObject(body);
 		if (json.has(accessToken)) {

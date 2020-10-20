@@ -1,16 +1,17 @@
 package eu.europeana.set.web.model;
 
-import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
-import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
-import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 
 public class WeUserSetImplTest {
 
@@ -69,7 +70,7 @@ public class WeUserSetImplTest {
         assertNotNull(userSet.getCreator());
         assertTrue(StringUtils.equals(UserSetTestObjectBuilder.TEST_AGENT, userSet.getCreator().getName()));
         assertTrue(StringUtils.equals(UserSetTestObjectBuilder.TEST_HOMEPAGE, userSet.getCreator().getHomepage()));
-        assertTrue(StringUtils.contains(userSet.getCreator().getHttpUrl(),getObjectBuilder().TEST_AGENT ));
+        assertTrue(StringUtils.contains(userSet.getCreator().getHttpUrl(), UserSetTestObjectBuilder.TEST_AGENT));
 
         assertNotNull(userSet.getItems());
         assertNotNull(userSet.getCreated());

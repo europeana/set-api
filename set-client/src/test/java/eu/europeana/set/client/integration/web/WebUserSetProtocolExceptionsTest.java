@@ -1,21 +1,15 @@
 package eu.europeana.set.client.integration.web;
 
-import eu.europeana.set.client.connection.BaseApiConnection;
-import eu.europeana.set.client.web.WebUserSetApiImpl;
-import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 
 /**

@@ -1,14 +1,16 @@
 package eu.europeana.set.web.service.controller;
 
-import eu.europeana.api.common.config.UserSetI18nConstants;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
-import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
-import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
-import eu.europeana.set.web.service.UserSetService;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,13 +19,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import eu.europeana.api.common.config.UserSetI18nConstants;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.service.UserSetService;
 
 @ExtendWith(MockitoExtension.class)
 public class BaseRestTest {
@@ -106,7 +110,7 @@ public class BaseRestTest {
 
     @Test
     public void testSerialiseUserSet() throws IOException {
-        UserSet userSet = new PersistentUserSetImpl();
+        UserSet userSet = new WebUserSetImpl();
         userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
         userSet.setType(UserSetTypes.COLLECTION.getJsonValue());
         List<String> items = new ArrayList<>();

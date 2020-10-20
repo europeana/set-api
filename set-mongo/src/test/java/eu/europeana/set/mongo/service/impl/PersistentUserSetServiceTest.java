@@ -13,6 +13,8 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
+import eu.europeana.set.web.model.WebUserSetImpl;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,8 +76,8 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
         checkUserSet(foundUserSet, storedUserSet);
 
         assertTrue(storedUserSet instanceof UserSet);
-        assertEquals(((PersistentUserSetImpl) storedUserSet).getObjectId().toString(),
-                ((PersistentUserSetImpl) foundUserSet).getObjectId().toString());
+        assertEquals(((WebUserSetImpl) storedUserSet).getObjectId().toString(),
+                ((WebUserSetImpl) foundUserSet).getObjectId().toString());
     }
 
     @Test
@@ -166,7 +168,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     private UserSet storeUserSet(boolean isCollection) {
-        UserSet userSet = new PersistentUserSetImpl();
+        UserSet userSet = new WebUserSetImpl();
         UserSet persistentUserSet = getObjectBuilder().buildUserSet(userSet, isCollection);
         UserSet storedUserSet = userSetService.store(persistentUserSet);
         checkUserSet(persistentUserSet, storedUserSet);

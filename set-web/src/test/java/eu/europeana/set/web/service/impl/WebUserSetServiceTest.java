@@ -18,8 +18,8 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 
@@ -86,7 +86,7 @@ public class WebUserSetServiceTest {
 													  // JsonParseException
 													  // {
 
-	UserSet userSet = new PersistentUserSetImpl();
+	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 
 	/**
@@ -111,7 +111,7 @@ public class WebUserSetServiceTest {
     public void testDeleteUserSet()
 	    throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
 
-	UserSet userSet = new PersistentUserSetImpl();
+	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 
 	// store user set in database
@@ -130,8 +130,8 @@ public class WebUserSetServiceTest {
     public void testGetUserSet()
 	    throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
 
-	UserSet userSet = new PersistentUserSetImpl();
-	UserSet userSet1200 = new PersistentUserSetImpl();
+	UserSet userSet = new WebUserSetImpl();
+	UserSet userSet1200 = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 	UserSet test1200UserSet = getObjectBuilder().buildUserSet(userSet1200,
 		UserSetTestObjectBuilder.ITEMS_1200_TEST_INPUT_FILE, true);
@@ -154,7 +154,7 @@ public class WebUserSetServiceTest {
     @Test
     public void testInsertItemUserSet() throws ApplicationAuthenticationException {
 
-	UserSet userSet = new PersistentUserSetImpl();
+	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 	testUserSet.setItems(null);
 
