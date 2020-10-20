@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Controller
 @SwaggerSelect
-@Api(tags = "User Set Discovery API", description = " ")
+@Api(tags = "User Set Discovery API")
 public class SearchUserSetRest extends BaseRest {
 
     UserSetQueryBuilder queryBuilder;
@@ -70,11 +70,12 @@ public class SearchUserSetRest extends BaseRest {
             UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
             ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile, authentication);
-            
+            StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+
             @SuppressWarnings("rawtypes")
             BaseUserSetResultPage resultsPage;
             resultsPage = getUserSetService().buildResultsPage(searchQuery, results,
-                    request.getRequestURL(), request.getQueryString(), profile, authentication);
+                    requestURL, request.getQueryString(), profile, authentication);
 
             String jsonLd = serializeResultsPage(resultsPage);
 

@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -59,8 +57,6 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
-	protected final Logger logger = LogManager.getLogger(this.getClass());
-
 	/*
      * (non-Javadoc)
      * 
@@ -88,8 +84,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	@Override
 	public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException {
-		List<PersistentUserSet> res = getMongoPersistence().getByCreator(creatorId).asList();
-		return res;
+		return getMongoPersistence().getByCreator(creatorId).asList();
 	}
 
 	/**
@@ -287,8 +282,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	if (webUserSet.isOpenSet()) {
 	    String searchUrl = getBaseSearchUrl(getConfiguration().getSearchApiUrl());
-	    String validateUrl = webUserSet.getIsDefinedBy();
-	    String queryUrl = getBaseSearchUrl(validateUrl);
+	    StringBuilder validateUrl = new StringBuilder(webUserSet.getIsDefinedBy());
+	    String queryUrl = getBaseSearchUrl(validateUrl.toString());
 	    if (!searchUrl.equals(queryUrl)) {
 		throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
@@ -300,8 +295,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    SearchApiResponse apiResult;
 	    try {
 		// the items are not required for validation
-		validateUrl += "&rows=0";
-		apiResult = getSearchApiClient().searchItems(validateUrl, apiKey, false);
+		validateUrl.append("&rows=0");
+		apiResult = getSearchApiClient().searchItems(validateUrl.toString(), apiKey, false);
 	    } catch (SearchApiClientException e) {
 		throw new RequestBodyValidationException(
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] {
@@ -309,7 +304,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			e);
 	    }
 
-	    if (!(apiResult.getTotal() > 0)) {
+	    if (apiResult.getTotal() <= 0) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY,
 				"no items returned when calling " + validateUrl });
@@ -326,7 +321,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private String getBaseSearchUrl(String searchUrl) {
 	String res = searchUrl;
 
-	int endPos = searchUrl.indexOf("?");
+	int endPos = searchUrl.indexOf('?');
 	if (endPos >= 0) {
 	    res = searchUrl.substring(0, endPos);
 	}
@@ -362,7 +357,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	}
     getMongoPersistance().removeAll(userSets);
-    logger.info("User sets deleted for user {}. Sets deleted are : {} " , creatorId, setsToBeDeleted);
+    getLogger().info("User sets deleted for user {}. Sets deleted are : {} " , creatorId, setsToBeDeleted);
 	}
 
     /**
@@ -382,7 +377,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    positionInt = -1;
 		}
 	    } catch (RuntimeException e) {
-		getLogger().trace("Position validation warning: {} ", e);
+		getLogger().trace("Position validation warning: {} ", position, e);
 		// invalid position, assume last (-1)
 	    }
 	}
@@ -548,7 +543,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private String buildSearchApiUrl(UserSet userSet, String apiKey, String sort, String sortOrder, int pageNr,
-	    int pageSize) throws HttpException {
+	    int pageSize) {
 
 	if (!userSet.isOpenSet()) {
 	    return buildSearchApiUrlForClosedSets(userSet, apiKey);
@@ -586,7 +581,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      *      eu.europeana.set.definitions.model.UserSet, java.util.List)
      *
      */
-    @Deprecated
+    @Deprecated(since = "")
     // TODO: fix the implementation and remove this method
     public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items) {
 	storedUserSet.setModified(new Date());
@@ -606,7 +601,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
+	    StringBuilder requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
 	    throws HttpException {
 
 	BaseUserSetResultPage<?> resPage = null;
@@ -725,7 +720,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return builder.toString();
     }
 
-    private String buildCollectionUrl(Query searchQuery, StringBuffer requestUrl, String queryString) {
+    private String buildCollectionUrl(Query searchQuery, StringBuilder requestUrl, String queryString) {
 
 	// queryString = removeParam(WebAnnotationFields.PARAM_WSKEY,
 	// queryString);
@@ -861,7 +856,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @return
      * @throws HttpException
      */
-    private String buildSearchApiUrlForClosedSets(UserSet userSet, String apiKey) throws HttpException {
+    private String buildSearchApiUrlForClosedSets(UserSet userSet, String apiKey) {
 	// use them to build the search query for retrieving item descriptions using
 	// minimal profile
 	// europeana_id is in format /collectionId/recordId, this can be easily
@@ -869,9 +864,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// full record ID by removing the base URL http://data.europeana.eu/item
 	// e.g. europeana_id:("/08641/1037479000000476635" OR
 	// "/08641/1037479000000476943")
-	String id, fullId;
-	int MAX_DEREF_ITEMS = 100;
-	int maxItems = Math.min(userSet.getItems().size(), MAX_DEREF_ITEMS);
+	String id;
+	String fullId;
+	int maxDerefItems = 100;
+	int maxItems = Math.min(userSet.getItems().size(), maxDerefItems);
 
 	StringBuilder query = new StringBuilder(100);
 	query.append("europeana_id:(");
@@ -890,7 +886,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 	// append rows=100
-	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(MAX_DEREF_ITEMS);
+	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(maxDerefItems);
 
 	return url.toString();
     }
@@ -947,7 +943,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (userSet.getItems() == null) {
 	    return;
 	}
-	List<String> jsonSerialized = new ArrayList<String>(userSet.getItems().size());
+	List<String> jsonSerialized = new ArrayList<>(userSet.getItems().size());
 	for (String itemId : userSet.getItems()) {
 	    // jsonSerialized.add(JSONObject.quote(itemId));
 	    jsonSerialized.add('"' + itemId + '"');

@@ -72,29 +72,6 @@
 			<version>${version.spring}</version>
 		</dependency>
 		
-
-		<!-- TESTING PURPOSES -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${version.spring}</version>
-			<scope>test</scope>			
-		</dependency>
-		
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-			<version>${version.org.junit.jupiter}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${version.commonsIO}</version>
-			<scope>test</scope>
-		</dependency>
-		
 		<!-- it seems that the test dependencies from api-commons-nosql are not imported automatically -->
 		<!-- Test dependencies -->
         <dependency>
@@ -109,6 +86,27 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${version.spring}</version>
+			<scope>test</scope>			
+		</dependency>
+		
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+			<version>${version.junit}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIO}</version>
+			<scope>test</scope>
+		</dependency>
         
 	</dependencies>
 

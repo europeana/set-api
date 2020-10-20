@@ -13,7 +13,7 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
  * 
  * @author Roman Graf on 23-09-2020.
  */
-public class BaseUserSetTest {
+public class BaseUserSetUtils {
 
     public static String getToken() {
 	EuropeanaOauthClient oauthClient = new EuropeanaOauthClient(); 

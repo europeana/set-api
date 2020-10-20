@@ -152,8 +152,7 @@ public class BaseRest extends BaseRestController {
 	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
 
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
-	String serializedUserSetJsonLdStr = serializer.serialize(set);
-	return serializedUserSetJsonLdStr;
+	return serializer.serialize(set);
     }
 
     /**
@@ -174,7 +173,9 @@ public class BaseRest extends BaseRestController {
         headerParts = preferHeader.split(";");
         for (String headerPart : headerParts) {
             contentParts = headerPart.split("=");
-            resMap.put(contentParts[keyPos], contentParts[valuePos]);
+            if(contentParts.length == 2) {
+                resMap.put(contentParts[keyPos], contentParts[valuePos]);
+            }
         }
         return resMap;
     }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
@@ -17,6 +16,7 @@ import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.mongo.model.internal.GeneratedUserSetIdImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.model.WebUserSetImpl;
 
 public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Serializable>
 		extends NosqlDaoImpl<E, T> implements PersistentUserSetDao<E, T>{
@@ -66,6 +66,6 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 
 	@Override
 	public void deleteByObjectId(List<ObjectId> objectIds) {
-		getDatastore().delete(PersistentUserSetImpl.class, objectIds);
+		getDatastore().delete(WebUserSetImpl.class, objectIds);
 	}
 }

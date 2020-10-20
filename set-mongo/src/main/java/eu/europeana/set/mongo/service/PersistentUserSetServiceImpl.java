@@ -43,8 +43,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	private static final String FIELD_TYPE       = WebUserSetModelFields.TYPE;
 	private static final String FIELD_CREATOR    = WebUserSetModelFields.CREATOR + ".httpUrl";
 	
-	List<String> publicPublishedList = Arrays.asList(new String[]{
-		VisibilityTypes.PUBLIC.getJsonValue(), VisibilityTypes.PUBLISHED.getJsonValue()});  
+	List<String> publicPublishedList = Arrays.asList(VisibilityTypes.PUBLIC.getJsonValue(), VisibilityTypes.PUBLISHED.getJsonValue());
 	
 	@Resource
 	private UserSetConfiguration configuration;
@@ -82,11 +81,11 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER); 
 		object.setIdentifier("" + sequenceId);
 		
-		String NOT_INITIALIZED_LONG_ID = "-1";
+		String notInitializedLongId = "-1";
 		
 		// validate user set ID
 		if (StringUtils.isBlank(object.getIdentifier()) 
-				|| NOT_INITIALIZED_LONG_ID.equals(object.getIdentifier()))
+				|| notInitializedLongId.equals(object.getIdentifier()))
 				throw new UserSetValidationException("UserSet.UserSetId.identifier must be a valid alpha-numeric value or a positive number!");
 	}
 
@@ -278,7 +277,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 * @deprecated     
 	 */
 	@Override
-	@Deprecated
+	@Deprecated(since = "", forRemoval = true)
 	//TODO: use store instead
 	public PersistentUserSet update(PersistentUserSet userSet) throws  UserSetValidationException {
 		return store(userSet);
