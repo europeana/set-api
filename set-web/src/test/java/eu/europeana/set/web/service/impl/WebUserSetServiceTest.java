@@ -10,10 +10,13 @@ import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
+import eu.europeana.api.commons.oauth2.model.impl.EuropeanaApiCredentials;
+import eu.europeana.api.commons.oauth2.model.impl.EuropeanaAuthenticationToken;
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -109,13 +112,13 @@ public class WebUserSetServiceTest {
 
 //	@Test(expected = UserSetNotFoundException.class)
     public void testDeleteUserSet()
-	    throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
+	    throws MalformedURLException, IOException, UserSetServiceException, HttpException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 
 	// store user set in database
-	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet, getAuthentication());
 	String userSetId = webUserSet.getIdentifier();
 	System.out.println("testUserSet id: " + userSetId);
 
@@ -128,7 +131,7 @@ public class WebUserSetServiceTest {
 
 //	@Test
     public void testGetUserSet()
-	    throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {
+	    throws MalformedURLException, IOException, UserSetServiceException, HttpException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet userSet1200 = new WebUserSetImpl();
@@ -137,10 +140,10 @@ public class WebUserSetServiceTest {
 		UserSetTestObjectBuilder.ITEMS_1200_TEST_INPUT_FILE, true);
 
 	// store user set in database
-	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet, getAuthentication());
 	String userSetId = webUserSet.getIdentifier();
 	System.out.println("testUserSet id: " + userSetId);
-	UserSet web1200UserSet = webUserSetService.storeUserSet(test1200UserSet);
+	UserSet web1200UserSet = webUserSetService.storeUserSet(test1200UserSet, getAuthentication());
 	String userSetId1200 = web1200UserSet.getIdentifier();
 	System.out.println("test1200UserSet id: " + userSetId1200);
 
@@ -151,15 +154,19 @@ public class WebUserSetServiceTest {
 	assertTrue(db1200UserSet.getTotal() == 1200);
     }
 
+    private Authentication getAuthentication() {
+	return new EuropeanaAuthenticationToken(null, "usersets", "junit-test-user-id", new EuropeanaApiCredentials("junit-test-username"));
+    }
+
     @Test
-    public void testInsertItemUserSet() throws ApplicationAuthenticationException {
+    public void testInsertItemUserSet() throws HttpException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
 	testUserSet.setItems(null);
 
 	// store user set in database
-	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet);
+	UserSet webUserSet = webUserSetService.storeUserSet(testUserSet, getAuthentication());
 	String userSetId = webUserSet.getIdentifier();
 	System.out.println("testUserSet id: " + userSetId);
 

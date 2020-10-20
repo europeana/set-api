@@ -26,6 +26,7 @@ import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.oauth2.model.ApiCredentials;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -46,6 +47,7 @@ import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.BaseUserSetResultPage;
@@ -57,14 +59,24 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
 
-	/*
+    /*
      * (non-Javadoc)
      * 
      * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
      * europeana.UserSet.definitions.model.UserSet)
      */
     @Override
-    public UserSet storeUserSet(UserSet newUserSet) {
+    public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
+	Agent user = new WebUser();
+	user.setHttpUrl(getUserId(authentication));
+	user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+	newUserSet.setCreator(user);
+
+	if (newUserSet.getVisibility() == null) {
+	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
+	}
+
+	validateWebUserSet(newUserSet);
 
 	UserSet extUserSet = getUserSetUtils().analysePagination(newUserSet);
 
@@ -82,12 +94,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return res;
     }
 
-	@Override
-	public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException {
-		return getMongoPersistence().getByCreator(creatorId).asList();
-	}
+    @Override
+    public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException {
+	return getMongoPersistence().getByCreator(creatorId).asList();
+    }
 
-	/**
+    /**
      * This method checks if a user set with provided type and user already exists
      * in database
      * 
@@ -119,7 +131,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet updatePagination(UserSet userSet) {
 	return getUserSetUtils().updatePagination(userSet);
     }
-   
+
     @Override
     public UserSet parseUserSetLd(String userSetJsonLdStr)
 	    throws RequestBodyValidationException, UserSetInstantiationException {
@@ -343,22 +355,22 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	getMongoPersistence().remove(userSetId);
     }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * eu.europeana.set.web.service.UserSetService#deleteUserSets(java.lang.String)
-	 */
-	public void deleteUserSets(String creatorId, List<PersistentUserSet> userSets) {
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * eu.europeana.set.web.service.UserSetService#deleteUserSets(java.lang.String)
+     */
+    public void deleteUserSets(String creatorId, List<PersistentUserSet> userSets) {
 	List<String> setsToBeDeleted = new ArrayList<>();
 	if (!userSets.isEmpty()) {
-		for (PersistentUserSet userSet : userSets) {
-			setsToBeDeleted.add(userSet.getIdentifier());
-		}
+	    for (PersistentUserSet userSet : userSets) {
+		setsToBeDeleted.add(userSet.getIdentifier());
+	    }
 	}
-    getMongoPersistance().removeAll(userSets);
-    getLogger().info("User sets deleted for user {}. Sets deleted are : {} " , creatorId, setsToBeDeleted);
-	}
+	getMongoPersistance().removeAll(userSets);
+	getLogger().info("User sets deleted for user {}. Sets deleted are : {} ", creatorId, setsToBeDeleted);
+    }
 
     /**
      * This method validates position input, if false responds with -1
@@ -488,7 +500,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
 	    LdProfiles profile) throws HttpException {
 
-		if (!userSet.isOpenSet() && (userSet.getItems() == null || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
+	if (!userSet.isOpenSet()
+		&& (userSet.getItems() == null || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
 	    // if empty closed userset, nothing to do
 	    return userSet;
 	}
@@ -524,10 +537,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
-	if(apiResult.getItems() == null) {
+	if (apiResult.getItems() == null) {
 	    return;
-	}  
-	
+	}
+
 	List<String> items = new ArrayList<>(apiResult.getItems().size());
 	for (String item : apiResult.getItems()) {
 	    items.add(UserSetUtils.buildItemUrl(item));
@@ -571,7 +584,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	return uriBuilder.build(true).toUriString();
     }
-    
+
     /**
      * (non-Javadoc)
      * 
@@ -611,15 +624,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    resPage = new UserSetResultPage();
 	    setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
 	} else {
-	    //LdProfiles.MINIMAL.equals(profile) - default
+	    // LdProfiles.MINIMAL.equals(profile) - default
 	    resPage = new UserSetIdsResultPage();
 	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
 	}
 
 	int lastPage = getLastPage(results.getResultSize(), searchQuery.getPageSize());
 	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
-	String first = buildPageUrl(collectionUrl,0, searchQuery.getPageSize());
-	String last= buildPageUrl(collectionUrl, lastPage , searchQuery.getPageSize());
+	String first = buildPageUrl(collectionUrl, 0, searchQuery.getPageSize());
+	String last = buildPageUrl(collectionUrl, lastPage, searchQuery.getPageSize());
 
 	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize(), first, last));
 
@@ -628,8 +641,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setCurrentPageUri(currentPageUrl);
 
 	if (currentPage > 0) {
-		String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
-		resPage.setPrevPageUri(prevPage);
+	    String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
+	    resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
@@ -641,32 +654,34 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return resPage;
     }
 
-	/**
-	 * calculates the last Page
-	 * @param totalResults
-	 * @param pageSize
-	 * @return
-	 */
+    /**
+     * calculates the last Page
+     * 
+     * @param totalResults
+     * @param pageSize
+     * @return
+     */
     protected int getLastPage(long totalResults, int pageSize) {
-     long lastPage = 0;
-     if (totalResults > 0) {
-     	long reaminder = (totalResults % pageSize);
-		int extraPage = (reaminder == 0 ? 0 : 1);
-		lastPage =  ((totalResults / pageSize) + extraPage) - 1;
+	long lastPage = 0;
+	if (totalResults > 0) {
+	    long reaminder = (totalResults % pageSize);
+	    int extraPage = (reaminder == 0 ? 0 : 1);
+	    lastPage = ((totalResults / pageSize) + extraPage) - 1;
 	}
 
 	return Math.toIntExact(lastPage);
-	}
+    }
 
-	/**
-	 * Checks if the currentPage is LastPage
-	 * @param currentPage
-	 * @param lastPage
-	 * @return
-	 */
-	private boolean isLastPage(int currentPage, int lastPage) {
-		return (currentPage == lastPage);
-	}
+    /**
+     * Checks if the currentPage is LastPage
+     * 
+     * @param currentPage
+     * @param lastPage
+     * @return
+     */
+    private boolean isLastPage(int currentPage, int lastPage) {
+	return (currentPage == lastPage);
+    }
 
     private void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
@@ -750,12 +765,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    // make sure to remove the "&" if not the first param
 	    if (startPos > 0) {
 		startPos--;
-	    }	
-	    
+	    }
+
 	    tmp = queryParams.substring(0, startPos);
 
 	    if (startEndPos > 0) {
-		//tmp += queryParams.substring(startEndPos);
+		// tmp += queryParams.substring(startEndPos);
 		tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
 	    }
 	} else {
@@ -883,7 +898,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	query.append(')');
 	StringBuilder url = new StringBuilder(getConfiguration().getSearchApiUrl());
 	url.append(URLEncoder.encode(query.toString(), StandardCharsets.UTF_8));
-	
+
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 	// append rows=100
 	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(maxDerefItems);
@@ -951,4 +966,5 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	((WebUserSetImpl) userSet).setSerializedItems(jsonSerialized);
 //	userSet.setItems(null);
     }
+
 }

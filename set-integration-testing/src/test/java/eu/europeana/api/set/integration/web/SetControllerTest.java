@@ -1,10 +1,11 @@
 package eu.europeana.api.set.integration.web;
 
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
-import org.apache.commons.lang3.StringUtils;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +19,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.service.UserSetService;
+import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
+import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 
 /**
  * Test class for UserSet controller.
@@ -43,14 +48,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(locations = {"classpath:set-web-mvc.xml"})
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-public class SetControllerTest extends BaseUserSetUtils {
+public class SetControllerTest extends BaseUserSetTestUtils {
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext wac;
+    @Autowired
+    private UserSetService userSetService; 
+
+    @Autowired
+    private UserSetConfiguration configuration; 
 
     private static String token;
+
+    
+    public UserSetServiceImpl getUserSetService() {
+        return (UserSetServiceImpl) userSetService;
+    }
+    
+    public UserSetConfiguration getConfiguration() {
+	return configuration;
+    }
 
     @BeforeAll
     public static void initToken() {
@@ -61,8 +80,6 @@ public class SetControllerTest extends BaseUserSetUtils {
     public void initApplication() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
-
-    String BASE_URL = "/set/";
 
     public static final String USER_SET_CONTENT = "/content/userset.json";
     public static final String UPDATED_USER_SET_CONTENT = "/content/updatedUserset.json";
@@ -84,14 +101,14 @@ public class SetControllerTest extends BaseUserSetUtils {
         mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
                 .content("").header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+                .andExpect(status().isCreated());
     }
 
     @Test
     public void create_UserSet_400_unauthorized_InvalidJWTToken() throws Exception {
-        String requestJson = getJsonStringInput(USER_SET_CONTENT);
-
-        mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+	String requestJson = getJsonStringInput(USER_SET_CONTENT);
+        
+	mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, "")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -101,7 +118,9 @@ public class SetControllerTest extends BaseUserSetUtils {
 
     @Test
     public void testGetUserSet_NotAuthorised() throws Exception {
-        mockMvc.perform(get(BASE_URL + "{identifier}", 100)
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_CONTENT, token);
+
+	mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -109,18 +128,10 @@ public class SetControllerTest extends BaseUserSetUtils {
 
     @Test
     public void testGetUserSet_Success() throws Exception {
-        String requestJson = getJsonStringInput(USER_SET_CONTENT);
-        // create a set and get the identifier
-        MvcResult result = mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-                .content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(HttpStatus.CREATED.value()))
-                .andReturn();
-
-        String identifier = getIdentifier(result.getResponse().getContentAsString());
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_CONTENT, token);
 
         // get the identifier
-        mockMvc.perform(get(BASE_URL + "{identifier}", identifier)
+        mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.OK.value()));
@@ -148,19 +159,11 @@ public class SetControllerTest extends BaseUserSetUtils {
 
     @Test
     public void testUpdateUserSet_Success() throws Exception {
-        String requestJson = getJsonStringInput(USER_SET_CONTENT);
-        // create a set and get the identifier
-        MvcResult result = mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-                .content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(HttpStatus.CREATED.value()))
-                .andReturn();
-
-        String identifier = getIdentifier(result.getResponse().getContentAsString());
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_CONTENT, token);
 
         String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
         // update the userset
-        mockMvc.perform(put(BASE_URL + "{identifier}", identifier)
+        mockMvc.perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .content(updatedRequestJson)
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -170,7 +173,10 @@ public class SetControllerTest extends BaseUserSetUtils {
     // Delete User associated Tests
     @Test
     public void testDeleteUserAssociatedSets_Success() throws Exception {
-        mockMvc.perform(delete(BASE_URL)
+	//ensure that at least onea user set exists into the database
+	createTestUserSet(USER_SET_CONTENT, token);
+
+	mockMvc.perform(delete(BASE_URL)
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
@@ -187,7 +193,9 @@ public class SetControllerTest extends BaseUserSetUtils {
     // Delete User set via identifier Tests
     @Test
     public void testDeleteUserSet_NotAuthorised() throws Exception {
-        mockMvc.perform(delete(BASE_URL + "{identifier}", 100)
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_CONTENT, token);
+	
+	mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -195,7 +203,10 @@ public class SetControllerTest extends BaseUserSetUtils {
 
     @Test
     public void testDeleteUserSet_OperationNotAuthorised() throws Exception {
-        mockMvc.perform(delete(BASE_URL + "{identifier}", 100)
+	String testFile = USER_SET_CONTENT;
+	WebUserSetImpl userSet = createTestUserSet(testFile, token);
+	
+	mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
@@ -203,7 +214,7 @@ public class SetControllerTest extends BaseUserSetUtils {
 
     @Test
     public void testDeleteUserSet_UserSetNotFound() throws Exception {
-        mockMvc.perform(delete(BASE_URL + "{identifier}",  "test")
+        mockMvc.perform(delete(BASE_URL + "{identifier}",  "wrong_id")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
@@ -212,33 +223,13 @@ public class SetControllerTest extends BaseUserSetUtils {
 
     @Test
     public void testDeleteUserSet_Success() throws Exception {
-        String requestJson = getJsonStringInput(USER_SET_CONTENT);
-        // create a set and get the identifier
-        MvcResult result = mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-                .content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(HttpStatus.CREATED.value()))
-                .andReturn();
-
-        String identifier = getIdentifier(result.getResponse().getContentAsString());
-
+	String testFile = USER_SET_CONTENT;
+	WebUserSetImpl userSet = createTestUserSet(testFile, token);
+	
         // delete the identifier
-        mockMvc.perform(delete(BASE_URL + "{identifier}", identifier)
+        mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
     }
-
-    /**
-     * Gets the identifier value from a responseString
-     *
-     * @param responseString
-     * @return identifier
-     */
-    private static String getIdentifier(String responseString) {
-        String value = StringUtils.substringsBetween(responseString, "\"id\":", ",\"type\"")[0];
-        String identifier = StringUtils.remove(value, WebUserSetFields.BASE_SET_URL);
-        return identifier.replace("\"", "").trim();
-    }
-
 }

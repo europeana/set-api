@@ -30,7 +30,6 @@
 		<version.aspectj>1.8.8</version.aspectj>
 		<version.log4j2>2.9.1</version.log4j2>
 		<version.commonsLang3>3.9</version.commonsLang3>
-		<version.commonsIo>2.6</version.commonsIo>
 		<version.jackson>2.9.4</version.jackson>
 		<version.commonsApi>0.2.11-SNAPSHOT</version.commonsApi>
 		<version.springBoot>2.3.1.RELEASE</version.springBoot>
@@ -42,7 +41,7 @@
 		<version.jettison>1.3</version.jettison>
 		<version.jaxb>2.3.1</version.jaxb>
 		<version.junit>5.6.2</version.junit>
-		<version.commonsIO>2.4</version.commonsIO>
+		<version.commonsIO>2.5</version.commonsIO>
 		<version.surefire>2.22.0</version.surefire>
 		
 		<!-- 

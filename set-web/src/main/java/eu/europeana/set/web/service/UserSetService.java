@@ -24,9 +24,10 @@ public interface UserSetService {
      *
      * @param userSet
      * @return UserSet object
+     * @throws HttpException 
      */
-    public UserSet storeUserSet(UserSet userSet);
-
+    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException;
+    
     /**
      * This method converts close set to open set by updating respective items
      *
