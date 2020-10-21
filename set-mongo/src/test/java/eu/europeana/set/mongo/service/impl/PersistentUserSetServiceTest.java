@@ -61,14 +61,14 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void testStoreUserSet() {
+    public void storeUserSet() {
 
         UserSet storedUserSet = storeUserSet(true);
         assertTrue(storedUserSet instanceof UserSet);
     }
 
     @Test
-    public void testGetUserSetById() {
+    public void getUserSetById() {
 
         UserSet storedUserSet = storeUserSet(true);
         UserSet foundUserSet = userSetService
@@ -81,7 +81,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void testGetUserSetByIdentifier() {
+    public void getUserSetByIdentifier() {
 
         UserSet storedUserSet = storeUserSet(true);
         UserSet foundUserSet = userSetService.getByIdentifier(storedUserSet.getIdentifier());
@@ -93,7 +93,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_getBookmarksFolder() {
+    public void getBookmarksFolder() {
         UserSet storedUserSet = storeUserSet(false);
         PersistentUserSet foundUserSet = userSetService.getBookmarksFolder(storedUserSet.getCreator().getHttpUrl());
 
@@ -103,7 +103,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_getByCreator() {
+    public void getByCreator() {
         String creatorId = UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT);
         QueryResults<PersistentUserSet> foundUserSet = userSetService.getByCreator(creatorId);
 
@@ -113,7 +113,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_findPrivateSets() {
+    public void findPrivateSets() {
         String creatorId = UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT);
         UserSetQuery query = new UserSetQueryImpl();
         query.setUser(creatorId);
@@ -125,7 +125,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_findPublicSets() {
+    public void findPublicSets() {
         String creatorId = UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT);
         UserSetQuery query = new UserSetQueryImpl();
         query.setUser(creatorId);
@@ -136,7 +136,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_findWithAdmin() {
+    public void findWithAdmin() {
         UserSetQuery query = new UserSetQueryImpl();
         query.setAdmin(true);
 
@@ -145,7 +145,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_remove() {
+    public void remove() {
         UserSet storedUserSet = storeUserSet(true);
         userSetService.remove(storedUserSet.getIdentifier());
 
@@ -154,7 +154,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     }
 
     @Test
-    public void Test_removeAll() {
+    public void removeAll() {
         UserSetQuery query = new UserSetQueryImpl();
         query.setAdmin(true);
         List<PersistentUserSet> userSetList = userSetService.find(query).getResults();

@@ -93,7 +93,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 
     // Create User Set Tests
     @Test
-    public void testCreate_UserSet_201Created() throws Exception {
+    public void create_UserSet_201Created() throws Exception {
         String requestJson = getJsonStringInput(USER_SET_REGULAR);
 
         mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
@@ -124,7 +124,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     // Get user sets Tests
 
     @Test
-    public void testGetUserSet_NotAuthorised() throws Exception {
+    public void getUserSet_NotAuthorised() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
 
 	mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
@@ -134,7 +134,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void testGetUserSet_Success() throws Exception {
+    public void getUserSet_Success() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
 
         // get the identifier
@@ -147,7 +147,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     //Update user set Tests
 
     @Test
-    public void testUpdateUserSet_NotAuthorised() throws Exception {
+    public void updateUserSet_NotAuthorised() throws Exception {
         mockMvc.perform(put(BASE_URL + "{identifier}", "test")
                 .content("updatedRequestJson")
                 .header(HttpHeaders.AUTHORIZATION, "")
@@ -156,7 +156,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void testUpdateUserSet_UserSetNotFound() throws Exception {
+    public void updateUserSet_UserSetNotFound() throws Exception {
         mockMvc.perform(put(BASE_URL + "{identifier}", "test")
                 .content("updatedRequestJson")
                 .header(HttpHeaders.AUTHORIZATION, token)
@@ -165,7 +165,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void testUpdateUserSet_Success() throws Exception {
+    public void updateUserSet_Success() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
 
         String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
@@ -180,7 +180,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 
     // Delete User associated Tests
     @Test
-    public void testDeleteUserAssociatedSets_Success() throws Exception {
+    public void deleteUserAssociatedSets_Success() throws Exception {
 	//ensure that at least onea user set exists into the database
 	createTestUserSet(USER_SET_REGULAR, token);
 	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
@@ -194,7 +194,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void testDeleteUserAssociatedSets_NotAuthorised() throws Exception {
+    public void deleteUserAssociatedSets_NotAuthorised() throws Exception {
         mockMvc.perform(delete(BASE_URL)
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -203,7 +203,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 
     // Delete User set via identifier Tests
     @Test
-    public void testDeleteUserSet_NotAuthorised() throws Exception {
+    public void deleteUserSet_NotAuthorised() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
 	
 	mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier())
@@ -213,7 +213,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     }
 
 //    @Test //a second token is required for this test to work propertly
-    public void testDeleteUserSet_OperationNotAuthorised() throws Exception {
+    public void deleteUserSet_OperationNotAuthorised() throws Exception {
 	String testFile = USER_SET_REGULAR;
 	WebUserSetImpl userSet = createTestUserSet(testFile, token);
 	
@@ -225,7 +225,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void testDeleteUserSet_UserSetNotFound() throws Exception {
+    public void deleteUserSet_UserSetNotFound() throws Exception {
         mockMvc.perform(delete(BASE_URL + "{identifier}",  "wrong_id")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -234,7 +234,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 
 
     @Test
-    public void testDeleteUserSet_Success() throws Exception {
+    public void deleteUserSet_Success() throws Exception {
 	String testFile = USER_SET_REGULAR;
 	WebUserSetImpl userSet = createTestUserSet(testFile, token);
 	
