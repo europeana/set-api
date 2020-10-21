@@ -1,11 +1,14 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.assertj.core.api.AssertDelegateTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +25,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 import eu.europeana.set.web.service.impl.UserSetServiceImpl;
@@ -154,7 +161,8 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     public void deleteUserAssociatedSets_Success() throws Exception {
 	//ensure that at least onea user set exists into the database
 	createTestUserSet(USER_SET_REGULAR, token);
-	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
+//TODO: enable cleaning database before testing 	
+//	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
 	createTestUserSet(USER_SET_REGULAR, token);
 
 	mockMvc.perform(delete(BASE_URL)
@@ -162,6 +170,10 @@ public class SetControllerTest extends BaseUserSetTestUtils {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
 	//TODO: use search by user to verify that all usersets were deleted
+	String creator = (String) getAuthentication(token).getPrincipal();
+	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:"+creator, null, null, 0, 1);
+        ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, LdProfiles.MINIMAL, getAuthentication(token));
+        assertEquals(0, results.getResultSize());
     }
 
     @Test
