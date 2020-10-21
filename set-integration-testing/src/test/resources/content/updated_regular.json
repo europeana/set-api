@@ -1,0 +1,20 @@
+{
+  "type": "Collection",
+  "title": {
+     "en": "SportsCollection",
+     "ro": "Collectie despre sport"
+  },
+  "description": {
+     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!",
+     "ro": "The la echipament de tenis la uniforme de golf, acceseaza collectia larga de echipamente sportive istorice si design sportiv din Europeana Fashion !"
+  },
+  "items":[
+  "http://data.europeana.eu/item/08641/1037479000000476703",
+  "http://data.europeana.eu/item/08641/1037479000000476591",
+  "http://data.europeana.eu/item/08641/1037479000000476903",
+  "http://data.europeana.eu/item/11628/_FOTO_AM_UNITS_ITALY_1816",
+  "http://data.europeana.eu/item/11628/_FOTO_AM_UNITS_ITALY_1815",
+  "http://data.europeana.eu/item/11628/_FOTO_AM_UNITS_ITALY_1818"
+  ]
+}
+  
