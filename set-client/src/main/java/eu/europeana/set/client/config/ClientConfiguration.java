@@ -35,12 +35,10 @@ public final class ClientConfiguration {
      * 
      * @return
      */
-    public static ClientConfiguration getInstance() {
-	synchronized (SET_CLIENT_PROPERTIES_FILE) {
-	    if (singleton == null) {
-		singleton = new ClientConfiguration();
-		singleton.loadProperties();
-	    }
+    public static synchronized ClientConfiguration getInstance() {
+	if (singleton == null) {
+	    singleton = new ClientConfiguration();
+	    singleton.loadProperties();
 	}
 
 	return singleton;
@@ -49,19 +47,16 @@ public final class ClientConfiguration {
     /**
      * Laizy loading of configuration properties
      */
-    public void loadProperties() {
+    public synchronized void loadProperties() {
 
 	try {
-	    synchronized (SET_CLIENT_PROPERTIES_FILE) {
-		properties = new Properties();
-		InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
-		if (resourceAsStream == null) {
-		    throw new TechnicalRuntimeException(
-			    "No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);  
-		} 
-		
-		getProperties().load(resourceAsStream);
+	    properties = new Properties();
+	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
+	    if (resourceAsStream == null) {
+		throw new TechnicalRuntimeException(
+			"No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);
 	    }
+	    getProperties().load(resourceAsStream);
 
 	} catch (RuntimeException | IOException e) {
 	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_CLIENT_PROPERTIES_FILE, e);
