@@ -700,7 +700,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int derefItems = WebUserSetFields.DEFAULT_DEREF_ITEMS;
 
 	for (UserSet userSet : results.getResults()) {
-	    if (profile.equals(LdProfiles.ITEMDESCRIPTIONS)) {
+	    if (LdProfiles.ITEMDESCRIPTIONS == profile) {
 		fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
