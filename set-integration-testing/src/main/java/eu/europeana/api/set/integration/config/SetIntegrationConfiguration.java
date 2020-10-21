@@ -11,7 +11,7 @@ public class SetIntegrationConfiguration {
     protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "/set-integration-testing.properties";
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
     protected static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
-
+    
     private static Properties properties = null;
     private static SetIntegrationConfiguration singleton;
 
@@ -89,5 +89,4 @@ public class SetIntegrationConfiguration {
     public String getOauthRequestParams() {
 	return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS);
     }
-
 }

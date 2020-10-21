@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 
@@ -18,6 +20,7 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 
 /**
@@ -29,6 +32,37 @@ import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 public abstract class BaseUserSetTestUtils {
 
     static final String BASE_URL = "/set/";
+    public static final String USER_SET_REGULAR = "/content/userset_regular.json";
+    public static final String USER_SET_MANDATORY = "/content/userset_mandatory.json";
+    public static final String USER_SET_OPEN = "/content/userset_open.json";
+    public static final String USER_SET_LARGE = "/content/userset_large.json";
+    public static final String USER_SET_REGULAR_PUBLIC = "/content/userset_regular_public.json";
+    public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";
+    public static final String USER_SET_COMPLETE_PUBLIC = "/content/userset_complete.json";
+    public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
+        
+    public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
+
+    @Autowired
+    private UserSetService userSetService; 
+
+    @Autowired
+    private UserSetConfiguration configuration; 
+    
+    protected static String token;
+
+    @BeforeAll
+    public static void initToken() {
+        token = getToken();
+    }
+
+    public UserSetServiceImpl getUserSetService() {
+        return (UserSetServiceImpl) userSetService;
+    }
+    
+    public UserSetConfiguration getConfiguration() {
+	return configuration;
+    }
 
     public static String getToken() {
 	EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
@@ -62,7 +96,7 @@ public abstract class BaseUserSetTestUtils {
 	return (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
     }
 
-    private Authentication getAuthentication(String token) throws ApiKeyExtractionException, AuthorizationExtractionException {
+    protected Authentication getAuthentication(String token) throws ApiKeyExtractionException, AuthorizationExtractionException {
 	RsaVerifier signatureVerifier = new RsaVerifier(getConfiguration().getJwtTokenSignatureKey());
 	String authorizationApiName = getConfiguration().getAuthorizationApiName();
 	List<? extends Authentication> oauthList = OAuthUtils.extractAuthenticationList(token, signatureVerifier,
@@ -75,8 +109,4 @@ public abstract class BaseUserSetTestUtils {
 	
 	return null;
     }
-
-    protected abstract UserSetConfiguration getConfiguration();
-
-    protected abstract UserSetServiceImpl getUserSetService();
 }

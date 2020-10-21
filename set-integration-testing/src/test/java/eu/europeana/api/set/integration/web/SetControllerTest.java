@@ -54,42 +54,13 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 
     @Autowired
     private WebApplicationContext wac;
-    @Autowired
-    private UserSetService userSetService; 
-
-    @Autowired
-    private UserSetConfiguration configuration; 
-
-    private static String token;
-
-    
-    public UserSetServiceImpl getUserSetService() {
-        return (UserSetServiceImpl) userSetService;
-    }
-    
-    public UserSetConfiguration getConfiguration() {
-	return configuration;
-    }
-
-    @BeforeAll
-    public static void initToken() {
-        token = getToken();
-    }
-
+   
     @BeforeEach
     public void initApplication() {
         if(mockMvc == null) {
             this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         }
     }
-
-    public static final String USER_SET_REGULAR = "/content/userset_regular.json";
-    public static final String USER_SET_MANDATORY = "/content/userset_mandatory.json";
-    public static final String USER_SET_OPEN = "/content/userset_open.json";
-    public static final String USER_SET_LARGE = "/content/userset_large.json";
-    public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
-        
-    public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
 
     // Create User Set Tests
     @Test

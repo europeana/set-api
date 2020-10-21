@@ -2,12 +2,10 @@
   "type": "Collection",
   "visibility":"public",
   "title": {
-     "en": "Sportswear - complete",
-     "ro": "Echipament sportiv - complet"
+     "en": "Sportswear"
   },
   "description": {
-     "en": "All kinds of sportswear - complete!",
-     "ro": "toate tipurile de echipamente sportive - complete!"
+     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
   },
   "items":[
   "http://data.europeana.eu/item/08641/1037479000000476703",
@@ -15,10 +13,5 @@
   "http://data.europeana.eu/item/08641/1037479000000476903",
   "http://data.europeana.eu/item/08641/1037479000000476467",
   "http://data.europeana.eu/item/08641/1037479000000476875"
-  ],
-  "@context": "http://www.europeana.eu/schemas/context/collection.jsonld",
-  "id":"http://data.europeana.eu/set/1",
-  "created": "2020-08-28T13:43:07Z",
-  "modified": "2020-08-28T13:44:48Z",
-  "total": 5
+  ]
 }
