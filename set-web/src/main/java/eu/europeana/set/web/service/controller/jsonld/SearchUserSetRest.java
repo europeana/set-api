@@ -81,8 +81,8 @@ public class SearchUserSetRest extends BaseRest {
 
             // build response
             MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-            // removed in #EA-763 and specifications
-            // //headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+            headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+            headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
             headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
 
             return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
