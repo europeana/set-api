@@ -84,7 +84,7 @@ public class WebUserSetServiceTest {
     }
 
 //	@Test
-    public void testStoreUserSetInDbRetrieveAndSerialize()
+    public void storeUserSetInDbRetrieveAndSerialize()
 	    throws MalformedURLException, IOException, UserSetServiceException, UserSetNotFoundException {// ,
 													  // JsonParseException
 													  // {
@@ -111,7 +111,7 @@ public class WebUserSetServiceTest {
     }
 
 //	@Test(expected = UserSetNotFoundException.class)
-    public void testDeleteUserSet()
+    public void deleteUserSet()
 	    throws MalformedURLException, IOException, UserSetServiceException, HttpException {
 
 	UserSet userSet = new WebUserSetImpl();
@@ -130,7 +130,7 @@ public class WebUserSetServiceTest {
     }
 
 //	@Test
-    public void testGetUserSet()
+    public void getUserSet()
 	    throws MalformedURLException, IOException, UserSetServiceException, HttpException {
 
 	UserSet userSet = new WebUserSetImpl();
@@ -159,7 +159,7 @@ public class WebUserSetServiceTest {
     }
 
     @Test
-    public void testInsertItemUserSet() throws HttpException {
+    public void insertItemUserSet() throws HttpException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
