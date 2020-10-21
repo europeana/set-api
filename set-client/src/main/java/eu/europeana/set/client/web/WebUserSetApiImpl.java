@@ -7,60 +7,73 @@ import org.springframework.http.ResponseEntity;
 import eu.europeana.set.client.BaseUserSetApi;
 import eu.europeana.set.client.exception.TechnicalRuntimeException;
 
+/**
+ * Implementation of client api
+ * @author GordeaS
+ *
+ */
+
 public class WebUserSetApiImpl extends BaseUserSetApi implements WebUserSetApi {
 
-	@Override
-	public ResponseEntity<String> createUserSet(String set, String profile) {
+    /**
+     * Default constructor
+     */
+    public WebUserSetApiImpl() {
+	super();
+    }
 
-		ResponseEntity<String> res;
-		try {
-			res = apiConnection.createUserSet(set, profile);
-		} catch (IOException e) {
-			throw new TechnicalRuntimeException(
-					"Exception occured when invoking the UserSetJsonApi createUserSet method", e);
-		}
+    @Override
+    public ResponseEntity<String> createUserSet(String set, String profile) {
 
-		return res;
-	}
-	
-	@Override
-	public ResponseEntity<String> deleteUserSet(String identifier) {
-		ResponseEntity<String> res;
-		try {
-			res = apiConnection.deleteUserSet(identifier);
-		} catch (IOException e) {
-			throw new TechnicalRuntimeException(
-					"Exception occured when invoking the UserSetJsonApi deleteUserSet method", e);
-		}
-
-		return res;
+	ResponseEntity<String> res;
+	try {
+	    res = apiConnection.createUserSet(set, profile);
+	} catch (IOException e) {
+	    throw new TechnicalRuntimeException(
+		    "Exception occured when invoking the UserSetJsonApi createUserSet method", e);
 	}
 
-	@Override
-	public ResponseEntity<String> getUserSet(String identifier, String profile) {
+	return res;
+    }
 
-		ResponseEntity<String> res;
-		try {
-			res = apiConnection.getUserSet(identifier, profile);
-		} catch (IOException e) {
-			throw new TechnicalRuntimeException(
-					"Exception occured when invoking the UserSetJsonApi getUserSet method", e);
-		}
-
-		return res;
+    @Override
+    public ResponseEntity<String> deleteUserSet(String identifier) {
+	ResponseEntity<String> res;
+	try {
+	    res = apiConnection.deleteUserSet(identifier);
+	} catch (IOException e) {
+	    throw new TechnicalRuntimeException(
+		    "Exception occured when invoking the UserSetJsonApi deleteUserSet method", e);
 	}
 
-	@Override
-	public ResponseEntity<String> updateUserSet(String identifier, String set, String profile) {
-		ResponseEntity<String> res;
-		try {
-			res = apiConnection.updateUserSet(identifier, set, profile);
-		} catch (IOException e) {
-			throw new TechnicalRuntimeException(
-					"Exception occured when invoking the UserSetJsonApi updateUserSet method", e);
-		}
+	return res;
+    }
 
-		return res;
+    @Override
+    public ResponseEntity<String> getUserSet(String identifier, String profile) {
+
+	ResponseEntity<String> res;
+	try {
+	    res = apiConnection.getUserSet(identifier, profile);
+	} catch (IOException e) {
+	    throw new TechnicalRuntimeException("Exception occured when invoking the UserSetJsonApi getUserSet method",
+		    e);
 	}
+
+	return res;
+    }
+
+    @Override
+    public ResponseEntity<String> updateUserSet(String identifier, String set, String profile) {
+	ResponseEntity<String> res;
+	try {
+	    res = apiConnection.updateUserSet(identifier, set, profile);
+	} catch (IOException e) {
+	    throw new TechnicalRuntimeException(
+		    "Exception occured when invoking the UserSetJsonApi updateUserSet method", e);
+	}
+
+	return res;
+    }
 
 }

@@ -2,18 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>set-client</artifactId>
-	<packaging>jar</packaging>
-	<name>Europeana (User) Sets Client (remote api access)</name>
-	<description>Implementation of a Java Client for remote invocation of Set REST API (see set-web)</description>
-
 	<parent>
 		<groupId>eu.europeana.set</groupId>
 		<artifactId>set-api</artifactId>
 		<relativePath>../pom.xml</relativePath>
 		<version>${version.setApi}</version>		
 	</parent>
-
+	<artifactId>set-client</artifactId>
+	<packaging>jar</packaging>
+	<name>Europeana (User) Sets Client (remote api access)</name>
+	<description>Implementation of a Java Client for remote invocation of Set REST API (see set-web)</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -9,18 +9,15 @@
 	<packaging>pom</packaging>
 	<name>Europeana  (User) Sets API parent</name>
 	
-	<repositories>
-		<repository>
-		    <id>artifactory.eanadev.org</id>
-			<name>artifactory.eanadev.org-releases (external and internal releases)</name>
-			<url>http://artifactory.eanadev.org/artifactory/libs-release</url>
-		</repository>
-		<repository>
-			<id>libs-snapshots-local</id>
-			<name>europeana-snapshots</name>
-			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
-		</repository>
-	</repositories>
+	<modules>
+		<module>set-definitions</module>
+		<module>set-common</module>
+		<module>set-mongo</module>
+		<module>set-web</module>
+		<module>set-client</module>
+		<module>set-search-api-client</module>
+		<module>set-integration-testing</module>
+	</modules>
 	
 	<properties>
 		<version.setApi>0.2.1-SNAPSHOT</version.setApi>
@@ -53,18 +50,21 @@
         <maven.compiler.target>${version.java}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+    
+	<repositories>
+		<repository>
+		    <id>artifactory.eanadev.org</id>
+			<name>artifactory.eanadev.org-releases (external and internal releases)</name>
+			<url>http://artifactory.eanadev.org/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<id>libs-snapshots-local</id>
+			<name>europeana-snapshots</name>
+			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
+		</repository>
+	</repositories>
 		
-      
-    </properties>
-	<modules>
-		<module>set-definitions</module>
-		<module>set-common</module>
-		<module>set-mongo</module>
-		<module>set-web</module>
-		<module>set-client</module>
-		<module>set-search-api-client</module>
-		<module>set-integration-testing</module>
-	</modules>
 	<build>
 		<!--  configure source and output locations -->
 		<directory>target</directory>
@@ -72,9 +72,6 @@
 		<finalName>${artifactId}-${version}</finalName>
 		<testOutputDirectory>target/test-classes</testOutputDirectory>
 		<sourceDirectory>src/main/java</sourceDirectory>
-		<!-- 
-		<scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
-		 -->
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<resources>
 			<resource>

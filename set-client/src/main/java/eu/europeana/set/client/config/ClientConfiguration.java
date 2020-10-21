@@ -6,7 +6,14 @@ import java.util.Properties;
 
 import eu.europeana.set.client.exception.TechnicalRuntimeException;
 
-public class ClientConfiguration {
+/**
+ * configuration for accessing remote api
+ * 
+ * @author GordeaS
+ *
+ */
+
+public final class ClientConfiguration {
 
     protected static final String SET_CLIENT_PROPERTIES_FILE = "/set-client.properties";
     protected static final String PROP_SET_API_KEY = "set.api.key";
@@ -14,7 +21,7 @@ public class ClientConfiguration {
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
     protected static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
 
-    private static Properties properties = null;
+    private Properties properties;
     private static ClientConfiguration singleton;
 
     /**
@@ -28,29 +35,35 @@ public class ClientConfiguration {
      * 
      * @return
      */
-    public static synchronized ClientConfiguration getInstance() {
-	if (singleton == null) {
-	    singleton = new ClientConfiguration();
-	    singleton.loadProperties();
+    public static ClientConfiguration getInstance() {
+	synchronized (SET_CLIENT_PROPERTIES_FILE) {
+	    if (singleton == null) {
+		singleton = new ClientConfiguration();
+		singleton.loadProperties();
+	    }
 	}
+
 	return singleton;
     }
 
     /**
      * Laizy loading of configuration properties
      */
-    public synchronized void loadProperties() {
+    public void loadProperties() {
+
 	try {
-	    properties = new Properties();
-	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
-	    if (resourceAsStream != null) {
+	    synchronized (SET_CLIENT_PROPERTIES_FILE) {
+		properties = new Properties();
+		InputStream resourceAsStream = getClass().getResourceAsStream(SET_CLIENT_PROPERTIES_FILE);
+		if (resourceAsStream == null) {
+		    throw new TechnicalRuntimeException(
+			    "No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);  
+		} 
+		
 		getProperties().load(resourceAsStream);
-	    } else {
-		throw new TechnicalRuntimeException(
-			"No properties file found in classpath! " + SET_CLIENT_PROPERTIES_FILE);
 	    }
 
-	} catch ( RuntimeException | IOException e) {
+	} catch (RuntimeException | IOException e) {
 	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_CLIENT_PROPERTIES_FILE, e);
 	}
 
@@ -96,7 +109,7 @@ public class ClientConfiguration {
     public String getServiceUri() {
 	return getProperties().getProperty(PROP_SET_SERVICE_URI);
     }
-   
+
     /**
      * This method returns the uri of the oauth service as configured in
      * 
