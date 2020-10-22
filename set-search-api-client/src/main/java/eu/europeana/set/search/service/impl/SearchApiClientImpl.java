@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -11,7 +12,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.search.connection.HttpConnection;
+import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
@@ -52,11 +53,12 @@ public class SearchApiClientImpl implements SearchApiClient {
     }
 
     private boolean isSuccessfull(JSONObject jo){
-	String key_success = "success";
+	String keySuccess = "success";
 	try {
-	    return jo.has(key_success) && jo.getBoolean(key_success);
+	    return jo.has(keySuccess) && jo.getBoolean(keySuccess);
 	} catch (JSONException e) {
 	    //actually it shouldn't happen
+	    logger.trace("Invalid Json Object", e);
 	    return false;
 	}	
     }
@@ -92,7 +94,7 @@ public class SearchApiClientImpl implements SearchApiClient {
     protected List<String> extractItemIds(JSONObject jo) throws SearchApiClientException {
 	try {
 	    JSONArray itemsArray = jo.getJSONArray(WebUserSetFields.ITEMS);
-	    return extractItemsFromSearchResponse(itemsArray, WebUserSetFields.ID);
+	    return extractItemsFromSearchResponse(itemsArray, WebUserSetModelFields.ID);
 	} catch (JSONException e) {
 	    throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(),
 		    e);
@@ -108,7 +110,7 @@ public class SearchApiClientImpl implements SearchApiClient {
      * @throws JSONException
      */
     protected List<String> extractItemDescriptions(JSONObject jo) throws SearchApiClientException {
-	List<String> list = new ArrayList<String>();
+	List<String> list = new ArrayList<>();
 	if (jo == null) {
 	    return list;
 	}
@@ -138,7 +140,7 @@ public class SearchApiClientImpl implements SearchApiClient {
     protected List<String> extractItemsFromSearchResponse(JSONArray valueObject, String fieldName)
 	    throws SearchApiClientException {
 
-	List<String> list = new ArrayList<String>();
+	List<String> list = new ArrayList<>();
 	if (valueObject == null) {
 	    return list;
 	}
@@ -162,7 +164,7 @@ public class SearchApiClientImpl implements SearchApiClient {
     JSONObject searchItems(String uri) throws SearchApiClientException {
 	String jsonResponse;
 	try {
-	    jsonResponse = createHttpConnection().getURLContent(uri);
+	    jsonResponse = createHttpConnection().getJsonResponse(uri);
 	    if (jsonResponse == null) {
 		// HTTP Error Code
 		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY, null);

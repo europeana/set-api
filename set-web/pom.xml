@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -36,40 +37,25 @@
 			<artifactId>commons-web</artifactId>
 			<version>${version.commonsApi}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-oauth</artifactId>
 			<version>${version.commonsApi}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-search</artifactId>
 			<version>${version.commonsApi}</version>
 			<exclusions>
-			<exclusion>
-			<groupId>org.apache.solr</groupId>
-			<artifactId>solr-solrj</artifactId>
-			
-			</exclusion>
-			</exclusions>
-		</dependency>
-	
-		<!-- europeana api key client -->
-		<!--
-		<dependency>
-		    <groupId>eu.europeana.apikey-utils</groupId>
-		    <artifactId>apikey-client</artifactId>
-		    <version>${version.apiKeyClient}</version>
-			<exclusions>
 				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
+					<groupId>org.apache.solr</groupId>
+					<artifactId>solr-solrj</artifactId>
+
 				</exclusion>
 			</exclusions>
 		</dependency>
-		-->
 
 		<!-- set projects -->
 		<dependency>
@@ -87,14 +73,14 @@
 			<artifactId>set-search-api-client</artifactId>
 			<version>${version.setApi}</version>
 		</dependency>
-		
+
 		<!-- aspectj /profiling -->
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>${version.aspectj}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
@@ -148,7 +134,42 @@
 			</exclusions>
 		</dependency>
 
-		<!-- test dependencies -->
+		
+		<!-- swagger -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.4.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- fixes for JDK 11 -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${version.jaxb}</version>
+		</dependency>
+		
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+			<version>${version.junit}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>3.5.13</version>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -163,51 +184,33 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<!--  
+
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<version>${version.commonsApi}</version>
-			<artifactId>commons-nosql</artifactId>
-			<classifier>tests</classifier>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		-->
-		<dependency>
-			<groupId>de.flapdoodle.embed</groupId>
-			<artifactId>de.flapdoodle.embed.mongo</artifactId>
-			<version>2.0.3</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIO}</version>
 			<scope>test</scope>
 		</dependency>
 		
-		<!-- swagger -->
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>2.4.0</version>
-		</dependency>	
-		
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${version.junit}</version>
-			<scope>test</scope>
-		</dependency>
-		
-		<!-- fixes for JDK 11 -->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>${version.jaxb}</version>
-		</dependency>
-				
 	</dependencies>
-	
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<attachClasses>true</attachClasses>
+				</configuration>
+			</plugin>
+			<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${version.surefire}</version>
+            </plugin>
+		</plugins>
+	</build>
 
 </project>

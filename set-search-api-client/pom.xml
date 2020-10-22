@@ -19,13 +19,6 @@
 
 	<dependencies>
 		<!-- europeana api commons -->
-		<!-- 
-		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-web</artifactId>
-			<version>${version.commonsApi}</version>
-		</dependency>
-		 -->
 		 <dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-definitions</artifactId>
@@ -39,11 +32,11 @@
 		</dependency>
 	
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>${version.httpClient}</version>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-common</artifactId>
+			<version>${version.setApi}</version>
 		</dependency>
-			
+		
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>

@@ -35,16 +35,6 @@
     	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
     	 --> 	
     </beans:bean>
-    
-	<!--
-    <beans:bean id="adminService" class="eu.europeana.annotation.web.service.impl.AdminServiceImpl">
-    </beans:bean>
-	-->
-    
-    <!-- 
-    <beans:bean id="setSearchService" class="eu.europeana.set.web.service.impl.UserSetSearchServiceImpl">
-    </beans:bean>
-     -->
          
     <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans -->
     <context:component-scan base-package="eu.europeana.set.web.service" />

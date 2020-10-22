@@ -1,15 +1,12 @@
 package eu.europeana.set.definitions.model.vocabulary;
 
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
-
 /**
  * @author GrafR
  */
 public class WebUserSetFields extends WebUserSetModelFields {
 
-  public WebUserSetFields() {
-       super();
-   }
+    WebUserSetFields() {
+    }
 
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";
@@ -32,7 +29,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
      *     
      * @deprecated    
      */
-    @Deprecated
+    @Deprecated(since = "")
     public static final String PARAM_SORT_ORDER           = "sortOrder";
 
     // Mongo Constants
@@ -49,6 +46,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
 
     //additional search fields  
     public static final String ITEM                      = "item";
+    public static final String SET_ID                    = "set_id";
 
     
     //results page
@@ -59,6 +57,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Pagination Cosntants
     public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";
     public static final String BASE_ITEM_URL             = "http://data.europeana.eu/item/";
+    public static final int    DEFAULT_DEREF_ITEMS       = 5;
     public static final int    MAX_ITEMS_PER_PAGE        = 10;
     public static final int    MAX_ITEMS_TO_PRESENT      = 1000;
 

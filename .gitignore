@@ -24,3 +24,8 @@ hs_err_pid*
 **.project
 **.classpath
 **/target
+**/log4j2.xml
+
+#IntelliJ project files
+.idea
+*.iml

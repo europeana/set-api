@@ -5,7 +5,6 @@ import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 public class Person extends BaseAgent {
 
 	public Person(){
-		super();
-		setAgentTypeEnum(AgentTypes.PERSON);
+		super(AgentTypes.PERSON);
 	}
 }

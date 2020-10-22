@@ -6,7 +6,7 @@ import java.util.Map;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 
-public interface UserSet {
+public interface UserSet extends PageInfo{
 
 	String getType();
 
@@ -32,13 +32,13 @@ public interface UserSet {
 
 	void setSubject(List<String> subject);
 
-	String getSpatial();
-
-	void setSpatial(String spatial);
-
-	boolean isUgc();
-
-	void setUgc(boolean ugc);
+//	String getSpatial();
+//
+//	void setSpatial(String spatial);
+//
+//	boolean isUgc();
+//
+//	void setUgc(boolean ugc);
 
 	Agent getCreator();
 
@@ -52,38 +52,10 @@ public interface UserSet {
 
 	void setModified(Date modified);
 
-	String getFirst();
-
-	void setFirst(String first);
-
-	String getLast();
-
-	void setLast(String last);
-
-	int getTotal();
-
-	void setTotal(int total);
-
-	int getCollectionPage();
-
-	void setCollectionPage(int collectionPage);
-
 	List<String> getItems();
 
 	void setItems(List<String> items);
 
-	int getNext();
-
-	void setNext(int next);
-
-	int getPrev();
-
-	void setPrev(int prev);
-
-	String getPartOf();
-
-	void setPartOf(String partOf);
-	
 	public String getIdentifier();
 	
 	public void setIdentifier(String sequenceIdentifier);

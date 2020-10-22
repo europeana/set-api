@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
 @JsonPropertyOrder({WebUserSetModelFields.ID,  WebUserSetFields.TYPE, WebUserSetFields.PART_OF, WebUserSetFields.ITEMS, WebUserSetFields.NEXT, WebUserSetFields.PREV})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -74,7 +74,7 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     @Override
     @JsonProperty(WebUserSetFields.PREV)
     public String getPrevPageUri() {
-        return super.getNextPageUri();
+        return super.getPrevPageUri();
     }
 
     

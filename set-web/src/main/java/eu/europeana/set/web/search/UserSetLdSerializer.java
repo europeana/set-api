@@ -2,12 +2,12 @@ package eu.europeana.set.web.search;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.view.ItemInsertView;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResource;
@@ -24,7 +24,7 @@ public class UserSetLdSerializer {
 	ObjectMapper mapper = new ObjectMapper(); 
 		
 	public UserSetLdSerializer() {
-		SimpleDateFormat df = new SimpleDateFormat(WebUserSetFields.SET_DATE_FORMAT);
+		SimpleDateFormat df = new SimpleDateFormat(WebUserSetFields.SET_DATE_FORMAT, Locale.ENGLISH);
 		mapper.setDateFormat(df);
 	}
 	
@@ -56,16 +56,10 @@ public class UserSetLdSerializer {
 		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
 	}
 	
-	/**
-	 * This method provides response for item insert request.
-	 * @param userSet
-	 * @return specific view for user set after item inserting
-	 * @throws IOException
-	 */
-	public String serialize(ItemInsertView userSet) throws IOException {		
-		mapper.registerModule(new JsonldModule()); 
-		JsonldResourceBuilder<ItemInsertView> jsonResourceBuilder = JsonldResource.Builder.create();
-		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
-	}
+//	public String serialize(ItemInsertView userSet) throws IOException {		
+//		mapper.registerModule(new JsonldModule()); 
+//		JsonldResourceBuilder<ItemInsertView> jsonResourceBuilder = JsonldResource.Builder.create();
+//		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
+//	}
 
 }

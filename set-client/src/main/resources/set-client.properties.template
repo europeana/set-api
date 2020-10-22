@@ -5,7 +5,9 @@ set.service.uri = http://localhost:8080/set
 # the user key used to access Europeana API. For more information see http://pro.europeana.eu/api 
 set.api.key =
 
-# the set validation header definitions
-set.header.name=Authorization
-set.regular.authorization.value=
- 
+#the URL for the endpoint of OAuth service  
+oauth.service.uri=https://auth.europeana.eu/auth/realms/europeana/protocol/openid-connect/token
+
+#The parameters sent for retrieving a new ticket   
+oauth.token.request.params=username=test_userset_regular&password=69355b87-9f84-48a8-90d0-47a26e9b2a82&grant_type=password&client_id=test_client_userset&client_secret=3dde4cdb-ee54-42f2-a198-5f38a753f5cc&scope=usersets
+

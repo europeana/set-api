@@ -24,9 +24,10 @@ public interface UserSetService {
      *
      * @param userSet
      * @return UserSet object
+     * @throws HttpException 
      */
-    public UserSet storeUserSet(UserSet userSet);
-
+    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException;
+    
     /**
      * This method converts close set to open set by updating respective items
      *
@@ -79,7 +80,15 @@ public interface UserSetService {
      */
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
 
-    /**
+	/**
+	 * This method returns List<UserSet> for given user set creatorId
+	 *
+	 * @param
+	 * @return List<PersistentUserSet>
+	 */
+	public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
+
+	/**
      * This method computes pagination values for user set
      *
      * @param userSet
@@ -119,7 +128,14 @@ public interface UserSetService {
 	 * @throws UserSetNotFoundException 
 	 */
 	public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
-	
+
+	/**
+	 * This method deletes list of  user set.
+	 * @param userSets The list of user sets.
+	 * @param creatorId Creator of the user Sets
+	 */
+	public void deleteUserSets(String creatorId, List<PersistentUserSet> userSets);
+
 	/**
 	 * remove duplicate items in the user set by preserving the order of items
 	 * @param userSet
@@ -183,7 +199,7 @@ public interface UserSetService {
 	public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile, Authentication authentication);
 
 	public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-		    StringBuffer requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
+		    StringBuilder requestUrl, String reqParams, LdProfiles profile, Authentication authentication) throws HttpException;
 
 	/**
 	 * This method validates input values wsKey, identifier and userToken.

@@ -27,5 +27,10 @@ public interface UserSetQuery extends Query{
     void setUser(String user);
 
     String getUser();
+
+    String getSetId();
+
+    void setSetId(String setId);
+
     
 }

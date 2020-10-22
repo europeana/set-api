@@ -1,0 +1,5 @@
+#the URL for the endpoint of OAuth service  
+oauth.service.uri=
+
+#The parameters sent for retrieving a new ticket   
+oauth.token.request.params=

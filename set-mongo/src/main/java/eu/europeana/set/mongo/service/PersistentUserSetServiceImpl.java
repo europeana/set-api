@@ -1,5 +1,6 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -10,12 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainerImpl;
-import org.mongodb.morphia.query.FieldEnd;
-import org.mongodb.morphia.query.FindOptions;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.Sort;
+import org.mongodb.morphia.query.*;
 import org.springframework.stereotype.Component;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -23,14 +19,12 @@ import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.UserSetId;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.fields.WebUserSetModelFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 /**
@@ -49,17 +43,16 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	private static final String FIELD_TYPE       = WebUserSetModelFields.TYPE;
 	private static final String FIELD_CREATOR    = WebUserSetModelFields.CREATOR + ".httpUrl";
 	
-	List<String> publicPublishedList = Arrays.asList(new String[]{
-		VisibilityTypes.PUBLIC.getJsonValue(), VisibilityTypes.PUBLISHED.getJsonValue()});  
+	List<String> publicPublishedList = Arrays.asList(VisibilityTypes.PUBLIC.getJsonValue(), VisibilityTypes.PUBLISHED.getJsonValue());
 	
 	@Resource
 	private UserSetConfiguration configuration;
 
-	public UserSetConfiguration getConfiguration() {
+	public synchronized UserSetConfiguration getConfiguration() {
 		return configuration;
 	}
 
-	public void setConfiguration(UserSetConfiguration configuration) {
+	public synchronized void setConfiguration(UserSetConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
@@ -87,10 +80,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 		long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER); 
 		object.setIdentifier("" + sequenceId);
-
+		
+		String notInitializedLongId = "-1";
+		
 		// validate user set ID
 		if (StringUtils.isBlank(object.getIdentifier()) 
-				|| UserSetId.NOT_INITIALIZED_LONG_ID.equals(object.getIdentifier()))
+				|| notInitializedLongId.equals(object.getIdentifier()))
 				throw new UserSetValidationException("UserSet.UserSetId.identifier must be a valid alpha-numeric value or a positive number!");
 	}
 
@@ -103,7 +98,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 		return getUserSetDao().findOne(query);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getByCreator(java.lang.String)
+	 */
+	public QueryResults<PersistentUserSet> getByCreator(String creatorId) {
+		Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
+		query.filter(FIELD_CREATOR, creatorId);
+
+		return getUserSetDao().find(query);
+	}
+
 	/* (non-Javadoc)
 	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String)
 	 */
@@ -130,7 +135,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    PersistentUserSet persistentObject = null;
 
 	    if (userSet instanceof PersistentUserSet) {
-		persistentObject = (PersistentUserSetImpl) userSet;
+		persistentObject = (PersistentUserSet) userSet;
 	    } else {
 		throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);
 	    }
@@ -158,7 +163,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    
 	    FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
-	    
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
@@ -181,7 +185,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return searchQuery;
 	    }
 	    
-//	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions) 
+//	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions)
 	    if(query.getVisibility() == null) {
 		//all public, published, and user's private
 //		searchQuery.filter(WebUserSetModelFields.VISIBILITY+" in", publicPublishedList);
@@ -220,26 +224,35 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if(query.getItem() != null) {
 		mongoQuery.filter(WebUserSetModelFields.ITEMS + " in", query.getItem());
 	    }
+
+		if(query.getSetId() != null) {
+			mongoQuery.filter(WebUserSetModelFields.IDENTIFIER,   query.getSetId());
+		}
 	    
 	    if(query.getSortCriteria() == null) {
 		//default ordering if none is defined by the user
 		mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));
 	    } else {
-		for (String sortField : query.getSortCriteria()) {
-		    if(!sortField.contains(" ")) {
-			mongoQuery.order(Sort.ascending(sortField));
-		    }else {
-			String[] sortParts = sortField.split(" ", 2);
-			if(!"desc".contentEquals(sortParts[1])) {
-			    mongoQuery.order(Sort.ascending(sortParts[0]));
-			}else {
-			    mongoQuery.order(Sort.descending(sortParts[0]));
-			}
-			
-		    }
-		}
+		buildSortCriteria(query, mongoQuery);
 	    }
+
 	    return mongoQuery;
+	}
+
+	private void buildSortCriteria(UserSetQuery query, Query<PersistentUserSet> mongoQuery) {
+	    for (String sortField : query.getSortCriteria()) {
+	        if(!sortField.contains(" ")) {
+	    	mongoQuery.order(Sort.ascending(sortField));
+	        }else {
+	    	String[] sortParts = sortField.split(" ", 2);
+	    	if(!"desc".contentEquals(sortParts[1])) {
+	    	    mongoQuery.order(Sort.ascending(sortParts[0]));
+	    	}else {
+	    	    mongoQuery.order(Sort.descending(sortParts[0]));
+	    	}
+	    	
+	        }
+	    }
 	}
 
 	@Override
@@ -249,11 +262,22 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		    getDao().delete(userSet);
 	}
 
+	@Override
+	public void removeAll(List<PersistentUserSet> userSets) {
+		List<ObjectId> objectIds = new ArrayList<>();
+		if (!userSets.isEmpty()) {
+			for( PersistentUserSet userSet : userSets) {
+				objectIds.add(userSet.getObjectId());
+			}
+		}
+		getUserSetDao().deleteByObjectId(objectIds);
+	}
+
 	/**      
 	 * @deprecated     
 	 */
 	@Override
-	@Deprecated
+	@Deprecated(since = "", forRemoval = true)
 	//TODO: use store instead
 	public PersistentUserSet update(PersistentUserSet userSet) throws  UserSetValidationException {
 		return store(userSet);

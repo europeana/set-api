@@ -1,16 +1,16 @@
 package eu.europeana.set.client.integration.web;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
@@ -20,7 +20,8 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest { 
+@Disabled
+public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     private static final String USER_SET_PATH = "http://data.europeana.eu/set/";
 		
@@ -57,9 +58,9 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocolTest {
 		validateResponse(response, HttpStatus.CREATED);
 	}
 	
-	protected void validateResponse(ResponseEntity<String> response, HttpStatus status) {
+	protected void validateResponse(ResponseEntity<String> response, HttpStatus expectedStatus) {
 		assertNotNull(response.getBody());
-		assertEquals(response.getStatusCode(), status);
+		assertEquals(expectedStatus, response.getStatusCode());
 	}
 	
 	/**

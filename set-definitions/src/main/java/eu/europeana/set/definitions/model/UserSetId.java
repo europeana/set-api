@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 public interface UserSetId extends Serializable {
 
-	String NOT_INITIALIZED_LONG_ID = "-1";
-	
 	/**
 	 * unanbiguous identifier of the resource for a given provider
 	 * @return

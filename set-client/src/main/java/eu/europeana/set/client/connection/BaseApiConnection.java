@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
-import eu.europeana.set.client.http.HttpConnection;
+import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 public class BaseApiConnection {
@@ -56,19 +56,6 @@ public class BaseApiConnection {
 		this.httpConnection = httpConnection;
 	}
 	
-//	public Gson getUserSetGson() {
-//		if (gson == null) {
-//			// Load results object from JSON
-//			GsonBuilder builder = new GsonBuilder();
-//			UserSetDeserializer annoDeserializer = new UserSetDeserializer();
-//			
-//			builder.registerTypeHierarchyAdapter(UserSet.class,
-//					annoDeserializer);
-//			
-//			gson = builder.setDateFormat(ModelConst.GSON_DATE_FORMAT).create();
-//		}
-//		return gson;
-//	}
 
 	/**
 	 * Create a new connection to the UserSet Service (REST API).
@@ -81,82 +68,34 @@ public class BaseApiConnection {
 		this.setServiceUri = setServiceUri;
 	}
 	
-	String getJSONResult(String url) throws IOException {
-		logger.trace("Call to UserSet API (GET): {} ", url);
-		return getHttpConnection().getURLContent(url);
-	}
 	
-	String getJSONResult(String url, String paramName, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST): {} ", url);
-		return getHttpConnection().getURLContent(url, paramName, jsonPost);
-	}
-	
-	String getJSONResultWithBody(String url, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: {} ", url);
-		return getHttpConnection().getURLContentWithBody(url, jsonPost);
-	}
-
-	/**
-	 * This method makes POST request for given URL and JSON body parameter that returns
-	 * response body, response headers and status code.
-	 * @param url
-	 * @param jsonPost
-	 * @return The response body, response headers and status code.
-	 * @throws IOException
-	 */
-	ResponseEntity<String> postURL(String url, String jsonPost) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: {} {}", url , URL_RESPONSE);
-		return getHttpConnection().postURL(url, jsonPost);
-	}
-
 	/**
 	 * This method makes POST request for given URL, header and JSON body parameter that returns
 	 * response body, response headers and status code.
 	 * @param url
 	 * @param jsonPost
-         * @param requestHeaderName
          * @param requestHeaderValue
 	 * @return The response body, response headers and status code.
 	 * @throws IOException
 	 */
-	ResponseEntity<String> postURL(String url, String jsonPost, String headerName, String headerValue) throws IOException {
-		logger.trace("Call to UserSet API (POST) with body: " + url + 
-				". Returns body, headers and status code.");
-		return getHttpConnection().postURL(url, jsonPost, headerName, headerValue);
+	ResponseEntity<String> postURL(String url, String jsonPost, String headerValue) throws IOException {
+		logger.trace("Call to UserSet API (POST) with body: {}. Returns body, headers and status code.", url);
+		return getHttpConnection().postURL(url, jsonPost, headerValue);
 	}
-	
-	
 	
 	/**
 	 * This method makes PUT request for given URL and JSON body parameter that returns
 	 * response body, response headers and status code.
 	 * @param url
 	 * @param jsonPut
+	 * @param authorizationHeaderValue
 	 * @return The response body, response headers and status code.
 	 * @throws IOException
 	 */
-	ResponseEntity<String> putURL(String url, String jsonPut) throws IOException {
-		logger.trace("Call to UserSet API (PUT) with body: {} {} ", url, URL_RESPONSE);
-		ResponseEntity<String> response = getHttpConnection().putURL(url, jsonPut);
-		response.getStatusCode();
-		return response;
-	}
-
-	/**
-	 * This method makes PUT request for given URL and JSON body parameter that returns
-	 * response body, response headers and status code.
-	 * @param url
-	 * @param jsonPut
-	 * @param headerName
-	 * @param headerValue
-	 * @return The response body, response headers and status code.
-	 * @throws IOException
-	 */
-	ResponseEntity<String> putURL(String url, String jsonPut, String headerName, String headerValue) throws IOException {
-		logger.trace("Call to UserSet API (PUT) with body: " + url + 
-				". Returns body, headers and status code.");
+	ResponseEntity<String> putURL(String url, String jsonPut, String authorizationHeaderValue) throws IOException {
+		logger.trace("Call to UserSet API (PUT) with body: {}. Returns body, headers and status code.", url);
 		
-		ResponseEntity<String> response = getHttpConnection().putURL(url, jsonPut, headerName, headerValue);
+		ResponseEntity<String> response = getHttpConnection().putURL(url, jsonPut, authorizationHeaderValue);
 		
 		response.getStatusCode();
 		
@@ -179,15 +118,13 @@ public class BaseApiConnection {
 	 * This method makes GET request for given URL and returns
 	 * response body, response headers and status code.
 	 * @param url
-	 * @param headerName
-	 * @param headerValue
+	 * @param authorizationHeaderValue
 	 * @return The response body, response headers and status code.
 	 * @throws IOException
 	 */
-	public ResponseEntity<String> getURL(String url, String headerName, String headerValue) throws IOException {
-		logger.trace("Call to UserSet API (GET): " + url + 
-				". Returns body, headers and status code.");
-		return getHttpConnection().getURL(url, headerName, headerValue);
+	public ResponseEntity<String> getURL(String url, String authorizationHeaderValue) throws IOException {
+		logger.trace("Call to UserSet API (GET): {}. Returns body, headers and status code.", url);
+		return getHttpConnection().getURL(url, authorizationHeaderValue);
 	}
 	
 	
@@ -207,15 +144,13 @@ public class BaseApiConnection {
 	 * This method makes DELETE request for given URL that returns
 	 * response headers and status code.
 	 * @param url
-	 * @param headerName
-	 * @param headerValue
+	 * @param authorizationHeaderValue
 	 * @return The response headers and status code.
 	 * @throws IOException
 	 */
-	ResponseEntity<String> deleteURL(String url, String headerName, String headerValue) throws IOException {
-		logger.trace("Call to UserSet API (DELETE): " + url + 
-				". Returns headers and status code.");
-		return getHttpConnection().deleteURL(url, headerName, headerValue);
+	ResponseEntity<String> deleteURL(String url, String authorizationHeaderValue) throws IOException {
+		logger.trace("Call to UserSet API (DELETE): {}. Returns headers and status code.", url);
+		return getHttpConnection().deleteURL(url, authorizationHeaderValue);
 	}
 		
 }

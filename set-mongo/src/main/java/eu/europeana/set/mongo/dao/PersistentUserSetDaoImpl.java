@@ -1,11 +1,13 @@
 package eu.europeana.set.mongo.dao;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -14,6 +16,7 @@ import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.mongo.model.internal.GeneratedUserSetIdImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.model.WebUserSetImpl;
 
 public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Serializable>
 		extends NosqlDaoImpl<E, T> implements PersistentUserSetDao<E, T>{
@@ -60,6 +63,9 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 
 		return nextUserSetId.getUserSetId();
 	}
-	
-	
+
+	@Override
+	public void deleteByObjectId(List<ObjectId> objectIds) {
+		getDatastore().delete(WebUserSetImpl.class, objectIds);
+	}
 }

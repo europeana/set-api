@@ -32,12 +32,12 @@ import io.swagger.annotations.ApiOperation;
 
 @Controller
 @SwaggerSelect
-@Api(tags = "User Set Discovery API", description = " ")
+@Api(tags = "User Set Discovery API")
 public class SearchUserSetRest extends BaseRest {
 
     UserSetQueryBuilder queryBuilder;
 
-    public UserSetQueryBuilder getQueryBuilder() {
+    public synchronized UserSetQueryBuilder getQueryBuilder() {
         if (queryBuilder == null) {
             queryBuilder = new UserSetQueryBuilder();
         }
@@ -70,32 +70,33 @@ public class SearchUserSetRest extends BaseRest {
             UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
             ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile, authentication);
-            
+            StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+
             @SuppressWarnings("rawtypes")
             BaseUserSetResultPage resultsPage;
             resultsPage = getUserSetService().buildResultsPage(searchQuery, results,
-                    request.getRequestURL(), request.getQueryString(), profile, authentication);
+                    requestURL, request.getQueryString(), profile, authentication);
 
-            String jsonLd = serializeResultsPage(resultsPage, profile);
+            String jsonLd = serializeResultsPage(resultsPage);
 
             // build response
             MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-            // removed in #EA-763 and specifications
-            // //headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+            headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+            headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
             headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
 
             return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
 
         } catch (HttpException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             throw new InternalServerException(e);
         }
     }
     
  
     @SuppressWarnings("rawtypes")
-    private String serializeResultsPage(BaseUserSetResultPage resultsPage, LdProfiles profile) throws IOException {
+    private String serializeResultsPage(BaseUserSetResultPage resultsPage) throws IOException {
         UserSetLdSerializer serializer = new UserSetLdSerializer();
         return serializer.serialize(resultsPage);
     }

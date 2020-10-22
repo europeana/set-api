@@ -20,10 +20,6 @@ public enum Roles implements Role {
 		return operations;
 	}
 	
-	public void setOperations(String[] operations) {
-		this.operations = operations;
-	}
-	
 	@Override
 	public String[] getPermissions() {
 	    return getOperations();
