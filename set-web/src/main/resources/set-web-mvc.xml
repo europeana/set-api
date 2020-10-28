@@ -49,7 +49,7 @@
 		<mvc:mapping path="/api-docs" allowed-origins="*" exposed-headers="Access-Control-Allow-Origin"/>
 		<mvc:mapping path="/api-docs/**" allowed-origins="*" exposed-headers="Access-Control-Allow-Origin"/>
 		
-		<mvc:mapping path="/set/" allowed-origins="*" allowed-methods="POST,GET,OPTIONS" 
+		<mvc:mapping path="/set/" allowed-origins="*" allowed-methods="POST,GET,OPTIONS,DELETE" 
 			exposed-headers="Access-Control-Allow-Origin, Allow, Link, ETag, Vary, Cache-Control, Preference-Applied" allowed-headers="*" max-age="600" allow-credentials="false"/>
 		<mvc:mapping path="/set/*" allowed-origins="*" allowed-methods="GET,PUT,DELETE" 
 			exposed-headers="Access-Control-Allow-Origin, Allow, Link, ETag, Vary, Preference-Applied" max-age="600" allow-credentials="false"/>
