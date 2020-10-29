@@ -2,26 +2,25 @@ package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.assertj.core.api.AssertDelegateTarget;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jackson.JsonObjectDeserializer;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -31,16 +30,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
-import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
-import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 
 /**
  * Test class for UserSet controller.
@@ -168,13 +165,19 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 
         String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
         // update the userset
-        mockMvc.perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
+        MockHttpServletResponse response = mockMvc.perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
         	.param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
                 .content(updatedRequestJson)
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(HttpStatus.OK.value()));
+                .andReturn().getResponse();
         
+        String result = response.getContentAsString();
+        assertNotNull(result);
+        assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+        
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+	       
         getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 

@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.oauth2.model.ApiCredentials;
 import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -40,10 +39,8 @@ import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationExcep
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -52,7 +49,6 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
-import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
@@ -280,6 +276,10 @@ public class WebUserSetRest extends BaseRest {
 	    // set immutable fields before validation
 	    newUserSet.setCreator(existingUserSet.getCreator());
 	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
+	    if(newUserSet.getVisibility() == null) {
+		newUserSet.setVisibility(existingUserSet.getVisibility());
+	    }
+	    
 	    getUserSetService().validateWebUserSet(newUserSet);
 	    // TODO: move verification to validateMethod when new specs are available
 	    if (existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
