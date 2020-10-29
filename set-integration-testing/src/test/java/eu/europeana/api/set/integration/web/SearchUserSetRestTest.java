@@ -1,13 +1,16 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -19,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
@@ -115,16 +119,21 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithPrivateVisibility() throws Exception {
-	createTestUserSet(USER_SET_MANDATORY, token);
-	createTestUserSet(USER_SET_REGULAR, token);
+	deleteBookmarkFolder(token);
+	UserSet set1 = createTestUserSet(USER_SET_MANDATORY, token);
+	UserSet set2 = createTestUserSet(USER_SET_REGULAR, token);
 	//Update tests to delete sets before test and enable bookmark folder creation
-	//	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
+	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PRIVATE_VISIBILITY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
+	
+	
     }
+
+    
 
     @Test
     public void searchWithPublishedVisibility() throws Exception {
@@ -138,16 +147,24 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithCreator() throws Exception {
-	createTestUserSet(USER_SET_REGULAR, token);
-	createTestUserSet(USER_SET_MANDATORY, token);
+	deleteBookmarkFolder(token);
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, token);
+	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, token);
 	//Update tests to delete sets before test and enable bookmark folder creation
-//	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
+	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
 	String creator = (String) getAuthentication(token).getPrincipal();
-	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+		.header(HttpHeaders.AUTHORIZATION, token)
+//		apikey will be ignored
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_CREATOR + creator)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-		.andExpect(status().is(HttpStatus.OK.value()));
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+	//check ids
+	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
+	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
+	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
+	
     }
 
     @Test

@@ -137,14 +137,10 @@ public abstract class BaseUserSetServiceImpl {
 //    @Override
     public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
 	mergeUserSetProperties(persistentUserSet, webUserSet);
-	updateUserSetPagination(persistentUserSet);
+	getUserSetUtils().updatePagination(persistentUserSet);
 	// update modified date
 	persistentUserSet.setModified(new Date());
 	return getMongoPersistence().update(persistentUserSet);
     }
     
-//    @Override
-    public void updateUserSetPagination(UserSet newUserSet) {
-	getUserSetUtils().updatePagination(newUserSet);
-    }
 }

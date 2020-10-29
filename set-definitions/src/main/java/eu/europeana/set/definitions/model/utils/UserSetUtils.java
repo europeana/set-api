@@ -29,41 +29,8 @@ public class UserSetUtils {
         return resMap;
     }
 
-    /**
-     * This method analyses the items and fills in pagination values.
-     *
-     * @param userSet The user set object
-     * @return user set object enriched by pagination values
-     */
-    public UserSet analysePagination(UserSet userSet) {
-        UserSet res = userSet;
-        res.setIdentifier(WebUserSetFields.BASE_SET_URL + userSet.getIdentifier());
-        res = updatePagination(res);
-        return res;
-    }
-
-    /**
-     * This method updates pagination values.
-     *
-     * @param userSet The user set object
-     * @return user set object with updated pagination values
-     */
-    public UserSet updatePagination(UserSet userSet) {
-        UserSet res = userSet;
-
-        if (res != null && res.getItems() != null) {
-            int total = res.getItems().size();
-            res.setTotal(total);
-            if (total > 0) {
-                int first = 0;
-                res.setFirst("" + first);
-                int last = total / WebUserSetFields.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
-                res.setLast("" + last);
-            }
-        }
-
-        return res;
-    }
+     /**
+   
 
     /**
      * This method forms an identifier URL
@@ -105,6 +72,7 @@ public class UserSetUtils {
      * @param userSet The user set object
      * @return user set object enriched by pagination values
      */
+    @Deprecated
     public UserSet fillPagination(UserSet userSet) {
 
         UserSet res = userSet;
@@ -124,6 +92,30 @@ public class UserSetUtils {
         return res;
     }
 
+    /* This method updates pagination values.
+    * @Deprecation the pagination information should not be saved in the database
+    * @param userSet The user set object
+    * @return user set object with updated pagination values
+    */
+   @Deprecated
+   public UserSet updatePagination(UserSet userSet) {
+       
+       if (userSet != null && userSet.getItems() != null) {
+           int total = userSet.getItems().size();
+           userSet.setTotal(total);
+           //NOTE: the first and last properties are not used now and might be deprecated, they should not be stored in the database
+           if (total > 0) {
+               int first = 0;
+               userSet.setFirst("" + first);
+               int last = total / WebUserSetFields.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
+               userSet.setLast("" + last);
+           }
+       }
+
+       return userSet;
+   }
+    
+    
     /**
      * This method fills pagination field in format '<id url>?page=0&pageSize=10'
      * for a user set object
@@ -142,6 +134,13 @@ public class UserSetUtils {
     
     public static String buildCreatorUri(String userId) {
    	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
+    }
+    
+    public static String buildUserSetId(String identifier) {
+	StringBuilder urlBuilder = new StringBuilder();
+	urlBuilder.append(WebUserSetFields.BASE_SET_URL);
+	urlBuilder.append(identifier);
+	return urlBuilder.toString();
     }
 
     /**

@@ -160,9 +160,9 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     @Test
     public void deleteUserAssociatedSets_Success() throws Exception {
 	//ensure that at least onea user set exists into the database
+	deleteBookmarkFolder(token);
 	createTestUserSet(USER_SET_REGULAR, token);
-//TODO: enable cleaning database before testing 	
-//	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
+	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
 	createTestUserSet(USER_SET_REGULAR, token);
 
 	mockMvc.perform(delete(BASE_URL)

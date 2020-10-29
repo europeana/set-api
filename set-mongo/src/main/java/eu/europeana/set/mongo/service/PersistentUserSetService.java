@@ -41,7 +41,7 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @param creatorid
 	 * @return user set object
 	 */
-	PersistentUserSet getBookmarksFolder(String creatorid);
+	PersistentUserSet getBookmarkFolder(String creatorid);
 	
 	/** 
 	 * This method retrieves user set from database by database Id provided as a string

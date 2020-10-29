@@ -19,6 +19,8 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.impl.UserSetServiceImpl;
@@ -53,7 +55,7 @@ public abstract class BaseUserSetTestUtils {
 
     @BeforeAll
     public static void initToken() {
-        token = getToken();
+        token = retrieveOatuhToken();
     }
 
     public UserSetServiceImpl getUserSetService() {
@@ -64,7 +66,7 @@ public abstract class BaseUserSetTestUtils {
 	return configuration;
     }
 
-    public static String getToken() {
+    public static String retrieveOatuhToken() {
 	EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
 	return oauthClient.getOauthToken();
     }
@@ -96,6 +98,25 @@ public abstract class BaseUserSetTestUtils {
 	return (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
     }
 
+    
+    protected void deleteBookmarkFolder(String token) throws ApiKeyExtractionException, AuthorizationExtractionException, UserSetNotFoundException {
+	// TODO Auto-generated method stub
+	Authentication authentication = getAuthentication(token);
+	String creatorId = buildCreatorId(authentication);
+	UserSet bookmarkFolder = getUserSetService().getBookmarkFolder(creatorId);
+	if(bookmarkFolder != null) {
+	    getUserSetService().deleteUserSet(bookmarkFolder.getIdentifier());
+	}
+	
+	
+    }
+
+    private String buildCreatorId(Authentication authentication) throws ApiKeyExtractionException, AuthorizationExtractionException {
+	String creator = (String) authentication.getPrincipal();
+	String creatorId = UserSetUtils.buildCreatorUri(creator);
+	return creatorId;
+    }
+    
     protected Authentication getAuthentication(String token) throws ApiKeyExtractionException, AuthorizationExtractionException {
 	RsaVerifier signatureVerifier = new RsaVerifier(getConfiguration().getJwtTokenSignatureKey());
 	String authorizationApiName = getConfiguration().getAuthorizationApiName();

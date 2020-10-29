@@ -95,7 +95,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     @Test
     public void getBookmarksFolder() {
         UserSet storedUserSet = storeUserSet(false);
-        PersistentUserSet foundUserSet = userSetService.getBookmarksFolder(storedUserSet.getCreator().getHttpUrl());
+        PersistentUserSet foundUserSet = userSetService.getBookmarkFolder(storedUserSet.getCreator().getHttpUrl());
 
         assertNotNull(foundUserSet);
         checkUserSet(foundUserSet, storedUserSet);

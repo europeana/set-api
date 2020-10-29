@@ -112,7 +112,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	/* (non-Javadoc)
 	 * @see eu.europeana.set.mongo.service.PersistentUserSetService#getBookmarksFolder(java.lang.String)
 	 */
-	public PersistentUserSet getBookmarksFolder(String creatorId) {
+	public PersistentUserSet getBookmarkFolder(String creatorId) {
 	    Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
 	    query.filter(FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
 	    query.filter(FIELD_CREATOR, creatorId);
@@ -211,9 +211,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		mongoQuery.filter(WebUserSetModelFields.VISIBILITY, query.getVisibility());
 	    }
 	        
-	    if(query.getType() == null) {
-		mongoQuery.filter(WebUserSetModelFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
-	    }else {
+	    if(query.getType() != null) {
+//		mongoQuery.filter(WebUserSetModelFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
 		mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
 	    }
 	    
@@ -225,10 +224,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		mongoQuery.filter(WebUserSetModelFields.ITEMS + " in", query.getItem());
 	    }
 
-		if(query.getSetId() != null) {
-			mongoQuery.filter(WebUserSetModelFields.IDENTIFIER,   query.getSetId());
-		}
-	    
+	    if (query.getSetId() != null) {
+		mongoQuery.filter(WebUserSetModelFields.IDENTIFIER, query.getSetId());
+	    }
+
 	    if(query.getSortCriteria() == null) {
 		//default ordering if none is defined by the user
 		mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));

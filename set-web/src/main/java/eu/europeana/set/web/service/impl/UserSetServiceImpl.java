@@ -67,6 +67,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     @Override
     public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
+	setDefaults(newUserSet, authentication);
+
+	validateWebUserSet(newUserSet);
+
+	UserSet extUserSet = getUserSetUtils().updatePagination(newUserSet);
+
+	// store in mongo database
+	return getMongoPersistence().store(extUserSet);
+    }
+
+    private void setDefaults(UserSet newUserSet, Authentication authentication) {
 	Agent user = new WebUser();
 	user.setHttpUrl(getUserId(authentication));
 	user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
@@ -75,13 +86,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}
-
-	validateWebUserSet(newUserSet);
-
-	UserSet extUserSet = getUserSetUtils().analysePagination(newUserSet);
-
-	// store in mongo database
-	return getMongoPersistence().store(extUserSet);
+	
+	if(newUserSet.getType() == null) {
+	    newUserSet.setType(UserSetTypes.COLLECTION.getJsonValue());
+	}
     }
 
     @Override
@@ -106,8 +114,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @param creator
      * @return null or existing bookarks folder
      */
-    public UserSet getBookmarksFolder(Agent creator) {
-	return getMongoPersistence().getBookmarksFolder(creator.getHttpUrl());
+    public UserSet getBookmarkFolder(Agent creator) {
+	return getBookmarkFolder(creator.getHttpUrl());
+    }
+    
+    public UserSet getBookmarkFolder(String creatorId) {
+	return getMongoPersistence().getBookmarkFolder(creatorId);
     }
 
     /*
@@ -119,17 +131,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet fillPagination(UserSet userSet) {
 	return getUserSetUtils().fillPagination(userSet);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.europeana.set.web.service.UserSetService#updatePagination(eu.europeana.set
-     * .definitions.model.UserSet)
-     */
-    public UserSet updatePagination(UserSet userSet) {
-	return getUserSetUtils().updatePagination(userSet);
     }
 
     @Override
@@ -238,19 +239,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.CREATOR });
 	}
 
-	UserSet usersBookmarkFolder = getBookmarksFolder(webUserSet.getCreator());
+	UserSet usersBookmarkFolder = getBookmarkFolder(webUserSet.getCreator());
 	if (usersBookmarkFolder == null) {
 	    // the user doesn't have yet a bookmark folder
 	    return;
 	}
 
+	// for create method indicate existing bookmark folder    
 	if (webUserSet.getIdentifier() == null) {
-	    // create method
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
 	}
 
+	// for update method indicate the existing bookmark folder (cannot change type to BookmarkFolder)    
 	if (!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
 	    // update method, prevent creation of 2 BookmarkFolders
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
@@ -268,12 +270,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     private void validateControlledValues(UserSet webUserSet) throws RequestBodyValidationException {
 
-	if (webUserSet.getVisibility() != null && !VisibilityTypes.isValid(webUserSet.getVisibility())) {
+	if (webUserSet.getVisibility() == null || !VisibilityTypes.isValid(webUserSet.getVisibility())) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
 	}
 
-	if (webUserSet.getType() != null && !UserSetTypes.isValid(webUserSet.getType())) {
+	if (webUserSet.getType() == null || !UserSetTypes.isValid(webUserSet.getType())) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType() });
 	}
@@ -447,9 +449,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * definitions.model.UserSet)
      */
     public UserSet updateItemList(UserSet existingUserSet) {
-	UserSet extUserSet;
-	updateUserSetPagination(existingUserSet);
-
+	//update total
+	getUserSetUtils().updatePagination(existingUserSet);
+	
 	// generate and add a created and modified timestamp to the Set
 	existingUserSet.setModified(new Date());
 
@@ -457,8 +459,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
 	UserSet updatedUserSet = updateUserSetInDb(existingUserSet, null);
-	extUserSet = fillPagination(updatedUserSet);
-	return extUserSet;
+	
+//	return fillPagination(updatedUserSet);
+	return updatedUserSet;
     }
 
     /*
