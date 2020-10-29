@@ -187,9 +187,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    
 //	    build the equivalent of (((visibility=private AND (creator=token OR user=admin)) OR visibility=public OR visibility=published) AND (other conditions)
 	    if(query.getVisibility() == null) {
-		//all public, published, and user's private
-//		searchQuery.filter(WebUserSetModelFields.VISIBILITY+" in", publicPublishedList);
-		
+		//all public, published, and user's own sets (including private)	
 		Criteria publicCriterion= searchQuery.criteria(WebUserSetModelFields.VISIBILITY).in(publicPublishedList);
 		Criteria ownerCriterion= searchQuery.criteria(FIELD_CREATOR).equal(query.getUser());
 		searchQuery.and(
