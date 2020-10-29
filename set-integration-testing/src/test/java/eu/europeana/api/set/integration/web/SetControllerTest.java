@@ -1,6 +1,7 @@
 package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -9,11 +10,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.assertj.core.api.AssertDelegateTarget;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jackson.JsonObjectDeserializer;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,6 +35,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.UserSetService;
@@ -74,11 +79,22 @@ public class SetControllerTest extends BaseUserSetTestUtils {
     public void create_UserSet_201Created() throws Exception {
         String requestJson = getJsonStringInput(USER_SET_REGULAR);
 
-        mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        String result = mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated())
-                .andReturn();
+                .andReturn().getResponse().getContentAsString();
+        String identifier = getSetIdentifier(result);
+        getUserSetService().deleteUserSet(identifier);
+    }
+
+    private String getSetIdentifier(String result) throws JSONException {
+	assertNotNull(result);
+        JSONObject json = new JSONObject(result);
+        String id = json.getString("id");
+        assertNotNull(id);
+        String identifier = id.replace(WebUserSetFields.BASE_SET_URL, "");
+	return identifier;
     }
 
     @Test
@@ -109,6 +125,8 @@ public class SetControllerTest extends BaseUserSetTestUtils {
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+	
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
     @Test
@@ -120,6 +138,8 @@ public class SetControllerTest extends BaseUserSetTestUtils {
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.OK.value()));
+        
+        getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
     //Update user set Tests
@@ -154,6 +174,8 @@ public class SetControllerTest extends BaseUserSetTestUtils {
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(HttpStatus.OK.value()));
+        
+        getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
     // Delete User associated Tests
@@ -205,6 +227,7 @@ public class SetControllerTest extends BaseUserSetTestUtils {
 		.andExpect(status().isForbidden());
 //      .header(HttpHeaders.AUTHORIZATION, token2)
 //                .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
     @Test
