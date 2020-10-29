@@ -617,8 +617,8 @@ public class WebUserSetRest extends BaseRest {
 	    existingUserSet.getItems().remove(newItem);
 
 	    // update an existing user set
-	    UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);
-	    UserSet updatedUserSet = getUserSetService().updateUserSetInDb(existingUserSetPaginated, null);
+//	    UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);
+	    UserSet updatedUserSet = getUserSetService().updateUserSetInDb(existingUserSet, null);
 
 	    // serialize to JsonLd
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);

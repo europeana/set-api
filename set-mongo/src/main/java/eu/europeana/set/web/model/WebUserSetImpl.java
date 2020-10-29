@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
@@ -154,10 +155,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
      */
     @JsonProperty(WebUserSetModelFields.ID)
     public String getId() {
-	StringBuilder urlBuilder = new StringBuilder();
-	urlBuilder.append(WebUserSetFields.BASE_SET_URL);
-	urlBuilder.append(super.getIdentifier());
-	return urlBuilder.toString();
+	return UserSetUtils.buildUserSetId(super.getIdentifier());
     }
 
     public void setId(String id) {
