@@ -1,6 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -617,8 +618,7 @@ public class WebUserSetRest extends BaseRest {
 	    existingUserSet.getItems().remove(newItem);
 
 	    // update an existing user set
-//	    UserSet existingUserSetPaginated = getUserSetService().updatePagination(existingUserSet);
-	    UserSet updatedUserSet = getUserSetService().updateUserSetInDb(existingUserSet, null);
+	    UserSet updatedUserSet = getUserSetService().updateItemList(existingUserSet);
 
 	    // serialize to JsonLd
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);

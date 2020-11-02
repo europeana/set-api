@@ -46,15 +46,6 @@ public interface UserSetService {
 	    LdProfiles profile) throws HttpException, IOException, JSONException;
 
     /**
-     * This method converts open set to close set by updating respective items
-     *
-     * @param storedUserSet
-     * @param items
-     * @return updated set
-     */
-    public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items);
-
-    /**
      * update (stored) <code>persistentUserSet</code> with values from
      * <code>webUserSet</code>
      *
@@ -79,14 +70,6 @@ public interface UserSetService {
      * @return List<PersistentUserSet>
      */
     public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
-
-    /**
-     * This method computes pagination values for user set
-     *
-     * @param userSet
-     * @return enriched user set
-     */
-    public UserSet fillPagination(UserSet userSet);
 
     /**
      * This methods converts user set object from JsonLd string format to a UserSet

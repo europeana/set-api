@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.search.Query;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.oauth2.model.ApiCredentials;
@@ -120,17 +119,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     
     public UserSet getBookmarkFolder(String creatorId) {
 	return getMongoPersistence().getBookmarkFolder(creatorId);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * eu.europeana.set.web.service.UserSetService#fillPagination(eu.europeana.set.
-     * definitions.model.UserSet)
-     */
-    public UserSet fillPagination(UserSet userSet) {
-	return getUserSetUtils().fillPagination(userSet);
     }
 
     @Override
@@ -431,7 +419,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		int currentPos = existingUserSet.getItems().indexOf(newItem);
 		if (currentPos == positionInt) {
 		    // do not change user set, just add pagination
-		    extUserSet = fillPagination(existingUserSet);
+		    // the items is already present at the correct position
+		    extUserSet = getUserSetUtils().updatePagination(existingUserSet);
 		} else {
 		    replaceItem(existingUserSet, positionInt, newItem);
 		    extUserSet = updateItemList(existingUserSet);
@@ -458,10 +447,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// Respond with HTTP 200
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
-	UserSet updatedUserSet = updateUserSetInDb(existingUserSet, null);
-	
-//	return fillPagination(updatedUserSet);
-	return updatedUserSet;
+	return getMongoPersistence().update((PersistentUserSet) existingUserSet);
     }
 
     /*
@@ -588,23 +574,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return uriBuilder.build(true).toUriString();
     }
 
-    /**
-     * (non-Javadoc)
-     * 
-     * @deprecated
-     * 
-     * @see eu.europeana.set.web.service.UserSetService(
-     *      eu.europeana.set.definitions.model.UserSet, java.util.List)
-     *
-     */
-    @Deprecated(since = "")
-    // TODO: fix the implementation and remove this method
-    public UserSet updateUserSetInDb(UserSet storedUserSet, List<String> items) {
-	storedUserSet.setModified(new Date());
-	// simply store userSet
-	return getMongoPersistence().update((PersistentUserSet) storedUserSet);
-    }
-
     @Override
     public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile,
 	    Authentication authentication) {
@@ -729,60 +698,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setTotalInPage(items.size());
     }
 
-    protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
-	StringBuilder builder = new StringBuilder(collectionUrl);
-	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
-
-	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
-
-	return builder.toString();
-    }
-
-    private String buildCollectionUrl(Query searchQuery, StringBuilder requestUrl, String queryString) {
-
-	// queryString = removeParam(WebAnnotationFields.PARAM_WSKEY,
-	// queryString);
-
-	// remove out of scope parameters
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
-
-	// avoid duplication of query parameters
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
-
-	// add mandatory parameters
-	if (StringUtils.isNotBlank(searchQuery.getSearchProfile())) {
-	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchQuery.getSearchProfile());
-	}
-
-	return requestUrl.append("?").append(queryString).toString();
-    }
-
-    protected String removeParam(final String queryParam, String queryParams) {
-	String tmp;
-	// avoid name conflicts search "queryParam="
-	int startPos = queryParams.indexOf(queryParam + "=");
-	int startEndPos = queryParams.indexOf('&', startPos + 1);
-
-	if (startPos >= 0) {
-	    // make sure to remove the "&" if not the first param
-	    if (startPos > 0) {
-		startPos--;
-	    }
-
-	    tmp = queryParams.substring(0, startPos);
-
-	    if (startEndPos > 0) {
-		// tmp += queryParams.substring(startEndPos);
-		tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
-	    }
-	} else {
-	    tmp = queryParams;
-	}
-	return tmp;
-    }
-
-    /**
+       /**
      * This method checks if user is an owner of the user set
      * 
      * @param userSet
