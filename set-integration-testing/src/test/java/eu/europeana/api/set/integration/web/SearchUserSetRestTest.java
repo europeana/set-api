@@ -71,7 +71,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void searchInvalidApiKey() throws Exception {
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.queryParam(CommonApiConstants.PARAM_WSKEY, "test").queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
+		.queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key").queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
