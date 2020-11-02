@@ -68,7 +68,7 @@ public class UserSetUtils {
     
     /**
      * This method fills in pagination strings to the user set object. Format is '<id url>?page=0&pageSize=10'
-     *
+     * @deprecated use updatePagination and update implementation when the first and last will be supported
      * @param userSet The user set object
      * @return user set object enriched by pagination values
      */
@@ -93,11 +93,9 @@ public class UserSetUtils {
     }
 
     /* This method updates pagination values.
-    * @Deprecation the pagination information should not be saved in the database
     * @param userSet The user set object
     * @return user set object with updated pagination values
     */
-   @Deprecated
    public UserSet updatePagination(UserSet userSet) {
        
        if (userSet != null && userSet.getItems() != null) {

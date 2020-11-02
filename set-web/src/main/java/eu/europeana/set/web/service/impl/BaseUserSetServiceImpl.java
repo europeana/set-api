@@ -5,10 +5,13 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.api.commons.definitions.search.Query;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -143,4 +146,57 @@ public abstract class BaseUserSetServiceImpl {
 	return getMongoPersistence().update(persistentUserSet);
     }
     
+    protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
+   	StringBuilder builder = new StringBuilder(collectionUrl);
+   	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
+
+   	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
+
+   	return builder.toString();
+       }
+
+       protected String buildCollectionUrl(Query searchQuery, StringBuilder requestUrl, String queryString) {
+
+   	// queryString = removeParam(WebAnnotationFields.PARAM_WSKEY,
+   	// queryString);
+
+   	// remove out of scope parameters
+   	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
+   	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
+
+   	// avoid duplication of query parameters
+   	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
+
+   	// add mandatory parameters
+   	if (StringUtils.isNotBlank(searchQuery.getSearchProfile())) {
+   	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchQuery.getSearchProfile());
+   	}
+
+   	return requestUrl.append("?").append(queryString).toString();
+       }
+
+       protected String removeParam(final String queryParam, String queryParams) {
+   	String tmp;
+   	// avoid name conflicts search "queryParam="
+   	int startPos = queryParams.indexOf(queryParam + "=");
+   	int startEndPos = queryParams.indexOf('&', startPos + 1);
+
+   	if (startPos >= 0) {
+   	    // make sure to remove the "&" if not the first param
+   	    if (startPos > 0) {
+   		startPos--;
+   	    }
+
+   	    tmp = queryParams.substring(0, startPos);
+
+   	    if (startEndPos > 0) {
+   		// tmp += queryParams.substring(startEndPos);
+   		tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
+   	    }
+   	} else {
+   	    tmp = queryParams;
+   	}
+   	return tmp;
+       }
+
 }
