@@ -15,6 +15,7 @@ set.environment.development.baseUrl=http://localhost:8080/set
 #max search results per page
 #set.search.maxpagesize.minimal=10000
 #set.search.maxpagesize.standard=100
+set.search.dereference.items.max=5
  
 # Profiling configurations (enabling/disabling through profiler.expression property)
 # disable profiling

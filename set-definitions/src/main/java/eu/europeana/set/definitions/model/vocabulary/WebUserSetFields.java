@@ -57,6 +57,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Pagination Cosntants
     public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";
     public static final String BASE_ITEM_URL             = "http://data.europeana.eu/item/";
+    @Deprecated
     public static final int    DEFAULT_DEREF_ITEMS       = 5;
     public static final int    MAX_ITEMS_PER_PAGE        = 10;
     public static final int    MAX_ITEMS_TO_PRESENT      = 1000;

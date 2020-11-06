@@ -114,8 +114,9 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
 
 	    if (mustFetchItems(storedUserSet, profile)) {
+		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
 		storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null,
-			CommonApiConstants.DEFAULT_PAGE, WebUserSetFields.DEFAULT_DEREF_ITEMS, profile);
+			CommonApiConstants.DEFAULT_PAGE, dereferencedItems, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
@@ -314,8 +315,9 @@ public class WebUserSetRest extends BaseRest {
 	    // TODO: if different from "ldp:PreferMinimalContainer" is referred in the
 	    // "Prefer" header.
 	    if (mustFetchItems(updatedUserSet, profile)) {
+		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null,
-			CommonApiConstants.DEFAULT_PAGE, WebUserSetFields.DEFAULT_DEREF_ITEMS, profile);
+			CommonApiConstants.DEFAULT_PAGE, dereferencedItems, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
