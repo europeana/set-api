@@ -11,12 +11,10 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 
+<!-- 
 	<util:properties id="setProperties" 
 		location="config/set.properties" />
-	
+ -->	
 	<import resource="set-web-context.xml"/>
-	
-	
-	
 	
 </beans>
