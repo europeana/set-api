@@ -47,12 +47,6 @@ public class WebUserSetServiceTest {
 
     @Resource(name = "configuration")
     UserSetConfiguration configuration;
-//
-//    @Resource(name = "set_db_setDao")
-//    NosqlDao<PersistentUserSet, UserSetId> userSetDao;
-//
-//    @Resource(name = "set_db_setService")
-//    PersistentUserSetService userSetService;
 
     @Resource(name = "setService")
     UserSetService webUserSetService;
@@ -70,8 +64,6 @@ public class WebUserSetServiceTest {
     public UserSetTestObjectBuilder getObjectBuilder() {
 	return objectBuilder;
     }
-
-//	@Rule public ExpectedException thrown= ExpectedException.none();
 
     /**
      * Initialize the testing session
