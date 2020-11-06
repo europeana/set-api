@@ -71,7 +71,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void searchInvalidApiKey() throws Exception {
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.queryParam(CommonApiConstants.PARAM_WSKEY, "test").queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
+		.queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key").queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -92,6 +92,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_SET_ID + set.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
+	//delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
 
     }
 
@@ -107,15 +109,33 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void searchWithPublicVisibility() throws Exception {
 	// create object in database
-	createTestUserSet(USER_SET_REGULAR_PUBLIC, token);
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, token);
 
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
+	
+	//delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
+    @Test
+    public void searchWithPublicVisibility_ItemsDescription() throws Exception {
+	// create object in database
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, token);
+
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.OK.value()));
+	
+	//delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
+    }
+    
     @Test
     public void searchWithPrivateVisibility() throws Exception {
 	deleteBookmarkFolder(token);
@@ -129,19 +149,25 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
 	
-	
+	//delete item created by test
+	getUserSetService().deleteUserSet(set1.getIdentifier());
+	getUserSetService().deleteUserSet(set2.getIdentifier());
+	getUserSetService().deleteUserSet(set3.getIdentifier());
     }
 
     
 
     @Test
     public void searchWithPublishedVisibility() throws Exception {
-	createTestUserSet(USER_SET_REGULAR_PUBLISHED, token);
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLISHED, token);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLISHED_VISIBILITY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
+
+	//delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
     @Test
@@ -163,17 +189,24 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
 	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
 	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
-	
+
+	//delete item created by test
+	getUserSetService().deleteUserSet(set1.getIdentifier());
+	getUserSetService().deleteUserSet(set2.getIdentifier());
+	getUserSetService().deleteUserSet(set3.getIdentifier());
     }
 
     @Test
     public void searchTypeCollection() throws Exception {
-	createTestUserSet(USER_SET_REGULAR, token);
-	createTestUserSet(USER_SET_MANDATORY, token);
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, token);
+	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, token);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_COLLECTION)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
+	//delete item created by test
+	getUserSetService().deleteUserSet(set1.getIdentifier());
+	getUserSetService().deleteUserSet(set2.getIdentifier());	
     }
 }

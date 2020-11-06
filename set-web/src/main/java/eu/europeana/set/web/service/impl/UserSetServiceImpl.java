@@ -548,7 +548,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    int pageSize) {
 
 	if (!userSet.isOpenSet()) {
-	    return buildSearchApiUrlForClosedSets(userSet, apiKey);
+	    return buildSearchApiUrlForClosedSets(userSet, apiKey, pageSize);
 	}
 
 	// String uri;
@@ -669,8 +669,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	List<UserSet> items = new ArrayList<>(results.getResults().size());
 
 	// TODO: define a second parameter for itemset page size
-	int derefItems = WebUserSetFields.DEFAULT_DEREF_ITEMS;
-
+	int derefItems = getConfiguration().getMaxSearchDereferencedItems();
+	
 	for (UserSet userSet : results.getResults()) {
 	    if (LdProfiles.ITEMDESCRIPTIONS == profile) {
 		fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
@@ -790,7 +790,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @return
      * @throws HttpException
      */
-    private String buildSearchApiUrlForClosedSets(UserSet userSet, String apiKey) {
+    private String buildSearchApiUrlForClosedSets(UserSet userSet, String apiKey, int pageSize) {
 	// use them to build the search query for retrieving item descriptions using
 	// minimal profile
 	// europeana_id is in format /collectionId/recordId, this can be easily
@@ -800,8 +800,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// "/08641/1037479000000476943")
 	String id;
 	String fullId;
-	int maxDerefItems = 100;
-	int maxItems = Math.min(userSet.getItems().size(), maxDerefItems);
+//	int maxDerefItems = 100;
+	int maxItems = Math.min(userSet.getItems().size(), pageSize);
 
 	StringBuilder query = new StringBuilder(100);
 	query.append("europeana_id:(");
@@ -820,7 +820,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 	// append rows=100
-	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(maxDerefItems);
+	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(maxItems);
 
 	return url.toString();
     }

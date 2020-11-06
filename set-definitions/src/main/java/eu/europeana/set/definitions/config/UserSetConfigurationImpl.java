@@ -7,6 +7,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     public static final String SUFFIX_BASEURL = "baseUrl";
 
     public static final String PREFIX_MAX_PAGE_SIZE = "userset.search.maxpagesize.";
+    public static final String KEY_SEARCH_DEREFERENCE_ITEMS = "set.search.dereference.items.max";
 
     public static final String USERSET_ENVIRONMENT = "set.environment";
 
@@ -52,6 +53,10 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 	return Integer.parseInt(getSetProperties().getProperty(key));
     }
 
+    public int getMaxSearchDereferencedItems() {
+	return Integer.parseInt(getSetProperties().getProperty(KEY_SEARCH_DEREFERENCE_ITEMS));
+    }
+    
     @Override
     public boolean isProductionEnvironment() {
 	return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());

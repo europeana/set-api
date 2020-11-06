@@ -16,6 +16,8 @@ public interface UserSetConfiguration{
 	
 	public int getMaxPageSize(String profile);
 	
+	public int getMaxSearchDereferencedItems();
+	
 	public String getSearchApiKey();
 	
 	/**

@@ -180,23 +180,6 @@ public class BaseRest extends BaseRestController {
         return resMap;
     }
 
-//    /**
-//     * This method performs query to Europeana API using URI defined in isDefinedBy
-//     * parameter and returning descriptions.
-//     * 
-//     * @param userSet
-//     * @return user set updated with items from Europeana API
-//     * @throws HttpException
-//     * @throws IOException
-//     * @throws JSONException
-//     */
-//    public UserSet fetchItemDescriptionsPage(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize)
-//	    throws HttpException, IOException, JSONException {
-//	String apiKey = getConfiguration().getSearchApiKey();
-//	userSet = getUserSetService().fetchDynamicSetItemDescriptions(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
-//	return userSet;
-//    }
-    
     public String getApiVersion() {
         return getConfiguration().getApiVersion();
     }
