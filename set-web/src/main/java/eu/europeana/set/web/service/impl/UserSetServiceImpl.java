@@ -30,6 +30,7 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -838,8 +839,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// presented
 	if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
 	    int itemsCount = userSet.getItems().size();
-	    if (itemsCount > WebUserSetFields.MAX_ITEMS_TO_PRESENT) {
-		List<String> itemsPage = userSet.getItems().subList(0, WebUserSetFields.MAX_ITEMS_TO_PRESENT);
+	    if (itemsCount > UserSetConfigurationImpl.MAX_ITEMS_TO_PRESENT) {
+		List<String> itemsPage = userSet.getItems().subList(0, UserSetConfigurationImpl.MAX_ITEMS_TO_PRESENT);
 		userSet.setItems(itemsPage);
 		profile = LdProfiles.STANDARD;
 		getLogger().debug("Profile switched to standard, due to set size!");

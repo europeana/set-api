@@ -8,6 +8,12 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
     public static final String PREFIX_MAX_PAGE_SIZE = "userset.search.maxpagesize.";
     public static final String KEY_SEARCH_DEREFERENCE_ITEMS = "set.search.dereference.items.max";
+    public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
+    
+//    public static final int    DEFAULT_DEREF_ITEMS       = 5;
+    public static final int    MAX_ITEMS_PER_PAGE        = 10;
+    public static final int    MAX_ITEMS_TO_PRESENT      = 1000;
+
 
     public static final String USERSET_ENVIRONMENT = "set.environment";
 
@@ -55,6 +61,10 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
     public int getMaxSearchDereferencedItems() {
 	return Integer.parseInt(getSetProperties().getProperty(KEY_SEARCH_DEREFERENCE_ITEMS));
+    }
+    
+    public int getMaxRetrieveDereferencedItems() {
+	return Integer.parseInt(getSetProperties().getProperty(KEY_RETRIEVE_DEREFERENCE_ITEMS));
     }
     
     @Override

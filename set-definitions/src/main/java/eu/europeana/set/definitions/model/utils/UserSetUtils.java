@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
@@ -84,7 +85,7 @@ public class UserSetUtils {
                 int first = 0;
                 String firstPageStr = fillPage(userSet, first);
                 res.setFirst(firstPageStr);
-                int last = total / WebUserSetFields.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
+                int last = total / UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
                 String lastPageStr = fillPage(userSet, last);
                 res.setLast(lastPageStr);
             }
@@ -105,7 +106,7 @@ public class UserSetUtils {
            if (total > 0) {
                int first = 0;
                userSet.setFirst("" + first);
-               int last = total / WebUserSetFields.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
+               int last = total / UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
                userSet.setLast("" + last);
            }
        }
@@ -126,7 +127,7 @@ public class UserSetUtils {
         StringBuilder firstBuilder = new StringBuilder();
         return firstBuilder.append(String.format("%s?%s=%d&%s=%d",
                 userSet.getIdentifier(), CommonApiConstants.QUERY_PARAM_PAGE, pageIndex
-                , CommonApiConstants.QUERY_PARAM_PAGE_SIZE, WebUserSetFields.MAX_ITEMS_PER_PAGE
+                , CommonApiConstants.QUERY_PARAM_PAGE_SIZE, UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE
         )).toString();
     }
     
