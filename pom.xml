@@ -20,7 +20,7 @@
 	</modules>
 	
 	<properties>
-		<version.setApi>0.3</version.setApi>
+		<version.setApi>0.4</version.setApi>
 		<version.java>1.9</version.java>
 		<version.javac.release>9</version.javac.release>
 		<version.spring>5.2.7.RELEASE</version.spring>
