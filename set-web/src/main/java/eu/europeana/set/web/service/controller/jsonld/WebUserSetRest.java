@@ -1,7 +1,6 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +35,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
@@ -114,9 +114,10 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
 
 	    if (mustFetchItems(storedUserSet, profile)) {
-		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
+//		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
+		int derefItems = getDerefItemsCount(storedUserSet, UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE);
 		storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null,
-			CommonApiConstants.DEFAULT_PAGE, dereferencedItems, profile);
+			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
@@ -158,7 +159,7 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, defaultValue = ""
 		    + CommonApiConstants.DEFAULT_PAGE) int page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
-		    + WebUserSetFields.MAX_ITEMS_PER_PAGE) int pageSize,
+		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) int pageSize,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
@@ -193,7 +194,8 @@ public class WebUserSetRest extends BaseRest {
 	    }
 
 	    if (mustFetchItems(userSet, profile)) {
-		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, pageSize, profile);
+		int derefItems = getDerefItemsCount(userSet, pageSize);
+		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, derefItems, profile);
 	    }
 
 	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
@@ -217,6 +219,17 @@ public class WebUserSetRest extends BaseRest {
 	    throw e;
 	} catch (RuntimeException | IOException | JSONException e) {
 	    throw new InternalServerException(e);
+	}
+    }
+
+    private int getDerefItemsCount(UserSet userSet, int pageSize) {
+	if (userSet.isOpenSet()) {
+	    // limit to max deref items
+	    return Math.min(pageSize, getConfiguration().getMaxRetrieveDereferencedItems());
+	} else {
+	    // for closed set dereference all items
+	    // limit to max deref items
+	    return Math.min(userSet.getTotal(), getConfiguration().getMaxRetrieveDereferencedItems());
 	}
     }
 
@@ -278,10 +291,10 @@ public class WebUserSetRest extends BaseRest {
 	    // set immutable fields before validation
 	    newUserSet.setCreator(existingUserSet.getCreator());
 	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
-	    if(newUserSet.getVisibility() == null) {
+	    if (newUserSet.getVisibility() == null) {
 		newUserSet.setVisibility(existingUserSet.getVisibility());
 	    }
-	    
+
 	    getUserSetService().validateWebUserSet(newUserSet);
 	    // TODO: move verification to validateMethod when new specs are available
 	    if (existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
@@ -307,26 +320,20 @@ public class WebUserSetRest extends BaseRest {
 	    // modified date is set in the service;
 	    UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
 
-	    // if the Set corresponds to an open set, update the metadata associated to the
-	    // Set,
-	    // and if the standard profile is requested, obtain the URIs for the items
-	    // following
-	    // the logic defined for retrieving a Set.
-	    // TODO: if different from "ldp:PreferMinimalContainer" is referred in the
-	    // "Prefer" header.
 	    if (mustFetchItems(updatedUserSet, profile)) {
-		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
+//		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
+		int derefItems = getDerefItemsCount(updatedUserSet, UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE);
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null,
-			CommonApiConstants.DEFAULT_PAGE, dereferencedItems, profile);
+			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
 	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 
-	    // TODO: refactor to use a build response method
 	    // generate “ETag”;
 	    String eTagNew = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	    // build response entity with headers
+	    // TODO: refactor to use a build response method
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
 	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);

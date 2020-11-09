@@ -18,6 +18,8 @@ public interface UserSetConfiguration{
 	
 	public int getMaxSearchDereferencedItems();
 	
+	public int getMaxRetrieveDereferencedItems();
+	
 	public String getSearchApiKey();
 	
 	/**
