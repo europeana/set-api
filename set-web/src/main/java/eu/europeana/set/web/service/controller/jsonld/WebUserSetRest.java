@@ -1,11 +1,13 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.ListUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,7 @@ import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
+import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
@@ -51,6 +54,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.vocabulary.Roles;
+import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -198,21 +202,7 @@ public class WebUserSetRest extends BaseRest {
 		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, derefItems, profile);
 	    }
 
-	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
-
-	    String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
-
-	    // build response
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-	    headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-	    // generate “ETag”;
-	    headers.add(UserSetHttpHeaders.ETAG, etag);
-
-	    return new ResponseEntity<>(userSetJsonLdStr, headers, HttpStatus.OK);
+	    return buildGetResponse(userSet, profile);
 
 	} catch (HttpException e) {
 	    // avoid wrapping http exception
@@ -327,22 +317,7 @@ public class WebUserSetRest extends BaseRest {
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-
-	    // generate “ETag”;
-	    String eTagNew = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
-
-	    // build response entity with headers
-	    // TODO: refactor to use a build response method
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-	    headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-	    headers.add(UserSetHttpHeaders.ETAG, eTagNew);
-
-	    return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+	    return buildGetResponse(updatedUserSet, profile);
 
 	} catch (UserSetValidationException | UserSetInstantiationException e) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
@@ -568,6 +543,7 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
+   
     @DeleteMapping(value = { "/set/{identifier}/{datasetId}/{localId}" }, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.DELETE_ITEM_NOTE, value = "Delete a item from the set", nickname = "delete item", response = java.lang.Void.class)

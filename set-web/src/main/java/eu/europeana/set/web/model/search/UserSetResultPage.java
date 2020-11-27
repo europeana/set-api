@@ -1,4 +1,4 @@
-package eu.europeana.set.web.search;
+package eu.europeana.set.web.model.search;
 
 import eu.europeana.set.definitions.model.UserSet;
 

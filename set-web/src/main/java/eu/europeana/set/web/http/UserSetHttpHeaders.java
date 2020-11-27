@@ -15,7 +15,7 @@ public class UserSetHttpHeaders {
     public static final String ALLOW_PPGHD = "POST,PUT,GET,HEAD,DELETE";
     public static final String ALLOW_PG    = "POST,GET";
     public static final String ALLOW_PGD = "POST,GET,DELETE";
-
+    
 
     //other constants
     public static final String VALUE_NO_CAHCHE_STORE_REVALIDATE = "no-cache, no-store, must-revalidate";

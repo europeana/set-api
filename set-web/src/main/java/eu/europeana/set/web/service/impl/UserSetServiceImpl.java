@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -49,11 +51,13 @@ import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.CollectionPreview;
+import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.model.search.ResultList;
+import eu.europeana.set.web.model.search.UserSetIdsResultPage;
+import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.model.vocabulary.Roles;
-import eu.europeana.set.web.search.BaseUserSetResultPage;
-import eu.europeana.set.web.search.CollectionView;
-import eu.europeana.set.web.search.UserSetIdsResultPage;
-import eu.europeana.set.web.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
@@ -86,8 +90,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}
-	
-	if(newUserSet.getType() == null) {
+
+	if (newUserSet.getType() == null) {
 	    newUserSet.setType(UserSetTypes.COLLECTION.getJsonValue());
 	}
     }
@@ -117,7 +121,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet getBookmarkFolder(Agent creator) {
 	return getBookmarkFolder(creator.getHttpUrl());
     }
-    
+
     public UserSet getBookmarkFolder(String creatorId) {
 	return getMongoPersistence().getBookmarkFolder(creatorId);
     }
@@ -234,14 +238,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    return;
 	}
 
-	// for create method indicate existing bookmark folder    
+	// for create method indicate existing bookmark folder
 	if (webUserSet.getIdentifier() == null) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
 		    new String[] { usersBookmarkFolder.getIdentifier(),
 			    usersBookmarkFolder.getCreator().getHttpUrl() });
 	}
 
-	// for update method indicate the existing bookmark folder (cannot change type to BookmarkFolder)    
+	// for update method indicate the existing bookmark folder (cannot change type
+	// to BookmarkFolder)
 	if (!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
 	    // update method, prevent creation of 2 BookmarkFolders
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
@@ -439,9 +444,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * definitions.model.UserSet)
      */
     public UserSet updateItemList(UserSet existingUserSet) {
-	//update total
+	// update total
 	getUserSetUtils().updatePagination(existingUserSet);
-	
+
 	// generate and add a created and modified timestamp to the Set
 	existingUserSet.setModified(new Date());
 
@@ -592,7 +597,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
-
+	int pageSize = searchQuery.getPageSize();
+	String searchProfile = searchQuery.getSearchProfile();
+	long totalInCollection = results.getResultSize();
+	int lastPage = getLastPage(totalInCollection, pageSize);
+	int currentPage = searchQuery.getPageNr();
+	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
+	
 	if (LdProfiles.STANDARD == profile || LdProfiles.ITEMDESCRIPTIONS == profile) {
 	    resPage = new UserSetResultPage();
 	    setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
@@ -602,29 +613,33 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
 	}
 
-	int lastPage = getLastPage(results.getResultSize(), searchQuery.getPageSize());
-	String collectionUrl = buildCollectionUrl(searchQuery, requestUrl, reqParams);
-	String first = buildPageUrl(collectionUrl, 0, searchQuery.getPageSize());
-	String last = buildPageUrl(collectionUrl, lastPage, searchQuery.getPageSize());
+	resPage.setPartOf(buildCollectionPreview(collectionUrl, pageSize, totalInCollection, lastPage));
+	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage);
 
-	resPage.setPartOf(new CollectionView(collectionUrl, results.getResultSize(), first, last));
+	return resPage;
+    }
 
-	int currentPage = searchQuery.getPageNr();
-	String currentPageUrl = buildPageUrl(collectionUrl, currentPage, searchQuery.getPageSize());
+    private void addPagination(BaseUserSetResultPage<?> resPage, String collectionUrl, int page, int pageSize,
+	    int lastPage) {
+	String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize);
 	resPage.setCurrentPageUri(currentPageUrl);
 
-	if (currentPage > 0) {
-	    String prevPage = buildPageUrl(collectionUrl, currentPage - 1, searchQuery.getPageSize());
+	if (page > 0) {
+	    String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize);
 	    resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
-	if (!isLastPage(currentPage, lastPage)) {
-	    String nextPage = buildPageUrl(collectionUrl, currentPage + 1, searchQuery.getPageSize());
+	if (!isLastPage(page, lastPage)) {
+	    String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize);
 	    resPage.setNextPageUri(nextPage);
 	}
+    }
 
-	return resPage;
+    private ResultList buildCollectionPreview(String collectionUrl, int pageSize, long totalInCollection, int lastPage) {
+	String first = buildPageUrl(collectionUrl, 0, pageSize);
+	String last = buildPageUrl(collectionUrl, lastPage, pageSize);
+	return new ResultList(collectionUrl, totalInCollection, first, last);
     }
 
     /**
@@ -671,7 +686,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// TODO: define a second parameter for itemset page size
 	int derefItems = getConfiguration().getMaxSearchDereferencedItems();
-	
+
 	for (UserSet userSet : results.getResults()) {
 	    if (LdProfiles.ITEMDESCRIPTIONS == profile) {
 		fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
@@ -699,7 +714,37 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	resPage.setTotalInPage(items.size());
     }
 
-       /**
+    @SuppressWarnings("unchecked")
+    public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
+	    HttpServletRequest request) {
+//	new ResultsPageImpl<T>()
+	ItemIdsResultPage result = new ItemIdsResultPage();
+	
+	StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+	String collectionUrl = buildCollectionUrl(null, requestURL, request.getQueryString());
+
+	if (itemIds != null && !itemIds.isEmpty()) {
+	    //build isPartOf (result) 
+	    long totalnCollection = (long) itemIds.size();
+	    int lastPage = getLastPage(itemIds.size(), pageSize);
+	    
+	    result.setPartOf( buildCollectionPreview(collectionUrl, pageSize, totalnCollection, lastPage));
+	    
+	    //build Result page properties
+	    int startPos = page * pageSize;
+	    if (startPos < itemIds.size()) {
+		int toIndex = Math.min(startPos + pageSize, itemIds.size());
+		List<String> pageItems = itemIds.subList(startPos, toIndex);
+		result.setItems(pageItems);
+		result.setTotalInPage(pageItems.size());
+		addPagination(result, collectionUrl, page, pageSize, lastPage);
+	    }
+	}
+
+	return result;
+    }
+  
+    /**
      * This method checks if user is an owner of the user set
      * 
      * @param userSet

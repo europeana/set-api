@@ -44,6 +44,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String TYPE                       = "type";
     public static final String ITEMS                      = "items";
 
+    public static final String FIRST                     = "first";
+    public static final String LAST                      = "last";
+
     //additional search fields  
     public static final String ITEM                      = "item";
     public static final String SET_ID                    = "set_id";

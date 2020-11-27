@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResource;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResourceBuilder;
@@ -56,10 +57,12 @@ public class UserSetLdSerializer {
 		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
 	}
 	
-//	public String serialize(ItemInsertView userSet) throws IOException {		
+//	public String serialize(BaseUserSetResultPage<?> resultsPage) throws IOException {
+//		
 //		mapper.registerModule(new JsonldModule()); 
-//		JsonldResourceBuilder<ItemInsertView> jsonResourceBuilder = JsonldResource.Builder.create();
-//		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
+//		JsonldResourceBuilder<BaseUserSetResultPage<?>> jsonResourceBuilder = JsonldResource.Builder.create();
+//		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
+//		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
 //	}
 
 }

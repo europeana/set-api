@@ -155,7 +155,7 @@ public abstract class BaseUserSetServiceImpl {
    	return builder.toString();
        }
 
-       protected String buildCollectionUrl(Query searchQuery, StringBuilder requestUrl, String queryString) {
+       protected String buildCollectionUrl(String searchProfile, StringBuilder requestUrl, String queryString) {
 
    	// queryString = removeParam(WebAnnotationFields.PARAM_WSKEY,
    	// queryString);
@@ -168,8 +168,8 @@ public abstract class BaseUserSetServiceImpl {
    	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
 
    	// add mandatory parameters
-   	if (StringUtils.isNotBlank(searchQuery.getSearchProfile())) {
-   	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchQuery.getSearchProfile());
+   	if (StringUtils.isNotBlank(searchProfile)) {
+   	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
    	}
 
    	return requestUrl.append("?").append(queryString).toString();

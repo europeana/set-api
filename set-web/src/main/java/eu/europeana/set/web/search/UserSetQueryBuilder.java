@@ -20,6 +20,10 @@ public class UserSetQueryBuilder extends QueryBuilder {
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
 	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID};
     Set<String> suportedFields = Set.of(fields);
+    
+    public static final String SEARCH_ALL = "*";
+    public static final String SEARCH_ALL_ALL = "*:*";
+		
 
     private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();
@@ -90,7 +94,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
     private void parseSearchCriteria(Map<String, String> criteria, String query, String[] qf)
 	    throws ParamValidationException {
-	boolean searchAllQuery = "*".equals(query) || "*:*".equals(query);
+	boolean searchAllQuery = isSearchAllQuery(query);
 	if (!searchAllQuery) {
 	    parseCriterion(criteria, query);
 	}
@@ -100,6 +104,10 @@ public class UserSetQueryBuilder extends QueryBuilder {
 		parseCriterion(criteria, criterion);
 	    }
 	}
+    }
+
+    public static boolean isSearchAllQuery(String query) {
+	return SEARCH_ALL.equals(query) || SEARCH_ALL_ALL.equals(query);
     }
 
     private void parseCriterion(Map<String, String> criteria, String criterion) throws ParamValidationException {

@@ -11,11 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
@@ -23,6 +27,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
@@ -154,6 +159,14 @@ public class BaseRest extends BaseRestController {
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
 	return serializer.serialize(set);
     }
+    
+    protected String serializeResultPage(LdProfiles profile, UserSet storedUserSet) throws IOException {
+	//prepare data for serialization according to the profile
+	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
+
+	UserSetLdSerializer serializer = new UserSetLdSerializer();
+	return serializer.serialize(set);
+    }
 
     /**
      * This method parses prefer header in keys and values
@@ -184,4 +197,21 @@ public class BaseRest extends BaseRestController {
         return getConfiguration().getApiVersion();
     }
     
+    protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile) throws IOException {
+	String userSetJsonLdStr = serializeUserSet(profile, userSet);
+	String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+
+	// build response
+	MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+	headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
+	headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
+	headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+	// generate “ETag”;
+	headers.add(UserSetHttpHeaders.ETAG, etag);
+
+	return new ResponseEntity<>(userSetJsonLdStr, headers, HttpStatus.OK);
+    }
+
 }

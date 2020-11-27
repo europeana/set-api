@@ -23,7 +23,7 @@ import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 
 @ContextConfiguration(locations = { "classpath:set-web-test.xml" })
 //@ExtendWith(MockitoExtension.class)

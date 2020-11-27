@@ -10,12 +10,16 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
-import eu.europeana.set.web.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.ItemIdsResultPage;
+
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.security.core.Authentication;
 
 import java.io.IOException;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface UserSetService {
 
@@ -177,6 +181,9 @@ public interface UserSetService {
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    StringBuilder requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
 	    throws HttpException;
+    
+    public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
+	    HttpServletRequest request);
 
     /**
      * This method validates input values wsKey, identifier and userToken.
