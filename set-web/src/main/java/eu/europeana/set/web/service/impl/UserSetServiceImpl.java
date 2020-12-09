@@ -52,7 +52,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
-import eu.europeana.set.web.model.search.CollectionPreview;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.ResultList;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;

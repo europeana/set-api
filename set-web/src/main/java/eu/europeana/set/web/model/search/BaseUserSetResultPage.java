@@ -17,7 +17,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
 
-    CollectionPreview partOf;
+    ResultList partOf;
 //    String context = WebUserSetFields.CONTEXT;
     String type = CommonLdConstants.RESULT_PAGE; 
     
@@ -30,11 +30,11 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
     }
     
     @JsonProperty(WebUserSetFields.PART_OF)
-    public CollectionPreview getPartOf() {
+    public ResultList getPartOf() {
         return partOf;
     }
 
-    public void setPartOf(CollectionPreview partOf) {
+    public void setPartOf(ResultList partOf) {
         this.partOf = partOf;
     }
     
