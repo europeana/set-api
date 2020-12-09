@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
+@Disabled
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     private static final String USER_SET_PATH = "http://data.europeana.eu/set/";
