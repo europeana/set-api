@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-@Disabled
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     private static final String USER_SET_PATH = "http://data.europeana.eu/set/";

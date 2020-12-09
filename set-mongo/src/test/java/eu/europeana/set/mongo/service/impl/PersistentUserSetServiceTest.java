@@ -16,7 +16,6 @@ import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mongodb.morphia.query.QueryResults;
@@ -29,7 +28,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = {"classpath:set-mongo-test.xml"})
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
