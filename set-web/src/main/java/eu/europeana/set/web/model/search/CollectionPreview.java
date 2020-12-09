@@ -13,7 +13,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
  * @author GordeaS
  *
  */
-@JsonPropertyOrder({WebUserSetModelFields.TYPE, WebUserSetModelFields.ID, WebUserSetModelFields.TOTAL,
+@JsonPropertyOrder({WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TOTAL,
 	WebUserSetFields.FIRST, WebUserSetFields.LAST})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class CollectionPreview {
