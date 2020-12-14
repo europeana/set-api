@@ -10,15 +10,12 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
-//@JsonPropertyOrder({WebUserSetModelFields.ID,  WebUserSetFields.TYPE, WebUserSetFields.PART_OF, WebUserSetFields.ITEMS, WebUserSetFields.NEXT, WebUserSetFields.PREV})
-
-@JsonPropertyOrder({ WebUserSetModelFields.AT_CONTEXT, WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TOTAL,
-	WebUserSetFields.PART_OF, WebUserSetFields.PREV, WebUserSetFields.NEXT, WebUserSetFields.ITEMS })
+@JsonPropertyOrder({ WebUserSetModelFields.AT_CONTEXT, WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetFields.PART_OF, 
+    WebUserSetFields.START_INDEX, WebUserSetModelFields.TOTAL, WebUserSetFields.ITEMS, WebUserSetFields.PREV, WebUserSetFields.NEXT })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
 
     ResultList partOf;
-//    String context = WebUserSetFields.CONTEXT;
     String type = CommonLdConstants.RESULT_PAGE; 
     
     @JsonProperty(WebUserSetFields.TYPE)

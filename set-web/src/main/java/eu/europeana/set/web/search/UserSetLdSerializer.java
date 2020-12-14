@@ -10,59 +10,89 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.CollectionPage;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResource;
 import ioinformarics.oss.jackson.module.jsonld.JsonldResourceBuilder;
 
-public class UserSetLdSerializer { 
+public class UserSetLdSerializer {
 
     UserSetUtils userSetUtils = new UserSetUtils();
+    ObjectMapper mapper = new ObjectMapper();
+    JsonldResourceBuilder<UserSet> userSetResourceBuilder;
+    JsonldResourceBuilder<BaseUserSetResultPage<?>> resultPageResourceBuilder;
+    JsonldResourceBuilder<CollectionPage> collectionPageResourceBuilder;
 
     public UserSetUtils getUserSetUtils() {
-      return userSetUtils;
+	return userSetUtils;
     }
-    
-	ObjectMapper mapper = new ObjectMapper(); 
-		
-	public UserSetLdSerializer() {
-		SimpleDateFormat df = new SimpleDateFormat(WebUserSetFields.SET_DATE_FORMAT, Locale.ENGLISH);
-		mapper.setDateFormat(df);
+
+    public UserSetLdSerializer() {
+	SimpleDateFormat df = new SimpleDateFormat(WebUserSetFields.SET_DATE_FORMAT, Locale.ENGLISH);
+	mapper.setDateFormat(df);
+    }
+
+    /**
+     * This method provides full serialization of a user set
+     * 
+     * @param userSet
+     * @return full user set view
+     * @throws IOException
+     */
+    public String serialize(UserSet userSet) throws IOException {
+
+	mapper.registerModule(new JsonldModule());
+	return mapper.writer().writeValueAsString(getUserSetResourceBuilder().build(userSet));
+    }
+
+    /**
+     * This method provides full serialization of a result page (search results)
+     * 
+     * @param resultsPage
+     * @return full user set view
+     * @throws IOException
+     */
+    public String serialize(BaseUserSetResultPage<?> resultsPage) throws IOException {
+
+	mapper.registerModule(new JsonldModule());
+	return mapper.writer().writeValueAsString(getResultPageResourceBuilder().build(resultsPage));
+    }
+
+    /**
+     * This method provides full serialization of a CollectionPage
+     * 
+     * @param resultsPage
+     * @return full user set view
+     * @throws IOException
+     */
+    public String serialize(CollectionPage itemPage) throws IOException {
+
+	mapper.registerModule(new JsonldModule());
+	return mapper.writer().writeValueAsString(getCollectionPageResourceBuilder().build(itemPage));
+    }
+
+    private JsonldResourceBuilder<CollectionPage> getCollectionPageResourceBuilder() {
+	if (collectionPageResourceBuilder == null) {
+	    collectionPageResourceBuilder = JsonldResource.Builder.create();
+	    collectionPageResourceBuilder.context(WebUserSetFields.CONTEXT);
 	}
-	
-	/**
-	 * This method provides full serialization of a user set
-	 * @param userSet
-	 * @return full user set view
-	 * @throws IOException
-	 */
-	public String serialize(UserSet userSet) throws IOException {
-		
-		mapper.registerModule(new JsonldModule()); 
-		JsonldResourceBuilder<UserSet> jsonResourceBuilder = JsonldResource.Builder.create();
-		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(userSet));
+	return collectionPageResourceBuilder;
+    }
+
+    public JsonldResourceBuilder<UserSet> getUserSetResourceBuilder() {
+	if (userSetResourceBuilder == null) {
+	    userSetResourceBuilder = JsonldResource.Builder.create();
+	    userSetResourceBuilder.context(WebUserSetFields.CONTEXT);
 	}
-	
-	/**
-	 * This method provides full serialization of a user set
-	 * @param resultsPage
-	 * @return full user set view
-	 * @throws IOException
-	 */
-	public String serialize(BaseUserSetResultPage<?> resultsPage) throws IOException {
-		
-		mapper.registerModule(new JsonldModule()); 
-		JsonldResourceBuilder<BaseUserSetResultPage<?>> jsonResourceBuilder = JsonldResource.Builder.create();
-		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
+	return userSetResourceBuilder;
+    }
+
+    public JsonldResourceBuilder<BaseUserSetResultPage<?>> getResultPageResourceBuilder() {
+	if (resultPageResourceBuilder == null) {
+	    resultPageResourceBuilder = JsonldResource.Builder.create();
+	    resultPageResourceBuilder.context(WebUserSetFields.CONTEXT);
 	}
-	
-//	public String serialize(BaseUserSetResultPage<?> resultsPage) throws IOException {
-//		
-//		mapper.registerModule(new JsonldModule()); 
-//		JsonldResourceBuilder<BaseUserSetResultPage<?>> jsonResourceBuilder = JsonldResource.Builder.create();
-//		jsonResourceBuilder.context(WebUserSetFields.CONTEXT);
-//		return mapper.writer().writeValueAsString(jsonResourceBuilder.build(resultsPage));
-//	}
+	return resultPageResourceBuilder;
+    }
 
 }

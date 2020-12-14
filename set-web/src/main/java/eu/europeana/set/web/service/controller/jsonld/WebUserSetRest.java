@@ -160,8 +160,7 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
-	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, defaultValue = ""
-		    + CommonApiConstants.DEFAULT_PAGE) int page,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) int page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
 		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) int pageSize,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
@@ -202,7 +201,7 @@ public class WebUserSetRest extends BaseRest {
 		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, derefItems, profile);
 	    }
 
-	    return buildGetResponse(userSet, profile);
+	    return buildGetResponse(userSet, profile, pageNr, pageSize, request);
 
 	} catch (HttpException e) {
 	    // avoid wrapping http exception
@@ -317,7 +316,7 @@ public class WebUserSetRest extends BaseRest {
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
-	    return buildGetResponse(updatedUserSet, profile);
+	    return buildGetResponse(updatedUserSet, profile, -1, -1, request);
 
 	} catch (UserSetValidationException | UserSetInstantiationException e) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
