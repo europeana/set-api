@@ -22,6 +22,7 @@ import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -45,7 +46,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
-import eu.europeana.set.web.model.search.ResultList;
+import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
@@ -391,7 +392,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	int lastPage = getLastPage(totalInCollection, pageSize);
 	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
-	ResultList ResultList = buildResultList(collectionUrl, pageSize, totalInCollection, lastPage);
+	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage, CommonLdConstants.RESULT_LIST);
 
 	if (LdProfiles.STANDARD == profile || LdProfiles.ITEMDESCRIPTIONS == profile) {
 	    resPage = new UserSetResultPage();
@@ -481,7 +482,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	
 	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
 	
-	ResultList partOf = buildResultList(collectionUrl, pageSize, totalInCollection, lastPage);
+	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage, CommonLdConstants.COLLECTION);
 
 	int startIndex = pageNr * pageSize;
 	CollectionPage page = new CollectionPage(userSet, partOf, startIndex);
@@ -518,7 +519,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    long totalnCollection = (long) itemIds.size();
 	    int lastPage = getLastPage(itemIds.size(), pageSize);
 
-	    result.setPartOf(buildResultList(collectionUrl, pageSize, totalnCollection, lastPage));
+	    result.setPartOf(buildCollectionOverview(collectionUrl, pageSize, totalnCollection, lastPage, CommonLdConstants.RESULT_LIST));
 
 	    // build Result page properties
 	    int startPos = page * pageSize;

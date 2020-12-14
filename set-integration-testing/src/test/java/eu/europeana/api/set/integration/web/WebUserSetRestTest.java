@@ -1,6 +1,7 @@
 package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -30,12 +31,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
@@ -129,10 +132,23 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
 
 	// get the identifier
-	mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, token)
-		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-		.andExpect(status().is(HttpStatus.OK.value()));
-
+	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+		
+	String result = response.getContentAsString();
+	assertNotNull(result);
+	assertEquals(HttpStatus.OK.value(), response.getStatus());
+	
+	assertTrue(StringUtils.contains(result, CommonLdConstants.COLLECTION));
+	//the default minimal profile is used
+	assertFalse(StringUtils.contains(result, WebUserSetFields.ITEMS));
+	//without page in request, it is not a collection page
+	assertFalse(StringUtils.contains(result, CollectionPage.COLLECTION_PAGE));
+	assertFalse(StringUtils.contains(result, WebUserSetFields.PART_OF));
+	assertFalse(StringUtils.contains(result, WebUserSetFields.FIRST));
+	assertFalse(StringUtils.contains(result, WebUserSetFields.LAST));
+	
+	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
@@ -180,11 +196,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 //	assertTrue(StringUtils.contains(result, collectionUrl));
 
 	assertTrue(StringUtils.contains(result, WebUserSetFields.PART_OF));
+	assertTrue(StringUtils.contains(result, CommonLdConstants.COLLECTION));
+	assertTrue(StringUtils.contains(result, CollectionPage.COLLECTION_PAGE));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.START_INDEX));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.PREV));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.NEXT));
+	assertTrue(StringUtils.contains(result, WebUserSetFields.ITEMS));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.ITEMS));
 	
 	

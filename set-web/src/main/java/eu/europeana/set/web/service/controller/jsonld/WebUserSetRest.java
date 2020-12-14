@@ -1,13 +1,11 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.collections.ListUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +33,6 @@ import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
@@ -54,7 +51,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.vocabulary.Roles;
-import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -160,9 +156,9 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
-	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) int page,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) Integer page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
-		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) int pageSize,
+		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) Integer pageSize,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
@@ -181,7 +177,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     private ResponseEntity<String> getUserSet(String profileStr, String identifier, HttpServletRequest request,
-	    String sort, String sortOrder, int pageNr, int pageSize, Authentication authentication)
+	    String sort, String sortOrder, Integer pageNr, int pageSize, Authentication authentication)
 	    throws HttpException {
 	try {
 	    LdProfiles profile = getProfile(profileStr, request);
@@ -198,7 +194,8 @@ public class WebUserSetRest extends BaseRest {
 
 	    if (mustFetchItems(userSet, profile)) {
 		int derefItems = getDerefItemsCount(userSet, pageSize);
-		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, derefItems, profile);
+		int page = (pageNr  != null) ? pageNr : CommonApiConstants.DEFAULT_PAGE;
+		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, page, derefItems, profile);
 	    }
 
 	    return buildGetResponse(userSet, profile, pageNr, pageSize, request);

@@ -40,7 +40,7 @@ import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.model.WebUser;
-import eu.europeana.set.web.model.search.ResultList;
+import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
 public abstract class BaseUserSetServiceImpl {
@@ -221,11 +221,11 @@ public abstract class BaseUserSetServiceImpl {
 	return tmp;
     }
 
-    protected ResultList buildResultList(String collectionUrl, int pageSize, long totalInCollection,
-	    int lastPage) {
+    protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize, long totalInCollection,
+	    int lastPage, String type) {
 	String first = buildPageUrl(collectionUrl, 0, pageSize);
 	String last = buildPageUrl(collectionUrl, lastPage, pageSize);
-	return new ResultList(collectionUrl, totalInCollection, first, last);
+	return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
     }
 
     /**

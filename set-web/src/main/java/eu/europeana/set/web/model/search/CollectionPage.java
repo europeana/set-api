@@ -9,10 +9,10 @@ public class CollectionPage extends BaseUserSetResultPage<String>{
 
     UserSet set;
     int startIndex;
-    static String COLLECTION_PAGE = "CollectionPage";
+    public static final String COLLECTION_PAGE = "CollectionPage";
 	
     
-    public CollectionPage(UserSet set, ResultList partOf, int startIndex) {
+    public CollectionPage(UserSet set, CollectionOverview partOf, int startIndex) {
 	this.set = set;
 	this.partOf = partOf;
 	this.startIndex = startIndex;

@@ -206,9 +206,9 @@ public class BaseRest extends BaseRestController {
         return getConfiguration().getApiVersion();
     }
     
-    protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws IOException, HttpException {
+    protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, Integer pageNr, int pageSize, HttpServletRequest request) throws IOException, HttpException {
 	String jsonBody = "";
-	if(pageNr < 0) {
+	if(pageNr == null || pageNr < 0) {
 	    jsonBody = serializeUserSet(profile, userSet);    
 	}else {
 	    CollectionPage itemPage = getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
