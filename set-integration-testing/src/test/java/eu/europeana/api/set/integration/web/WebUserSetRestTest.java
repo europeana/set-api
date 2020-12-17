@@ -108,7 +108,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     public void create_UserSet_400_unauthorized_InvalidJWTToken() throws Exception {
 	String requestJson = getJsonStringInput(USER_SET_REGULAR);
 
-	mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content(requestJson).header(HttpHeaders.AUTHORIZATION, "")
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -132,7 +132,10 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
 
 	// get the identifier
-	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, token)
+	MockHttpServletResponse response = mockMvc.perform(
+		get(BASE_URL + "{identifier}", userSet.getIdentifier())
+//		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+		.header(HttpHeaders.AUTHORIZATION, token)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 		
 	String result = response.getContentAsString();
