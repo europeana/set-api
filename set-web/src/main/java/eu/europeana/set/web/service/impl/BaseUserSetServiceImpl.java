@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -162,10 +161,13 @@ public abstract class BaseUserSetServiceImpl {
 //    @Override
     public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
 	mergeUserSetProperties(persistentUserSet, webUserSet);
-	getUserSetUtils().updatePagination(persistentUserSet);
 	// update modified date
 	persistentUserSet.setModified(new Date());
-	return getMongoPersistence().update(persistentUserSet);
+	updateTotal(persistentUserSet);
+	UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet);
+	return updatedUserSet;
+	
     }
 
     protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
@@ -532,4 +534,11 @@ public abstract class BaseUserSetServiceImpl {
 	}
     }
 
+    void updateTotal(UserSet existingUserSet) {
+	if(existingUserSet.getItems() != null) {
+	    existingUserSet.setTotal(existingUserSet.getItems().size());
+	}else {
+	    existingUserSet.setTotal(0);
+	}
+    }
 }

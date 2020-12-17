@@ -133,12 +133,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.isUgc();
     }
 
-    @JsonIgnore
+    @JsonProperty(WebUserSetFields.FIRST)
     public String getFirst() {
 	return super.getFirst();
     }
 
-    @JsonIgnore
+    @JsonProperty(WebUserSetFields.LAST)
     public String getLast() {
 	return super.getLast();
     }

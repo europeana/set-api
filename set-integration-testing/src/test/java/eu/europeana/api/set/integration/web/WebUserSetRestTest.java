@@ -140,13 +140,13 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
 	
 	assertTrue(StringUtils.contains(result, CommonLdConstants.COLLECTION));
+	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
+	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
 	//the default minimal profile is used
 	assertFalse(StringUtils.contains(result, WebUserSetFields.ITEMS));
 	//without page in request, it is not a collection page
 	assertFalse(StringUtils.contains(result, CollectionPage.COLLECTION_PAGE));
 	assertFalse(StringUtils.contains(result, WebUserSetFields.PART_OF));
-	assertFalse(StringUtils.contains(result, WebUserSetFields.FIRST));
-	assertFalse(StringUtils.contains(result, WebUserSetFields.LAST));
 	
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());

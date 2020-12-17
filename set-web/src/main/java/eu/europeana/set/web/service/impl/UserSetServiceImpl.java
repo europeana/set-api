@@ -66,10 +66,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	validateWebUserSet(newUserSet);
 
-	UserSet extUserSet = getUserSetUtils().updatePagination(newUserSet);
-
 	// store in mongo database
-	return getMongoPersistence().store(extUserSet);
+	updateTotal(newUserSet);
+	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet);
+	return updatedUserSet;	
     }
 
     @Override
@@ -282,17 +283,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet updateItemList(UserSet existingUserSet) {
 	// update total
-	getUserSetUtils().updatePagination(existingUserSet);
-
+	updateTotal(existingUserSet);
 	// generate and add a created and modified timestamp to the Set
 	existingUserSet.setModified(new Date());
 
 	// Respond with HTTP 200
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
-	return getMongoPersistence().update((PersistentUserSet) existingUserSet);
+	UserSet updatedUserSet =  getMongoPersistence().update((PersistentUserSet) existingUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet);
+	return updatedUserSet;
     }
-
+    
     /*
      * (non-Javadoc)
      * 
