@@ -11,21 +11,19 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 @JsonPropertyOrder({WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TOTAL,
 	WebUserSetFields.FIRST, WebUserSetFields.LAST})
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class ResultList {
+public class CollectionOverview {
     
     private String id;
     private Long total;
     private String first;
     private String last;
     private String type;
+    
     public String getType() {
         return type;
     }
 
-    
-
-    
-
+ 
     @JsonProperty(WebUserSetModelFields.ID)
     public String getId() {
         return id;
@@ -62,11 +60,11 @@ public class ResultList {
     } 
     
 
-    public ResultList(String id, Long total, String first, String last) {
+    public CollectionOverview(String id, Long total, String first, String last) {
         this(id, total, first, last, CommonLdConstants.RESULT_LIST);
     }
     
-    public ResultList(String id, Long total, String first, String last, String type) {
+    public CollectionOverview(String id, Long total, String first, String last, String type) {
         this.id = id;
         this.total = total;
         this.first = first;

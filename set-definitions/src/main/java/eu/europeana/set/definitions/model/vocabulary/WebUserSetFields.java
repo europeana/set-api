@@ -51,11 +51,14 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String ITEM                      = "item";
     public static final String SET_ID                    = "set_id";
 
-    
     //results page
     public static final String PART_OF = "partOf";
     public static final String NEXT = "next";
     public static final String PREV = "prev";
+    
+    //collection page
+    public static final String START_INDEX = "startIndex";
+    
 
     // Pagination Cosntants
     public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";

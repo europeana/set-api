@@ -93,8 +93,7 @@ public class UserSetServiceImplTest {
 	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
-	StringBuilder buffer = new StringBuilder(REQUEST_URL);
-	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, buffer, "",
+	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
 		LdProfiles.STANDARD, authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
@@ -122,8 +121,7 @@ public class UserSetServiceImplTest {
 	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
-	StringBuilder buffer = new StringBuilder(REQUEST_URL);
-	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, buffer, "",
+	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
 		LdProfiles.MINIMAL, authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
@@ -148,8 +146,7 @@ public class UserSetServiceImplTest {
 	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
-	StringBuilder buffer = new StringBuilder(REQUEST_URL);
-	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, buffer, "",
+	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
 		LdProfiles.ITEMDESCRIPTIONS, authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
@@ -177,8 +174,7 @@ public class UserSetServiceImplTest {
 	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
-	StringBuilder buffer = new StringBuilder(REQUEST_URL);
-	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, buffer, "",
+	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
 		LdProfiles.ITEMDESCRIPTIONS, authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));

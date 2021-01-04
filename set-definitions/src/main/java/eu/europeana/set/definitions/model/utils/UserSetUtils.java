@@ -66,32 +66,6 @@ public class UserSetUtils {
 	builder.append(WebUserSetFields.SLASH).append(id);
 	return builder.toString();
     }
-    
-    /**
-     * This method fills in pagination strings to the user set object. Format is '<id url>?page=0&pageSize=10'
-     * @deprecated use updatePagination and update implementation when the first and last will be supported
-     * @param userSet The user set object
-     * @return user set object enriched by pagination values
-     */
-    @Deprecated
-    public UserSet fillPagination(UserSet userSet) {
-
-        UserSet res = userSet;
-
-        if (res != null && res.getItems() != null) {
-            int total = res.getItems().size();
-            res.setTotal(total);
-            if (total > 0) {
-                int first = 0;
-                String firstPageStr = fillPage(userSet, first);
-                res.setFirst(firstPageStr);
-                int last = total / UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
-                String lastPageStr = fillPage(userSet, last);
-                res.setLast(lastPageStr);
-            }
-        }
-        return res;
-    }
 
     /* This method updates pagination values.
     * @param userSet The user set object
@@ -104,10 +78,16 @@ public class UserSetUtils {
            userSet.setTotal(total);
            //NOTE: the first and last properties are not used now and might be deprecated, they should not be stored in the database
            if (total > 0) {
+               
                int first = 0;
-               userSet.setFirst("" + first);
-               int last = total / UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE - 1; // we start counting by 0
-               userSet.setLast("" + last);
+               String firstPageStr = fillPage(userSet, first, UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE);
+               userSet.setFirst(firstPageStr);
+               int last = (int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE); 
+               if(last > 0) {
+        	last = last - 1; // we start counting by 0    
+               }
+               String lastPageStr = fillPage(userSet, last, UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE);
+               userSet.setLast(lastPageStr);
            }
        }
 
@@ -123,11 +103,11 @@ public class UserSetUtils {
      * @param pageIndex
      * @return pagination string
      */
-    public String fillPage(UserSet userSet, int pageIndex) {
-        StringBuilder firstBuilder = new StringBuilder();
-        return firstBuilder.append(String.format("%s?%s=%d&%s=%d",
+    public String fillPage(UserSet userSet, int pageIndex, int pageSize) {
+        StringBuilder pageUriBuilder = new StringBuilder();
+        return pageUriBuilder.append(String.format("%s%s?%s=%d&%s=%d",WebUserSetFields.BASE_SET_URL,
                 userSet.getIdentifier(), CommonApiConstants.QUERY_PARAM_PAGE, pageIndex
-                , CommonApiConstants.QUERY_PARAM_PAGE_SIZE, UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE
+                , CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize
         )).toString();
     }
     
