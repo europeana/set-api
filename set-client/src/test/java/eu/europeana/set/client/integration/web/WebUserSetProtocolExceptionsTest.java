@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 
@@ -16,6 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
  *
  * @author GrafR
  */
+@Disabled
 public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     public String CORRUPTED_JSON =
