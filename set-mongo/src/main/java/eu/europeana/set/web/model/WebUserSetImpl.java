@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -24,6 +25,7 @@ import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
         WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
 	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 
     List<String> serializedItems;
@@ -85,12 +87,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.getDescription();
     }
 
-    @JsonProperty(WebUserSetModelFields.TOTAL)
+    @JsonProperty(value = WebUserSetModelFields.TOTAL, access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveIntegerFilter.class)
     public int getTotal() {
 	return super.getTotal();
     }
-
+    
     @JsonProperty(WebUserSetModelFields.IS_DEFINED_BY)
     public String getIsDefinedBy() {
 	return super.getIsDefinedBy();

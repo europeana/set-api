@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
@@ -113,7 +114,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	mapper.registerModule(new JsonldModule());
 	mapper.configure(Feature.AUTO_CLOSE_SOURCE, true);
 //	mapper.configure(MapperFeature.AUTO_DETECT_SETTERS, false);
-//	    mapper.configure(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME, true);
 
 	JsonFactory jsonFactory = mapper.getFactory();
 
