@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -8,7 +9,7 @@
 	<version>${version.setApi}</version>
 	<packaging>pom</packaging>
 	<name>Europeana  (User) Sets API parent</name>
-	
+
 	<modules>
 		<module>set-definitions</module>
 		<module>set-common</module>
@@ -18,17 +19,17 @@
 		<module>set-search-api-client</module>
 		<module>set-integration-testing</module>
 	</modules>
-	
+
 	<properties>
-		<version.setApi>0.4</version.setApi>
-		<version.java>1.9</version.java>
-		<version.javac.release>9</version.javac.release>
+		<version.setApi>0.5-SNAPSHOT</version.setApi>
+		<version.java>11</version.java>
+		<version.javac.release>11</version.javac.release>
 		<version.spring>5.2.7.RELEASE</version.spring>
 		<version.aspectj>1.8.8</version.aspectj>
 		<version.log4j2>2.9.1</version.log4j2>
 		<version.commonsLang3>3.9</version.commonsLang3>
 		<version.jackson>2.9.4</version.jackson>
-		<version.commonsApi>0.2.11</version.commonsApi>
+		<version.commonsApi>0.2.12</version.commonsApi>
 		<version.springBoot>2.3.1.RELEASE</version.springBoot>
 		<version.slf4j>1.7.5</version.slf4j>
 		<version.servletJstl>1.2</version.servletJstl>
@@ -40,21 +41,19 @@
 		<version.junit>5.6.2</version.junit>
 		<version.commonsIO>2.5</version.commonsIO>
 		<version.surefire>2.22.0</version.surefire>
-		
-		<!-- 
-		<version.apikeyUtils>1.4</version.apikeyUtils>
-		 -->
-		
-		<!--  java version properties -->
-	    <maven.compiler.source>${version.java}</maven.compiler.source>
-        <maven.compiler.target>${version.java}</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- <version.apikeyUtils>1.4</version.apikeyUtils> -->
+
+		<!-- java version properties -->
+		<maven.compiler.source>${version.java}</maven.compiler.source>
+		<maven.compiler.target>${version.java}</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
-    
+
 	<repositories>
 		<repository>
-		    <id>artifactory.eanadev.org</id>
+			<id>artifactory.eanadev.org</id>
 			<name>artifactory.eanadev.org-releases (external and internal releases)</name>
 			<url>http://artifactory.eanadev.org/artifactory/libs-release</url>
 		</repository>
@@ -64,9 +63,9 @@
 			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
 	</repositories>
-		
+
 	<build>
-		<!--  configure source and output locations -->
+		<!-- configure source and output locations -->
 		<directory>target</directory>
 		<outputDirectory>target/classes</outputDirectory>
 		<finalName>${artifactId}-${version}</finalName>
@@ -84,20 +83,25 @@
 			</testResource>
 		</testResources>
 
-		<!--  plugins -->
+		<!-- plugins -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<!-- to be used starting with version 3.5.0 
-						<release>${version.javac.release}</release>
-					-->
-					<source>${version.java}</source>
-					<target>${version.java}</target>
-				</configuration>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+					<configuration>
+						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<release>${version.javac.release}</release>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>

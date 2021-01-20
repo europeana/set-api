@@ -156,10 +156,9 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
-	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, defaultValue = ""
-		    + CommonApiConstants.DEFAULT_PAGE) int page,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) Integer page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
-		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) int pageSize,
+		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) Integer pageSize,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
@@ -178,7 +177,7 @@ public class WebUserSetRest extends BaseRest {
      * @throws HttpException
      */
     private ResponseEntity<String> getUserSet(String profileStr, String identifier, HttpServletRequest request,
-	    String sort, String sortOrder, int pageNr, int pageSize, Authentication authentication)
+	    String sort, String sortOrder, Integer pageNr, int pageSize, Authentication authentication)
 	    throws HttpException {
 	try {
 	    LdProfiles profile = getProfile(profileStr, request);
@@ -195,24 +194,11 @@ public class WebUserSetRest extends BaseRest {
 
 	    if (mustFetchItems(userSet, profile)) {
 		int derefItems = getDerefItemsCount(userSet, pageSize);
-		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, derefItems, profile);
+		int page = (pageNr  != null) ? pageNr : CommonApiConstants.DEFAULT_PAGE;
+		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, page, derefItems, profile);
 	    }
 
-	    String userSetJsonLdStr = serializeUserSet(profile, userSet);
-
-	    String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
-
-	    // build response
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-	    headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-	    // generate “ETag”;
-	    headers.add(UserSetHttpHeaders.ETAG, etag);
-
-	    return new ResponseEntity<>(userSetJsonLdStr, headers, HttpStatus.OK);
+	    return buildGetResponse(userSet, profile, pageNr, pageSize, request);
 
 	} catch (HttpException e) {
 	    // avoid wrapping http exception
@@ -327,22 +313,7 @@ public class WebUserSetRest extends BaseRest {
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-
-	    // generate “ETag”;
-	    String eTagNew = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
-
-	    // build response entity with headers
-	    // TODO: refactor to use a build response method
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-	    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	    headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-	    headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-	    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-	    headers.add(UserSetHttpHeaders.ETAG, eTagNew);
-
-	    return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+	    return buildGetResponse(updatedUserSet, profile, -1, -1, request);
 
 	} catch (UserSetValidationException | UserSetInstantiationException e) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
@@ -568,6 +539,7 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
+   
     @DeleteMapping(value = { "/set/{identifier}/{datasetId}/{localId}" }, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
     @ApiOperation(notes = SwaggerConstants.DELETE_ITEM_NOTE, value = "Delete a item from the set", nickname = "delete item", response = java.lang.Void.class)

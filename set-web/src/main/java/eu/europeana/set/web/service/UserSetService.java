@@ -1,5 +1,13 @@
 package eu.europeana.set.web.service;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.codehaus.jettison.json.JSONException;
+import org.springframework.security.core.Authentication;
+
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -10,12 +18,9 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
-import eu.europeana.set.web.search.BaseUserSetResultPage;
-import org.codehaus.jettison.json.JSONException;
-import org.springframework.security.core.Authentication;
-
-import java.io.IOException;
-import java.util.List;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.CollectionPage;
+import eu.europeana.set.web.model.search.ItemIdsResultPage;
 
 public interface UserSetService {
 
@@ -175,8 +180,13 @@ public interface UserSetService {
 	    Authentication authentication);
 
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    StringBuilder requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
+	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
 	    throws HttpException;
+    
+    public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
+	    HttpServletRequest request);
+    
+    public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
 
     /**
      * This method validates input values wsKey, identifier and userToken.

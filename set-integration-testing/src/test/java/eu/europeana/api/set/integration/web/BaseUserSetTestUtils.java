@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -129,5 +130,9 @@ public abstract class BaseUserSetTestUtils {
 	}
 	
 	return null;
+    }
+    
+    protected boolean constainsKeyOrValue(String jsonString, String property) {
+	return StringUtils.contains(jsonString, "\"" + property + "\"");
     }
 }

@@ -45,8 +45,6 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     public String UNKNOWN_PROVIDED_IDENTIFIER = "unknown_provided_identifier";
 
-    //private RedisBackedCache underTest;
-
     @Test
     public void createWebsetUserSetWithoutBody() throws IOException {
 
@@ -59,7 +57,6 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     @Test
     public void createWebUserSetWithCorruptedBody() {
-
         ResponseEntity<String> response = getApiClient().createUserSet(
                 CORRUPTED_JSON, LdProfiles.MINIMAL.name());
 
@@ -68,7 +65,6 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     @Test
     public void getWebUserSetWithWrongIdentifier() {
-
         ResponseEntity<String> response = getApiClient().getUserSet(
                 WRONG_GENERATED_IDENTIFIER, LdProfiles.MINIMAL.name());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -76,7 +72,6 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     @Test
     public void updateWebsetUserSetWithWrongIdentifierNumber() throws IOException {
-
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
 
         ResponseEntity<String> response = getApiClient().updateUserSet(
@@ -88,7 +83,6 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     @Test
     public void updateWebUserSetWithWrongIdentifier() throws IOException {
-
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
 
         ResponseEntity<String> response = getApiClient().updateUserSet(

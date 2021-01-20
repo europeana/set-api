@@ -1,4 +1,4 @@
-package eu.europeana.set.web.search;
+package eu.europeana.set.web.model.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,27 +10,33 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
-@JsonPropertyOrder({WebUserSetModelFields.ID,  WebUserSetFields.TYPE, WebUserSetFields.PART_OF, WebUserSetFields.ITEMS, WebUserSetFields.NEXT, WebUserSetFields.PREV})
+@JsonPropertyOrder({ WebUserSetModelFields.AT_CONTEXT, WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetFields.PART_OF, 
+    WebUserSetFields.START_INDEX, WebUserSetModelFields.TOTAL, WebUserSetFields.ITEMS, WebUserSetFields.PREV, WebUserSetFields.NEXT })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
 
-    CollectionView partOf;
+    CollectionOverview partOf;
+    String type = CommonLdConstants.RESULT_PAGE; 
     
-    public CollectionView getPartOf() {
+    @JsonProperty(WebUserSetFields.TYPE)
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+    
+    @JsonProperty(WebUserSetFields.PART_OF)
+    public CollectionOverview getPartOf() {
         return partOf;
     }
 
-    public void setPartOf(CollectionView partOf) {
+    public void setPartOf(CollectionOverview partOf) {
         this.partOf = partOf;
-    }
-
-    public String getType() {
-	return CommonLdConstants.RESULT_PAGE;
     }
     
     @Override
     @JsonProperty(WebUserSetModelFields.TOTAL)
-//    @JsonIgnore
     public long getTotalInPage() {
         return super.getTotalInPage();
     }
