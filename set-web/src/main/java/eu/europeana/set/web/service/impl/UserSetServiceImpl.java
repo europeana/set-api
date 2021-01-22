@@ -557,7 +557,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return userSet.getCreator().getHttpUrl().equals(userId);
     }
 
-    /**
+	/**
+	 * This method checks admin role
+	 *
+	 * @param authentication
+	 * @return true if user is admin
+	 */
+	@Override
+	public boolean isAdmin(Authentication authentication) {
+		return hasAdminRights(authentication);
+	}
+
+
+	/**
      * This method validates input values wsKey, identifier and userToken.
      * 
      * @param userSet

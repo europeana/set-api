@@ -259,7 +259,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
     // Delete User associated Tests
     @Test
-    public void deleteUserAssociatedSets_Success() throws Exception {
+    public void deleteMysets_Success() throws Exception {
 	// ensure that at least onea user set exists into the database
 	deleteBookmarkFolder(token);
 	createTestUserSet(USER_SET_REGULAR, token);
@@ -278,12 +278,26 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void deleteUserAssociatedSets_NotAuthorised() throws Exception {
+    public void deleteMySets_NotAuthorised() throws Exception {
 	mockMvc.perform(delete(BASE_URL).header(HttpHeaders.AUTHORIZATION, "").header(HttpHeaders.CONTENT_TYPE,
 		MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
     }
 
-    // Delete User set via identifier Tests
+	@Test
+	public void deleteUserAssociatedSets_NotAdmin() throws Exception {
+		mockMvc.perform(delete(BASE_URL).queryParam(WebUserSetFields.PATH_PARAM_CREATOR_ID, "creatorID")
+				.header(HttpHeaders.AUTHORIZATION, token).header(HttpHeaders.CONTENT_TYPE,
+						MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+	}
+
+	@Test
+	public void deleteUserAssociatedSets_NotAuthorised() throws Exception {
+		mockMvc.perform(delete(BASE_URL).queryParam(WebUserSetFields.PATH_PARAM_CREATOR_ID, "creatorID")
+				.header(HttpHeaders.AUTHORIZATION, "").header(HttpHeaders.CONTENT_TYPE,
+				MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+	}
+
+	// Delete User set via identifier Tests
     @Test
     public void deleteUserSet_NotAuthorised() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);

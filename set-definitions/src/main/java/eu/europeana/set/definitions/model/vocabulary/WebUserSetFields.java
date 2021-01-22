@@ -21,6 +21,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Query Params Constants
     public static final String PATH_PARAM_SET_ID          = "identifier";
     public static final String PATH_PARAM_DATASET_ID      = "datasetId";
+    public static final String PATH_PARAM_CREATOR_ID      = "creator";
     public static final String PATH_PARAM_LOCAL_ID        = "localId";
     public static final String PATH_PARAM_POSITION        = "position";
 
