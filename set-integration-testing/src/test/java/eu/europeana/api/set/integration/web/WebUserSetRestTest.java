@@ -297,6 +297,13 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 				MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 	}
 
+	@Test
+	public void deleteUserAssociatedSets_BadRequest() throws Exception {
+		mockMvc.perform(delete(BASE_URL).queryParam(WebUserSetFields.PATH_PARAM_CREATOR_ID, "")
+				.header(HttpHeaders.AUTHORIZATION, token).header(HttpHeaders.CONTENT_TYPE,
+						MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
 	// Delete User set via identifier Tests
     @Test
     public void deleteUserSet_NotAuthorised() throws Exception {

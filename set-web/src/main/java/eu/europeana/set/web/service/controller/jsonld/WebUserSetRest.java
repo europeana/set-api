@@ -715,12 +715,32 @@ public class WebUserSetRest extends BaseRest {
 		// check user credentials, if invalid respond with HTTP 401,
 		// or if unauthorized respond with HTTP 403
 		Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
+		return deleteUserAssociatedSets(getCreatorId(authentication, creator));
+	}
 
+	/**
+	 * gets the creatorId for the delete functionality
+	 * if creator is null, gets the userId from the token OR
+	 * if creator is empty , throws 400 Bad request
+	 * if creator is passed and role is not admin, throws 403 Forbidden
+	 * if creator is passed and role is admin, returns the creatorId
+	 *
+	 * @param authentication
+	 * @param creatorId
+	 * @return
+	 * @throws RequestValidationException, ApplicationAuthenticationException
+	 */
+	private String getCreatorId(Authentication authentication, String creatorId) throws RequestValidationException, ApplicationAuthenticationException {
 		// if creator is empty : Delete my sets is invoked.
 		// get the creatorId from the userToken
-		if (creator == null) {
-			creator = getUserSetService().getUserId(authentication);
+		if (creatorId == null) {
+			return getUserSetService().getUserId(authentication);
 		} else {
+			// if creatorId is empty, return 400 Bad Request
+			if (creatorId.isEmpty()){
+				throw new RequestValidationException(I18nConstants.INVALID_PARAM_VALUE,
+						new String[]{"Creator Id is empty"});
+			}
 			// if creator is passed, verify if the user is admin.
 			// Owner/User can not perform this action
 			if (! getUserSetService().isAdmin(authentication)) {
@@ -729,11 +749,11 @@ public class WebUserSetRest extends BaseRest {
 						"Only admins are authorized to perform this operation."},
 						HttpStatus.FORBIDDEN);
 			}
-			if (! StringUtils.startsWith(creator, "http")) {
-				creator = UserSetUtils.buildCreatorUri(creator);
+			if (! StringUtils.startsWith(creatorId, "http")) {
+				return UserSetUtils.buildCreatorUri(creatorId);
 			}
 		}
-		return deleteUserAssociatedSets(creator);
+		return creatorId;
 	}
     /**
      * This method implements removal of a all sets associated to a user
