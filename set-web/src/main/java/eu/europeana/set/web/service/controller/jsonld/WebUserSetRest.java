@@ -6,6 +6,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -631,7 +634,7 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier, HttpServletRequest request)
 	    throws HttpException {
 
-	// check user credentials, if invalid respond with HTTP 401,
+    // check user credentials, if invalid respond with HTTP 401,
 	// or if unauthorized respond with HTTP 403
 	Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
 	return deleteUserSet(request, identifier, authentication);
@@ -693,30 +696,85 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
-    @DeleteMapping(value = { "/set/" })
-    @ApiOperation(value = "Delete sets associated with user", nickname = "delete user's sets", response = java.lang.Void.class)
-    public ResponseEntity<String> deleteUserAssociatedSet(HttpServletRequest request) throws HttpException {
+	/**
+	 * Deletes the user sets :
+	 * 1) With admin role and creator. Deletes all the associated user sets
+	 * OR
+	 * 2) Deletes my user sets by getting the creatorId from the userToken
+	 *
+	 * @param creator
+	 * @param request
+	 * @return
+	 * @throws HttpException
+	 */
+	@DeleteMapping(value = { "/set/" })
+	@ApiOperation(value = "Delete sets associated with user", nickname = "delete associated user's sets", response = java.lang.Void.class)
+	public ResponseEntity<String> deleteUserAssociatedSet(
+			@RequestParam(value = WebUserSetFields.PATH_PARAM_CREATOR_ID, required = false) String creator,
+			HttpServletRequest request) throws HttpException {
+		// check user credentials, if invalid respond with HTTP 401,
+		// or if unauthorized respond with HTTP 403
+		Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
+		return deleteUserAssociatedSets(getCreatorId(authentication, creator));
+	}
 
-	// check user credentials, if invalid respond with HTTP 401,
-	// or if unauthorized respond with HTTP 403
-	Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-
-	return deleteUserAssociatedSets(authentication);
-    }
-
+	/**
+	 * gets the creatorId for the delete functionality
+	 * if creator is null, gets the userId from the token OR
+	 * if creator is empty , throws 400 Bad request
+	 * if creator is passed and role is not admin, throws 403 Forbidden
+	 * if creator is passed and role is admin, returns the creatorId
+	 *
+	 * @param authentication
+	 * @param creatorId
+	 * @return
+	 * @throws RequestValidationException, ApplicationAuthenticationException
+	 */
+	private String getCreatorId(Authentication authentication, String creatorId) throws RequestValidationException, ApplicationAuthenticationException {
+		// if creator is empty : Delete my sets is invoked.
+		// get the creatorId from the userToken
+		if (creatorId == null) {
+			return getUserSetService().getUserId(authentication);
+		} else {
+			// if creatorId is empty, return 400 Bad Request
+			if (creatorId.isEmpty()){
+				throw new RequestValidationException(I18nConstants.INVALID_PARAM_VALUE,
+						new String[]{"Creator Id is empty"});
+			}
+			// if creator is passed, verify if the user is admin.
+			// Owner/User can not perform this action
+			if (! getUserSetService().isAdmin(authentication)) {
+				throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
+						I18nConstants.OPERATION_NOT_AUTHORIZED, new String[]{
+						"Only admins are authorized to perform this operation."},
+						HttpStatus.FORBIDDEN);
+			}
+			if (! StringUtils.startsWith(creatorId, "http")) {
+				return UserSetUtils.buildCreatorUri(creatorId);
+			}
+		}
+		return creatorId;
+	}
     /**
      * This method implements removal of a all sets associated to a user
      *
-     * @param authentication
+     * @param creatorId
      * @throws HttpException
      */
-    protected ResponseEntity<String> deleteUserAssociatedSets(Authentication authentication) throws HttpException {
+    protected ResponseEntity<String> deleteUserAssociatedSets(String creatorId) throws HttpException {
 	try {
-	    // get the creator from authentication
-	    String creatorId = getUserSetService().getUserId(authentication);
 	    List<PersistentUserSet> userSets = getUserSetService().getUserSetByCreatorId(creatorId);
 
-	    // if the user set is disabled and the user is not an admin, respond with HTTP
+	    // verify if the user sets are associated with the creatorId
+	    for (UserSet userset : userSets){
+	    	if (! StringUtils.equals(creatorId, userset.getCreator().getHttpUrl())) {
+	    		throw new OperationAuthorizationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
+						I18nConstants.OPERATION_NOT_AUTHORIZED, new String[]{
+								"Only user associated sets can be deleted"},
+						HttpStatus.FORBIDDEN);
+			}
+		}
+		// if the user set is disabled and the user is not an admin, respond with HTTP
 	    // 410
 	    HttpStatus httpStatus = null;
 	    httpStatus = HttpStatus.NO_CONTENT;

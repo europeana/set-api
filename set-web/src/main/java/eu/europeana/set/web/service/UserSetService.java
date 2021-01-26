@@ -200,6 +200,17 @@ public interface UserSetService {
     UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
 
     /**
+     * This method validates admin role
+     *
+     * @param  authentication
+     *
+     * @return true if userToken has admin role
+     * @throws HttpException
+     */
+    boolean isAdmin(Authentication authentication);
+
+
+    /**
      * This method retrieves user id from authentication object
      * 
      * @param authentication
