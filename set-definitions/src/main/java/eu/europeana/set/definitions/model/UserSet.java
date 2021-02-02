@@ -24,21 +24,9 @@ public interface UserSet extends PageInfo{
 
 	void setDescription(Map<String, String> setDescription);
 
-	String getItemType();
-
-	void setItemType(String itemType);
-
 	List<String> getSubject();
 
 	void setSubject(List<String> subject);
-
-//	String getSpatial();
-//
-//	void setSpatial(String spatial);
-//
-//	boolean isUgc();
-//
-//	void setUgc(boolean ugc);
 
 	Agent getCreator();
 
@@ -59,11 +47,7 @@ public interface UserSet extends PageInfo{
 	public String getIdentifier();
 	
 	public void setIdentifier(String sequenceIdentifier);
-	
-//	public String getContext();
-//	
-//	public void setContext(String context);
-	
+
 	/**
 	 * @return Holds a search request to the User Set API (complete URL pointing to production). 
 	 * To reduce complexity on the API, the exhaustive listing could also be expressed as a query.
@@ -83,5 +67,11 @@ public interface UserSet extends PageInfo{
     public boolean isPublic();
     
     public boolean isPublished();
+
+	/**
+	 * This method detects if it is EntityBestItemSet
+	 * @return true if it is an EntityBestItemSet
+	 */
+    public boolean isEntityBestItemSet();
     
 }
