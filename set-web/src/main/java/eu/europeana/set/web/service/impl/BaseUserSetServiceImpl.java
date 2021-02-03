@@ -395,6 +395,10 @@ public abstract class BaseUserSetServiceImpl {
 	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(userSet.getType());
     }
 
+	boolean isEntityBestItemsSet(UserSet userSet) {
+		return UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(userSet.getType());
+	}
+
     void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	if (apiResult.getItems() == null) {
 	    return;
@@ -488,6 +492,14 @@ public abstract class BaseUserSetServiceImpl {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType() });
 	}
+	// if type is BookmarkFolder or Collection, validate subject
+	// subject must not contain entity reference
+	if(webUserSet.getType() != null && ! isEntityBestItemsSet(webUserSet)) {
+		if(webUserSet.isEntityBestItemSet()) {
+			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+		}
+	}
     }
 
     /**
@@ -533,6 +545,41 @@ public abstract class BaseUserSetServiceImpl {
 	    }
 	}
     }
+
+	/**
+	 * validated the EntityBestItemsSet
+	 *
+	 * @param webUserSet
+	 * @throws ParamValidationException
+	 * @throws RequestBodyValidationException
+	 */
+	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException, RequestBodyValidationException {
+		if (!isEntityBestItemsSet(webUserSet)) {
+			return;
+		}
+
+		// subject must be present
+		if (webUserSet.getSubject() == null) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+		}
+
+		if (webUserSet.isOpenSet()) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+					UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+					new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
+		}
+
+		if (!webUserSet.isEntityBestItemSet()) {
+			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
+					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+		}
+
+		//TODO add validation for roles and users
+
+	}
+
 
     void updateTotal(UserSet existingUserSet) {
 	if(existingUserSet.getItems() != null) {

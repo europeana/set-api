@@ -225,7 +225,8 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     public boolean isEntityBestItemSet() {
       if (getSubject() != null) {
           for(String subject : getSubject()) {
-              if (subject.startsWith("http://") ||subject.startsWith("https://"))
+              //TODO verify the entity reference value
+              if (subject.startsWith("http://") || subject.startsWith("https://"))
               return true;
           }
       }
