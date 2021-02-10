@@ -418,6 +418,22 @@ public abstract class BaseUserSetServiceImpl {
 //	}
     }
 
+	/**
+	 * if List<String>subject contains an entity reference
+	 * referring to the set then it is a EntityBestItemSet
+	 *
+	 * @return true if it is an EntityBestItemSet
+	 */
+	public boolean isEntityReference(UserSet userSet) {
+		if (userSet.getSubject() != null) {
+			for(String subject : userSet.getSubject()) {
+				//TODO verify the entity reference value
+				if (subject.startsWith("http://") || subject.startsWith("https://"))
+					return true;
+			}
+		}
+		return false;
+	}
     /**
      * This method validates and processes the favorite set
      * 
@@ -492,13 +508,10 @@ public abstract class BaseUserSetServiceImpl {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType() });
 	}
-	// if type is BookmarkFolder or Collection, validate subject
-	// subject must not contain entity reference
-	if(webUserSet.getType() != null && ! isEntityBestItemsSet(webUserSet)) {
-		if(webUserSet.isEntityBestItemSet()) {
-			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
-		}
+	// if type is BookmarkFolder or Collection, subject must not contain entity reference
+	if (! isEntityBestItemsSet(webUserSet) && isEntityReference(webUserSet)) {
+		throw new RequestBodyValidationException(UserSetI18nConstants.INVALID_SUBJECT_VALUE,
+			new String[] {webUserSet.getType(), WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 	}
     }
 
@@ -571,7 +584,7 @@ public abstract class BaseUserSetServiceImpl {
 					new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
 		}
 
-		if (!webUserSet.isEntityBestItemSet()) {
+		if (! isEntityReference(webUserSet)) {
 			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
 					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 		}

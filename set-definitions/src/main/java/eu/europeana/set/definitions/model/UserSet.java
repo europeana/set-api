@@ -68,10 +68,4 @@ public interface UserSet extends PageInfo{
     
     public boolean isPublished();
 
-	/**
-	 * This method detects if it is EntityBestItemSet
-	 * @return true if it is an EntityBestItemSet
-	 */
-    public boolean isEntityBestItemSet();
-    
 }

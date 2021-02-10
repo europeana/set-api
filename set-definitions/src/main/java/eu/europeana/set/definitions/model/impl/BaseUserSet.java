@@ -216,23 +216,6 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
 	return VisibilityTypes.PUBLISHED.getJsonValue().equals(getVisibility());
     }
 
-    /**
-     * if List<String>subject contains an entity reference
-     * referring to the set then it is a EntityBestItemSet
-     *
-     * @return true if it is an EntityBestItemSet
-     */
-    public boolean isEntityBestItemSet() {
-      if (getSubject() != null) {
-          for(String subject : getSubject()) {
-              //TODO verify the entity reference value
-              if (subject.startsWith("http://") || subject.startsWith("https://"))
-              return true;
-          }
-      }
-      return false;
-    }
-
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder("\t### User set ###\n");
