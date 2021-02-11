@@ -206,7 +206,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(constainsKeyOrValue(result, WebUserSetFields.PREV));
 	assertTrue(constainsKeyOrValue(result, WebUserSetFields.NEXT));
 	assertTrue(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
+//	assertTrue(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
 	
 	
 	int idCount = StringUtils.countMatches(result, "\"id\"");
@@ -219,6 +219,50 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
+    
+    
+    @Test
+    public void getUserSetPaginationEmptyPageNr() throws Exception {
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, token);
+
+	// get the identifier
+	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "")
+//		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
+		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+	//
+	String result = response.getContentAsString();
+	assertNotNull(result);
+	assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+	assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE));
+	
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
+    
+    @Test
+    public void getUserSetPaginationPageSizeExceeded() throws Exception {
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, token);
+
+	// get the identifier
+	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "0")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "200")
+		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+	//
+	String result = response.getContentAsString();
+	assertNotNull(result);
+	assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+	assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE_SIZE));
+	
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
+    
     // Update user set Tests
 
     @Test

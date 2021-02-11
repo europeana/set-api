@@ -2,11 +2,13 @@ package eu.europeana.set.definitions.config;
 
 import java.util.Properties;
 
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+
 public class UserSetConfigurationImpl implements UserSetConfiguration {
 
     public static final String SUFFIX_BASEURL = "baseUrl";
 
-    public static final String PREFIX_MAX_PAGE_SIZE = "userset.search.maxpagesize.";
+    public static final String PREFIX_RETRIEVE_MAX_PAGE_SIZE = "set.retrieve.maxpagesize.";
     public static final String KEY_SEARCH_DEREFERENCE_ITEMS = "set.search.dereference.items.max";
     public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
     
@@ -56,7 +58,9 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     }
 
     public int getMaxPageSize(String profile) {
-	String key = PREFIX_MAX_PAGE_SIZE + profile;
+	//String key = PREFIX_MAX_PAGE_SIZE + profile.toLowerCase();
+	//TODO enable configuration per profile when specified 
+	String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + LdProfiles.STANDARD.name().toLowerCase();
 	return Integer.parseInt(getSetProperties().getProperty(key));
     }
 

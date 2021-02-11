@@ -36,6 +36,7 @@ import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
+import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
@@ -159,14 +160,35 @@ public class WebUserSetRest extends BaseRest {
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
-	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) Integer page,
+	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) String page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
-		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) Integer pageSize,
+		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) String pageSize,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
 	Authentication authentication = verifyReadAccess(request);
-	return getUserSet(profile, identifier, request, sortField, sortOrderField, page, pageSize, authentication);
+	Integer pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1);
+	int maxPageSize = getConfiguration().getMaxPageSize(profile);
+	Integer pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize);
+	
+	return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems, authentication);
+    }
+
+    private Integer parseIntegerParam(String paramName, String paramValue, int maxValue) throws ParamValidationException {
+	if (paramValue != null) {
+	    try {
+		Integer value = Integer.valueOf(paramValue);
+		if(maxValue > 0 && value > maxValue) {
+		    throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+				new String[] { paramName, paramValue });
+		}
+		return value;
+	    }catch(NumberFormatException e){
+		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+			new String[] { paramName, paramValue });
+	    }
+	}
+	return null;
     }
 
     /**
