@@ -175,6 +175,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	validateBookmarkFolder(webUserSet);
+	validateEntityBestItemsSet(webUserSet);
 	validateControlledValues(webUserSet);
 	validateIsDefinedBy(webUserSet);
     }

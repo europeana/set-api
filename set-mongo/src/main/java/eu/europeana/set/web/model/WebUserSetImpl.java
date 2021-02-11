@@ -20,9 +20,9 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
-@JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TITLE, WebUserSetFields.DESCRIPTION,
-        WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR,
-        WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
+@JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TITLE, WebUserSetModelFields.SUBJECT,
+        WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.ITEMS,
+        WebUserSetModelFields.CREATOR, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
 	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -85,6 +85,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     @JsonProperty(WebUserSetFields.DESCRIPTION)
     public Map<String, String> getDescription() {
 	return super.getDescription();
+    }
+
+    @Override
+    @JsonProperty(WebUserSetFields.SUBJECT)
+    public List<String> getSubject() {
+        return super.getSubject();
     }
 
     @JsonProperty(value = WebUserSetModelFields.TOTAL, access = JsonProperty.Access.READ_ONLY)
