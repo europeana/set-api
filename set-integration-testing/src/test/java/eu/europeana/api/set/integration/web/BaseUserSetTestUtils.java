@@ -43,7 +43,9 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";
     public static final String USER_SET_COMPLETE_PUBLIC = "/content/userset_complete.json";
     public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
-        
+    public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
+
+
     public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
 
     @Autowired

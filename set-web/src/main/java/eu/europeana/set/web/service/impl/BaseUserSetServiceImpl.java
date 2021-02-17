@@ -10,9 +10,11 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -288,17 +290,27 @@ public abstract class BaseUserSetServiceImpl {
 	if (authentication == null) {
 	    return false;
 	}
-
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (Roles.ADMIN.getName().equalsIgnoreCase(role)) {
-		return true;
-	    }
-	}
-	return false;
+	return checkRoles(authentication, Roles.ADMIN.getName());
     }
+
+	public boolean hasEditorRights(Authentication authentication) {
+		if (authentication == null) {
+			return false;
+		}
+		return checkRoles(authentication, Roles.EDITOR.getName());
+	}
+
+	private boolean checkRoles(Authentication authentication, String roleType) {
+		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
+				.hasNext();) {
+			// role based authorization
+			String role = iterator.next().getAuthority();
+			if (StringUtils.equalsIgnoreCase(roleType, role)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     /**
      * This method retrieves item ids from the closed userSet to build query e.g.
@@ -560,13 +572,20 @@ public abstract class BaseUserSetServiceImpl {
     }
 
 	/**
-	 * validated the EntityBestItemsSet
+	 * validates the EntityBestItemsSet
+	 * for entity user set subject field must have a entity reference
+	 * user with only EDITOR role can curate the entity set
+	 * user who creates the entity set for the first time become the 'creator' of that entity set
+	 * Other users with EDITOR role become 'contributors' for that entity set
+	 * 'contributors' can update the entity user set
+	 * Only 'creator' of an entity set can delete the set
 	 *
 	 * @param webUserSet
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
 	 */
-	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException, RequestBodyValidationException {
+	void validateEntityBestItemsSet(UserSet webUserSet, Authentication authentication) throws ParamValidationException,
+			                                                                 RequestBodyValidationException, UserAuthorizationException {
 		if (!isEntityBestItemsSet(webUserSet)) {
 			return;
 		}
@@ -588,11 +607,12 @@ public abstract class BaseUserSetServiceImpl {
 			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
 					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 		}
-
-		//TODO add validation for roles and users
-
+		// users with "EDITOR" role can create or update entity set
+		if (! hasEditorRights(authentication)) {
+			throw new UserAuthorizationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
+					UserSetI18nConstants.USER_NOT_AUTHORIZED, new String[]{"Only editors can curate entity user set"}, HttpStatus.UNAUTHORIZED);
+		}
 	}
-
 
     void updateTotal(UserSet existingUserSet) {
 	if(existingUserSet.getItems() != null) {

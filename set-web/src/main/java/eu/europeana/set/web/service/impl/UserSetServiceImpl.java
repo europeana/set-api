@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -65,7 +66,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
 	setDefaults(newUserSet, authentication);
 
-	validateWebUserSet(newUserSet);
+	validateWebUserSet(newUserSet, authentication);
 
 	// store in mongo database
 	updateTotal(newUserSet);
@@ -153,7 +154,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException {
+    public void validateWebUserSet(UserSet webUserSet, Authentication authentication) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !isBookmarksFolder(webUserSet)) {
@@ -175,7 +176,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	validateBookmarkFolder(webUserSet);
-	validateEntityBestItemsSet(webUserSet);
+	validateEntityBestItemsSet(webUserSet, authentication);
 	validateControlledValues(webUserSet);
 	validateIsDefinedBy(webUserSet);
     }
@@ -569,9 +570,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return hasAdminRights(authentication);
 	}
 
+	/**
+	 * Check if user is an editor
+	 *
+	 * @param authentication
+	 * @return true if user has editor role
+	 */
+	@Override
+	public boolean isEditor(Authentication authentication) {
+		return hasEditorRights(authentication);
+	}
+
 
 	/**
-     * This method validates input values wsKey, identifier and userToken.
+     * This method validates if the user is the owner/creator of the userset or the admin
      * 
      * @param userSet
      * @param authentication
@@ -605,7 +617,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    /**
+	/**
      * This methods applies Linked Data profile to a user set
      * 
      * @param userSet The given user set

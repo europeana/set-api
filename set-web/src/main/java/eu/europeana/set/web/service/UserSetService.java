@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.security.core.Authentication;
 
@@ -89,12 +90,14 @@ public interface UserSetService {
     /**
      * This method validates and processes the Set description for format and
      * mandatory fields if false responds with HTTP 400
+     * Also validates the roles for the Entity user sets
      * 
      * @param webUserSet
+     * @param authentication
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException;
+    public void validateWebUserSet(UserSet webUserSet, Authentication authentication) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -189,10 +192,10 @@ public interface UserSetService {
     public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
 
     /**
-     * This method validates input values wsKey, identifier and userToken.
+     * This method validates input if the user is the owner/creator of the user set or is admin
      * 
-     * @param identifier
-     * @param userId
+     * @param userSet
+     * @param authentication
      * @return
      * @return userSet object
      * @throws HttpException
@@ -208,6 +211,16 @@ public interface UserSetService {
      * @throws HttpException
      */
     boolean isAdmin(Authentication authentication);
+
+    /**
+     * This method validates editor role
+     *
+     * @param  authentication
+     *
+     * @return true if userToken has editor role
+     * @throws HttpException
+     */
+    boolean isEditor(Authentication authentication);
 
 
     /**

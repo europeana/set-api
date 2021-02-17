@@ -302,11 +302,12 @@ public class WebUserSetRest extends BaseRest {
 	    // set immutable fields before validation
 	    newUserSet.setCreator(existingUserSet.getCreator());
 	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
+	    newUserSet.setSubject(existingUserSet.getSubject());
 	    if (newUserSet.getVisibility() == null) {
 		newUserSet.setVisibility(existingUserSet.getVisibility());
 	    }
 
-	    getUserSetService().validateWebUserSet(newUserSet);
+	    getUserSetService().validateWebUserSet(newUserSet, authentication);
 	    // TODO: move verification to validateMethod when new specs are available
 	    if (existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
 		// isDefinedBy is mandatory for open sets
@@ -351,30 +352,11 @@ public class WebUserSetRest extends BaseRest {
     }
 
     private void checkVisibilityForUpdate(UserSet existingUserSet, Authentication authentication) throws HttpException {
-	if (hasEditorRole(authentication) && !existingUserSet.isPrivate()) {
+	if (getUserSetService().isEditor(authentication) && !existingUserSet.isPrivate()) {
 	    // handle editor role
 	    return;
 	}
 	getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
-    }
-
-    /**
-     * Check if user is an editor
-     * 
-     * @param authentication
-     * @return true if user has editor role
-     */
-    protected boolean hasEditorRole(Authentication authentication) {
-
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (Roles.EDITOR.getName().equals(role)) {
-		return true;
-	    }
-	}
-	return false;
     }
 
     private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
@@ -605,7 +587,7 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
-	    // check if the user is the owner of the set or admin, otherwise respond with
+	    // check if the user is the owner/creator of the set or admin, otherwise respond with
 	    // 403
 	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
 
@@ -778,7 +760,7 @@ public class WebUserSetRest extends BaseRest {
 		return creatorId;
 	}
     /**
-     * This method implements removal of a all sets associated to a user
+     * This method implements removal of all sets associated to a user
      *
      * @param creatorId
      * @throws HttpException

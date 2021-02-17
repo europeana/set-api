@@ -114,6 +114,19 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
     }
 
+    // create Entity user set validation tests
+	@Test
+	public void create_EntityUserSet_unauthorized_InvalidUserRole() throws Exception {
+		String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+
+		mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+				.content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+	}
+
+	// TODO add entity user set test once we have editor role user
+
     // Get user sets Tests
 
     @Test
