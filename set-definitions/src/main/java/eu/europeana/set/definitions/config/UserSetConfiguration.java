@@ -21,6 +21,8 @@ public interface UserSetConfiguration{
 	public int getMaxRetrieveDereferencedItems();
 	
 	public String getSearchApiKey();
+
+	public String getEntityUserSetUserId();
 	
 	/**
 	 * checks annotation.environment=production property

@@ -4,9 +4,8 @@
     "en": "Sportswear"
   },
   "subject" : [
-    "https://entity_refernce"
+    "test_subject"
   ],
-  "visibility": "public",
   "description": {
     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
   },

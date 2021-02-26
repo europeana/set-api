@@ -581,6 +581,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		return hasEditorRights(authentication);
 	}
 
+	/**
+	 * Check if user is Admin entity user
+	 *
+	 * @param authentication
+	 * @return true if user is Admin entity user
+	 */
+	@Override
+	public boolean isEntityAdminUser(UserSet userSet, Authentication authentication) {
+	return checkEntityAdminUser(userSet, authentication);
+	}
 
 	/**
      * This method validates if the user is the owner/creator of the userset or the admin
@@ -611,8 +621,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    // not authorized
 	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    I18nConstants.OPERATION_NOT_AUTHORIZED,
-		    new String[] {
-			    "Only the creators of the user set or admins are authorized to perform this operation." },
+		    new String[] {"Only the creators of the user set or admins are authorized to perform this operation." },
 		    HttpStatus.FORBIDDEN);
 	}
     }

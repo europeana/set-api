@@ -12,6 +12,9 @@ set.environment.test.baseUrl=http://test-sets.europeana.eu/set
 #used only in production environment
 set.environment.development.baseUrl=http://localhost:8080/set
 
+#configurable user id for the entity user set
+entity.userset.user.id=
+
 #max search results per page
 #set.search.maxpagesize.minimal=10000
 #set.search.maxpagesize.standard=100

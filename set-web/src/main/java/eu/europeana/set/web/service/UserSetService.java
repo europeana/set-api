@@ -222,6 +222,16 @@ public interface UserSetService {
      */
     boolean isEditor(Authentication authentication);
 
+    /**
+     * This method validates if the userID from authentication token
+     * is the Entity Admin User
+     *
+     * @param  authentication
+     *
+     * @return true if userToken is Entity Admin User
+     * @throws HttpException
+     */
+    boolean isEntityAdminUser(UserSet userSet,Authentication authentication);
 
     /**
      * This method retrieves user id from authentication object

@@ -81,7 +81,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	String result = mockMvc
 		.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-			.content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
+			.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
 	String identifier = getSetIdentifier(result);
@@ -100,7 +100,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void create_UserSet_401_bad_request_InvalidInput() throws Exception {
 	mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.content("{}").header(HttpHeaders.AUTHORIZATION, token)
+		.content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isBadRequest());
     }
 
@@ -116,22 +116,124 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
     // create Entity user set validation tests
 	@Test
-	public void create_EntityUserSet_unauthorized_InvalidUserRole() throws Exception {
+	public void create_EntityUserSet_Unauthorized_InvalidUserRole() throws Exception {
 		String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
 
 		mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-				.content(requestJson).header(HttpHeaders.AUTHORIZATION, token)
+				.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 	}
 
-	// TODO add entity user set test once we have editor role user
+	@Test
+	public void create_EntityUserSet_Unauthorized_EmptyToken() throws Exception {
+		String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+
+		mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+				.content(requestJson).header(HttpHeaders.AUTHORIZATION, "")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+	}
+
+	//create entity user set with editor token
+	@Test
+	public void create_EntityUserSet_Success() throws Exception {
+		String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+
+		String result = mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+				.content(requestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
+
+		String identifier = getSetIdentifier(result);
+		assertNotNull(getSetIdentifier(result));
+		String creator = getSetCreator(result);
+		assertNotNull(creator);
+        assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
+		getUserSetService().deleteUserSet(identifier);
+
+	}
+
+	@Test
+	public void create_EntityUserSet_InvalidRequestBody() throws Exception {
+		String requestJson = getJsonStringInput(ENTITY_USER_SET_INVALID);
+
+		mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+				.content(requestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	// check if editor can update the entity set
+	@Test
+	public void update_EntityUserSet_withEditor() throws Exception {
+		String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE);
+
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		mockMvc.perform(put(BASE_URL+ "{identifier}", identifier)
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.OK.value()));
+
+		getUserSetService().deleteUserSet(identifier);
+	}
+
+	@Test
+	public void update_EntityUserSet_withRegularUser() throws Exception {
+		String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE);
+
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		mockMvc.perform(put(BASE_URL+ "{identifier}", identifier)
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+    }
+
+	@Test
+	public void delete_EntityUserSet_withRegularUser() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		mockMvc.perform(delete(BASE_URL+ "{identifier}", identifier)
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+
+		getUserSetService().deleteUserSet(identifier);
+	}
+
+	@Test
+	public void delete_EntityUserSet_withEditorUser() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		mockMvc.perform(delete(BASE_URL+ "{identifier}", identifier)
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.header(HttpHeaders.AUTHORIZATION, editorUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+	}
+
+	private String getSetCreator(String result) throws JSONException {
+		assertNotNull(result);
+		JSONObject json = new JSONObject(result);
+		String creator = json.getString("creator");
+		assertNotNull(creator);
+		return creator;
+	}
 
     // Get user sets Tests
 
     @Test
     public void getUserSet_NotAuthorised() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
 	mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, "")
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -142,13 +244,13 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void getUserSet_Success() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
 	// get the identifier
 	MockHttpServletResponse response = mockMvc.perform(
 		get(BASE_URL + "{identifier}", userSet.getIdentifier())
 //		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 		
 	String result = response.getContentAsString();
@@ -169,12 +271,12 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void getUserSet_ItemDescriptions() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 	// get the identifier
 	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
 	//
@@ -192,14 +294,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void getUserSetPagination() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 	// get the identifier
 	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
 	//
@@ -236,14 +338,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     
     @Test
     public void getUserSetPaginationEmptyPageNr() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 	// get the identifier
 	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "")
 //		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
 	//
@@ -257,14 +359,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     
     @Test
     public void getUserSetPaginationPageSizeExceeded() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 	// get the identifier
 	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "0")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "200")
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
 	//
@@ -289,20 +391,20 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void updateUserSet_UserSetNotFound() throws Exception {
 	mockMvc.perform(put(BASE_URL + "{identifier}", "test").content("updatedRequestJson")
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
     @Test
     public void updateUserSet_Success() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
 	String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
 	// update the userset
 	MockHttpServletResponse response = mockMvc.perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()).content(updatedRequestJson)
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
 	String result = response.getContentAsString();
@@ -318,19 +420,19 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void deleteMysets_Success() throws Exception {
 	// ensure that at least onea user set exists into the database
-	deleteBookmarkFolder(token);
-	createTestUserSet(USER_SET_REGULAR, token);
-	createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
-	createTestUserSet(USER_SET_REGULAR, token);
+	deleteBookmarkFolder(regularUserToken);
+	createTestUserSet(USER_SET_REGULAR, regularUserToken);
+	createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+	createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
-	mockMvc.perform(delete(BASE_URL).header(HttpHeaders.AUTHORIZATION, token).header(HttpHeaders.CONTENT_TYPE,
+	mockMvc.perform(delete(BASE_URL).header(HttpHeaders.AUTHORIZATION, regularUserToken).header(HttpHeaders.CONTENT_TYPE,
 		MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.NO_CONTENT.value()));
 	// TODO: use search by user to verify that all usersets were deleted
-	String creator = (String) getAuthentication(token).getPrincipal();
+	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator, null, null, 0,
 		1);
 	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, LdProfiles.MINIMAL,
-		getAuthentication(token));
+		getAuthentication(regularUserToken));
 	assertEquals(0, results.getResultSize());
     }
 
@@ -343,7 +445,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	@Test
 	public void deleteUserAssociatedSets_NotAdmin() throws Exception {
 		mockMvc.perform(delete(BASE_URL).queryParam(WebUserSetFields.PATH_PARAM_CREATOR_ID, "creatorID")
-				.header(HttpHeaders.AUTHORIZATION, token).header(HttpHeaders.CONTENT_TYPE,
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken).header(HttpHeaders.CONTENT_TYPE,
 						MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 	}
 
@@ -357,14 +459,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	@Test
 	public void deleteUserAssociatedSets_BadRequest() throws Exception {
 		mockMvc.perform(delete(BASE_URL).queryParam(WebUserSetFields.PATH_PARAM_CREATOR_ID, "")
-				.header(HttpHeaders.AUTHORIZATION, token).header(HttpHeaders.CONTENT_TYPE,
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken).header(HttpHeaders.CONTENT_TYPE,
 						MediaType.APPLICATION_JSON_VALUE)).andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 	}
 
 	// Delete User set via identifier Tests
     @Test
     public void deleteUserSet_NotAuthorised() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, token);
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
 	mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, "")
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -374,7 +476,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 //    @Test //a second token is required for this test to work propertly
     public void deleteUserSet_OperationNotAuthorised() throws Exception {
 	String testFile = USER_SET_REGULAR;
-	WebUserSetImpl userSet = createTestUserSet(testFile, token);
+	WebUserSetImpl userSet = createTestUserSet(testFile, regularUserToken);
 
 	mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.CONTENT_TYPE,
 		MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isForbidden());
@@ -385,7 +487,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void deleteUserSet_UserSetNotFound() throws Exception {
-	mockMvc.perform(delete(BASE_URL + "{identifier}", "wrong_id").header(HttpHeaders.AUTHORIZATION, token)
+	mockMvc.perform(delete(BASE_URL + "{identifier}", "wrong_id").header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
@@ -393,11 +495,11 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void deleteUserSet_Success() throws Exception {
 	String testFile = USER_SET_REGULAR;
-	WebUserSetImpl userSet = createTestUserSet(testFile, token);
+	WebUserSetImpl userSet = createTestUserSet(testFile, regularUserToken);
 
 	// delete the identifier
 	mockMvc.perform(
-		delete(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, token)
+		delete(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.NO_CONTENT.value()));
     }

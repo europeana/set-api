@@ -31,6 +31,7 @@ public class WebUserSetModelFields {
 
 	//** creator fields **/
 	public static final String NICKNAME         = "nickname";
+	public static final String ENTITYUSER_NICKNAME = "entitygalleries";
 
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";

@@ -66,7 +66,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchEmptyApiKey() throws Exception {
-//        UserSet set = createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
+//        UserSet set = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, "").queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
@@ -91,7 +91,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithValidSetId() throws Exception {
-	UserSet set = createTestUserSet(USER_SET_REGULAR, token);
+	UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_SET_ID + set.getIdentifier())
@@ -114,7 +114,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void searchWithPublicVisibility() throws Exception {
 	// create object in database
-	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, token);
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
@@ -129,7 +129,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void searchWithPublicVisibility_ItemsDescription() throws Exception {
 	// create object in database
-	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, token);
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
@@ -143,11 +143,11 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     
     @Test
     public void searchWithPrivateVisibility() throws Exception {
-	deleteBookmarkFolder(token);
-	UserSet set1 = createTestUserSet(USER_SET_MANDATORY, token);
-	UserSet set2 = createTestUserSet(USER_SET_REGULAR, token);
+	deleteBookmarkFolder(regularUserToken);
+	UserSet set1 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
+	UserSet set2 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 	//Update tests to delete sets before test and enable bookmark folder creation
-	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
+	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PRIVATE_VISIBILITY)
@@ -164,7 +164,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithPublishedVisibility() throws Exception {
-	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLISHED, token);
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLISHED, regularUserToken);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLISHED_VISIBILITY)
@@ -177,14 +177,14 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithCreator() throws Exception {
-	deleteBookmarkFolder(token);
-	UserSet set1 = createTestUserSet(USER_SET_REGULAR, token);
-	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, token);
+	deleteBookmarkFolder(regularUserToken);
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
 	//Update tests to delete sets before test and enable bookmark folder creation
-	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, token);
-	String creator = (String) getAuthentication(token).getPrincipal();
+	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.header(HttpHeaders.AUTHORIZATION, token)
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 //		apikey will be ignored
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_CREATOR + creator)
@@ -203,7 +203,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     
     @Test
     public void searchItemsInSet() throws Exception {
-	UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, token);
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 	
 	String setIdentifier = set1.getIdentifier();
 	String result = callSearchItemsInSet(setIdentifier, "1", "2", null);
@@ -237,10 +237,10 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchItemsInSetPrivate() throws Exception {
-	UserSet set1 = createTestUserSet(USER_SET_REGULAR, token);
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 	
 	String setIdentifier = set1.getIdentifier();
-	String result = callSearchItemsInSet(setIdentifier, null, null, token);
+	String result = callSearchItemsInSet(setIdentifier, null, null, regularUserToken);
 	//check ids
 	String searchUri = "/set/"+setIdentifier+"/search";
 	assertTrue(StringUtils.contains(result, searchUri));
@@ -258,12 +258,12 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(setIdentifier);	
     }
     
-    private String callSearchItemsInSet(String setIdentifier, String page, String pageSize, String token)
+    private String callSearchItemsInSet(String setIdentifier, String page, String pageSize, String regularUserToken)
 	    throws UnsupportedEncodingException, Exception {
 	
 	MockHttpServletRequestBuilder getRequest = get("/set/" + setIdentifier + "/search").param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name());
-	if(token != null) {
-	    getRequest.header(HttpHeaders.AUTHORIZATION, token);
+	if(regularUserToken != null) {
+	    getRequest.header(HttpHeaders.AUTHORIZATION, regularUserToken);
 	}else {
 	    getRequest.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY);
 	}
@@ -291,8 +291,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchTypeCollection() throws Exception {
-	UserSet set1 = createTestUserSet(USER_SET_REGULAR, token);
-	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, token);
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_COLLECTION)

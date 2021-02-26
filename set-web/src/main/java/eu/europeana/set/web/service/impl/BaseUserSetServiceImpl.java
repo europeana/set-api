@@ -263,10 +263,15 @@ public abstract class BaseUserSetServiceImpl {
 
     protected void setDefaults(UserSet newUserSet, Authentication authentication) {
 	Agent user = new WebUser();
-	user.setHttpUrl(getUserId(authentication));
-	user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
-	newUserSet.setCreator(user);
-
+	// if entity set, assign entity admin user as a creator
+    if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+    	user.setHttpUrl(UserSetUtils.buildCreatorUri(getConfiguration().getEntityUserSetUserId()));
+		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+	} else {
+		user.setHttpUrl(getUserId(authentication));
+		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+	}
+    newUserSet.setCreator(user);
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}
@@ -310,6 +315,13 @@ public abstract class BaseUserSetServiceImpl {
 			}
 		}
 		return false;
+	}
+
+	public boolean checkEntityAdminUser(UserSet userSet, Authentication authentication) {
+	if (authentication == null) {
+		return false;
+	}
+	return StringUtils.equals(getUserId(authentication), userSet.getCreator().getHttpUrl());
 	}
 
     /**
@@ -573,11 +585,18 @@ public abstract class BaseUserSetServiceImpl {
 
 	/**
 	 * validates the EntityBestItemsSet
-	 * for entity user set subject field must have a entity reference
-	 * user with only EDITOR role can curate the entity set
-	 * user who creates the entity set for the first time become the 'creator' of that entity set
-	 * Other users with EDITOR role become 'contributors' for that entity set
-	 * 'contributors' can update the entity user set
+	 * for entity user set subject field must have a entity reference.
+	 *
+	 * Contributors : can only create or update the entity user set
+	 * user with only EDITOR role can create/update the entity set.
+	 * users with EDITOR role become 'contributors' for that entity set but not 'creator' of the set
+	 * if ADMIN role creates the entity user set, it will be as a contributor
+	 *
+	 * Creator : can create, update and delete the entity user set
+	 * All entity sets must are associated to 1 single user account as creator
+	 * (a sort of admin account for entity sets). 
+	 * The user id is specified as a configurable constant in the set.properties.
+	 *
 	 * Only 'creator' of an entity set can delete the set
 	 *
 	 * @param webUserSet
@@ -589,6 +608,19 @@ public abstract class BaseUserSetServiceImpl {
 		if (!isEntityBestItemsSet(webUserSet)) {
 			return;
 		}
+		// only editors, entity admin user and admin user can curate entity user set
+		if (!(hasEditorRights(authentication) || checkEntityAdminUser(webUserSet, authentication) || hasAdminRights(authentication))) {
+			throw new UserAuthorizationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
+					UserSetI18nConstants.USER_NOT_AUTHORIZED, new String[]{"Only editors or admin user can curate entity user set"},
+					HttpStatus.UNAUTHORIZED);
+		}
+
+		// creator must be present
+		if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					new String[] { WebUserSetModelFields.CREATOR });
+		}
 
 		// subject must be present
 		if (webUserSet.getSubject() == null) {
@@ -597,6 +629,7 @@ public abstract class BaseUserSetServiceImpl {
 					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 		}
 
+		// entity user set is a close set
 		if (webUserSet.isOpenSet()) {
 			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 					UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
@@ -606,11 +639,6 @@ public abstract class BaseUserSetServiceImpl {
 		if (! isEntityReference(webUserSet)) {
 			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
 					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
-		}
-		// users with "EDITOR" role can create or update entity set
-		if (! hasEditorRights(authentication)) {
-			throw new UserAuthorizationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
-					UserSetI18nConstants.USER_NOT_AUTHORIZED, new String[]{"Only editors can curate entity user set"}, HttpStatus.UNAUTHORIZED);
 		}
 	}
 
