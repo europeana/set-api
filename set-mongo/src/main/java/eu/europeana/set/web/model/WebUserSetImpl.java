@@ -22,7 +22,7 @@ import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
 @JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TITLE, WebUserSetModelFields.SUBJECT,
         WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.ITEMS,
-        WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTORS, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
+        WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
 	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -94,9 +94,9 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @Override
-    @JsonProperty(WebUserSetFields.CONTRIBUTORS)
-    public List<String> getContributors() {
-        return super.getContributors();
+    @JsonProperty(WebUserSetFields.CONTRIBUTOR)
+    public List<String> getContributor() {
+        return super.getContributor();
     }
 
     @JsonProperty(value = WebUserSetModelFields.TOTAL, access = JsonProperty.Access.READ_ONLY)

@@ -263,7 +263,7 @@ public abstract class BaseUserSetServiceImpl {
     	user.setHttpUrl(UserSetUtils.buildCreatorUri(getConfiguration().getEntityUserSetUserId()));
 		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
 		if(hasEditorRights(authentication)) {
-			newUserSet.setContributors(Collections.singletonList(getUserId(authentication)));
+			newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
 		}
 	} else {
 		user.setHttpUrl(getUserId(authentication));

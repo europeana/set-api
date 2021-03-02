@@ -356,10 +356,10 @@ public class WebUserSetRest extends BaseRest {
 	 */
 	private void addContributorForEntitySet(UserSet existingUserSet, Authentication authentication) {
 		String userId= getUserSetService().getUserId(authentication);
-		if(existingUserSet.getContributors().stream().anyMatch(c -> c.contains(userId))) {
-			existingUserSet.getContributors().remove(userId);
+		if(existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
+			existingUserSet.getContributor().remove(userId);
 		}
-		existingUserSet.getContributors().add(userId);
+		existingUserSet.getContributor().add(userId);
 	}
 
     private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
