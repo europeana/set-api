@@ -3,6 +3,7 @@ package eu.europeana.api.set.integration.connection.http;
 import java.io.IOException;
 
 import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,17 @@ public class EuropeanaOauthClient{
     	//
     }
 
-    public String getOauthToken() {
+    public String getOauthToken(String user) {
 	try {
 	    String accessToken = "access_token";
 	    String oauthUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
-	    String oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParams();
+		String oauthParams = null;
+	    if (StringUtils.equalsIgnoreCase(user, "regular")) {
+		   oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
+		}
+	    if (StringUtils.equalsIgnoreCase(user, "editor")) {
+			oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor();
+	    }
 	    HttpConnection connection = new HttpConnection();
 	    ResponseEntity<String> response;
 	    response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded");

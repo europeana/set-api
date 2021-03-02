@@ -10,8 +10,10 @@ public class SetIntegrationConfiguration {
 
     protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "/set-integration-testing.properties";
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
-    protected static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
-    
+    protected static final String PROP_OAUTH_REQUEST_PARAMS_REGULAR = "oauth.token.request.params.regular";
+    protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR = "oauth.token.request.params.editor";
+
+
     private static Properties properties = null;
     private static SetIntegrationConfiguration singleton;
 
@@ -85,7 +87,16 @@ public class SetIntegrationConfiguration {
      * 
      * @return
      */
-    public String getOauthRequestParams() {
-	return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS);
+    public String getOauthRequestParamsRegular() {
+	return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_REGULAR);
+    }
+
+    /**
+     * This method returns the request params needed to acquire a new token
+     *
+     * @return
+     */
+    public String getOauthRequestParamsEditor() {
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR);
     }
 }

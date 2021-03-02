@@ -153,7 +153,7 @@ public class SearchUserSetRest extends BaseRest {
 
 	    // check visibility level for given user
 	    if (existingUserSet.isPrivate()) {
-		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
+		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 	    }
 
 	    @SuppressWarnings("unchecked")

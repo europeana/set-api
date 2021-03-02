@@ -28,6 +28,10 @@ public interface UserSet extends PageInfo{
 
 	void setSubject(List<String> subject);
 
+	List<String> getContributors();
+
+	void setContributors(List<String> contributors);
+
 	Agent getCreator();
 
 	void setCreator(Agent creator);

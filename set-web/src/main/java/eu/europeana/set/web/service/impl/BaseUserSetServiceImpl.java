@@ -2,11 +2,7 @@ package eu.europeana.set.web.service.impl;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
@@ -261,10 +257,19 @@ public abstract class BaseUserSetServiceImpl {
 
     protected void setDefaults(UserSet newUserSet, Authentication authentication) {
 	Agent user = new WebUser();
-	user.setHttpUrl(getUserId(authentication));
-	user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
-	newUserSet.setCreator(user);
-
+	// if entity set, assign entity admin user as a creator
+	// also, add user as 'contributor' if the role is editor
+    if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+    	user.setHttpUrl(UserSetUtils.buildCreatorUri(getConfiguration().getEntityUserSetUserId()));
+		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+		if(hasEditorRights(authentication)) {
+			newUserSet.setContributors(Collections.singletonList(getUserId(authentication)));
+		}
+	} else {
+		user.setHttpUrl(getUserId(authentication));
+		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+	}
+    newUserSet.setCreator(user);
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}
@@ -288,17 +293,27 @@ public abstract class BaseUserSetServiceImpl {
 	if (authentication == null) {
 	    return false;
 	}
-
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (Roles.ADMIN.getName().equalsIgnoreCase(role)) {
-		return true;
-	    }
-	}
-	return false;
+	return hasRole(authentication, Roles.ADMIN.getName());
     }
+
+	public boolean hasEditorRights(Authentication authentication) {
+		if (authentication == null) {
+			return false;
+		}
+		return hasRole(authentication, Roles.EDITOR.getName());
+	}
+
+	protected boolean hasRole(Authentication authentication, String roleType) {
+		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
+				.hasNext();) {
+			// role based authorization
+			String role = iterator.next().getAuthority();
+			if (StringUtils.equalsIgnoreCase(roleType, role)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     /**
      * This method retrieves item ids from the closed userSet to build query e.g.
@@ -560,15 +575,24 @@ public abstract class BaseUserSetServiceImpl {
     }
 
 	/**
-	 * validated the EntityBestItemsSet
+	 * validates the EntityBestItemsSet
+	 * for entity user set subject field must have a entity reference.
 	 *
 	 * @param webUserSet
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
 	 */
-	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException, RequestBodyValidationException {
+	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
+			                                                                 RequestBodyValidationException {
 		if (!isEntityBestItemsSet(webUserSet)) {
 			return;
+		}
+
+		// creator must be present
+		if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					new String[] { WebUserSetModelFields.CREATOR });
 		}
 
 		// subject must be present
@@ -578,6 +602,7 @@ public abstract class BaseUserSetServiceImpl {
 					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 		}
 
+		// entity user set is a close set
 		if (webUserSet.isOpenSet()) {
 			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 					UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
@@ -588,11 +613,7 @@ public abstract class BaseUserSetServiceImpl {
 			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
 					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 		}
-
-		//TODO add validation for roles and users
-
 	}
-
 
     void updateTotal(UserSet existingUserSet) {
 	if(existingUserSet.getItems() != null) {

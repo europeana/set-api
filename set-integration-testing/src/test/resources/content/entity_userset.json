@@ -1,0 +1,17 @@
+{
+  "type": "EntityBestItemsSet",
+  "title": {
+    "en": "Sportswear"
+  },
+  "subject" : [
+    "https://entity_refernce"
+  ],
+  "visibility": "public",
+  "description": {
+    "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
+  },
+  "items":[
+    "http://data.europeana.eu/item/08641/1037479000000476703",
+    "http://data.europeana.eu/item/08641/1037479000000476591"
+  ]
+}

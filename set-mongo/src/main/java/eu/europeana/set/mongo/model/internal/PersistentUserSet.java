@@ -40,6 +40,10 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     void setSubject(List<String> subject);
 
+    List<String> getContributors();
+
+    void setContributors(List<String> contributors);
+
 //    String getSpatial();
 //
 //    void setSpatial(String spatial);
