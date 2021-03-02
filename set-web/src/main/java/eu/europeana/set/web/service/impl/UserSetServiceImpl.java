@@ -17,7 +17,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
@@ -65,8 +64,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
 	setDefaults(newUserSet, authentication);
-
-	validateWebUserSet(newUserSet, authentication);
+	if(isEntityBestItemsSet(newUserSet)) {
+		checkPermissionForUpdate(newUserSet, authentication, true);
+	}
+	validateWebUserSet(newUserSet);
 
 	// store in mongo database
 	updateTotal(newUserSet);
@@ -154,7 +155,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    public void validateWebUserSet(UserSet webUserSet, Authentication authentication) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !isBookmarksFolder(webUserSet)) {
@@ -176,7 +177,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	validateBookmarkFolder(webUserSet);
-	validateEntityBestItemsSet(webUserSet, authentication);
+	validateEntityBestItemsSet(webUserSet);
 	validateControlledValues(webUserSet);
 	validateIsDefinedBy(webUserSet);
     }
@@ -481,7 +482,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int totalInCollection = userSet.getTotal();
 	int lastPage = getLastPage(totalInCollection, pageSize);
 	if(pageNr > lastPage) {
-	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, 
+	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] {CommonApiConstants.QUERY_PARAM_PAGE, "value our of range: " + pageNr + ", last page:" + lastPage});
 	}
 	
@@ -577,19 +578,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @return true if user has editor role
 	 */
 	@Override
-	public boolean isEditor(Authentication authentication) {
+	public boolean hasEditorRole(Authentication authentication) {
 		return hasEditorRights(authentication);
-	}
-
-	/**
-	 * Check if user is Admin entity user
-	 *
-	 * @param authentication
-	 * @return true if user is Admin entity user
-	 */
-	@Override
-	public boolean isEntityAdminUser(UserSet userSet, Authentication authentication) {
-	return checkEntityAdminUser(userSet, authentication);
 	}
 
 	/**
@@ -602,7 +592,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @throws HttpException
      */
     @Override
-    public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException {
+    public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
 
 	if (authentication == null) {
 	    // access by API KEY, authentication not available
@@ -619,12 +609,39 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    return userSet;
 	} else {
 	    // not authorized
+		StringBuilder message = new StringBuilder();
+		if (includeEntitySetMsg) {
+			message.append("Only the contributors, creator of the entity user set or admins are authorized to perform this operation.");
+		} else {
+			message.append("Only the creators of the user set or admins are authorized to perform this operation.");
+		}
 	    throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
 		    I18nConstants.OPERATION_NOT_AUTHORIZED,
-		    new String[] {"Only the creators of the user set or admins are authorized to perform this operation." },
+		    new String[] { message.toString() },
 		    HttpStatus.FORBIDDEN);
 	}
     }
+
+	/**
+	 * This method checks the permission to update the user sets OR
+	 * permissions to create/update Entity sets
+	 *
+	 * Only owner and admin are allowed to update the user set.
+	 *
+	 * But for entity sets:
+	 * 1) 'contributors' (users with editor role)
+	 * 2) owner or admin ; all three are allowed to create/update entity set
+	 * can also update the entity sets.
+	 * @param existingUserSet
+	 * @param authentication
+	 * @throws HttpException
+	 */
+	public void checkPermissionForUpdate(UserSet existingUserSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
+		if (isEntityBestItemsSet(existingUserSet) && hasEditorRole(authentication) && !existingUserSet.isPrivate()) {
+			return;
+		}
+		verifyOwnerOrAdmin(existingUserSet, authentication, includeEntitySetMsg);
+	}
 
 	/**
      * This methods applies Linked Data profile to a user set

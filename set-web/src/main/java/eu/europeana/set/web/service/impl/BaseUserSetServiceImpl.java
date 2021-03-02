@@ -2,19 +2,13 @@ package eu.europeana.set.web.service.impl;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
-import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -264,9 +258,13 @@ public abstract class BaseUserSetServiceImpl {
     protected void setDefaults(UserSet newUserSet, Authentication authentication) {
 	Agent user = new WebUser();
 	// if entity set, assign entity admin user as a creator
+	// also, add user as 'contributor' if the role is editor
     if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
     	user.setHttpUrl(UserSetUtils.buildCreatorUri(getConfiguration().getEntityUserSetUserId()));
 		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+		if(hasEditorRights(authentication)) {
+			newUserSet.setContributors(Collections.singletonList(getUserId(authentication)));
+		}
 	} else {
 		user.setHttpUrl(getUserId(authentication));
 		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
@@ -295,17 +293,17 @@ public abstract class BaseUserSetServiceImpl {
 	if (authentication == null) {
 	    return false;
 	}
-	return checkRoles(authentication, Roles.ADMIN.getName());
+	return hasRole(authentication, Roles.ADMIN.getName());
     }
 
 	public boolean hasEditorRights(Authentication authentication) {
 		if (authentication == null) {
 			return false;
 		}
-		return checkRoles(authentication, Roles.EDITOR.getName());
+		return hasRole(authentication, Roles.EDITOR.getName());
 	}
 
-	private boolean checkRoles(Authentication authentication, String roleType) {
+	protected boolean hasRole(Authentication authentication, String roleType) {
 		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
 				.hasNext();) {
 			// role based authorization
@@ -315,13 +313,6 @@ public abstract class BaseUserSetServiceImpl {
 			}
 		}
 		return false;
-	}
-
-	public boolean checkEntityAdminUser(UserSet userSet, Authentication authentication) {
-	if (authentication == null) {
-		return false;
-	}
-	return StringUtils.equals(getUserId(authentication), userSet.getCreator().getHttpUrl());
 	}
 
     /**
@@ -587,32 +578,14 @@ public abstract class BaseUserSetServiceImpl {
 	 * validates the EntityBestItemsSet
 	 * for entity user set subject field must have a entity reference.
 	 *
-	 * Contributors : can only create or update the entity user set
-	 * user with only EDITOR role can create/update the entity set.
-	 * users with EDITOR role become 'contributors' for that entity set but not 'creator' of the set
-	 * if ADMIN role creates the entity user set, it will be as a contributor
-	 *
-	 * Creator : can create, update and delete the entity user set
-	 * All entity sets must are associated to 1 single user account as creator
-	 * (a sort of admin account for entity sets). 
-	 * The user id is specified as a configurable constant in the set.properties.
-	 *
-	 * Only 'creator' of an entity set can delete the set
-	 *
 	 * @param webUserSet
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
 	 */
-	void validateEntityBestItemsSet(UserSet webUserSet, Authentication authentication) throws ParamValidationException,
-			                                                                 RequestBodyValidationException, UserAuthorizationException {
+	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
+			                                                                 RequestBodyValidationException {
 		if (!isEntityBestItemsSet(webUserSet)) {
 			return;
-		}
-		// only editors, entity admin user and admin user can curate entity user set
-		if (!(hasEditorRights(authentication) || checkEntityAdminUser(webUserSet, authentication) || hasAdminRights(authentication))) {
-			throw new UserAuthorizationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
-					UserSetI18nConstants.USER_NOT_AUTHORIZED, new String[]{"Only editors or admin user can curate entity user set"},
-					HttpStatus.UNAUTHORIZED);
 		}
 
 		// creator must be present

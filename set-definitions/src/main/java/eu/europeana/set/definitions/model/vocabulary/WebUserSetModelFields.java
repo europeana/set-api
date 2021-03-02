@@ -19,6 +19,7 @@ public class WebUserSetModelFields {
 	//** user set fields **/
 	public static final String AT_CONTEXT       = "@context";
 	public static final String CREATOR          = "creator";
+	public static final String CONTRIBUTORS     = "contributors";
 	public static final String CREATED          = "created";
 	public static final String MODIFIED         = "modified";
 	public static final String IS_DEFINED_BY    = "isDefinedBy";

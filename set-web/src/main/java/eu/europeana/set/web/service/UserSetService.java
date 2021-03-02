@@ -90,14 +90,12 @@ public interface UserSetService {
     /**
      * This method validates and processes the Set description for format and
      * mandatory fields if false responds with HTTP 400
-     * Also validates the roles for the Entity user sets
      * 
      * @param webUserSet
-     * @param authentication
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
      */
-    public void validateWebUserSet(UserSet webUserSet, Authentication authentication) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -200,7 +198,7 @@ public interface UserSetService {
      * @return userSet object
      * @throws HttpException
      */
-    UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication) throws HttpException;
+    UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
 
     /**
      * This method validates admin role
@@ -220,18 +218,18 @@ public interface UserSetService {
      * @return true if userToken has editor role
      * @throws HttpException
      */
-    boolean isEditor(Authentication authentication);
+    boolean hasEditorRole(Authentication authentication);
 
     /**
-     * This method validates if the userID from authentication token
-     * is the Entity Admin User
+     * This method checks the permission for create and update
+     * with the authentication token
      *
      * @param  authentication
      *
-     * @return true if userToken is Entity Admin User
+     * @return true if the user has permission
      * @throws HttpException
      */
-    boolean isEntityAdminUser(UserSet userSet,Authentication authentication);
+    void checkPermissionForUpdate(UserSet userSet,Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
 
     /**
      * This method retrieves user id from authentication object

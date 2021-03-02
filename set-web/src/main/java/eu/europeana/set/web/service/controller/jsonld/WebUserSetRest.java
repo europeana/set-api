@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.set.definitions.model.vocabulary.*;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
@@ -43,16 +43,12 @@ import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
-import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -212,7 +208,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check visibility level for given user
 	    if (userSet.isPrivate()) {
-		getUserSetService().verifyOwnerOrAdmin(userSet, authentication);
+		getUserSetService().verifyOwnerOrAdmin(userSet, authentication, false);
 	    }
 
 	    if (mustFetchItems(userSet, profile)) {
@@ -285,7 +281,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // only an editor can set the state of a set to "published"
 	    // and only if the set is in "public" visibility.
-	    checkVisibilityForUpdate(existingUserSet, authentication);
+	    getUserSetService().checkPermissionForUpdate(existingUserSet, authentication,true);
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
@@ -304,8 +300,12 @@ public class WebUserSetRest extends BaseRest {
 	    if (newUserSet.getVisibility() == null) {
 		newUserSet.setVisibility(existingUserSet.getVisibility());
 	    }
-
-	    getUserSetService().validateWebUserSet(newUserSet, authentication);
+	    // for entity user sets, add users with 'editor' role as contributors
+        if(StringUtils.equals(existingUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()) &&
+				getUserSetService().hasEditorRole(authentication)) {
+			addContributorForEntitySet(existingUserSet, authentication);
+		}
+	    getUserSetService().validateWebUserSet(newUserSet);
 	    // TODO: move verification to validateMethod when new specs are available
 	    if (existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
 		// isDefinedBy is mandatory for open sets
@@ -349,13 +349,18 @@ public class WebUserSetRest extends BaseRest {
 	}
     }
 
-    private void checkVisibilityForUpdate(UserSet existingUserSet, Authentication authentication) throws HttpException {
-	if (getUserSetService().isEditor(authentication) && !existingUserSet.isPrivate()) {
-	    // handle editor role
-	    return;
+	/**
+	 * Will add the last editor at the end of the contributor List
+	 * @param existingUserSet
+	 * @param authentication
+	 */
+	private void addContributorForEntitySet(UserSet existingUserSet, Authentication authentication) {
+		String userId= getUserSetService().getUserId(authentication);
+		if(existingUserSet.getContributors().stream().anyMatch(c -> c.contains(userId))) {
+			existingUserSet.getContributors().remove(userId);
+		}
+		existingUserSet.getContributors().add(userId);
 	}
-	getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
-    }
 
     private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
 	    throws ApplicationAuthenticationException {
@@ -441,7 +446,7 @@ public class WebUserSetRest extends BaseRest {
 	    }
 
 	    // check visibility level for given user
-	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
+	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
@@ -510,7 +515,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check visibility level for given user
 	    if (existingUserSet.isPrivate()) {
-		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
+		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 	    }
 
 	    // check if the Set is disabled, respond with HTTP 410
@@ -587,7 +592,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check if the user is the owner/creator of the set or admin, otherwise respond with
 	    // 403
-	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
+	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 
 	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 
@@ -666,7 +671,7 @@ public class WebUserSetRest extends BaseRest {
 	    // that calls the deletion (i.e. identified by provided user token) is the same
 	    // user as the creator
 	    // of the user set
-	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication);
+	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 
 	    // check visibility level for given user - currently
 	    // checkStatus(existingUserSet, authentication);

@@ -42,6 +42,9 @@ import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Test class for UserSet controller.
  * <p>
@@ -122,7 +125,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 				.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+				.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 	}
 
 	@Test
@@ -150,6 +153,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String creator = getSetCreator(result);
 		assertNotNull(creator);
         assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
+        assertNotNull(getSetContributors(result));
 		getUserSetService().deleteUserSet(identifier);
 
 	}
@@ -172,12 +176,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
-		mockMvc.perform(put(BASE_URL+ "{identifier}", identifier)
+		String result = mockMvc.perform(put(BASE_URL+ "{identifier}", identifier)
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
 				.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(status().is(HttpStatus.OK.value()));
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 
+		assertNotNull(getSetCreator(result));
+		assertNotNull(getSetContributors(result));
 		getUserSetService().deleteUserSet(identifier);
 	}
 
@@ -227,6 +233,12 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String creator = json.getString("creator");
 		assertNotNull(creator);
 		return creator;
+	}
+
+	private List<String> getSetContributors(String result) throws JSONException {
+		assertNotNull(result);
+		JSONObject json = new JSONObject(result);
+		return  Collections.singletonList(json.getString("contributors"));
 	}
 
     // Get user sets Tests
