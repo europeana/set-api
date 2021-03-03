@@ -178,7 +178,7 @@ public class WebUserSetRest extends BaseRest {
 		return value;
 	    }catch(NumberFormatException e){
 		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-			new String[] { paramName, paramValue });
+			new String[] { paramName, paramValue }, e);
 	    }
 	}
 	return null;

@@ -31,5 +31,9 @@ public class CollectionPage extends BaseUserSetResultPage<String>{
         this.set = set;
     }
     
+    UserSet getSet() {
+        return set;
+    }
+    
     
 }

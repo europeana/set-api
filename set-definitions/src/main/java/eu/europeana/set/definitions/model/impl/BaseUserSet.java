@@ -137,8 +137,8 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     }
 
     @Override
-    public void setContributor(List<String> contributors) {
-        this.contributor = contributors;
+    public void setContributor(List<String> contributor) {
+        this.contributor = contributor;
     }
 
     public boolean isUgc() {
