@@ -33,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -348,6 +349,28 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
     
+    @Test
+    public void getUserSetPaginationDefaultPageSize() throws Exception {
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
+
+	// get the identifier
+	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+	//
+	String result = response.getContentAsString();
+	assertNotNull(result);
+	assertEquals(HttpStatus.OK.value(), response.getStatus());
+	
+	int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
+	int pageSize = StringUtils.countMatches(result, "http://data.europeana.eu/item/");
+	assertEquals(defaultPageSize, pageSize);
+		
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
     
     @Test
     public void getUserSetPaginationEmptyPageNr() throws Exception {

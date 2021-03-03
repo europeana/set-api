@@ -125,7 +125,7 @@ public class SearchUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false, defaultValue = "0") int page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false, defaultValue = ""
-		    + UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE) int pageSize,
+		    + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) int pageSize,
 //    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
 	    HttpServletRequest request) throws HttpException {
 

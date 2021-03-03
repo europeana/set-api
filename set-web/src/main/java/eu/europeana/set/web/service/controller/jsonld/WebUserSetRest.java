@@ -58,7 +58,6 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @Controller
-//@RestController
 @SwaggerSelect
 @Api(tags = "Web User Set API")
 public class WebUserSetRest extends BaseRest {
@@ -113,7 +112,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    if (mustFetchItems(storedUserSet, profile)) {
 //		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
-		int derefItems = getDerefItemsCount(storedUserSet, UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE);
+		int derefItems = getDerefItemsCount(storedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 		storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null,
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
@@ -156,7 +155,7 @@ public class WebUserSetRest extends BaseRest {
 	    @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER, required = false) String sortOrderField,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) String page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, defaultValue = ""
-		    + UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE) String pageSize,
+		    + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) String pageSize,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
 	    HttpServletRequest request) throws HttpException {
 
@@ -332,7 +331,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    if (mustFetchItems(updatedUserSet, profile)) {
 //		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
-		int derefItems = getDerefItemsCount(updatedUserSet, UserSetConfigurationImpl.MAX_ITEMS_PER_PAGE);
+		int derefItems = getDerefItemsCount(updatedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null,
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
