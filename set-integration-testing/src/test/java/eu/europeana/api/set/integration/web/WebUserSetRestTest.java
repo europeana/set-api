@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -230,7 +231,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	private String getSetCreator(String result) throws JSONException {
 		assertNotNull(result);
 		JSONObject json = new JSONObject(result);
-		String creator = json.getString("creator");
+		String creator = json.getString(WebUserSetModelFields.CREATOR);
 		assertNotNull(creator);
 		return creator;
 	}
@@ -238,7 +239,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	private List<String> getSetContributors(String result) throws JSONException {
 		assertNotNull(result);
 		JSONObject json = new JSONObject(result);
-		return  Collections.singletonList(json.getString("contributors"));
+		return  Collections.singletonList(json.getString(WebUserSetModelFields.CONTRIBUTOR));
 	}
 
     // Get user sets Tests
