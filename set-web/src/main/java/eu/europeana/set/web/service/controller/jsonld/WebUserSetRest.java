@@ -280,7 +280,8 @@ public class WebUserSetRest extends BaseRest {
 
 	    // only an editor can set the state of a set to "published"
 	    // and only if the set is in "public" visibility.
-	    getUserSetService().checkPermissionForUpdate(existingUserSet, authentication,true);
+		// only owner or admin can update any user set
+	   getUserSetService().verifyOwnerOrAdmin(existingUserSet,authentication,false);
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
@@ -299,11 +300,7 @@ public class WebUserSetRest extends BaseRest {
 	    if (newUserSet.getVisibility() == null) {
 		newUserSet.setVisibility(existingUserSet.getVisibility());
 	    }
-	    // for entity user sets, add users with 'editor' role as contributors
-        if(StringUtils.equals(existingUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()) &&
-				getUserSetService().hasEditorRole(authentication)) {
-			addContributorForEntitySet(existingUserSet, authentication);
-		}
+	    newUserSet.setContributor(existingUserSet.getContributor());
 	    getUserSetService().validateWebUserSet(newUserSet);
 	    // TODO: move verification to validateMethod when new specs are available
 	    if (existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
@@ -354,11 +351,15 @@ public class WebUserSetRest extends BaseRest {
 	 * @param authentication
 	 */
 	private void addContributorForEntitySet(UserSet existingUserSet, Authentication authentication) {
-		String userId= getUserSetService().getUserId(authentication);
-		if(existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
-			existingUserSet.getContributor().remove(userId);
+		if(StringUtils.equals(existingUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()) &&
+				getUserSetService().hasEditorRole(authentication)) {
+			String userId= getUserSetService().getUserId(authentication);
+			if(existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
+				existingUserSet.getContributor().remove(userId);
+			}
+			existingUserSet.getContributor().add(userId);
 		}
-		existingUserSet.getContributor().add(userId);
+
 	}
 
     private void validateAndSetItems(UserSet storedUserSet, UserSet updateUserSet, LdProfiles profile)
@@ -445,15 +446,17 @@ public class WebUserSetRest extends BaseRest {
 	    }
 
 	    // check visibility level for given user
-	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
+	    getUserSetService().checkPermissionToUpdate(existingUserSet, authentication, true);
+
+		// for entity user sets, add users with 'editor' role as contributors
+		addContributorForEntitySet(existingUserSet, authentication);
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
 	    String eTagOrigin = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 	    checkIfMatchHeader(eTagOrigin, request);
-
 	    UserSet updatedUserSet = getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-	    String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+		String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 
 	    String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
@@ -513,9 +516,18 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
 	    // check visibility level for given user
-	    if (existingUserSet.isPrivate()) {
-		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
-	    }
+		// for Entity sets, editors also can view the Items
+		if(StringUtils.equals(existingUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+			getUserSetService().checkPermissionToUpdate(existingUserSet,authentication,true);
+		} else { // if not entity set and visibility private, then only owner and admins are allowed.
+			   if (existingUserSet.isPrivate()) {
+				getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
+			}
+		}
+
+		// for entity user sets, add users with 'editor' role as contributors
+		addContributorForEntitySet(existingUserSet, authentication);
+
 
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
@@ -589,9 +601,13 @@ public class WebUserSetRest extends BaseRest {
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
-	    // check if the user is the owner/creator of the set or admin, otherwise respond with
+	    // check if the user is the owner/creator of the set or admin,
+		// OR Editor for Entity sets, otherwise respond with
 	    // 403
-	    getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
+	    getUserSetService().checkPermissionToUpdate(existingUserSet, authentication, true);
+
+		// for entity user sets, add users with 'editor' role as contributors
+		addContributorForEntitySet(existingUserSet, authentication);
 
 	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 
