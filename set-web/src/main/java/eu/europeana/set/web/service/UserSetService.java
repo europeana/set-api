@@ -229,7 +229,7 @@ public interface UserSetService {
      * @return true if the user has permission
      * @throws HttpException
      */
-    void checkPermissionForUpdate(UserSet userSet,Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
+    void checkPermissionToUpdate(UserSet userSet,Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
 
     /**
      * This method retrieves user id from authentication object

@@ -259,7 +259,9 @@ public abstract class BaseUserSetServiceImpl {
 	Agent user = new WebUser();
 	// if entity set, assign entity admin user as a creator
 	// also, add user as 'contributor' if the role is editor
+	// default visibility for Entity set is Public, even if user submits differently.
     if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+    	newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
     	user.setHttpUrl(UserSetUtils.buildCreatorUri(getConfiguration().getEntityUserSetUserId()));
 		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
 		if(hasEditorRights(authentication)) {

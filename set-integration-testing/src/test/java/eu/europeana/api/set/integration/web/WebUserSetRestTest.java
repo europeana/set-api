@@ -178,14 +178,12 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
-		String result = mockMvc.perform(put(BASE_URL+ "{identifier}", identifier)
+		mockMvc.perform(put(BASE_URL+ "{identifier}", identifier)
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
 				.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+				.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-		assertNotNull(getSetCreator(result));
-		assertNotNull(getSetContributors(result));
 		getUserSetService().deleteUserSet(identifier);
 	}
 
