@@ -65,7 +65,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
 	setDefaults(newUserSet, authentication);
 	if(isEntityBestItemsSet(newUserSet)) {
-		checkPermissionForUpdate(newUserSet, authentication, true);
+		checkPermissionToUpdate(newUserSet, authentication, true);
 	}
 	validateWebUserSet(newUserSet);
 
@@ -626,21 +626,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
 	/**
-	 * This method checks the permission to update the user sets OR
-	 * permissions to create/update Entity sets
-	 *
-	 * Only owner and admin are allowed to update the user set.
-	 *
-	 * But for entity sets:
+	 * This method checks the permission to create or Update the entity user sets
+	 * for entity sets creation or updating the items:
 	 * 1) 'contributors' (users with editor role)
-	 * 2) owner or admin ; all three are allowed to create/update entity set
-	 * can also update the entity sets.
-	 * @param existingUserSet
+	 * 2) owner or admin ; all three are allowed to create/update the entity set
+	 *
+	 *  @param existingUserSet
 	 * @param authentication
 	 * @throws HttpException
 	 */
-	public void checkPermissionForUpdate(UserSet existingUserSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
-		if (isEntityBestItemsSet(existingUserSet) && hasEditorRole(authentication) && !existingUserSet.isPrivate()) {
+	public void checkPermissionToUpdate(UserSet existingUserSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
+		if (isEntityBestItemsSet(existingUserSet) && hasEditorRole(authentication)) {
 			return;
 		}
 		verifyOwnerOrAdmin(existingUserSet, authentication, includeEntitySetMsg);
