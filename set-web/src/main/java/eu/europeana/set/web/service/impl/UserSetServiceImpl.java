@@ -536,6 +536,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		result.setTotalInPage(pageItems.size());
 		addPagination(result, collectionUrl, page, pageSize, lastPage);
 	    }
+	}else {
+	    //empty result page, but we must still return the ID 
+	    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize));   
 	}
 
 	return result;

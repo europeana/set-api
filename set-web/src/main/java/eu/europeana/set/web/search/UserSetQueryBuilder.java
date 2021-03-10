@@ -18,7 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 public class UserSetQueryBuilder extends QueryBuilder {
 
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID};
+	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
     Set<String> suportedFields = Set.of(fields);
     
     public static final String SEARCH_ALL = "*";

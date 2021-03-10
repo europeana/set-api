@@ -76,7 +76,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @Test
     public void searchInvalidApiKey() throws Exception {
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key").queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
+		.queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key")
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
@@ -97,7 +98,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_SET_ID + set.getIdentifier())
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
-	//delete item created by test
+	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
 
     }
@@ -121,8 +122,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
-	
-	//delete item created by test
+
+	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
@@ -131,36 +132,35 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// create object in database
 	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
-	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
-		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+	mockMvc.perform(
+		get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
-	
-	//delete item created by test
+
+	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchWithPrivateVisibility() throws Exception {
 	deleteBookmarkFolder(regularUserToken);
 	UserSet set1 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
 	UserSet set2 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-	//Update tests to delete sets before test and enable bookmark folder creation
+	// Update tests to delete sets before test and enable bookmark folder creation
 	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PRIVATE_VISIBILITY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
-	
-	//delete item created by test
+
+	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());
 	getUserSetService().deleteUserSet(set2.getIdentifier());
 	getUserSetService().deleteUserSet(set3.getIdentifier());
     }
-
-    
 
     @Test
     public void searchWithPublishedVisibility() throws Exception {
@@ -171,7 +171,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
 
-	//delete item created by test
+	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
@@ -180,35 +180,38 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	deleteBookmarkFolder(regularUserToken);
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 	UserSet set2 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
-	//Update tests to delete sets before test and enable bookmark folder creation
+	// Update tests to delete sets before test and enable bookmark folder creation
 	UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
 	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
-	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+	String result = mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+			.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 //		apikey will be ignored
-		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_CREATOR + creator)
-		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_CREATOR + creator)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
-	//check ids
+	// check ids
 	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
 	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
 	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
 
-	//delete item created by test
+	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());
 	getUserSetService().deleteUserSet(set2.getIdentifier());
 	getUserSetService().deleteUserSet(set3.getIdentifier());
     }
-    
+
     @Test
     public void searchItemsInSet() throws Exception {
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
-	
+
 	String setIdentifier = set1.getIdentifier();
-	String result = callSearchItemsInSet(setIdentifier, "1", "2", null);
-	//check ids
-	String searchUri = "/set/"+setIdentifier+"/search";
+	String[] qf = new String[] {"item:/08641/1037479000000476467", "item:/08641/1037479000000476875", "item:/11654/_Botany_U_1419207",
+		"item:/2048128/618580", "item:/2048128/618580", "item:/2048128/notexisting", "item:/2048128/notexisting1"};
+	String result = callSearchItemsInSet(setIdentifier, qf, "1", "2", null);
+	// check ids
+	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
@@ -216,77 +219,131 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.PREV));
-	//last page no next
+	// last page no next
 	assertTrue(!StringUtils.contains(result, WebUserSetFields.NEXT));
-	
-	result = callSearchItemsInSet(setIdentifier, "0", "2", null);
-	//check ids
+
+	result = callSearchItemsInSet(setIdentifier, qf, "0", "2", null);
+	// check ids
 	assertTrue(StringUtils.contains(result, searchUri));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_LIST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
-	//first page no prev
+	// first page no prev
 	assertTrue(!StringUtils.contains(result, WebUserSetFields.PREV));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.NEXT));
-	
-	//delete item created by test
-	getUserSetService().deleteUserSet(setIdentifier);	
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(setIdentifier);
     }
 
     @Test
     public void searchItemsInSetPrivate() throws Exception {
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-	
+
 	String setIdentifier = set1.getIdentifier();
-	String result = callSearchItemsInSet(setIdentifier, null, null, regularUserToken);
-	//check ids
-	String searchUri = "/set/"+setIdentifier+"/search";
+	String[] qf = new String[] {"item:/08641/1037479000000476467", "item:/08641/1037479000000476875", "item:/11654/_Botany_U_1419207",
+		"item:/2048128/618580", "item:/2048128/618580", "item:/2048128/notexisting", "item:/2048128/notexisting1"};
+	String result = callSearchItemsInSet(setIdentifier, qf, null, null, regularUserToken);
+	// check ids
+	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_LIST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
 	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
-	//first page no next
+	// first page no next
 	assertTrue(!StringUtils.contains(result, WebUserSetFields.PREV));
-	//last page no next
+	// last page no next
 	assertTrue(!StringUtils.contains(result, WebUserSetFields.NEXT));
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(setIdentifier);
+    }
+
+    @Test
+    public void searchItemsInSet_empty_response() throws Exception {
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+	String setIdentifier = set1.getIdentifier();
+	String result = callSearchItemsInSet(setIdentifier, new String[] {"item:/nonexisting/item"}, null, null, regularUserToken);
+	// check ids
+	String searchUri = "/set/" + setIdentifier + "/search";
+	assertTrue(StringUtils.contains(result, searchUri));
+	//total should be 0
+	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
+	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(StringUtils.contains(result, "\""+CommonLdConstants.ID+"\""));
 	
-	//delete item created by test
-	getUserSetService().deleteUserSet(setIdentifier);	
+	// delete item created by test
+	getUserSetService().deleteUserSet(setIdentifier);
+    }
+
+    @Test
+    public void searchItemsInSet_No_QF_Param() throws Exception {
+	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+	String setIdentifier = set1.getIdentifier();
+
+	MockHttpServletRequestBuilder searchRequest = buildSearchItemsInSetRequest(setIdentifier, null, null, null,
+		regularUserToken);
+
+	mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+		.getContentAsString();
+	
+	String result = callSearchItemsInSet(setIdentifier, null, null, null, regularUserToken);
+	// check ids
+	String searchUri = "/set/" + setIdentifier + "/search";
+	assertTrue(StringUtils.contains(result, searchUri));
+	//total should be 0
+	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
+	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(StringUtils.contains(result, "\""+CommonLdConstants.ID+"\""));
+	
+	// delete item created by test
+	getUserSetService().deleteUserSet(setIdentifier);
     }
     
-    private String callSearchItemsInSet(String setIdentifier, String page, String pageSize, String regularUserToken)
-	    throws UnsupportedEncodingException, Exception {
-	
-	MockHttpServletRequestBuilder getRequest = get("/set/" + setIdentifier + "/search").param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name());
-	if(regularUserToken != null) {
+    private String callSearchItemsInSet(String setIdentifier, String[] qf, String page, String pageSize,
+	    String regularUserToken) throws UnsupportedEncodingException, Exception {
+
+	MockHttpServletRequestBuilder searchRequest = buildSearchItemsInSetRequest(setIdentifier, qf, page, pageSize,
+		regularUserToken);
+
+	return mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
+		.getContentAsString();
+
+    }
+
+    private MockHttpServletRequestBuilder buildSearchItemsInSetRequest(String setIdentifier, String[] qf, String page,
+	    String pageSize, String regularUserToken) {
+	MockHttpServletRequestBuilder getRequest = get("/set/" + setIdentifier + "/search")
+		.param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name());
+	if (regularUserToken != null) {
 	    getRequest.header(HttpHeaders.AUTHORIZATION, regularUserToken);
-	}else {
+	} else {
 	    getRequest.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY);
 	}
-	if(page != null) {
+	
+	if (page != null) {
 	    getRequest.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, page);
 	}
-	if(pageSize != null) {
+	if (pageSize != null) {
 	    getRequest.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize);
 	}
-			
+
 //		apikey will be ignored
-			
-	getRequest.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL)
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/08641/1037479000000476467")
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/08641/1037479000000476875")
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/11654/_Botany_U_1419207")
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/2048128/618580")
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/2048128/618580")
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/2048128/notexisting")
-			.queryParam(CommonApiConstants.QUERY_PARAM_QF, "item:/2048128/notexisting1");
-	return mockMvc.perform(getRequest)
-		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
-	
+	MockHttpServletRequestBuilder requestBuilder = getRequest.queryParam(CommonApiConstants.QUERY_PARAM_QUERY,
+		UserSetQueryBuilder.SEARCH_ALL);
+
+	// add qf param
+	if (qf != null) {
+	    for (int i = 0; i < qf.length; i++) {
+		requestBuilder.queryParam(CommonApiConstants.QUERY_PARAM_QF, qf[i]);
+	    }
+	}
+	return getRequest;
     }
 
     @Test
@@ -298,8 +355,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_COLLECTION)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
-	//delete item created by test
+	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());
-	getUserSetService().deleteUserSet(set2.getIdentifier());	
+	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
 }

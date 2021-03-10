@@ -180,7 +180,9 @@ public class SearchUserSetRest extends BaseRest {
 
     private List<String> buildItemIdsList(String query, String[] qf) throws ParamValidationException {
 	if (qf == null || qf.length == 0) {
-	    return null;
+//	    return null;
+	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+		    UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, new String[] { "qf" });
 	}
 
 	final String ITEM_PREFIX = WebUserSetFields.ITEM + ":";
