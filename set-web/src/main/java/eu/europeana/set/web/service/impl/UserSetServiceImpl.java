@@ -64,7 +64,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
 	setDefaults(newUserSet, authentication);
-	if(isEntityBestItemsSet(newUserSet)) {
+	if(newUserSet.isEntityBestItemsSet()) {
 		checkPermissionToUpdate(newUserSet, authentication, true);
 	}
 	validateWebUserSet(newUserSet);
@@ -158,7 +158,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
 
 	// validate title
-	if (webUserSet.getTitle() == null && !isBookmarksFolder(webUserSet)) {
+	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 		    new String[] { WebUserSetModelFields.TITLE });
 	}
@@ -636,7 +636,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @throws HttpException
 	 */
 	public void checkPermissionToUpdate(UserSet existingUserSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
-		if (isEntityBestItemsSet(existingUserSet) && hasEditorRole(authentication)) {
+		if (existingUserSet.isEntityBestItemsSet() && hasEditorRole(authentication)) {
 			return;
 		}
 		verifyOwnerOrAdmin(existingUserSet, authentication, includeEntitySetMsg);

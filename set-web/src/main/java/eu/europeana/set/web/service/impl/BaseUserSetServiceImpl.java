@@ -408,14 +408,6 @@ public abstract class BaseUserSetServiceImpl {
 	return res;
     }
 
-    boolean isBookmarksFolder(UserSet userSet) {
-	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(userSet.getType());
-    }
-
-	boolean isEntityBestItemsSet(UserSet userSet) {
-		return UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(userSet.getType());
-	}
-
     void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	if (apiResult.getItems() == null) {
 	    return;
@@ -460,7 +452,7 @@ public abstract class BaseUserSetServiceImpl {
     void validateBookmarkFolder(UserSet webUserSet)
 	    throws RequestBodyValidationException, ParamValidationException {
 
-	if (!isBookmarksFolder(webUserSet)) {
+	if (!webUserSet.isBookmarksFolder()) {
 	    return;
 	}
 
@@ -526,7 +518,7 @@ public abstract class BaseUserSetServiceImpl {
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType() });
 	}
 	// if type is BookmarkFolder or Collection, subject must not contain entity reference
-	if (! isEntityBestItemsSet(webUserSet) && isEntityReference(webUserSet)) {
+	if (! webUserSet.isEntityBestItemsSet() && isEntityReference(webUserSet)) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.INVALID_SUBJECT_VALUE,
 			new String[] {webUserSet.getType(), WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
 	}
@@ -586,7 +578,7 @@ public abstract class BaseUserSetServiceImpl {
 	 */
 	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
 			                                                                 RequestBodyValidationException {
-		if (!isEntityBestItemsSet(webUserSet)) {
+		if (!webUserSet.isEntityBestItemsSet()) {
 			return;
 		}
 

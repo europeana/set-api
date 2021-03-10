@@ -5,71 +5,78 @@ import java.util.List;
 import java.util.Map;
 
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 
-public interface UserSet extends PageInfo{
+public interface UserSet extends PageInfo {
 
-	String getType();
+    String getType();
 
-	void setType(String type);
+    void setType(String type);
 
-	String getVisibility();
+    String getVisibility();
 
-	void setVisibility(String visibility);
+    void setVisibility(String visibility);
 
-	Map<String, String> getTitle();
+    Map<String, String> getTitle();
 
-	void setTitle(Map<String, String> title);
+    void setTitle(Map<String, String> title);
 
-	Map<String, String> getDescription();
+    Map<String, String> getDescription();
 
-	void setDescription(Map<String, String> setDescription);
+    void setDescription(Map<String, String> setDescription);
 
-	List<String> getSubject();
+    List<String> getSubject();
 
-	void setSubject(List<String> subject);
+    void setSubject(List<String> subject);
 
-	List<String> getContributor();
+    List<String> getContributor();
 
-	void setContributor(List<String> contributorList);
+    void setContributor(List<String> contributorList);
 
-	Agent getCreator();
+    Agent getCreator();
 
-	void setCreator(Agent creator);
+    void setCreator(Agent creator);
 
-	Date getCreated();
+    Date getCreated();
 
-	void setCreated(Date created);
+    void setCreated(Date created);
 
-	Date getModified();
+    Date getModified();
 
-	void setModified(Date modified);
+    void setModified(Date modified);
 
-	List<String> getItems();
+    List<String> getItems();
 
-	void setItems(List<String> items);
+    void setItems(List<String> items);
 
-	public String getIdentifier();
-	
-	public void setIdentifier(String sequenceIdentifier);
+    public String getIdentifier();
 
-	/**
-	 * @return Holds a search request to the User Set API (complete URL pointing to production). 
-	 * To reduce complexity on the API, the exhaustive listing could also be expressed as a query.
-	 */
-	String getIsDefinedBy();
-	
-	void setIsDefinedBy(String query);
-	
+    public void setIdentifier(String sequenceIdentifier);
+
+    /**
+     * @return Holds a search request to the User Set API (complete URL pointing to
+     *         production). To reduce complexity on the API, the exhaustive listing
+     *         could also be expressed as a query.
+     */
+    String getIsDefinedBy();
+
+    void setIsDefinedBy(String query);
+
     /**
      * This method detects if it is open or closed set
+     * 
      * @return true if it is an open set
      */
     public boolean isOpenSet();
-    
+
+    public boolean isBookmarksFolder();
+
+    public boolean isEntityBestItemsSet();
+
     public boolean isPrivate();
-    
+
     public boolean isPublic();
-    
+
     public boolean isPublished();
 
 }

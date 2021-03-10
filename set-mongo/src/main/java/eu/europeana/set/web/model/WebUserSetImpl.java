@@ -230,4 +230,16 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     public boolean isPublished() {
 	return super.isPublished();
     }
+    
+    @Override
+    @JsonIgnore
+    public boolean isEntityBestItemsSet() {
+        return super.isEntityBestItemsSet();
+    }
+    
+    @Override
+    @JsonIgnore
+    public boolean isBookmarksFolder() {
+        return super.isBookmarksFolder();
+    }
 }

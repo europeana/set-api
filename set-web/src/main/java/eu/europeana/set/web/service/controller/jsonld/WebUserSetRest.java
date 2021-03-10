@@ -351,7 +351,7 @@ public class WebUserSetRest extends BaseRest {
 	 * @param authentication
 	 */
 	private void addContributorForEntitySet(UserSet existingUserSet, Authentication authentication) {
-		if(StringUtils.equals(existingUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()) &&
+		if(existingUserSet.isEntityBestItemsSet() &&
 				getUserSetService().hasEditorRole(authentication)) {
 			String userId= getUserSetService().getUserId(authentication);
 			if(existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
@@ -517,7 +517,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check visibility level for given user
 		// for Entity sets, editors also can view the Items
-		if(StringUtils.equals(existingUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+		if(existingUserSet.isEntityBestItemsSet()) {
 			getUserSetService().checkPermissionToUpdate(existingUserSet,authentication,true);
 		} else { // if not entity set and visibility private, then only owner and admins are allowed.
 			   if (existingUserSet.isPrivate()) {
