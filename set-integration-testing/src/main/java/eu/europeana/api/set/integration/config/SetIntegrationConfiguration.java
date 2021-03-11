@@ -12,6 +12,7 @@ public class SetIntegrationConfiguration {
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_REGULAR = "oauth.token.request.params.regular";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR = "oauth.token.request.params.editor";
+    protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR2 = "oauth.token.request.params.editor2";
 
 
     private static Properties properties = null;
@@ -98,5 +99,14 @@ public class SetIntegrationConfiguration {
      */
     public String getOauthRequestParamsEditor() {
         return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR);
+    }
+    
+    /**
+     * This method returns the request params needed to acquire a new token
+     *
+     * @return
+     */
+    public String getOauthRequestParamsEditor2() {
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR2);
     }
 }

@@ -1,0 +1,22 @@
+{
+"@context": "http://www.europeana.eu/schemas/context/collection.jsonld",
+"type": "EntityBestItemsSet",
+"title":{
+"en": "Sport - best items"
+},
+"subject":[
+"http://data.europeana.eu/concept/base/114"
+],
+"description":{
+"en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
+},
+"items":[
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107533_jp",
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107534_jp",
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107535_jp",
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107536_jp",
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107537_jp",
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107538_jp",
+"http://data.europeana.eu/item/2024909/photography_ProvidedCHO_United_Archives_00107539_jp"
+]
+}

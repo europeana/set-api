@@ -262,7 +262,7 @@ public abstract class BaseUserSetServiceImpl {
 	// default visibility for Entity set is Public, even if user submits differently.
     if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
     	newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
-    	user.setHttpUrl(UserSetUtils.buildCreatorUri(getConfiguration().getEntityUserSetUserId()));
+    	user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
 		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
 		if(hasEditorRights(authentication)) {
 			newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
@@ -288,7 +288,7 @@ public abstract class BaseUserSetServiceImpl {
      * @return the user id
      */
     public String getUserId(Authentication authentication) {
-	return UserSetUtils.buildCreatorUri((String) authentication.getPrincipal());
+	return UserSetUtils.buildUserUri((String) authentication.getPrincipal());
     }
 
     protected boolean hasAdminRights(Authentication authentication) {

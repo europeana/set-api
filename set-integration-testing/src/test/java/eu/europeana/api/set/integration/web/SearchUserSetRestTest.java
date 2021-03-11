@@ -1,5 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,7 +52,10 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	    + VisibilityTypes.PUBLISHED.getJsonValue();
     private static final String SEARCH_CREATOR = WebUserSetFields.CREATOR + ":";
     private static final String SEARCH_COLLECTION = WebUserSetFields.TYPE + ":" + UserSetTypes.COLLECTION;
+    private static final String SEARCH_ENTITY_SET = WebUserSetFields.TYPE + ":" + UserSetTypes.ENTITYBESTITEMSSET;
 
+//    private static final String SORT_MODIFIED_WebUserSetFields.MODIFIED
+    
     private static final String PAGE_SIZE = "100";
 
     private MockMvc mockMvc;
@@ -127,6 +131,105 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
+    @Test
+    public void searchEntitySet() throws Exception {
+	// create object in database
+	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
+	String query = SEARCH_ENTITY_SET;
+	String result = mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+	assertNotNull(result);
+	// check id
+	//default sorting should include the id on the first position
+	final String buildUserSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	assertTrue(containsKeyOrValue(result, buildUserSetId));
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
+    }
+
+    @Test
+    public void searchEntitySetByContributor() throws Exception {
+	// create object in database
+	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
+	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
+	String query = "contributor:"+ contributor;
+	String result = mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+	assertNotNull(result);
+	// check id
+	//default sorting should include the id on the first position
+	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	assertTrue(containsKeyOrValue(result, userSetId));
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
+    }
+    
+    @Test
+    public void searchEntitySetByContributorUri() throws Exception {
+	// create object in database
+	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
+	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
+	final String contributorId = UserSetUtils.buildUserUri(contributor);
+	String query = "contributor:"+ contributorId;
+	String result = mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+	assertNotNull(result);
+	// check id
+	//default sorting should include the id on the first position
+	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	assertTrue(containsKeyOrValue(result, userSetId));
+	
+	//check contributor
+	assertTrue(containsKeyOrValue(result, contributorId));
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
+    }
+    
+    @Test
+    public void searchEntitySetBySubject() throws Exception {
+	// create object in database
+	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
+//	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
+	//subject in json file: http://data.europeana.eu/concept/base/114
+	final String subject = set.getSubject().get(0);
+	String query = "subject:"+ subject;
+	String result = mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+	assertNotNull(result);
+	// check id
+	//default sorting should include the id on the first position
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+
+	//check subject
+	assertTrue(containsKeyOrValue(result, subject));
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
+    }
+    
     @Test
     public void searchWithPublicVisibility_ItemsDescription() throws Exception {
 	// create object in database
@@ -207,8 +310,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
 	String setIdentifier = set1.getIdentifier();
-	String[] qf = new String[] {"item:/08641/1037479000000476467", "item:/08641/1037479000000476875", "item:/11654/_Botany_U_1419207",
-		"item:/2048128/618580", "item:/2048128/618580", "item:/2048128/notexisting", "item:/2048128/notexisting1"};
+	String[] qf = new String[] { "item:/08641/1037479000000476467", "item:/08641/1037479000000476875",
+		"item:/11654/_Botany_U_1419207", "item:/2048128/618580", "item:/2048128/618580",
+		"item:/2048128/notexisting", "item:/2048128/notexisting1" };
 	String result = callSearchItemsInSet(setIdentifier, qf, "1", "2", null);
 	// check ids
 	String searchUri = "/set/" + setIdentifier + "/search";
@@ -243,8 +347,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
 	String setIdentifier = set1.getIdentifier();
-	String[] qf = new String[] {"item:/08641/1037479000000476467", "item:/08641/1037479000000476875", "item:/11654/_Botany_U_1419207",
-		"item:/2048128/618580", "item:/2048128/618580", "item:/2048128/notexisting", "item:/2048128/notexisting1"};
+	String[] qf = new String[] { "item:/08641/1037479000000476467", "item:/08641/1037479000000476875",
+		"item:/11654/_Botany_U_1419207", "item:/2048128/618580", "item:/2048128/618580",
+		"item:/2048128/notexisting", "item:/2048128/notexisting1" };
 	String result = callSearchItemsInSet(setIdentifier, qf, null, null, regularUserToken);
 	// check ids
 	String searchUri = "/set/" + setIdentifier + "/search";
@@ -268,15 +373,16 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
 	String setIdentifier = set1.getIdentifier();
-	String result = callSearchItemsInSet(setIdentifier, new String[] {"item:/nonexisting/item"}, null, null, regularUserToken);
+	String result = callSearchItemsInSet(setIdentifier, new String[] { "item:/nonexisting/item" }, null, null,
+		regularUserToken);
 	// check ids
 	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
-	//total should be 0
+	// total should be 0
 	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, "\""+CommonLdConstants.ID+"\""));
-	
+	assertTrue(StringUtils.contains(result, "\"" + CommonLdConstants.ID + "\""));
+
 	// delete item created by test
 	getUserSetService().deleteUserSet(setIdentifier);
     }
@@ -286,25 +392,19 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 	String setIdentifier = set1.getIdentifier();
 
-	MockHttpServletRequestBuilder searchRequest = buildSearchItemsInSetRequest(setIdentifier, null, null, null,
-		regularUserToken);
-
-	mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
-		.getContentAsString();
-	
 	String result = callSearchItemsInSet(setIdentifier, null, null, null, regularUserToken);
 	// check ids
 	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
-	//total should be 0
+	// total should be 0
 	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
 	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, "\""+CommonLdConstants.ID+"\""));
-	
+	assertTrue(StringUtils.contains(result, "\"" + CommonLdConstants.ID + "\""));
+
 	// delete item created by test
 	getUserSetService().deleteUserSet(setIdentifier);
     }
-    
+
     private String callSearchItemsInSet(String setIdentifier, String[] qf, String page, String pageSize,
 	    String regularUserToken) throws UnsupportedEncodingException, Exception {
 
@@ -325,7 +425,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	} else {
 	    getRequest.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY);
 	}
-	
+
 	if (page != null) {
 	    getRequest.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, page);
 	}

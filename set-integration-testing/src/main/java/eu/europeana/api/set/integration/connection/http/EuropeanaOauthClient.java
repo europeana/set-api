@@ -15,25 +15,32 @@ import eu.europeana.set.common.http.HttpConnection;
 /**
  * @author GrafR
  */
-public class EuropeanaOauthClient{
+public class EuropeanaOauthClient {
 
     public static final String HEADER_AUTHORIZATION = "Authorization";
+    public static final String REGULAR_USER = "REGULAR";
+    public static final String EDITOR_USER = "EDITOR";
+    public static final String EDITOR2_USER = "EDITOR2";
 
     public EuropeanaOauthClient() {
-    	//
+	//
     }
 
     public String getOauthToken(String user) {
 	try {
 	    String accessToken = "access_token";
 	    String oauthUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
-		String oauthParams = null;
-	    if (StringUtils.equalsIgnoreCase(user, "regular")) {
-		   oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
-		}
-	    if (StringUtils.equalsIgnoreCase(user, "editor")) {
-			oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor();
+	    String oauthParams = null;
+	    if (REGULAR_USER.equalsIgnoreCase(user)) {
+		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
 	    }
+	    if (EDITOR_USER.equalsIgnoreCase(user)) {
+		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor();
+	    }
+	    if (EDITOR2_USER.equalsIgnoreCase(user)) {
+		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor();
+	    }
+	    
 	    HttpConnection connection = new HttpConnection();
 	    ResponseEntity<String> response;
 	    response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded");
@@ -47,8 +54,7 @@ public class EuropeanaOauthClient{
 		    throw new TechnicalRuntimeException("Cannot extract authentication token from reponse:" + body);
 		}
 	    } else {
-		throw new TechnicalRuntimeException(
-			"Error occured when calling oath service! " + response);
+		throw new TechnicalRuntimeException("Error occured when calling oath service! " + response);
 	    }
 	} catch (IOException | JSONException e) {
 	    throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);

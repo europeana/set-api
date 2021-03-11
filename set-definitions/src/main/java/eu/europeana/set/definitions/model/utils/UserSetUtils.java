@@ -111,8 +111,8 @@ public class UserSetUtils {
         )).toString();
     }
     
-    public static String buildCreatorUri(String userId) {
-   	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
+    public static String buildUserUri(String userId) {
+   	return WebUserSetFields.DEFAULT_USER_BASE_URL + userId;
     }
     
     public static String buildUserSetId(String identifier) {

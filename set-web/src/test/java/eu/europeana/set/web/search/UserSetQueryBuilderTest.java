@@ -40,7 +40,7 @@ public class UserSetQueryBuilderTest {
         String query = buildQuery(WebUserSetFields.CREATOR, CREATOR_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100);
 
-        assertTrue(StringUtils.equals(UserSetUtils.buildCreatorUri(CREATOR_VALUE), userSetQuery.getCreator()));
+        assertTrue(StringUtils.equals(UserSetUtils.buildUserUri(CREATOR_VALUE), userSetQuery.getCreator()));
         assertFalse(userSetQuery.isAdmin());
     }
 

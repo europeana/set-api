@@ -772,7 +772,7 @@ public class WebUserSetRest extends BaseRest {
 						HttpStatus.FORBIDDEN);
 			}
 			if (! StringUtils.startsWith(creatorId, "http")) {
-				return UserSetUtils.buildCreatorUri(creatorId);
+				return UserSetUtils.buildUserUri(creatorId);
 			}
 		}
 		return creatorId;

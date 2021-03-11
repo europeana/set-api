@@ -68,7 +68,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Serialization Constants
     public static final String SEPARATOR_SEMICOLON        = ":";
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    public static final String DEFAULT_CREATOR_URL        = "http://data.europeana.eu/user/";
+    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
 
     // Europeana API Constants
 //    public static final String BASE_ITEM_URL              = "http://data.europeana.eu/item";
