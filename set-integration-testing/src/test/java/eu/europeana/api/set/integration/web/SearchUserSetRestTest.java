@@ -295,9 +295,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 	// check ids
-	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
-	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
-	assertTrue(StringUtils.contains(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());
@@ -317,26 +317,26 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// check ids
 	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_LIST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.PREV));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
 	// last page no next
-	assertTrue(!StringUtils.contains(result, WebUserSetFields.NEXT));
+	assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
 
 	result = callSearchItemsInSet(setIdentifier, qf, "0", "2", null);
 	// check ids
 	assertTrue(StringUtils.contains(result, searchUri));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_LIST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
 	// first page no prev
-	assertTrue(!StringUtils.contains(result, WebUserSetFields.PREV));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.NEXT));
+	assertTrue(!containsKeyOrValue(result, WebUserSetFields.PREV));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(setIdentifier);
@@ -354,15 +354,15 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// check ids
 	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_LIST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.FIRST));
-	assertTrue(StringUtils.contains(result, WebUserSetFields.LAST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
 	// first page no next
-	assertTrue(!StringUtils.contains(result, WebUserSetFields.PREV));
+	assertTrue(!containsKeyOrValue(result, WebUserSetFields.PREV));
 	// last page no next
-	assertTrue(!StringUtils.contains(result, WebUserSetFields.NEXT));
+	assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(setIdentifier);
@@ -379,9 +379,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
 	// total should be 0
-	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, "\"" + CommonLdConstants.ID + "\""));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.ID));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(setIdentifier);
@@ -397,9 +397,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	String searchUri = "/set/" + setIdentifier + "/search";
 	assertTrue(StringUtils.contains(result, searchUri));
 	// total should be 0
-	assertTrue(StringUtils.contains(result, WebUserSetFields.TOTAL));
-	assertTrue(StringUtils.contains(result, CommonLdConstants.RESULT_PAGE));
-	assertTrue(StringUtils.contains(result, "\"" + CommonLdConstants.ID + "\""));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.ID));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(setIdentifier);
