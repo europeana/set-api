@@ -22,8 +22,6 @@ import java.util.TimeZone;
 @Service
 public class UsageStatsService {
 
-    Logger LOG = LogManager.getLogger(getClass());
-
     @Resource
     PersistentUserSetService mongoPersistance;
 
@@ -48,7 +46,6 @@ public class UsageStatsService {
                         UserSetTypes.COLLECTION.getJsonValue(),
                         VisibilityTypes.PRIVATE.getJsonValue()));
 
-      LOG.info("Public {}, Private {} Sets Metric generated.", publicSetsCount, privateSetsCount);
       metric.setNoOfPublicSets(publicSetsCount);
       metric.setNoOfPrivateSets(privateSetsCount);
     }
@@ -69,8 +66,6 @@ public class UsageStatsService {
               totalItemsLiked += userSet.getItems().size();
           }
       }
-      LOG.info("Total Items Liked Metric generated {}.", totalItemsLiked);
-
       metric.setNoOfItemsLiked(totalItemsLiked);
     }
 
