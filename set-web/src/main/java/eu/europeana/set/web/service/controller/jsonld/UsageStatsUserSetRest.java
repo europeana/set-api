@@ -2,16 +2,16 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.stats.model.MetricData;
 import eu.europeana.set.stats.vocabulary.UsageStatsFields;
 import eu.europeana.set.web.http.SwaggerConstants;
+import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +30,6 @@ import java.io.IOException;
 @ComponentScan("eu.europeana.set.stats")
 public class UsageStatsUserSetRest extends BaseRest {
 
-    Logger LOG = LogManager.getLogger(getClass().getName());
-
     /**
      * Method to generate metric for User Set (Galleries)
      *
@@ -44,9 +42,8 @@ public class UsageStatsUserSetRest extends BaseRest {
     @ApiOperation(notes = SwaggerConstants.SET_USAGE_STATS, value = "Generate usage stats", nickname = "generateUserStats", response = java.lang.Void.class)
     public ResponseEntity<String> generateUsageStats(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
-            @
-            HttpServletRequest request) throws IOException {
-        return getUsageStats();
+            HttpServletRequest request) throws IOException, ApplicationAuthenticationException {
+        return getUsageStats(request);
     }
 
     /**
@@ -54,24 +51,23 @@ public class UsageStatsUserSetRest extends BaseRest {
      *
      * @return
      */
-    private ResponseEntity<String> getUsageStats() throws IOException {
+    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws IOException, ApplicationAuthenticationException {
+        // authenticate and generate the new statistics
+        verifyReadAccess(request);
         MetricData metricData = new MetricData();
         metricData.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
         getUsageStatsService().getPublicPrivateSetsCount(metricData);
         getUsageStatsService().getTotalItemsLiked(metricData);
         getUsageStatsService().getAverageSetsPerUser(metricData);
-        System.out.println(metricData);
-
+        metricData.setTimestamp(getUsageStatsService().getCurrentISODate());
         String json = serializeMetricView(metricData);
         return buildUsageStatsResponse(json);
-
     }
 
     private ResponseEntity<String> buildUsageStatsResponse(String json) {
         // build response
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-        headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-        headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
+        headers.add(UserSetHttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
         headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
 
         return new ResponseEntity<>(json, headers, HttpStatus.OK);

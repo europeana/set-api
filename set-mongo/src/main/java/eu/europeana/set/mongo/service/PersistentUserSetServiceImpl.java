@@ -163,10 +163,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
-		System.out.println("here " +query);
 	    Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
 	    long totalInCollection = mongoQuery.count();
-		System.out.println("totalInCollection " +totalInCollection);
 
 		FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);

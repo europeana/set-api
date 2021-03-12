@@ -8,9 +8,14 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.stats.model.MetricData;
+import eu.europeana.set.stats.vocabulary.UsageStatsFields;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 @Service
 public class UsageStatsService {
@@ -76,6 +81,17 @@ public class UsageStatsService {
           averageUserSetsPerUser = totalUserSets / distinctUsers;
       }
       metricData.setAverageSetsPerUser(averageUserSetsPerUser);
+    }
+
+    /**
+     * Returns the current date time in ISO format
+     * @return
+     */
+    public String getCurrentISODate() {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat(UsageStatsFields.DATE_FORMAT);
+        df.setTimeZone(tz);
+        return df.format(new Date());
     }
 
     /**

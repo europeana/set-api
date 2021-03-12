@@ -14,5 +14,5 @@ public class UsageStatsFields {
     public static final String NUMBER_OF_ITEMS_LIKED = "NumberOfItemsLiked";
     public static final String AVERAGE_SETS_PER_USER = "AverageSetsPerUser";
 
-
+    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm'Z'";
 }
