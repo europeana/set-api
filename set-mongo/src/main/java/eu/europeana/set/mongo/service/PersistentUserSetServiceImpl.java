@@ -162,6 +162,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	@Override
+	public long count(UserSetQuery query) {
+		Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
+		return mongoQuery.count();
+	}
+
+	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
 	    Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
 	    long totalInCollection = mongoQuery.count();

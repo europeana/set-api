@@ -34,15 +34,15 @@ public class UsageStatsService {
      * @param metric
      */
     public void getPublicPrivateSetsCount(Metric metric) {
-      long publicSetsCount = getMongoPersistance().find(buildUserSetQuery(
+      long publicSetsCount = getMongoPersistance().count(buildUserSetQuery(
                  null,
                         UserSetTypes.COLLECTION.getJsonValue(),
-                        VisibilityTypes.PUBLIC.getJsonValue())).getResultSize();
+                        VisibilityTypes.PUBLIC.getJsonValue()));
 
-      long privateSetsCount = getMongoPersistance().find(buildUserSetQuery(
+      long privateSetsCount = getMongoPersistance().count(buildUserSetQuery(
                  null,
                         UserSetTypes.COLLECTION.getJsonValue(),
-                        VisibilityTypes.PRIVATE.getJsonValue())).getResultSize();
+                        VisibilityTypes.PRIVATE.getJsonValue()));
 
       metric.setNoOfPublicSets(publicSetsCount);
       metric.setNoOfPrivateSets(privateSetsCount);
