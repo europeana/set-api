@@ -9,6 +9,8 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.stats.model.Metric;
 import eu.europeana.set.stats.vocabulary.UsageStatsFields;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -19,6 +21,8 @@ import java.util.TimeZone;
 
 @Service
 public class UsageStatsService {
+
+    Logger LOG = LogManager.getLogger(getClass());
 
     @Resource
     PersistentUserSetService mongoPersistance;
@@ -44,6 +48,7 @@ public class UsageStatsService {
                         UserSetTypes.COLLECTION.getJsonValue(),
                         VisibilityTypes.PRIVATE.getJsonValue()));
 
+      LOG.info("Public {}, Private {} Sets Metric generated.", publicSetsCount, privateSetsCount);
       metric.setNoOfPublicSets(publicSetsCount);
       metric.setNoOfPrivateSets(privateSetsCount);
     }
@@ -60,8 +65,12 @@ public class UsageStatsService {
              UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),null));
 
       for(PersistentUserSet userSet : res.getResults()) {
-       totalItemsLiked +=userSet.getItems().size();
+          if (userSet.getItems() != null) {
+              totalItemsLiked += userSet.getItems().size();
+          }
       }
+      LOG.info("Total Items Liked Metric generated {}.", totalItemsLiked);
+
       metric.setNoOfItemsLiked(totalItemsLiked);
     }
 
@@ -72,10 +81,10 @@ public class UsageStatsService {
     public void getAverageSetsPerUser(Metric metric) {
       long averageUserSetsPerUser = 0;
       long distinctUsers = getMongoPersistance().getDistinctCreators().size();
-      long totalUserSets =  getMongoPersistance().find(
+      long totalUserSets =  getMongoPersistance().count(
                 buildUserSetQuery(null,
                         UserSetTypes.COLLECTION.getJsonValue(),
-                        null)).getResultSize();
+                        null));
 
       if(distinctUsers != 0 && totalUserSets != 0) {
           averageUserSetsPerUser = totalUserSets / distinctUsers;
