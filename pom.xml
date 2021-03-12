@@ -18,6 +18,7 @@
 		<module>set-client</module>
 		<module>set-search-api-client</module>
 		<module>set-integration-testing</module>
+        <module>set-usage-stats</module>
 	</modules>
 
 	<properties>

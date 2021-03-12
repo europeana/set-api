@@ -157,17 +157,24 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	@Override
+	public List getDistinctCreators() {
+		return getDao().getCollection().distinct(WebUserSetFields.CREATOR);
+	}
+
+	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
+		System.out.println("here " +query);
 	    Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
 	    long totalInCollection = mongoQuery.count();
-	    
-	    FindOptions options = buildMongoPaginationOptions(query);
+		System.out.println("totalInCollection " +totalInCollection);
+
+		FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
-	    
-	    return res;
+
+		return res;
 	}
 
 	private FindOptions buildMongoPaginationOptions(UserSetQuery query) {
