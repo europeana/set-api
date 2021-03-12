@@ -7,7 +7,7 @@ import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
-import eu.europeana.set.stats.model.MetricData;
+import eu.europeana.set.stats.model.Metric;
 import eu.europeana.set.stats.vocabulary.UsageStatsFields;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +31,9 @@ public class UsageStatsService {
      * Gets the count of total public and private Sets for type Collection
      * This data is excluding BookmarkFolder and EntityBestItemsSet sets
      *
-     * @param metricData
+     * @param metric
      */
-    public void getPublicPrivateSetsCount(MetricData metricData) {
+    public void getPublicPrivateSetsCount(Metric metric) {
       long publicSetsCount = getMongoPersistance().find(buildUserSetQuery(
                  null,
                         UserSetTypes.COLLECTION.getJsonValue(),
@@ -44,17 +44,17 @@ public class UsageStatsService {
                         UserSetTypes.COLLECTION.getJsonValue(),
                         VisibilityTypes.PRIVATE.getJsonValue())).getResultSize();
 
-      metricData.setNoOfPublicSets(publicSetsCount);
-      metricData.setNoOfPrivateSets(privateSetsCount);
+      metric.setNoOfPublicSets(publicSetsCount);
+      metric.setNoOfPrivateSets(privateSetsCount);
     }
 
     /**
      * Gets the total item liked which is the total number
      * of item in all BookmarkFolders
      *
-     * @param metricData
+     * @param metric
      */
-    public void getTotalItemsLiked(MetricData metricData) {
+    public void getTotalItemsLiked(Metric metric) {
       long totalItemsLiked = 0;
       ResultSet<PersistentUserSet> res = getMongoPersistance().find(buildUserSetQuery(null,
              UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),null));
@@ -62,14 +62,14 @@ public class UsageStatsService {
       for(PersistentUserSet userSet : res.getResults()) {
        totalItemsLiked +=userSet.getItems().size();
       }
-      metricData.setNoOfItemsLiked(totalItemsLiked);
+      metric.setNoOfItemsLiked(totalItemsLiked);
     }
 
     /**
      * Gets the average user sets per user
-     * @param metricData
+     * @param metric
      */
-    public void getAverageSetsPerUser(MetricData metricData) {
+    public void getAverageSetsPerUser(Metric metric) {
       long averageUserSetsPerUser = 0;
       long distinctUsers = getMongoPersistance().getDistinctCreators().size();
       long totalUserSets =  getMongoPersistance().find(
@@ -80,7 +80,7 @@ public class UsageStatsService {
       if(distinctUsers != 0 && totalUserSets != 0) {
           averageUserSetsPerUser = totalUserSets / distinctUsers;
       }
-      metricData.setAverageSetsPerUser(averageUserSetsPerUser);
+      metric.setAverageSetsPerUser(averageUserSetsPerUser);
     }
 
     /**

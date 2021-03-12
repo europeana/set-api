@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.stats.model.MetricData;
+import eu.europeana.set.stats.model.Metric;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
@@ -66,7 +66,7 @@ public class UserSetLdSerializer {
      * @return full metric view
      * @throws IOException
      */
-    public String serialize(MetricData metricData) throws IOException {
+    public String serialize(Metric metricData) throws IOException {
         mapper.registerModule(new JsonldModule());
         return mapper.writer().writeValueAsString(metricData);
     }

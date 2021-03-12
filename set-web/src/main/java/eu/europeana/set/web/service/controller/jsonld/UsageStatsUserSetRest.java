@@ -4,7 +4,7 @@ import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.set.stats.model.MetricData;
+import eu.europeana.set.stats.model.Metric;
 import eu.europeana.set.stats.vocabulary.UsageStatsFields;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
@@ -37,7 +37,7 @@ public class UsageStatsUserSetRest extends BaseRest {
      * @param request
      * @return
      */
-    @GetMapping(value = "/set/metrics/push", produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+    @GetMapping(value = "/set/metrics", produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
             HttpHeaders.CONTENT_TYPE_JSON_UTF8})
     @ApiOperation(notes = SwaggerConstants.SET_USAGE_STATS, value = "Generate usage stats", nickname = "generateUserStats", response = java.lang.Void.class)
     public ResponseEntity<String> generateUsageStats(
@@ -54,13 +54,16 @@ public class UsageStatsUserSetRest extends BaseRest {
     private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws IOException, ApplicationAuthenticationException {
         // authenticate and generate the new statistics
         verifyReadAccess(request);
-        MetricData metricData = new MetricData();
-        metricData.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
-        getUsageStatsService().getPublicPrivateSetsCount(metricData);
-        getUsageStatsService().getTotalItemsLiked(metricData);
-        getUsageStatsService().getAverageSetsPerUser(metricData);
-        metricData.setTimestamp(getUsageStatsService().getCurrentISODate());
-        String json = serializeMetricView(metricData);
+        // create metric
+        Metric metric = new Metric();
+        metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
+        getUsageStatsService().getPublicPrivateSetsCount(metric);
+        getUsageStatsService().getTotalItemsLiked(metric);
+        getUsageStatsService().getAverageSetsPerUser(metric);
+        metric.setTimestamp(getUsageStatsService().getCurrentISODate());
+
+        String json = serializeMetricView(metric);
+
         return buildUsageStatsResponse(json);
     }
 
@@ -74,7 +77,7 @@ public class UsageStatsUserSetRest extends BaseRest {
     }
 
     @SuppressWarnings("rawtypes")
-    private String serializeMetricView(MetricData metricData) throws IOException {
+    private String serializeMetricView(Metric metricData) throws IOException {
         UserSetLdSerializer serializer = new UserSetLdSerializer();
         return serializer.serialize(metricData);
     }

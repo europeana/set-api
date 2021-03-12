@@ -10,7 +10,7 @@ import eu.europeana.set.stats.vocabulary.UsageStatsFields;
         UsageStatsFields.NUMBER_OF_PRIVATE_SETS, UsageStatsFields.NUMBER_OF_ITEMS_LIKED, UsageStatsFields.AVERAGE_SETS_PER_USER})
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MetricData {
+public class Metric {
 
     @JsonProperty(UsageStatsFields.TYPE)
     private String type;
