@@ -32,5 +32,13 @@ public interface UserSetQuery extends Query{
 
     void setSetId(String setId);
 
+    void setContributor(String contributor);
+
+    String getContributor();
+
+    void setSubject(String subject);
+
+    String getSubject();
+
     
 }

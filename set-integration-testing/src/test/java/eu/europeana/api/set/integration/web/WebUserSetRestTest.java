@@ -268,14 +268,14 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
-	assertTrue(constainsKeyOrValue(result, CommonLdConstants.COLLECTION));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.FIRST));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.LAST));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
 	//the default minimal profile is used
-	assertFalse(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
+	assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 	//without page in request, it is not a collection page
-	assertFalse(constainsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
-	assertFalse(constainsKeyOrValue(result, WebUserSetFields.PART_OF));
+	assertFalse(containsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
+	assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
 	
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
@@ -295,7 +295,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
-	assertTrue(constainsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
 
 	int idCount = StringUtils.countMatches(result, "\"id\"");
 	//1 id for userset + 100 ids for dereferenced items, but not all are available in the index anymore
@@ -324,15 +324,15 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 //	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());	
 //	assertTrue(constainsKey(result, collectionUrl));
 
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.PART_OF));
-	assertTrue(constainsKeyOrValue(result, CommonLdConstants.COLLECTION));
-	assertTrue(constainsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.START_INDEX));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.FIRST));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.LAST));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.PREV));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.NEXT));
-	assertTrue(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
+	assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));
+	assertTrue(containsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.START_INDEX));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 //	assertTrue(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
 	
 	
@@ -443,7 +443,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	String result = response.getContentAsString();
 	assertNotNull(result);
-	assertTrue(constainsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
 
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
 

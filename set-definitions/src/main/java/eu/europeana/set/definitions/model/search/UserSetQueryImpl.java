@@ -5,6 +5,8 @@ import eu.europeana.api.commons.definitions.search.impl.QueryImpl;
 public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
 
     String creator;
+    String contributor;
+    String subject;
     String visibility;
     String type;
     boolean admin;
@@ -72,5 +74,23 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
         this.setId = setId;
     }
 
-    
+    @Override
+    public String getContributor() {
+        return contributor;
+    }
+
+    @Override
+    public void setContributor(String contributor) {
+        this.contributor = contributor;
+    }
+
+    @Override
+    public String getSubject() {
+        return subject;
+    }
+
+    @Override
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 }

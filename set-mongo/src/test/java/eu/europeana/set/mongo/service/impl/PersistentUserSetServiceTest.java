@@ -121,7 +121,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     @Test
     public void getByCreator() {
 	UserSet storedUserSet = createUserSet(true);
-        String creatorId = UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT);
+        String creatorId = UserSetUtils.buildUserUri(UserSetTestObjectBuilder.TEST_AGENT);
         QueryResults<PersistentUserSet> foundUserSet = userSetService.getByCreator(creatorId);
 
         assertNotNull(foundUserSet);
@@ -136,7 +136,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     public void findBookmarkFolder() {
 	//ensure BookmarkFolder exists
 	UserSet bf = retrieveOrCreateBookmarkFolder();
-	String creatorId = UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT);
+	String creatorId = UserSetUtils.buildUserUri(UserSetTestObjectBuilder.TEST_AGENT);
         UserSetQuery query = new UserSetQueryImpl();
         query.setUser(creatorId);
         query.setType(UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
@@ -151,7 +151,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     @Test
     public void findPublicSets() {
         UserSet set = createUserSet(true);
-	String creatorId = UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT);
+	String creatorId = UserSetUtils.buildUserUri(UserSetTestObjectBuilder.TEST_AGENT);
         UserSetQuery query = new UserSetQueryImpl();
         query.setUser(creatorId);
         query.setType(UserSetTypes.COLLECTION.getJsonValue());
@@ -219,7 +219,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
     private UserSet retrieveBookmarkFolder() {
 	UserSet set = userSetService.getBookmarkFolder(
-		UserSetUtils.buildCreatorUri(UserSetTestObjectBuilder.TEST_AGENT));
+		UserSetUtils.buildUserUri(UserSetTestObjectBuilder.TEST_AGENT));
 	return set;
     }
     
