@@ -88,6 +88,12 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 */
 	long count(UserSetQuery searchQuery);
+
+	/**
+	 *  creates a mongo query to count the total item present in BookmarkFolder
+	 * @return
+	 */
+	long countTotalLikes();
 	
 }
 

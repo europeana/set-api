@@ -1,25 +1,14 @@
 package eu.europeana.set.stats.service;
 
-import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
-import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.stats.model.Metric;
-import eu.europeana.set.stats.vocabulary.UsageStatsFields;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
-@Service
 public class UsageStatsService {
 
     @Resource
@@ -57,16 +46,7 @@ public class UsageStatsService {
      * @param metric
      */
     public void getTotalItemsLiked(Metric metric) {
-      long totalItemsLiked = 0;
-      ResultSet<PersistentUserSet> res = getMongoPersistance().find(buildUserSetQuery(null,
-             UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),null));
-
-      for(PersistentUserSet userSet : res.getResults()) {
-          if (userSet.getItems() != null) {
-              totalItemsLiked += userSet.getItems().size();
-          }
-      }
-      metric.setNoOfItemsLiked(totalItemsLiked);
+      metric.setNoOfItemsLiked(getMongoPersistance().countTotalLikes());
     }
 
     /**
@@ -85,17 +65,6 @@ public class UsageStatsService {
           averageUserSetsPerUser = totalUserSets / distinctUsers;
       }
       metric.setAverageSetsPerUser(averageUserSetsPerUser);
-    }
-
-    /**
-     * Returns the current date time in ISO format
-     * @return
-     */
-    public String getCurrentISODate() {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat(UsageStatsFields.DATE_FORMAT);
-        df.setTimeZone(tz);
-        return df.format(new Date());
     }
 
     /**

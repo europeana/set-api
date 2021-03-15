@@ -12,7 +12,6 @@ import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,11 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Date;
 
 @Controller
 @SwaggerSelect
 @Api(tags = "User Set Usage Statistics API")
-@ComponentScan("eu.europeana.set.stats")
 public class UsageStatsUserSetRest extends BaseRest {
 
     /**
@@ -60,7 +59,7 @@ public class UsageStatsUserSetRest extends BaseRest {
         getUsageStatsService().getPublicPrivateSetsCount(metric);
         getUsageStatsService().getTotalItemsLiked(metric);
         getUsageStatsService().getAverageSetsPerUser(metric);
-        metric.setTimestamp(getUsageStatsService().getCurrentISODate());
+        metric.setTimestamp(new Date());
 
         String json = serializeMetricView(metric);
 

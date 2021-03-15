@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -166,6 +168,33 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
 		return mongoQuery.count();
 	}
+
+	/**
+	 *  creates a mongo query to count the total item present in BookmarkFolder
+	 *  Mongo Query : db.getCollection('userset').aggregate([
+	 *  {$match:{"type":"BookmarkFolder"}},{$group: {_id:null, totalLikes: {$sum: "$total"}}}
+	 *  ])
+	 * @return
+	 */
+	@Override
+	public long countTotalLikes() {
+		long totalLikes =0;
+		// create $match and $group
+		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+				                           new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+
+		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
+		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
+		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
+
+		List < DBObject > pipeline = Arrays.asList(match, group);
+		Iterable<DBObject> list =getDao().getCollection().aggregate(pipeline).results();
+		// add the total likes value
+		for(DBObject result: list) {
+			totalLikes += Long.parseLong(String.valueOf(result.get(WebUserSetFields.MONGO_TOTAL_LIKES)));
+		}
+		return totalLikes;
+		}
 
 	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {

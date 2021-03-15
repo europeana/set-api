@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.set.stats.vocabulary.UsageStatsFields;
 
-@JsonPropertyOrder({UsageStatsFields.TYPE, UsageStatsFields.CREATED, UsageStatsFields.NUMBER_OF_PUBLIC_SETS,
-        UsageStatsFields.NUMBER_OF_PRIVATE_SETS, UsageStatsFields.NUMBER_OF_ITEMS_LIKED, UsageStatsFields.AVERAGE_SETS_PER_USER})
+import java.util.Date;
+
+@JsonPropertyOrder({UsageStatsFields.TYPE, UsageStatsFields.CREATED, UsageStatsFields.PUBLIC_SETS,
+        UsageStatsFields.PRIVATE_SETS, UsageStatsFields.ITEMS_LIKED, UsageStatsFields.SETS_PER_USER})
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Metric {
@@ -16,18 +18,18 @@ public class Metric {
     private String type;
 
     @JsonProperty(UsageStatsFields.CREATED)
-    private String timestamp;
+    private Date timestamp;
 
-    @JsonProperty(UsageStatsFields.NUMBER_OF_PRIVATE_SETS)
+    @JsonProperty(UsageStatsFields.PRIVATE_SETS)
     private long noOfPrivateSets;
 
-    @JsonProperty(UsageStatsFields.NUMBER_OF_PUBLIC_SETS)
+    @JsonProperty(UsageStatsFields.PUBLIC_SETS)
     private long noOfPublicSets;
 
-    @JsonProperty(UsageStatsFields.NUMBER_OF_ITEMS_LIKED)
+    @JsonProperty(UsageStatsFields.ITEMS_LIKED)
     private long noOfItemsLiked;
 
-    @JsonProperty(UsageStatsFields.AVERAGE_SETS_PER_USER)
+    @JsonProperty(UsageStatsFields.SETS_PER_USER)
     private long averageSetsPerUser;
 
     public String getType() {
@@ -38,11 +40,11 @@ public class Metric {
         this.type = type;
     }
 
-    public String getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -76,17 +78,5 @@ public class Metric {
 
     public void setAverageSetsPerUser(long averageSetsPerUser) {
         this.averageSetsPerUser = averageSetsPerUser;
-    }
-
-    @Override
-    public String toString() {
-        return "MetricData{" +
-                "OverallTotal='" + type + '\'' +
-                ", created='" + timestamp + '\'' +
-                ", NumberOfPrivateSets=" + noOfPrivateSets +
-                ", NumberOfPublicSets=" + noOfPublicSets +
-                ", NumberOfItemsLiked=" + noOfItemsLiked +
-                ", AverageSetsPerUser=" + averageSetsPerUser +
-                '}';
     }
 }
