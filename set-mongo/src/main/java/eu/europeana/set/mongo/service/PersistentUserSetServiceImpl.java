@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
@@ -178,23 +179,27 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	@Override
 	public long countTotalLikes() {
+		//AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
 		long totalLikes =0;
-		// create $match and $group
-		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
-				                           new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
-
-		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
-		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
-		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
-
-		List < DBObject > pipeline = Arrays.asList(match, group);
-		Iterable<DBObject> list =getDao().getCollection().aggregate(pipeline).results();
-		// add the total likes value
+		Iterable<DBObject> list =getDao().getCollection().aggregate(getAggregatePipeline()).results();
 		for(DBObject result: list) {
 			totalLikes += Long.parseLong(String.valueOf(result.get(WebUserSetFields.MONGO_TOTAL_LIKES)));
 		}
 		return totalLikes;
 		}
+
+	// create $match and $group for mongo query
+	private List<DBObject> getAggregatePipeline() {
+
+		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+
+		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
+		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
+		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
+
+		return Arrays.asList(match, group);
+	}
 
 	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
