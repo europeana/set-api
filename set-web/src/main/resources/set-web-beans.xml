@@ -35,9 +35,13 @@
     	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
     	 --> 	
     </beans:bean>
-         
+
+	<beans:bean id="statsService" class="eu.europeana.set.stats.service.UsageStatsService">
+	</beans:bean>
+
     <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans -->
-    <context:component-scan base-package="eu.europeana.set.web.service" />
+    <context:component-scan base-package="eu.europeana.set.web.service,eu.europeana.set.stats" />
+
     <!-- Activates various annotations to be detected in bean classes e.g: @Autowired -->
     <context:annotation-config />
  
@@ -49,5 +53,4 @@
     <beans:bean id="i18nService" class="eu.europeana.api.commons.config.i18n.I18nServiceImpl">
     	<beans:property name="messageSource" ref="set_i18n_messageSource"/>
     </beans:bean>
-    
 </beans:beans>
