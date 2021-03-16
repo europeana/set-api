@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
+import com.mongodb.Cursor;
 import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -179,11 +180,14 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	@Override
 	public long countTotalLikes() {
-		//AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
 		long totalLikes =0;
-		Iterable<DBObject> list =getDao().getCollection().aggregate(getAggregatePipeline()).results();
-		for(DBObject result: list) {
-			totalLikes += Long.parseLong(String.valueOf(result.get(WebUserSetFields.MONGO_TOTAL_LIKES)));
+		Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(), AggregationOptions.builder().build());
+		if (cursor != null) {
+			while(cursor.hasNext()) {
+				DBObject object = cursor.next();
+				totalLikes += Long.parseLong(String.valueOf(object.get(WebUserSetFields.MONGO_TOTAL_LIKES)));
+			}
 		}
 		return totalLikes;
 		}
