@@ -180,7 +180,9 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	@Override
 	public long countTotalLikes() {
+		// Cursor is needed in aggregate command
 		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+
 		long totalLikes =0;
 		Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(), aggregationOptions);
 		if (cursor != null) {
