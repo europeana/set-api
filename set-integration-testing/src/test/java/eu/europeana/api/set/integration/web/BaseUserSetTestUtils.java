@@ -2,7 +2,6 @@ package eu.europeana.api.set.integration.web;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import eu.europeana.api.commons.exception.ApiKeyExtractionException;
 import eu.europeana.api.commons.exception.AuthorizationExtractionException;
 import eu.europeana.api.commons.oauth2.utils.OAuthUtils;
-import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
@@ -43,20 +41,28 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";
     public static final String USER_SET_COMPLETE_PUBLIC = "/content/userset_complete.json";
     public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
-        
-    public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
+    public static final String USER_SET_BEST_ITEMS = "/content/userset_entity_best_items.json";
+    public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
+    public static final String ENTITY_USER_SET_INVALID = "/content/entity_userset_invalid.json";
+    public static final String ENTITY_USER_SET_UPDATE = "/content/entity_userset_update.json";
 
+    public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
+   
     @Autowired
     private UserSetService userSetService; 
 
     @Autowired
     private UserSetConfiguration configuration; 
     
-    protected static String token;
+    protected static String regularUserToken;
+    protected static String editorUserToken;
+    protected static String editor2UserToken;
 
     @BeforeAll
     public static void initToken() {
-        token = retrieveOatuhToken();
+     regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+     editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+//     editor2UserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
     }
 
     public UserSetServiceImpl getUserSetService() {
@@ -67,9 +73,9 @@ public abstract class BaseUserSetTestUtils {
 	return configuration;
     }
 
-    public static String retrieveOatuhToken() {
+    public static String retrieveOatuhToken(String user) {
 	EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
-	return oauthClient.getOauthToken();
+	return oauthClient.getOauthToken(user);
     }
 
     /**
@@ -92,7 +98,7 @@ public abstract class BaseUserSetTestUtils {
     }
 
     protected WebUserSetImpl createTestUserSet(String testFile, String token)
-	    throws IOException, Exception, UnsupportedEncodingException, HttpException {
+	    throws Exception {
 	String requestJson = getJsonStringInput(testFile);
 	UserSet set = getUserSetService().parseUserSetLd(requestJson);
 	Authentication authentication = getAuthentication(token);
@@ -103,7 +109,7 @@ public abstract class BaseUserSetTestUtils {
     protected void deleteBookmarkFolder(String token) throws ApiKeyExtractionException, AuthorizationExtractionException, UserSetNotFoundException {
 	// TODO Auto-generated method stub
 	Authentication authentication = getAuthentication(token);
-	String creatorId = buildCreatorId(authentication);
+	String creatorId = UserSetUtils.buildUserUri((String) authentication.getPrincipal());
 	UserSet bookmarkFolder = getUserSetService().getBookmarkFolder(creatorId);
 	if(bookmarkFolder != null) {
 	    getUserSetService().deleteUserSet(bookmarkFolder.getIdentifier());
@@ -112,12 +118,6 @@ public abstract class BaseUserSetTestUtils {
 	
     }
 
-    private String buildCreatorId(Authentication authentication) throws ApiKeyExtractionException, AuthorizationExtractionException {
-	String creator = (String) authentication.getPrincipal();
-	String creatorId = UserSetUtils.buildCreatorUri(creator);
-	return creatorId;
-    }
-    
     protected Authentication getAuthentication(String token) throws ApiKeyExtractionException, AuthorizationExtractionException {
 	RsaVerifier signatureVerifier = new RsaVerifier(getConfiguration().getJwtTokenSignatureKey());
 	String authorizationApiName = getConfiguration().getAuthorizationApiName();
@@ -132,7 +132,7 @@ public abstract class BaseUserSetTestUtils {
 	return null;
     }
     
-    protected boolean constainsKeyOrValue(String jsonString, String property) {
+    protected boolean containsKeyOrValue(String jsonString, String property) {
 	return StringUtils.contains(jsonString, "\"" + property + "\"");
     }
 }

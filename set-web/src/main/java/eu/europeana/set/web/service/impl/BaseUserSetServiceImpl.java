@@ -2,11 +2,7 @@ package eu.europeana.set.web.service.impl;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
@@ -261,10 +257,21 @@ public abstract class BaseUserSetServiceImpl {
 
     protected void setDefaults(UserSet newUserSet, Authentication authentication) {
 	Agent user = new WebUser();
-	user.setHttpUrl(getUserId(authentication));
-	user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
-	newUserSet.setCreator(user);
-
+	// if entity set, assign entity admin user as a creator
+	// also, add user as 'contributor' if the role is editor
+	// default visibility for Entity set is Public, even if user submits differently.
+    if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+    	newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+    	user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
+		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+		if(hasEditorRights(authentication)) {
+			newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
+		}
+	} else {
+		user.setHttpUrl(getUserId(authentication));
+		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+	}
+    newUserSet.setCreator(user);
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}
@@ -281,24 +288,34 @@ public abstract class BaseUserSetServiceImpl {
      * @return the user id
      */
     public String getUserId(Authentication authentication) {
-	return UserSetUtils.buildCreatorUri((String) authentication.getPrincipal());
+	return UserSetUtils.buildUserUri((String) authentication.getPrincipal());
     }
 
     protected boolean hasAdminRights(Authentication authentication) {
 	if (authentication == null) {
 	    return false;
 	}
-
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (Roles.ADMIN.getName().equalsIgnoreCase(role)) {
-		return true;
-	    }
-	}
-	return false;
+	return hasRole(authentication, Roles.ADMIN.getName());
     }
+
+	public boolean hasEditorRights(Authentication authentication) {
+		if (authentication == null) {
+			return false;
+		}
+		return hasRole(authentication, Roles.EDITOR.getName());
+	}
+
+	protected boolean hasRole(Authentication authentication, String roleType) {
+		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
+				.hasNext();) {
+			// role based authorization
+			String role = iterator.next().getAuthority();
+			if (StringUtils.equalsIgnoreCase(roleType, role)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     /**
      * This method retrieves item ids from the closed userSet to build query e.g.
@@ -391,10 +408,6 @@ public abstract class BaseUserSetServiceImpl {
 	return res;
     }
 
-    boolean isBookmarksFolder(UserSet userSet) {
-	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(userSet.getType());
-    }
-
     void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	if (apiResult.getItems() == null) {
 	    return;
@@ -414,6 +427,22 @@ public abstract class BaseUserSetServiceImpl {
 //	}
     }
 
+	/**
+	 * if List<String>subject contains an entity reference
+	 * referring to the set then it is a EntityBestItemSet
+	 *
+	 * @return true if it is an EntityBestItemSet
+	 */
+	public boolean isEntityReference(UserSet userSet) {
+		if (userSet.getSubject() != null) {
+			for(String subject : userSet.getSubject()) {
+				//TODO verify the entity reference value
+				if (subject.startsWith("http://") || subject.startsWith("https://"))
+					return true;
+			}
+		}
+		return false;
+	}
     /**
      * This method validates and processes the favorite set
      * 
@@ -423,7 +452,7 @@ public abstract class BaseUserSetServiceImpl {
     void validateBookmarkFolder(UserSet webUserSet)
 	    throws RequestBodyValidationException, ParamValidationException {
 
-	if (!isBookmarksFolder(webUserSet)) {
+	if (!webUserSet.isBookmarksFolder()) {
 	    return;
 	}
 
@@ -488,6 +517,11 @@ public abstract class BaseUserSetServiceImpl {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType() });
 	}
+	// if type is BookmarkFolder or Collection, subject must not contain entity reference
+	if (! webUserSet.isEntityBestItemsSet() && isEntityReference(webUserSet)) {
+		throw new RequestBodyValidationException(UserSetI18nConstants.INVALID_SUBJECT_VALUE,
+			new String[] {webUserSet.getType(), WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+	}
     }
 
     /**
@@ -533,6 +567,47 @@ public abstract class BaseUserSetServiceImpl {
 	    }
 	}
     }
+
+	/**
+	 * validates the EntityBestItemsSet
+	 * for entity user set subject field must have a entity reference.
+	 *
+	 * @param webUserSet
+	 * @throws ParamValidationException
+	 * @throws RequestBodyValidationException
+	 */
+	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
+			                                                                 RequestBodyValidationException {
+		if (!webUserSet.isEntityBestItemsSet()) {
+			return;
+		}
+
+		// creator must be present
+		if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					new String[] { WebUserSetModelFields.CREATOR });
+		}
+
+		// subject must be present
+		if (webUserSet.getSubject() == null) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+		}
+
+		// entity user set is a close set
+		if (webUserSet.isOpenSet()) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+					UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+					new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
+		}
+
+		if (! isEntityReference(webUserSet)) {
+			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
+					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+		}
+	}
 
     void updateTotal(UserSet existingUserSet) {
 	if(existingUserSet.getItems() != null) {

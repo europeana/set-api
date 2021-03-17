@@ -18,7 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 public class UserSetQueryBuilder extends QueryBuilder {
 
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID};
+	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
     Set<String> suportedFields = Set.of(fields);
     
     public static final String SEARCH_ALL = "*";
@@ -49,18 +49,38 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	    searchQuery.setType(type);
 	}
 
+	final String PREFIX_HTTP = "http";
 	if (searchCriteria.containsKey(WebUserSetModelFields.CREATOR)) {
 	    String creatorId = searchCriteria.get(WebUserSetModelFields.CREATOR);
-	    if(creatorId.startsWith("http")) {
+	    if(creatorId.startsWith(PREFIX_HTTP)) {
 		searchQuery.setCreator(creatorId);
 	    }else {
-		searchQuery.setCreator(UserSetUtils.buildCreatorUri(creatorId));
+		searchQuery.setCreator(UserSetUtils.buildUserUri(creatorId));
+	    }
+	}
+	
+	if (searchCriteria.containsKey(WebUserSetModelFields.CONTRIBUTOR)) {
+	    String contributorId = searchCriteria.get(WebUserSetModelFields.CONTRIBUTOR);
+	    if(contributorId.startsWith(PREFIX_HTTP)) {
+		searchQuery.setContributor(contributorId);
+	    }else {
+		searchQuery.setContributor(UserSetUtils.buildUserUri(contributorId));
+	    }
+	}
+	
+	if (searchCriteria.containsKey(WebUserSetModelFields.SUBJECT)) {
+	    String subject = searchCriteria.get(WebUserSetModelFields.SUBJECT);
+	    if(subject.startsWith(PREFIX_HTTP)) {
+		searchQuery.setSubject(subject);
+	    }else {
+		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+			new String[] { "invalid value for search field, subject must be a URI", subject });
 	    }
 	}
 	
 	if (searchCriteria.containsKey(WebUserSetFields.ITEM)) {
 	    String item = searchCriteria.get(WebUserSetFields.ITEM);
-	    if(item.startsWith("http")) {
+	    if(item.startsWith(PREFIX_HTTP)) {
 		searchQuery.setItem(item);
 	    }else {
 		searchQuery.setItem(UserSetUtils.buildItemUrl(item));
@@ -128,7 +148,8 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
 	    value = StringUtils.substringBefore(toParse, space);
 	    toParse = StringUtils.substringAfter(toParse, space);
-	    if (value.contains(separator) || StringUtils.isBlank(value)) {
+	    
+	    if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
 		// invalid seearch value
 		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
 			new String[] { "invalid formatting of search query for field " + field, value });

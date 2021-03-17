@@ -32,17 +32,21 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     void setDescription(Map<String, String> description);
 
-    String getItemType();
-
-    void setItemType(String itemType);
+//    String getItemType();
+//
+//    void setItemType(String itemType);
 
     List<String> getSubject();
 
     void setSubject(List<String> subject);
 
-    String getSpatial();
+//    List<String> getContributor();
+//
+//    void setContributor(List<String> contributorList);
 
-    void setSpatial(String spatial);
+//    String getSpatial();
+//
+//    void setSpatial(String spatial);
 
     boolean isUgc();
 

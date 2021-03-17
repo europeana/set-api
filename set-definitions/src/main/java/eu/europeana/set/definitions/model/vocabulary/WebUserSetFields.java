@@ -35,6 +35,11 @@ public class WebUserSetFields extends WebUserSetModelFields {
 
     // Mongo Constants
     public static final String MONGO_ID                   = "_id";
+    public static final String MONGO_MATCH                = "$match";
+    public static final String MONGO_GROUP                = "$group";
+    public static final String MONGO_TOTAL_LIKES          = "totalLikes";
+    public static final String MONGO_SUM                  = "$sum";
+    public static final String MONGO_TOTAL                = "$total";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
@@ -68,7 +73,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Serialization Constants
     public static final String SEPARATOR_SEMICOLON        = ":";
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    public static final String DEFAULT_CREATOR_URL        = "http://data.europeana.eu/user/";
+    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
 
     // Europeana API Constants
 //    public static final String BASE_ITEM_URL              = "http://data.europeana.eu/item";

@@ -7,6 +7,10 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.mongodb.AggregationOptions;
+import com.mongodb.BasicDBObject;
+import com.mongodb.Cursor;
+import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,17 +161,64 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	@Override
+	public List getDistinctCreators() {
+		return getDao().getCollection().distinct(WebUserSetFields.CREATOR);
+	}
+
+	@Override
+	public long count(UserSetQuery query) {
+		Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
+		return mongoQuery.count();
+	}
+
+	/**
+	 *  creates a mongo query to count the total item present in BookmarkFolder
+	 *  Mongo Query : db.getCollection('userset').aggregate([
+	 *  {$match:{"type":"BookmarkFolder"}},{$group: {_id:null, totalLikes: {$sum: "$total"}}}
+	 *  ])
+	 * @return
+	 */
+	@Override
+	public long countTotalLikes() {
+		// Cursor is needed in aggregate command
+		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+
+		long totalLikes =0;
+		Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(), aggregationOptions);
+		if (cursor != null) {
+			while(cursor.hasNext()) {
+				DBObject object = cursor.next();
+				totalLikes += Long.parseLong(String.valueOf(object.get(WebUserSetFields.MONGO_TOTAL_LIKES)));
+			}
+		}
+		return totalLikes;
+		}
+
+	// create $match and $group for mongo query
+	private List<DBObject> getAggregatePipeline() {
+
+		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+
+		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
+		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
+		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
+
+		return Arrays.asList(match, group);
+	}
+
+	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
 	    Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
 	    long totalInCollection = mongoQuery.count();
-	    
-	    FindOptions options = buildMongoPaginationOptions(query);
+
+		FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
-	    
-	    return res;
+
+		return res;
 	}
 
 	private FindOptions buildMongoPaginationOptions(UserSetQuery query) {
@@ -215,7 +266,15 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    }
 	    
 	    if(query.getCreator() != null) {
-		mongoQuery.filter("creator.httpUrl", query.getCreator());
+		mongoQuery.filter(WebUserSetModelFields.CREATOR + ".httpUrl", query.getCreator());
+	    }
+	    
+	    if(query.getContributor() != null) {
+		mongoQuery.filter(WebUserSetModelFields.CONTRIBUTOR + " in", query.getContributor());
+	    }
+	    
+	    if(query.getSubject() != null) {
+		mongoQuery.filter(WebUserSetModelFields.SUBJECT + " in", query.getSubject());
 	    }
 	    
 	    if(query.getItem() != null) {

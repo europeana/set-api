@@ -17,5 +17,6 @@ public class SwaggerConstants {
     public static final String SEARCH           = "Searching user sets. The criteria for filtering results is provided in form of <field>:<value> pairs, using the query and qf request parameters. Currently supported fields are: type, visibility, creator, item.";
     public static final String UPDATE_SAMPLES_JSONLD = SAMPLES_JSONLD + "Please create your JSON update request using selected fields you are going " +
             "to update. E.g. 'title' and 'description' example:  { \"title\": {\r\n \"en\": \"New Title\"\r\n" + "  }\r\n }";
-	
+    public static final String SET_USAGE_STATS = "Generating set API usage statistics. Pushing metrics to Databox ";
+
 }

@@ -80,13 +80,13 @@ public class UserSetUtils {
            if (total > 0) {
                
                int first = 0;
-               String firstPageStr = fillPage(userSet, first, UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE);
+               String firstPageStr = fillPage(userSet, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setFirst(firstPageStr);
-               int last = (int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE); 
+               int last = (int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE); 
                if(last > 0) {
         	last = last - 1; // we start counting by 0    
                }
-               String lastPageStr = fillPage(userSet, last, UserSetConfigurationImpl.DEFAULT_ITEM_IDS_PER_PAGE);
+               String lastPageStr = fillPage(userSet, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setLast(lastPageStr);
            }
        }
@@ -111,8 +111,8 @@ public class UserSetUtils {
         )).toString();
     }
     
-    public static String buildCreatorUri(String userId) {
-   	return WebUserSetFields.DEFAULT_CREATOR_URL + userId;
+    public static String buildUserUri(String userId) {
+   	return WebUserSetFields.DEFAULT_USER_BASE_URL + userId;
     }
     
     public static String buildUserSetId(String identifier) {

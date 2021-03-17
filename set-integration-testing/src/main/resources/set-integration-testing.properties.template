@@ -2,4 +2,6 @@
 oauth.service.uri=
 
 #The parameters sent for retrieving a new ticket   
-oauth.token.request.params=
+oauth.token.request.params.regular=
+oauth.token.request.params.editor=
+oauth.token.request.params.editor2=

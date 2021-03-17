@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.stats.service.UsageStatsService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +45,9 @@ public class BaseRest extends BaseRestController {
     @Resource
     UserSetAuthorizationService authorizationService;
 
+    @Resource
+    UsageStatsService usageStatsService;
+
     Logger logger = LogManager.getLogger(getClass());
 
     public Logger getLogger() {
@@ -69,6 +73,11 @@ public class BaseRest extends BaseRestController {
     public UserSetAuthorizationService getAuthorizationService() {
         return authorizationService;
     }
+
+    protected UsageStatsService getUsageStatsService() {
+        return usageStatsService;
+    }
+
 
     public void setAuthorizationService(UserSetAuthorizationService authorizationService) {
         this.authorizationService = authorizationService;

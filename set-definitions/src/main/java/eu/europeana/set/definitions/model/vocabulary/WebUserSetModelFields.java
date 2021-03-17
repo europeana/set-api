@@ -19,9 +19,11 @@ public class WebUserSetModelFields {
 	//** user set fields **/
 	public static final String AT_CONTEXT       = "@context";
 	public static final String CREATOR          = "creator";
+	public static final String CONTRIBUTOR      = "contributor";
 	public static final String CREATED          = "created";
 	public static final String MODIFIED         = "modified";
 	public static final String IS_DEFINED_BY    = "isDefinedBy";
+	public static final String SUBJECT          = "subject";
 	public static final String ITEMS            = "items";
 	public static final String TOTAL            = "total";
 	public static final String VISIBILITY       = "visibility";
@@ -30,6 +32,7 @@ public class WebUserSetModelFields {
 
 	//** creator fields **/
 	public static final String NICKNAME         = "nickname";
+	public static final String ENTITYUSER_NICKNAME = "entitygalleries";
 
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";

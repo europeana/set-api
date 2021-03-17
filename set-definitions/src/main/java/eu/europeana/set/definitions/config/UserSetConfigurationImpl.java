@@ -2,32 +2,36 @@ package eu.europeana.set.definitions.config;
 
 import java.util.Properties;
 
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+
 public class UserSetConfigurationImpl implements UserSetConfiguration {
 
     public static final String SUFFIX_BASEURL = "baseUrl";
 
-    public static final String PREFIX_MAX_PAGE_SIZE = "userset.search.maxpagesize.";
-    public static final String KEY_SEARCH_DEREFERENCE_ITEMS = "set.search.dereference.items.max";
+    public static final String PREFIX_RETRIEVE_MAX_PAGE_SIZE  = "set.retrieve.maxpagesize.";
+    public static final String KEY_SEARCH_DEREFERENCE_ITEMS   = "set.search.dereference.items.max";
     public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
     
-//    public static final int    DEFAULT_DEREF_ITEMS       = 5;
-    public static final int    MAX_ITEMS_PER_PAGE        = 10;
+    public static final int    DEFAULT_ITEMS_PER_PAGE        = 10;
+    @Deprecated
+    /**
+     * use getMaxPageSize instead
+     */
     public static final int    MAX_ITEMS_TO_PRESENT      = 1000;
-    public static final int    DEFAULT_ITEM_IDS_PER_PAGE      = 100;
+    
 
-
-    public static final String USERSET_ENVIRONMENT = "set.environment";
-
-    public static final String VALUE_ENVIRONMENT_PRODUCTION = "production";
-    public static final String VALUE_ENVIRONMENT_TEST = "test";
+    public static final String USERSET_ENVIRONMENT           = "set.environment";
+    public static final String VALUE_ENVIRONMENT_PRODUCTION  = "production";
+    public static final String VALUE_ENVIRONMENT_TEST        = "test";
     public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
+    public static final String ENTITY_USERSET_USERID            = "entity.userset.user.id";
 
     // TODO: move constants to api commons
-    public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
+    public static final String AUTHORIZATION_API_NAME           = "authorization.api.name";
     public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
-    public static final String KEY_SEARCH_APIKEY = "europeana.search.apikey";
-    public static final String KEY_SEARCH_URL = "europeana.search.url";
-    public static final String API_VERSION = "set.api.version";
+    public static final String KEY_SEARCH_APIKEY                = "europeana.search.apikey";
+    public static final String KEY_SEARCH_URL                   = "europeana.search.url";
+    public static final String API_VERSION                      = "set.api.version";
 
     private Properties setProperties;
 
@@ -56,10 +60,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     }
 
     public int getMaxPageSize(String profile) {
-	String key = PREFIX_MAX_PAGE_SIZE + profile;
+	//TODO enable configuration per profile when specified
+	String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + LdProfiles.STANDARD.name().toLowerCase();
 	return Integer.parseInt(getSetProperties().getProperty(key));
     }
-
+    
     public int getMaxSearchDereferencedItems() {
 	return Integer.parseInt(getSetProperties().getProperty(KEY_SEARCH_DEREFERENCE_ITEMS));
     }
@@ -90,6 +95,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     @Override
     public String getSearchApiKey() {
 	return getSetProperties().getProperty(KEY_SEARCH_APIKEY);
+    }
+
+    @Override
+    public String getEntityUserSetUserId() {
+        return getSetProperties().getProperty(ENTITY_USERSET_USERID);
     }
 
     @Override
