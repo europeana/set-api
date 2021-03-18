@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
+import eu.europeana.set.web.model.elevation.Elevation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -690,7 +691,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return userSet;
     }
 
-    private void setSerializedItemIds(UserSet userSet) {
+	/**
+	 * Return the List of entity sets with
+	 * items, subject and type value
+	 * @return
+	 */
+	@Override
+	public List<PersistentUserSet> getEntitySetBestBetsItems() {
+	return getMongoPersistance().getEntitySetsItemAndSubject();
+    }
+
+	private void setSerializedItemIds(UserSet userSet) {
 	if (userSet.getItems() == null) {
 	    return;
 	}

@@ -94,6 +94,13 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 */
 	long countTotalLikes();
+
+
+	/**
+	 *  creates a mongo query to get the items and entity reference for the entity sets
+	 * @return
+	 */
+	List<PersistentUserSet> getEntitySetsItemAndSubject();
 	
 }
 

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
+import eu.europeana.set.web.model.elevation.Elevation;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.security.core.Authentication;
 
@@ -248,4 +249,10 @@ public interface UserSetService {
      */
     UserSet applyProfile(UserSet userSet, LdProfiles profile);
 
+    /**
+     * Return the List of entity sets with
+     * items, subject and type value
+     * @return
+     */
+    List<PersistentUserSet> getEntitySetBestBetsItems();
 }

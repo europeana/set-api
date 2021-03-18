@@ -7,10 +7,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import com.mongodb.AggregationOptions;
-import com.mongodb.BasicDBObject;
-import com.mongodb.Cursor;
-import com.mongodb.DBObject;
+import com.mongodb.*;
+import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -162,7 +160,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@Override
 	public List getDistinctCreators() {
-		return getDao().getCollection().distinct(WebUserSetFields.CREATOR);
+		return getDao().getCollection().distinct(WebUserSetModelFields.CREATOR);
 	}
 
 	@Override
@@ -196,15 +194,52 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	// create $match and $group for mongo query
 	private List<DBObject> getAggregatePipeline() {
-
-		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
-				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
-
 		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
 		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
 		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
 
-		return Arrays.asList(match, group);
+		return Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()),
+				             group);
+	}
+
+	/**
+	 * creates a mongo query to get the items and entity reference for the entity sets
+	 * Mongo Query : db.getCollection('userset').aggregate([
+	 *  {$match:{"type":"EntityBestItemsSet"}},{project: { "subject": 1, "items": 1,"type": 1}}
+	 *  ])
+	 * @return
+	 */
+	@Override
+	public List<PersistentUserSet> getEntitySetsItemAndSubject() {
+		DBObject fields = new BasicDBObject(WebUserSetModelFields.SUBJECT, 1);
+		fields.put(WebUserSetFields.ITEMS, 1);
+		fields.put(WebUserSetFields.TYPE, 1);
+		// create projection
+		DBObject project = new BasicDBObject(WebUserSetFields.MONGO_PROJECT, fields);
+
+		List<DBObject> pipeline = Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()),
+				                  project);
+
+		AggregationOutput output = getDao().getCollection().aggregate(pipeline);
+		return getResultUserSet(output.results());
+	}
+
+	private List<PersistentUserSet> getResultUserSet(Iterable<DBObject> aggregationOutput) {
+		List<PersistentUserSet> userSets = new ArrayList<>();
+		for (DBObject result : aggregationOutput) {
+			PersistentUserSet userSet = new PersistentUserSetImpl();
+			userSet.setType(result.get(WebUserSetFields.TYPE).toString());
+			userSet.setSubject((List<String>) result.get(WebUserSetModelFields.SUBJECT));
+			userSet.setItems((List<String>) result.get(WebUserSetFields.ITEMS));
+			userSets.add(userSet);
+		}
+		return userSets;
+	}
+
+	// creates $match for mongo query
+	private DBObject getMongoMatchForPipeLine(String matchId, String matchValue) {
+		return new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+				new BasicDBObject(matchId, matchValue));
 	}
 
 	@Override
@@ -261,7 +296,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    }
 	        
 	    if(query.getType() != null) {
-//		mongoQuery.filter(WebUserSetModelFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
 		mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
 	    }
 	    
