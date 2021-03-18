@@ -4,7 +4,7 @@
     "en": "Sportswear"
   },
   "subject" : [
-    "https://entity_refernce"
+    "http://data.europeana.eu/concept/base/114"
   ],
   "visibility": "public",
   "description": {

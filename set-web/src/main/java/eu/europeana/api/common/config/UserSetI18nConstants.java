@@ -38,4 +38,8 @@ public class UserSetI18nConstants {
     public static final String USER_SET_NOT_AVAILABLE         = "error.userset_not_available";
     
     public static final String USER_SET_OPERATION_NOT_ALLOWED = "error.userset_operation_not_allowed";
+    public static final String ENTITY_USER_SET_NOT_FOUND = "error.no_entity_userset_found";
+
+
+
 }

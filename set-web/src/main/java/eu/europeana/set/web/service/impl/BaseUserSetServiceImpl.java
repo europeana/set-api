@@ -436,8 +436,7 @@ public abstract class BaseUserSetServiceImpl {
 	public boolean isEntityReference(UserSet userSet) {
 		if (userSet.getSubject() != null) {
 			for(String subject : userSet.getSubject()) {
-				//TODO verify the entity reference value
-				if (subject.startsWith("http://") || subject.startsWith("https://"))
+				if (subject.startsWith(WebUserSetFields.ENTITY_REFERENCE_URL))
 					return true;
 			}
 		}
