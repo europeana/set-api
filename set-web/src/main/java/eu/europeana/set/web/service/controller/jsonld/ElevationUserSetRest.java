@@ -15,6 +15,7 @@ import eu.europeana.set.web.utils.UserSetXMLSerializer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +45,7 @@ public class ElevationUserSetRest extends BaseRest {
      * @return
      * @throws HttpException
      */
-    @GetMapping(value = { "/set/elevation"})
+    @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Generate Elevation file", nickname = "generate elevation file", response = java.lang.Void.class)
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
