@@ -123,11 +123,13 @@ public class ElevationUserSetRest extends BaseRest {
           if (s.contains(WebUserSetFields.AGENT)) {
               text.append(WebUserSetFields.ELEVATION_AGENT_QUERY);
           }
-          if (s.contains(WebUserSetFields.CONCEPT)) {
+          else if (s.contains(WebUserSetFields.CONCEPT)) {
               text.append(WebUserSetFields.ELEVATION_CONCEPT_QUERY);
           }
-          if(s.contains(WebUserSetFields.TIMESPAN)) {
+          else if(s.contains(WebUserSetFields.TIMESPAN)) {
               text.append(WebUserSetFields.ELEVATION_TIMESPAN_QUERY);
+          } else {
+              break;
           }
           text.append("\"");
           text.append(s);
