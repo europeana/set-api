@@ -1,12 +1,14 @@
 package eu.europeana.set.web.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
-import java.util.List;
+
 import javax.annotation.Resource;
 
-import eu.europeana.api.common.config.UserSetI18nConstants;
-import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.oauth2.model.impl.EuropeanaApiCredentials;
 import eu.europeana.api.commons.oauth2.model.impl.EuropeanaAuthenticationToken;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -24,8 +27,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test for the Web UserSet service
