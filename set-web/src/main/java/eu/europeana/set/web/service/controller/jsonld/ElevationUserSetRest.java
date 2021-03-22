@@ -1,6 +1,5 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
@@ -45,7 +44,7 @@ public class ElevationUserSetRest extends BaseRest {
      * @return
      * @throws HttpException
      */
-    @GetMapping(value = { "/set/elevation" })
+    @GetMapping(value = { "/set/elevation"})
     @ApiOperation(value = "Generate Elevation file", nickname = "generate elevation file", response = java.lang.Void.class)
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
@@ -67,13 +66,17 @@ public class ElevationUserSetRest extends BaseRest {
             UserSetXMLSerializer xmlSerializer = new UserSetXMLSerializer();
             String xml = xmlSerializer.serialize(elevation);
             writeElevation(getConfiguration().getElevationFileLocation(), xml);
+            // returning the elevation response
+            //TODO - remove the body, once we know how elevation file will be used
+            return new ResponseEntity<>(xml, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("No elevation file generated" , HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new UserSetNotFoundException(UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
+                    UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
+                    null);
         }
-    } catch (JsonProcessingException e) {
+    } catch (IOException e) {
         throw new InternalServerException(e);
     }
-    return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -82,28 +85,28 @@ public class ElevationUserSetRest extends BaseRest {
      * @return
      */
     private Elevation buildElevation(List<PersistentUserSet> userSets) throws UserSetNotFoundException {
-        if (userSets.isEmpty()) {
-            throw new UserSetNotFoundException(UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
+    if (userSets.isEmpty()) {
+        throw new UserSetNotFoundException(UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
                     UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
                     null);
         }
-        Elevation elevation = new Elevation();
-        List<Query> queries = new ArrayList<>();
-        for (UserSet userset : userSets) {
-            String text = generateQueryText(userset.getSubject());
-            List<Doc> docList = new ArrayList<>();
-            for(String item : userset.getItems()) {
-                docList.add(new Doc(item));
-            }
-            if (!text.isEmpty() && docList.size() > 0) {
-                queries.add(new Query(text, docList));
-            }
+    Elevation elevation = new Elevation();
+    List<Query> queries = new ArrayList<>();
+    for (UserSet userset : userSets) {
+        String text = generateQueryText(userset.getSubject());
+        List<Doc> docList = new ArrayList<>();
+        for(String item : userset.getItems()) {
+            docList.add(new Doc(item));
         }
-        if (queries.size() > 0) {
-            elevation.setQuery(queries);
-            return elevation;
+        if (!text.isEmpty() && !docList.isEmpty()) {
+            queries.add(new Query(text, docList));
         }
-        return null;
+    }
+    if (!queries.isEmpty()) {
+        elevation.setQuery(queries);
+        return elevation;
+    }
+    return null;
     }
 
     /**
@@ -112,7 +115,7 @@ public class ElevationUserSetRest extends BaseRest {
      * @return
      */
     private String generateQueryText(List<String> subject) {
-        StringBuilder text = new StringBuilder();
+      StringBuilder text = new StringBuilder();
       for(String s : subject) {
           if (s.contains(WebUserSetFields.AGENT)) {
               text.append(WebUserSetFields.ELEVATION_AGENT_QUERY);
@@ -137,10 +140,12 @@ public class ElevationUserSetRest extends BaseRest {
      * @param directoryLocation folder location
      */
     public static void writeElevation(String directoryLocation, String xml) throws InternalServerException {
+    if (!directoryLocation.isEmpty()) {
         try (PrintWriter writer = new PrintWriter(directoryLocation + WebUserSetFields.SLASH + WebUserSetFields.ELEVATION_FILENAME, StandardCharsets.UTF_8)) {
             writer.write(xml);
         } catch (IOException e) {
             throw new InternalServerException("Error creating the " + WebUserSetFields.ELEVATION_FILENAME + " file", e);
         }
+    }
     }
 }
