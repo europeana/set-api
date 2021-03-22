@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
@@ -58,16 +60,24 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     
     private static final String PAGE_SIZE = "100";
 
-    private MockMvc mockMvc;
+//    private MockMvc mockMvc;
+//
+//    @Autowired
+//    private WebApplicationContext wac;
 
-    @Autowired
-    private WebApplicationContext wac;
-
+       
     @BeforeEach
     public void initApplication() {
-	this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	super.initApplication();
     }
 
+    @BeforeAll
+    public static void initTokens() {
+	initRegularUserToken();
+	editorUserToken=
+		    retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+    }
+    
     @Test
     public void searchEmptyApiKey() throws Exception {
 //        UserSet set = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);

@@ -4,7 +4,7 @@
     "en": "Sportswear"
   },
   "subject" : [
-    "https://reference.uri"
+    "http://subject.test", "test_subject"
   ],
   "visibility": "public",
   "description": {

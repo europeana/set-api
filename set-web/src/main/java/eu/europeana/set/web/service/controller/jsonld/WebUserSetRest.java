@@ -296,7 +296,7 @@ public class WebUserSetRest extends BaseRest {
 	    // set immutable fields before validation
 	    newUserSet.setCreator(existingUserSet.getCreator());
 	    newUserSet.setIdentifier(existingUserSet.getIdentifier());
-	    newUserSet.setSubject(existingUserSet.getSubject());
+//	    newUserSet.setSubject(existingUserSet.getSubject());
 	    if (newUserSet.getVisibility() == null) {
 		newUserSet.setVisibility(existingUserSet.getVisibility());
 	    }
