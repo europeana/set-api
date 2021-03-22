@@ -39,6 +39,7 @@ public class UserSetI18nConstants {
     
     public static final String USER_SET_OPERATION_NOT_ALLOWED = "error.userset_operation_not_allowed";
     public static final String ENTITY_USER_SET_NOT_FOUND = "error.no_entity_userset_found";
+    public static final String ELEVATION_NOT_GENERATED = "error.no_elevation_generated";
 
 
 

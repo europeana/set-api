@@ -71,8 +71,8 @@ public class ElevationUserSetRest extends BaseRest {
             //TODO - remove the body, once we know how elevation file will be used
             return new ResponseEntity<>(xml, HttpStatus.OK);
         } else {
-            throw new UserSetNotFoundException(UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
-                    UserSetI18nConstants.ENTITY_USER_SET_NOT_FOUND,
+            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED,
+                    UserSetI18nConstants.ELEVATION_NOT_GENERATED,
                     null);
         }
     } catch (IOException e) {
@@ -96,8 +96,10 @@ public class ElevationUserSetRest extends BaseRest {
     for (UserSet userset : userSets) {
         String text = generateQueryText(userset.getSubject());
         List<Doc> docList = new ArrayList<>();
-        for(String item : userset.getItems()) {
+        if (userset.getItems() != null) {
+            for(String item : userset.getItems()) {
             docList.add(new Doc(item));
+            }
         }
         if (!text.isEmpty() && !docList.isEmpty()) {
             queries.add(new Query(text, docList));
