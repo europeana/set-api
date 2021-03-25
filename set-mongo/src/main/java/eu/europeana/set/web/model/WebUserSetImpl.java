@@ -116,9 +116,10 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 //	return super.getContext();
 //    }
 
+    //TODO: change to use of getter and setter, or ingore unknown properties
     @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
     public void setContext(String context) {
-	// do nothing, just to allow cotnext in input
+	// do nothing, just to allow context in input
     }
 
 //    @JsonProperty(WebUserSetFields.CREATOR)

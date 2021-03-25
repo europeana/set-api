@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.europeana.set.definitions.model.agent.Agent;
-import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 
 public interface UserSet extends PageInfo {
 

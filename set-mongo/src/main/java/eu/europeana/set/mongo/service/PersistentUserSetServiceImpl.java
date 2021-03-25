@@ -160,8 +160,9 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return getDao().findOne(WebUserSetFields.MONGO_ID, new ObjectId(id));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List getDistinctCreators() {
+	public List<String> getDistinctCreators() {
 		return getDao().getCollection().distinct(WebUserSetFields.CREATOR);
 	}
 

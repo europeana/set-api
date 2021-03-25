@@ -13,6 +13,8 @@ public class SetIntegrationConfiguration {
     protected static final String PROP_OAUTH_REQUEST_PARAMS_REGULAR = "oauth.token.request.params.regular";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR = "oauth.token.request.params.editor";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR2 = "oauth.token.request.params.editor2";
+    protected static final String PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET = "oauth.token.request.params.creator.entityset";
+    
 
 
     private static Properties properties = null;
@@ -84,7 +86,7 @@ public class SetIntegrationConfiguration {
     }
 
     /**
-     * This method returns the request params needed to acquire a new token
+     * This method returns the request params needed to acquire a new token for regular user
      * 
      * @return
      */
@@ -93,7 +95,7 @@ public class SetIntegrationConfiguration {
     }
 
     /**
-     * This method returns the request params needed to acquire a new token
+     * This method returns the request params needed to acquire a new token for a user with editor role
      *
      * @return
      */
@@ -102,11 +104,20 @@ public class SetIntegrationConfiguration {
     }
     
     /**
-     * This method returns the request params needed to acquire a new token
+     * This method returns the request params needed to acquire a new token for a second user with editor role
      *
      * @return
      */
     public String getOauthRequestParamsEditor2() {
         return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR2);
+    }
+    
+    /**
+     * This method returns the request params needed to acquire a new token for the user which is the ownwer of entity sets
+     *
+     * @return
+     */
+    public String getOauthRequestParamsCreatorEntitySet() {
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET);
     }
 }
