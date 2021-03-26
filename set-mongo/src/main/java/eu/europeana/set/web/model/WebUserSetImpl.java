@@ -110,11 +110,6 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.getIsDefinedBy();
     }
     
-//    @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
-//    @JsonIgnore // avoid double serialization
-//    public String getContext() {
-//	return super.getContext();
-//    }
 
     //TODO: change to use of getter and setter, or ingore unknown properties
     @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
@@ -122,8 +117,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	// do nothing, just to allow context in input
     }
 
-//    @JsonProperty(WebUserSetFields.CREATOR)
-    @JsonIgnore //creator is set by the system, proper serialization postponed for next version
+    @JsonProperty(WebUserSetFields.CREATOR)
     public Agent getCreator() {
 	return super.getCreator();
     }
@@ -134,14 +128,6 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	super.setCreator(creator);
     }
   
-    @JsonProperty(WebUserSetModelFields.CREATOR)
-    public String getCreatorHttpUrl() {
-	String res = null;
-	if (super.getCreator() != null && super.getCreator().getHttpUrl() != null) {
-	    res = super.getCreator().getHttpUrl();
-	}
-	return res;
-    }
 
     @JsonIgnore
     public boolean isUgc() {
@@ -173,6 +159,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return UserSetUtils.buildUserSetId(super.getIdentifier());
     }
 
+    //TODO: switch to jsongetter to ignore deserialization of id field
     public void setId(String id) {
 	// this method is defined just for avoiding parse errors in update method, the
 	// URI is ignored as the identifier from URL is used
