@@ -8,7 +8,6 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import com.mongodb.*;
-import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -204,42 +203,15 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	/**
 	 * creates a mongo query to get the items and entity reference for the entity sets
-	 * Mongo Query : db.getCollection('userset').aggregate([
-	 *  {$match:{"type":"EntityBestItemsSet"}},{project: { "subject": 1, "items": 1,"type": 1}}
-	 *  ])
+	 *
 	 * @return
 	 */
 	@Override
-	public List<PersistentUserSet> getEntitySetsItemAndSubject() {
-		// Cursor is needed in aggregate command
-		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
-
-		DBObject fields = new BasicDBObject(WebUserSetModelFields.SUBJECT, 1);
-		fields.put(WebUserSetFields.ITEMS, 1);
-		fields.put(WebUserSetFields.TYPE, 1);
-		// create projection
-		DBObject project = new BasicDBObject(WebUserSetFields.MONGO_PROJECT, fields);
-
-		List<DBObject> pipeline = Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()),
-				                  project);
-
-		Cursor cursor = getDao().getCollection().aggregate(pipeline, aggregationOptions);
-		return getResultUserSet(cursor);
-	}
-
-	private List<PersistentUserSet> getResultUserSet(Cursor cursor) {
-		List<PersistentUserSet> userSets = new ArrayList<>();
-		if (cursor != null) {
-			while (cursor.hasNext()) {
-				DBObject result = cursor.next();
-				PersistentUserSet userSet = new PersistentUserSetImpl();
-				userSet.setType(result.get(WebUserSetFields.TYPE).toString());
-				userSet.setSubject((List<String>) result.get(WebUserSetModelFields.SUBJECT));
-				userSet.setItems((List<String>) result.get(WebUserSetFields.ITEMS));
-				userSets.add(userSet);
-			}
-		}
-		return userSets;
+	public List<PersistentUserSet> getEntitySetsItemAndSubject(UserSetQuery userSetQuery) {
+		return buildMongoQuery(userSetQuery)
+				.project(WebUserSetFields.ITEMS, true)
+				.project(WebUserSetFields.TYPE, true)
+				.project(WebUserSetModelFields.SUBJECT, true).asList();
 	}
 
 	// creates $match for mongo query

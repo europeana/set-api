@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
-import eu.europeana.set.web.model.elevation.Elevation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -697,8 +696,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * @return
 	 */
 	@Override
-	public List<PersistentUserSet> getEntitySetBestBetsItems() {
-	return getMongoPersistance().getEntitySetsItemAndSubject();
+	public List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query) {
+	return getMongoPersistance().getEntitySetsItemAndSubject(query);
     }
 
 	private void setSerializedItemIds(UserSet userSet) {
