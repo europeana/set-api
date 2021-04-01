@@ -22,7 +22,6 @@ import java.util.Map;
         @Index(fields = {@Field(WebUserSetFields.VISIBILITY)}),
         @Index(fields = {@Field(WebUserSetFields.CONTRIBUTOR)}),
         @Index(fields = {@Field(WebUserSetFields.SUBJECT)}),
-        @Index(fields = {@Field(WebUserSetFields.ITEMS)}),
         @Index(fields = {@Field(WebUserSetModelFields.MODIFIED)})})
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
