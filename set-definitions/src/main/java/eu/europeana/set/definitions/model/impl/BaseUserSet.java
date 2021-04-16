@@ -43,6 +43,11 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     private List<String> subject;
 
     /**
+     * Counter for Pinned items position in Entity user sets
+     */
+    private int pinned;
+
+    /**
      * List of the users that have the editor role and contributed to the creation
      * of this set of the Entity user sets
      */
@@ -131,6 +136,16 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     @Override
     public void setSubject(List<String> subject) {
 	this.subject = subject;
+    }
+
+    @Override
+    public int getPinned() {
+        return pinned;
+    }
+
+    @Override
+    public void setPinned(int pinned) {
+        this.pinned = pinned;
     }
 
     @Override

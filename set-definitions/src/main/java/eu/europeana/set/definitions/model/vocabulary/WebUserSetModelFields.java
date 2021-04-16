@@ -29,10 +29,14 @@ public class WebUserSetModelFields {
 	public static final String VISIBILITY       = "visibility";
 	public static final String IDENTIFIER       = "identifier";
 	public static final String TITLE            = "title";
+	public static final String PINNED           = "pinned";
 
 	//** creator fields **/
 	public static final String NICKNAME         = "nickname";
 	public static final String ENTITYUSER_NICKNAME = "entitygalleries";
+
+	// Pinned items constants
+	public static final String PINNED_POSITION = "pin";
 
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";

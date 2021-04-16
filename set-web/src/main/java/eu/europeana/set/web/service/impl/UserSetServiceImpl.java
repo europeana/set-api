@@ -218,11 +218,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @return position The validated position in list to insert
      * @throws ApplicationAuthenticationException
      */
-    public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException {
+    public int validatePosition(String position, List<String> items, int pinnedItems) throws ApplicationAuthenticationException {
 	int positionInt = -1;
 	if (StringUtils.isNotEmpty(position)) {
 	    try {
 		positionInt = Integer.parseInt(position);
+		// if position is with in pinned items range
+		// change the position from the initial start of Entity sets items
+		if(positionInt <= pinnedItems) {
+			positionInt = pinnedItems + positionInt;
+		}
 		if (positionInt > items.size()) {
 		    positionInt = -1;
 		}
@@ -243,41 +248,67 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 	    throws ApplicationAuthenticationException {
-	// validate position
-	// -1 if invalid
-	int positionInt = validatePosition(position, existingUserSet.getItems());
-
-	// build new item URL
 	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
-
-	// check if item already exists in the Set, if so remove it
-	// insert item to Set in the indicated position (or last position if no position
-	// was indicated).
-	UserSet extUserSet = null;
-	if (existingUserSet.getItems() == null) {
-	    addNewItemToList(existingUserSet, -1, newItem);
-	    extUserSet = updateItemList(existingUserSet);
-	} else {
-	    if (!existingUserSet.getItems().contains(newItem)) {
-		// add item
-		addNewItemToList(existingUserSet, positionInt, newItem);
-		extUserSet = updateItemList(existingUserSet);
-	    } else {
-		// replace item
-		int currentPos = existingUserSet.getItems().indexOf(newItem);
-		if (currentPos == positionInt) {
-		    // do not change user set, just add pagination
-		    // the items is already present at the correct position
-		    extUserSet = getUserSetUtils().updatePagination(existingUserSet);
-		} else {
-		    replaceItem(existingUserSet, positionInt, newItem);
-		    extUserSet = updateItemList(existingUserSet);
-		}
-	    }
+    // check if the position is "pin" and is a EntityBestItem set then
+	// insert the item at the 0 position
+    if(StringUtils.equals(position, WebUserSetModelFields.PINNED_POSITION) && existingUserSet.isEntityBestItemsSet()) {
+		return insertItem(existingUserSet, newItem, 0, true);
+    } else {
+		// validate position
+		// -1 if invalid
+		int positionInt = validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
+		return insertItem(existingUserSet, newItem, positionInt, false);
 	}
-	return extUserSet;
     }
 
+	/**
+	 * check if item already exists in the Set, if so remove it
+	 * insert item to Set in the indicated position (or last position if no position
+	 * was indicated).
+	 *
+	 * if pinnedItem : Then increase the counter by one while adding the item.
+	 * No need to update the counter while replacing the existing item
+	 *
+	 * @param existingUserSet
+	 * @param newItem
+	 * @param positionInt
+	 * @return
+	 */
+    private UserSet insertItem(UserSet existingUserSet, String newItem, int positionInt, boolean pinnedItem) {
+		UserSet extUserSet = null;
+		if (existingUserSet.getItems() == null) {
+			addNewItemToList(existingUserSet, -1, newItem);
+			// if pinned item, increase the pinned counter by 1
+			if(pinnedItem) {
+				existingUserSet.setPinned(existingUserSet.getPinned()+1);
+			}
+			extUserSet = updateItemList(existingUserSet);
+		} else {
+			if (!existingUserSet.getItems().contains(newItem)) {
+				// add item
+				addNewItemToList(existingUserSet, positionInt, newItem);
+				// if pinned item, increase the pinned counter by 1
+				if(pinnedItem) {
+					existingUserSet.setPinned(existingUserSet.getPinned()+1);
+				}
+				extUserSet = updateItemList(existingUserSet);
+
+			} else {
+				// replace item
+				int currentPos = existingUserSet.getItems().indexOf(newItem);
+				if (currentPos == positionInt) {
+					// do not change user set, just add pagination
+					// the items is already present at the correct position
+					extUserSet = getUserSetUtils().updatePagination(existingUserSet);
+				} else {
+					replaceItem(existingUserSet, positionInt, newItem);
+					extUserSet = updateItemList(existingUserSet);
+				}
+			}
+		}
+
+		return extUserSet;
+	}
     /*
      * (non-Javadoc)
      * 
@@ -308,6 +339,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public void replaceItem(UserSet existingUserSet, int positionInt, String newItem) {
 	existingUserSet.getItems().remove(newItem);
+	// if item already existed, the size of item list has changed
+	// Check to avoid IndexOutOfBoundsException
+	if(positionInt > existingUserSet.getItems().size()) {
+		positionInt = positionInt-1;
+	}
 	addNewItemToList(existingUserSet, positionInt, newItem);
     }
 
