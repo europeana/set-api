@@ -623,6 +623,13 @@ public class WebUserSetRest extends BaseRest {
 			new String[] { datasetId + "/" + localId, identifier });
 	    }
 
+	    // check if it is a pinned item, decrease the counter by 1 for entity sets
+        if(existingUserSet.isEntityBestItemsSet()) {
+            int currentPosition = existingUserSet.getItems().indexOf(newItem);
+            if (currentPosition < existingUserSet.getPinned()) {
+                existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+            }
+        }
 	    // if already exists - remove item and update modified date
 	    existingUserSet.getItems().remove(newItem);
 

@@ -1,7 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -10,6 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -61,7 +63,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     public static void initTokens() {
 	initRegularUserToken();
 	initEntitySetTokens();
-    }
+	}
     
     // create Entity user set validation tests
     @Test
@@ -124,11 +126,11 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
     }
-    
+
     // check if editor can update the entity set
     @Test
     public void update_EntityUserSet_withEditor() throws Exception {
-	
+
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
 
@@ -154,14 +156,14 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
-	
+
 	getUserSetService().deleteUserSet(identifier);
     }
 
-    
+
     @Test
     public void update_EntityUserSet_noSubject() throws Exception {
-	
+
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
 
@@ -171,13 +173,13 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-	
+
 	getUserSetService().deleteUserSet(identifier);
     }
-    
+
     @Test
     public void update_EntityUserSet_ok() throws Exception {
-	
+
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
 
@@ -187,14 +189,14 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
-	
+
 	assertTrue(containsKeyOrValue(result, "https://updated.reference.uri"));
 	assertTrue(containsKeyOrValue(result, userSet.getId()));
-	
+
 	getUserSetService().deleteUserSet(identifier);
     }
 
-    
+
     @Test
     public void delete_EntityUserSet_withRegularUser() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
@@ -221,6 +223,124 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
     }
 
+
+    @Test
+	public void insertItems_EntityUserSets_withRegularUser() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+	    .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+
+		getUserSetService().deleteUserSet(identifier);
+
+	}
+
+	@Test
+	public void insertItems_EntityUserSets_withEditorUser() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+
+		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertTrue(containsKeyOrValue(result, newItem));
+		assertTrue(containsKeyOrValue(result, userSet.getId()));
+		getUserSetService().deleteUserSet(identifier);
+
+	}
+
+	@Test
+	public void insertPinnedItems_EntityUserSets_withEditorUser() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		String identifier = userSet.getIdentifier();
+
+		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+
+		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.queryParam(WebUserSetFields.PATH_PARAM_POSITION, WebUserSetModelFields.PINNED_POSITION)
+				.header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertTrue(containsKeyOrValue(result, newItem));
+		assertTrue(containsKeyOrValue(result, userSet.getId()));
+		assertTrue(containsKeyOrValue(result, "pinned"));
+
+        // add more pinned items
+		UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+		getUserSetService().insertItem("02",  "123_test", WebUserSetModelFields.PINNED_POSITION, existingUserSet);
+		getUserSetService().insertItem("03",  "123_test", WebUserSetModelFields.PINNED_POSITION, existingUserSet);
+		getUserSetService().insertItem("04",  "123_test", WebUserSetModelFields.PINNED_POSITION, existingUserSet);
+
+		// check if item is present
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_test")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "03", "123_test")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_test")));
+
+		// check count of pinned items
+		assertEquals(4, existingUserSet.getPinned());
+
+		// add entity item at 0 position
+		getUserSetService().insertItem("05",  "123_test", "0", existingUserSet);
+		String entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "05", "123_test");
+		// check the item
+		assertTrue(existingUserSet.getItems().contains(entityItem));
+		assertEquals(4, existingUserSet.getPinned());
+		assertEquals(7, existingUserSet.getItems().size());
+		// entity item at 4+0 position
+		assertEquals(4, existingUserSet.getItems().indexOf(entityItem));
+
+        // add entity item at 3 position
+		getUserSetService().insertItem("06",  "123_test", "3", existingUserSet);
+		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "06", "123_test");
+		// check the item
+		assertTrue(existingUserSet.getItems().contains(entityItem));
+		assertEquals(4, existingUserSet.getPinned());
+		assertEquals(8, existingUserSet.getItems().size());
+		// entity item at 4+3 position
+		assertEquals(7, existingUserSet.getItems().indexOf(entityItem));
+
+		getUserSetService().deleteUserSet(identifier);
+
+	}
+
+	@Test
+	public void deletePinnedItems_EntityUserSets_withEditorUser() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+		getUserSetService().insertItem("01",  "123_test", WebUserSetModelFields.PINNED_POSITION, userSet);
+		getUserSetService().insertItem("02",  "123_test", WebUserSetModelFields.PINNED_POSITION, userSet);
+
+		assertEquals(2, userSet.getPinned());
+		String identifier = userSet.getIdentifier();
+
+		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+
+		String result = mockMvc.perform(delete(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+				.header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertFalse(containsKeyOrValue(result, newItem));
+		assertTrue(containsKeyOrValue(result, userSet.getId()));
+
+		UserSet userSet1 = getUserSetService().getUserSetById(userSet.getIdentifier());
+		assertEquals(1, userSet1.getPinned());
+
+		getUserSetService().deleteUserSet(identifier);
+
+	}
+
     private String getSetCreator(String result) throws JSONException {
 	assertNotNull(result);
 	JSONObject json = new JSONObject(result);
@@ -234,5 +354,4 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	JSONObject json = new JSONObject(result);
 	return Collections.singletonList(json.getString(WebUserSetModelFields.CONTRIBUTOR));
     }
-
 }
