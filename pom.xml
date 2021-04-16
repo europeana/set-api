@@ -22,7 +22,7 @@
 	</modules>
 
 	<properties>
-		<version.setApi>0.5</version.setApi>
+		<version.setApi>0.6-SNAPSHOT</version.setApi>
 		<version.java>11</version.java>
 		<version.javac.release>11</version.javac.release>
 		<version.spring>5.2.7.RELEASE</version.spring>
