@@ -3,7 +3,10 @@ package eu.europeana.set.mongo.model.internal;
 import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.*;
 
 import java.util.Date;
 import java.util.List;
@@ -12,6 +15,15 @@ import java.util.Map;
 /**
  * @author GrafR
  */
+@Entity
+@Indexes({@Index(fields = {@Field(WebUserSetFields.IDENTIFIER)}),
+        @Index(fields = {@Field(WebUserSetFields.CREATOR)}),
+        @Index(fields = {@Field(WebUserSetFields.TYPE)}),
+        @Index(fields = {@Field(WebUserSetFields.VISIBILITY)}),
+        @Index(fields = {@Field(WebUserSetFields.CONTRIBUTOR)}),
+        @Index(fields = {@Field(WebUserSetFields.SUBJECT)}),
+        @Index(fields = {@Field(WebUserSetFields.ITEMS)}),
+        @Index(fields = {@Field(WebUserSetModelFields.MODIFIED)})})
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     ObjectId getObjectId();
