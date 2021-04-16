@@ -15,15 +15,7 @@ import java.util.Map;
 /**
  * @author GrafR
  */
-@Entity
-@Indexes({@Index(fields = {@Field(WebUserSetFields.IDENTIFIER)}),
-        @Index(fields = {@Field(WebUserSetFields.CREATOR)}),
-        @Index(fields = {@Field(WebUserSetFields.TYPE)}),
-        @Index(fields = {@Field(WebUserSetFields.VISIBILITY)}),
-        @Index(fields = {@Field(WebUserSetFields.CONTRIBUTOR)}),
-        @Index(fields = {@Field(WebUserSetFields.SUBJECT)}),
-        @Index(fields = {@Field(WebUserSetFields.ITEMS)}),
-        @Index(fields = {@Field(WebUserSetModelFields.MODIFIED)})})
+//@Entity
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     ObjectId getObjectId();
