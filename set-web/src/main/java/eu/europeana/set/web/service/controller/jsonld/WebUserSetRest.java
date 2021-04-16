@@ -1,6 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -357,10 +358,15 @@ public class WebUserSetRest extends BaseRest {
 		if(existingUserSet.isEntityBestItemsSet() &&
 				getUserSetService().hasEditorRole(authentication)) {
 			String userId= getUserSetService().getUserId(authentication);
-			if(existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
-				existingUserSet.getContributor().remove(userId);
+			// check if contributor is not null, in case if entity set was created by super user
+			if(existingUserSet.getContributor() != null) {
+				if (existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
+					existingUserSet.getContributor().remove(userId);
+				}
+				existingUserSet.getContributor().add(userId);
+			} else {
+				existingUserSet.setContributor(Collections.singletonList(userId));
 			}
-			existingUserSet.getContributor().add(userId);
 		}
 
 	}
