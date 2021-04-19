@@ -55,12 +55,11 @@ public class UsageStatsService {
      */
     public void getAverageSetsPerUser(Metric metric) {
       long averageUserSetsPerUser = 0;
-      long distinctUsers = getMongoPersistance().getDistinctCreators().size();
+      long distinctUsers = getMongoPersistance().getDistinctCreators();
       long totalUserSets =  getMongoPersistance().count(
                 buildUserSetQuery(null,
-                        UserSetTypes.COLLECTION.getJsonValue(),
+                        null,
                         null));
-
       if(distinctUsers != 0 && totalUserSets != 0) {
           averageUserSetsPerUser = totalUserSets / distinctUsers;
       }

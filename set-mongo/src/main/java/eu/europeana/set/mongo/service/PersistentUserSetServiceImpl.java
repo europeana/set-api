@@ -162,8 +162,8 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<String> getDistinctCreators() {
-		return getDao().getCollection().distinct(WebUserSetFields.CREATOR);
+	public long getDistinctCreators() {
+		return getDao().getCollection().distinct(WebUserSetFields.CREATOR).size();
 	}
 
 	@Override
