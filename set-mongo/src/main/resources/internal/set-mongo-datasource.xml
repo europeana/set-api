@@ -18,7 +18,6 @@
 		<constructor-arg value="#{setProperties['mongodb.set.connectionUrl']}" type="java.lang.String" />
 		<constructor-arg value="#{setProperties['mongodb.set.truststore']}" type="java.lang.String" />
 		<constructor-arg value="#{setProperties['mongodb.set.truststorepass']}" type="java.lang.String" />
-		<constructor-arg value="eu.europeana.set.mongo.model.PersistentUserSetImpl" type="java.lang.Class" />
 	</bean>
 	
 </beans>
