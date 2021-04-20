@@ -4,11 +4,7 @@
     "en": "Sportswear"
   },
   "subject" : [
-<<<<<<< HEAD
     "http://data.europeana.eu/concept/base/114"
-=======
-    "https://reference.uri"
->>>>>>> refs/remotes/origin/develop
   ],
   "visibility": "public",
   "description": {
