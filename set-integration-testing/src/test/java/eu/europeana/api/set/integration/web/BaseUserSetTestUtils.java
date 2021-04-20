@@ -1,5 +1,7 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -7,10 +9,14 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeAll;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import eu.europeana.api.commons.exception.ApiKeyExtractionException;
 import eu.europeana.api.commons.exception.AuthorizationExtractionException;
@@ -19,6 +25,7 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
@@ -42,33 +49,54 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_COMPLETE_PUBLIC = "/content/userset_complete.json";
     public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
     public static final String USER_SET_BEST_ITEMS = "/content/userset_entity_best_items.json";
-    public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
-    public static final String ENTITY_USER_SET_INVALID = "/content/entity_userset_invalid.json";
-    public static final String ENTITY_USER_SET_UPDATE = "/content/entity_userset_update.json";
-
     public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
-   
-    @Autowired
-    private UserSetService userSetService; 
+    public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
+    public static final String ENTITY_USER_SET_INVALID_SUBJECT = "/content/entity_userset_invalid_subject.json";
+    public static final String ENTITY_USER_SET_INVALID_MULTIPLE_SUBJECTS = "/content/entity_userset_invalid_multiple_subjects.json";
+    public static final String ENTITY_USER_SET_UPDATE = "/content/entity_userset_update.json";
+    public static final String ENTITY_USER_SET_NO_SUBJECT = "/content/entity_userset_invalid_subject.json";
+
+    protected MockMvc mockMvc;
 
     @Autowired
-    private UserSetConfiguration configuration; 
-    
+    protected WebApplicationContext wac;
+
+    @Autowired
+    private UserSetService userSetService;
+
+    @Autowired
+    private UserSetConfiguration configuration;
+
     protected static String regularUserToken;
     protected static String editorUserToken;
     protected static String editor2UserToken;
+    protected static String creatorEntitySetUserToken;
 
-    @BeforeAll
-    public static void initToken() {
-     regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
-     editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
-//     editor2UserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
+    public void initApplication() {
+	if (mockMvc == null) {
+	    this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	}
     }
 
-    public UserSetServiceImpl getUserSetService() {
-        return (UserSetServiceImpl) userSetService;
+    public static void initRegularUserToken() {
+	regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+    }
+
+    public static void initEntitySetTokens() {
+	editorUserToken=
+		    retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+	editor2UserToken = 
+		retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
+	creatorEntitySetUserToken =
+		retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
+
     }
     
+    
+    public UserSetServiceImpl getUserSetService() {
+	return (UserSetServiceImpl) userSetService;
+    }
+
     public UserSetConfiguration getConfiguration() {
 	return configuration;
     }
@@ -97,28 +125,26 @@ public abstract class BaseUserSetTestUtils {
 	}
     }
 
-    protected WebUserSetImpl createTestUserSet(String testFile, String token)
-	    throws Exception {
+    protected WebUserSetImpl createTestUserSet(String testFile, String token) throws Exception {
 	String requestJson = getJsonStringInput(testFile);
 	UserSet set = getUserSetService().parseUserSetLd(requestJson);
 	Authentication authentication = getAuthentication(token);
 	return (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
     }
 
-    
-    protected void deleteBookmarkFolder(String token) throws ApiKeyExtractionException, AuthorizationExtractionException, UserSetNotFoundException {
-	// TODO Auto-generated method stub
+    protected void deleteBookmarkFolder(String token)
+	    throws ApiKeyExtractionException, AuthorizationExtractionException, UserSetNotFoundException {
 	Authentication authentication = getAuthentication(token);
 	String creatorId = UserSetUtils.buildUserUri((String) authentication.getPrincipal());
 	UserSet bookmarkFolder = getUserSetService().getBookmarkFolder(creatorId);
-	if(bookmarkFolder != null) {
+	if (bookmarkFolder != null) {
 	    getUserSetService().deleteUserSet(bookmarkFolder.getIdentifier());
 	}
-	
-	
+
     }
 
-    protected Authentication getAuthentication(String token) throws ApiKeyExtractionException, AuthorizationExtractionException {
+    protected Authentication getAuthentication(String token)
+	    throws ApiKeyExtractionException, AuthorizationExtractionException {
 	RsaVerifier signatureVerifier = new RsaVerifier(getConfiguration().getJwtTokenSignatureKey());
 	String authorizationApiName = getConfiguration().getAuthorizationApiName();
 	List<? extends Authentication> oauthList = OAuthUtils.extractAuthenticationList(token, signatureVerifier,
@@ -128,11 +154,20 @@ public abstract class BaseUserSetTestUtils {
 		return authentication;
 	    }
 	}
-	
+
 	return null;
     }
-    
+
     protected boolean containsKeyOrValue(String jsonString, String property) {
 	return StringUtils.contains(jsonString, "\"" + property + "\"");
+    }
+
+    protected String getSetIdentifier(String result) throws JSONException {
+	assertNotNull(result);
+	JSONObject json = new JSONObject(result);
+	String id = json.getString("id");
+	assertNotNull(id);
+	String identifier = id.replace(WebUserSetFields.BASE_SET_URL, "");
+	return identifier;
     }
 }

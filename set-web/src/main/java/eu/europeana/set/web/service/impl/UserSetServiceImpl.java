@@ -511,7 +511,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return page;
     }
 
-    @SuppressWarnings("unchecked")
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request) {
 //	new ResultsPageImpl<T>()

@@ -157,8 +157,9 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return getDao().findOne(WebUserSetFields.MONGO_ID, new ObjectId(id));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List getDistinctCreators() {
+	public List<String> getDistinctCreators() {
 		return getDao().getCollection().distinct(WebUserSetModelFields.CREATOR);
 	}
 
@@ -193,12 +194,17 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	// create $match and $group for mongo query
 	private List<DBObject> getAggregatePipeline() {
+
+		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+
 		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
 		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
 		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
 
-		return Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()),
-				             group);
+//		return Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()),
+//				             group);
+		return Arrays.asList(match, group);
 	}
 
 	/**
@@ -214,11 +220,11 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 				.project(WebUserSetModelFields.SUBJECT, true).asList();
 	}
 
-	// creates $match for mongo query
-	private DBObject getMongoMatchForPipeLine(String matchId, String matchValue) {
-		return new BasicDBObject(WebUserSetFields.MONGO_MATCH,
-				new BasicDBObject(matchId, matchValue));
-	}
+//	// creates $match for mongo query
+//	private DBObject getMongoMatchForPipeLine(String matchId, String matchValue) {
+//		return new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+//				new BasicDBObject(matchId, matchValue));
+//	}
 
 	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {

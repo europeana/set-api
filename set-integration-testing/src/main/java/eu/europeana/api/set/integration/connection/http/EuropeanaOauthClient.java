@@ -2,14 +2,13 @@ package eu.europeana.api.set.integration.connection.http;
 
 import java.io.IOException;
 
-import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
-import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
+import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
 import eu.europeana.set.common.http.HttpConnection;
 
 /**
@@ -21,6 +20,7 @@ public class EuropeanaOauthClient {
     public static final String REGULAR_USER = "REGULAR";
     public static final String EDITOR_USER = "EDITOR";
     public static final String EDITOR2_USER = "EDITOR2";
+    public static final String CREATOR_ENTITYSETS = "CREATOR_ES";
 
     public EuropeanaOauthClient() {
 	//
@@ -31,14 +31,19 @@ public class EuropeanaOauthClient {
 	    String accessToken = "access_token";
 	    String oauthUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
 	    String oauthParams = null;
-	    if (REGULAR_USER.equalsIgnoreCase(user)) {
+	    switch(user) {
+	    case REGULAR_USER:
 		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
-	    }
-	    if (EDITOR_USER.equalsIgnoreCase(user)) {
+		break;
+	    case EDITOR_USER:
 		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor();
-	    }
-	    if (EDITOR2_USER.equalsIgnoreCase(user)) {
-		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor();
+		break;
+	    case EDITOR2_USER:
+		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsEditor2();
+		break;
+	    case CREATOR_ENTITYSETS:
+		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsCreatorEntitySet();
+		break;
 	    }
 	    
 	    HttpConnection connection = new HttpConnection();

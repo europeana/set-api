@@ -127,6 +127,10 @@ public abstract class BaseUserSetServiceImpl {
 	    persistedSet.setVisibility(updates.getVisibility());
 	}
 
+	if (updates.getSubject() != null) {
+	    persistedSet.setSubject(updates.getSubject());
+	}
+
 	if (updates.getTitle() != null) {
 	    if (persistedSet.getTitle() != null) {
 		for (Map.Entry<String, String> entry : updates.getTitle().entrySet()) {
@@ -259,7 +263,8 @@ public abstract class BaseUserSetServiceImpl {
 	Agent user = new WebUser();
 	// if entity set, assign entity admin user as a creator
 	// also, add user as 'contributor' if the role is editor
-	// default visibility for Entity set is Public, even if user submits differently.
+	// default visibility for Entity set is Public, even if user submits
+	// differently.
     if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
     	newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
     	user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
@@ -427,29 +432,18 @@ public abstract class BaseUserSetServiceImpl {
 //	}
     }
 
-	/**
-	 * if List<String>subject contains an entity reference
-	 * referring to the set then it is a EntityBestItemSet
-	 *
-	 * @return true if it is an EntityBestItemSet
-	 */
-	public boolean isEntityReference(UserSet userSet) {
-		if (userSet.getSubject() != null) {
-			for(String subject : userSet.getSubject()) {
-				if (subject.startsWith(WebUserSetFields.ENTITY_REFERENCE_URL))
-					return true;
-			}
-		}
-		return false;
-	}
+
+    private boolean isUri(String value) {
+	return value.startsWith("http://") || value.startsWith("https://");
+    }
+
     /**
      * This method validates and processes the favorite set
      * 
      * @param webUserSet The new user set
      * @throws RequestBodyValidationException
      */
-    void validateBookmarkFolder(UserSet webUserSet)
-	    throws RequestBodyValidationException, ParamValidationException {
+    void validateBookmarkFolder(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException {
 
 	if (!webUserSet.isBookmarksFolder()) {
 	    return;
@@ -516,11 +510,6 @@ public abstract class BaseUserSetServiceImpl {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 		    new String[] { WebUserSetModelFields.TYPE, webUserSet.getType() });
 	}
-	// if type is BookmarkFolder or Collection, subject must not contain entity reference
-	if (! webUserSet.isEntityBestItemsSet() && isEntityReference(webUserSet)) {
-		throw new RequestBodyValidationException(UserSetI18nConstants.INVALID_SUBJECT_VALUE,
-			new String[] {webUserSet.getType(), WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
-	}
     }
 
     /**
@@ -568,15 +557,15 @@ public abstract class BaseUserSetServiceImpl {
     }
 
 	/**
-	 * validates the EntityBestItemsSet
-	 * for entity user set subject field must have a entity reference.
+     * validates the EntityBestItemsSet for entity user set subject field must have
+     * a entity reference.
 	 *
 	 * @param webUserSet
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
 	 */
-	void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
-			                                                                 RequestBodyValidationException {
+    void validateEntityBestItemsSet(UserSet webUserSet)
+	    throws ParamValidationException, RequestBodyValidationException {
 		if (!webUserSet.isEntityBestItemsSet()) {
 			return;
 		}
@@ -588,11 +577,17 @@ public abstract class BaseUserSetServiceImpl {
 					new String[] { WebUserSetModelFields.CREATOR });
 		}
 
+	final List<String> subject = webUserSet.getSubject();
+	if (subject == null || subject.isEmpty()) {
 		// subject must be present
-		if (webUserSet.getSubject() == null) {
 			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
+						new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
+	} else if (subject.size() != 1 || !isUri(subject.get(0))) {
+//	   must include only one HTTP reference
+	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
+		    new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
+
 		}
 
 		// entity user set is a close set
@@ -602,10 +597,6 @@ public abstract class BaseUserSetServiceImpl {
 					new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
 		}
 
-		if (! isEntityReference(webUserSet)) {
-			throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
-					new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(webUserSet.getSubject())});
-		}
 	}
 
     void updateTotal(UserSet existingUserSet) {
