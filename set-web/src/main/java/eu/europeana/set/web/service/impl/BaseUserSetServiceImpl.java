@@ -126,7 +126,7 @@ public abstract class BaseUserSetServiceImpl {
 	if (updates.getVisibility() != null) {
 	    persistedSet.setVisibility(updates.getVisibility());
 	}
-	
+
 	if (updates.getSubject() != null) {
 	    persistedSet.setSubject(updates.getSubject());
 	}
@@ -164,10 +164,10 @@ public abstract class BaseUserSetServiceImpl {
 	// update modified date
 	persistentUserSet.setModified(new Date());
 	updateTotal(persistentUserSet);
-	UserSet updatedUserSet = getMongoPersistence().update(persistentUserSet);
+	UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
 	getUserSetUtils().updatePagination(updatedUserSet);
 	return updatedUserSet;
-
+	
     }
 
     protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
@@ -196,7 +196,7 @@ public abstract class BaseUserSetServiceImpl {
 	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
 	}
 
-	return requestUrl + "?" + queryString;
+	return requestUrl+"?"+queryString;
     }
 
     protected String removeParam(final String queryParam, String queryParams) {
@@ -265,18 +265,18 @@ public abstract class BaseUserSetServiceImpl {
 	// also, add user as 'contributor' if the role is editor
 	// default visibility for Entity set is Public, even if user submits
 	// differently.
-	if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
-	    newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
-	    user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
-	    user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
-	    if (hasEditorRights(authentication)) {
-		newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
-	    }
+    if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+    	newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+    	user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
+		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+		if(hasEditorRights(authentication)) {
+			newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
+		}
 	} else {
-	    user.setHttpUrl(getUserId(authentication));
-	    user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+		user.setHttpUrl(getUserId(authentication));
+		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
 	}
-	newUserSet.setCreator(user);
+    newUserSet.setCreator(user);
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}
@@ -303,24 +303,24 @@ public abstract class BaseUserSetServiceImpl {
 	return hasRole(authentication, Roles.ADMIN.getName());
     }
 
-    public boolean hasEditorRights(Authentication authentication) {
-	if (authentication == null) {
-	    return false;
+	public boolean hasEditorRights(Authentication authentication) {
+		if (authentication == null) {
+			return false;
+		}
+		return hasRole(authentication, Roles.EDITOR.getName());
 	}
-	return hasRole(authentication, Roles.EDITOR.getName());
-    }
 
-    protected boolean hasRole(Authentication authentication, String roleType) {
-	for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-		.hasNext();) {
-	    // role based authorization
-	    String role = iterator.next().getAuthority();
-	    if (StringUtils.equalsIgnoreCase(roleType, role)) {
-		return true;
-	    }
+	protected boolean hasRole(Authentication authentication, String roleType) {
+		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
+				.hasNext();) {
+			// role based authorization
+			String role = iterator.next().getAuthority();
+			if (StringUtils.equalsIgnoreCase(roleType, role)) {
+				return true;
+			}
+		}
+		return false;
 	}
-	return false;
-    }
 
     /**
      * This method retrieves item ids from the closed userSet to build query e.g.
@@ -556,53 +556,53 @@ public abstract class BaseUserSetServiceImpl {
 	}
     }
 
-    /**
+	/**
      * validates the EntityBestItemsSet for entity user set subject field must have
      * a entity reference.
-     *
-     * @param webUserSet
-     * @throws ParamValidationException
-     * @throws RequestBodyValidationException
-     */
+	 *
+	 * @param webUserSet
+	 * @throws ParamValidationException
+	 * @throws RequestBodyValidationException
+	 */
     void validateEntityBestItemsSet(UserSet webUserSet)
 	    throws ParamValidationException, RequestBodyValidationException {
-	if (!webUserSet.isEntityBestItemsSet()) {
-	    return;
-	}
+		if (!webUserSet.isEntityBestItemsSet()) {
+			return;
+		}
 
-	// creator must be present
-	if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
-	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    new String[] { WebUserSetModelFields.CREATOR });
-	}
+		// creator must be present
+		if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					new String[] { WebUserSetModelFields.CREATOR });
+		}
 
 	final List<String> subject = webUserSet.getSubject();
 	if (subject == null || subject.isEmpty()) {
-	   // subject must be present
-	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
+		// subject must be present
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+						new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
 	} else if (subject.size() != 1 || !isUri(subject.get(0))) {
 //	   must include only one HTTP reference
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
 		    new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
 
-	}
+		}
 
-	// entity user set is a close set
-	if (webUserSet.isOpenSet()) {
-	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-		    UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-		    new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
-	}
+		// entity user set is a close set
+		if (webUserSet.isOpenSet()) {
+			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+					UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+					new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
+		}
 
-    }
+	}
 
     void updateTotal(UserSet existingUserSet) {
-	if (existingUserSet.getItems() != null) {
+	if(existingUserSet.getItems() != null) {
 	    existingUserSet.setTotal(existingUserSet.getItems().size());
-	} else {
+	}else {
 	    existingUserSet.setTotal(0);
 	}
     }
