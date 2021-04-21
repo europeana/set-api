@@ -81,7 +81,7 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * Retrieve distinct creators present in the DB
 	 * @return
 	 */
-	List<String> getDistinctCreators();
+	long getDistinctCreators();
 
 	/**
 	 * Retrieve distinct creators present in the DB
