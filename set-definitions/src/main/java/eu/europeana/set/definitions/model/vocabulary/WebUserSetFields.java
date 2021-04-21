@@ -40,6 +40,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String MONGO_TOTAL_LIKES          = "totalLikes";
     public static final String MONGO_SUM                  = "$sum";
     public static final String MONGO_TOTAL                = "$total";
+    public static final String MONGO_EQUALS                = "$eq";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";

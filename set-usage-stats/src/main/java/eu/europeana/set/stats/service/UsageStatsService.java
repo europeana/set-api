@@ -58,7 +58,7 @@ public class UsageStatsService {
       long distinctUsers = getMongoPersistance().getDistinctCreators();
       long totalUserSets =  getMongoPersistance().count(
                 buildUserSetQuery(null,
-                        null,
+                        UserSetTypes.COLLECTION.getJsonValue(),
                         null));
       if(distinctUsers != 0 && totalUserSets != 0) {
           averageUserSetsPerUser = totalUserSets / distinctUsers;

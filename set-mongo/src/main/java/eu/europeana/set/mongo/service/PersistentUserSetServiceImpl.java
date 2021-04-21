@@ -163,7 +163,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@SuppressWarnings("unchecked")
 	@Override
 	public long getDistinctCreators() {
-		return getDao().getCollection().distinct(WebUserSetFields.CREATOR).size();
+		// create query : { type: { $eq: Collection } }
+		DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
+				new BasicDBObject(WebUserSetFields.MONGO_EQUALS, UserSetTypes.COLLECTION.getJsonValue()));
+		return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
 	}
 
 	@Override
