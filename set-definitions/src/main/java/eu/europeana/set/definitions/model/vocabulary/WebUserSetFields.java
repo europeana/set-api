@@ -40,6 +40,8 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String MONGO_TOTAL_LIKES          = "totalLikes";
     public static final String MONGO_SUM                  = "$sum";
     public static final String MONGO_TOTAL                = "$total";
+    public static final String MONGO_EQUALS               = "$eq";
+    public static final String MONGO_PROJECT              = "$project";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
@@ -75,6 +77,13 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
 
-    // Europeana API Constants
-//    public static final String BASE_ITEM_URL              = "http://data.europeana.eu/item";
+    // Entity user set and Elevation Constants
+    public static final String ELEVATION_FILENAME        = "elevate.xml";
+    public static final String ELEVATION_AGENT_QUERY     = "edm_agent:";
+    public static final String ELEVATION_CONCEPT_QUERY   = "skos_concept:";
+    public static final String ELEVATION_TIMESPAN_QUERY  = "edm_timespan:";
+    public static final String AGENT                     = "agent";
+    public static final String CONCEPT                   = "concept";
+    public static final String TIMESPAN                  = "timespan";
+    public static final String ENTITY_REFERENCE_URL      = "http://data.europeana.eu/";
 }

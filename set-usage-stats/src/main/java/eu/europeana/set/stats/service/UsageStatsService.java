@@ -55,12 +55,11 @@ public class UsageStatsService {
      */
     public void getAverageSetsPerUser(Metric metric) {
       long averageUserSetsPerUser = 0;
-      long distinctUsers = getMongoPersistance().getDistinctCreators().size();
+      long distinctUsers = getMongoPersistance().getDistinctCreators();
       long totalUserSets =  getMongoPersistance().count(
                 buildUserSetQuery(null,
                         UserSetTypes.COLLECTION.getJsonValue(),
                         null));
-
       if(distinctUsers != 0 && totalUserSets != 0) {
           averageUserSetsPerUser = totalUserSets / distinctUsers;
       }
@@ -75,7 +74,7 @@ public class UsageStatsService {
      * @param visibility
      * @return UsersSetQuery
      */
-    private UserSetQuery buildUserSetQuery(String creator, String type, String visibility) {
+    public UserSetQuery buildUserSetQuery(String creator, String type, String visibility) {
         UserSetQuery userSetQuery = new UserSetQueryImpl();
         userSetQuery.setCreator(creator);
         userSetQuery.setType(type);
