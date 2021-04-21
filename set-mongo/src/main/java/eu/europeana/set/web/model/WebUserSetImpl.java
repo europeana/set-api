@@ -3,15 +3,10 @@ package eu.europeana.set.web.model;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.*;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -94,8 +89,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
 
     @Override
-    @JsonProperty(WebUserSetFields.PINNED)
+    @JsonGetter(WebUserSetFields.PINNED)
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveIntegerFilter.class)
     public int getPinned() {
+        if (!StringUtils.equals(super.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+            return -1;
+        }
         return super.getPinned();
     }
 

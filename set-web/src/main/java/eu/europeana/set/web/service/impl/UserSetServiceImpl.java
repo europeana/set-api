@@ -163,6 +163,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.TITLE });
 	}
 
+	// validate Pinned
+	if (!webUserSet.isEntityBestItemsSet() && webUserSet.getPinned() > 0)	{
+		throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+				UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+				new String[] { WebUserSetModelFields.PINNED, webUserSet.getType() });
+	}
+
 	// validate context
 //	if (webUserSet.getContext() != null
 //		&& !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())) {
@@ -223,7 +230,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (StringUtils.isNotEmpty(position)) {
 	    try {
 		positionInt = Integer.parseInt(position);
-		// if position is with in pinned items range
+			// if position less than pinned items
 		// change the position from the initial start of Entity sets items
 		if(positionInt <= pinnedItems) {
 			positionInt = pinnedItems + positionInt;
@@ -266,8 +273,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	 * insert item to Set in the indicated position (or last position if no position
 	 * was indicated).
 	 *
-	 * if pinnedItem : Then increase the counter by one while adding the item.
-	 * No need to update the counter while replacing the existing item
+	 * For entity sets :
+	 * if pinnedItem : Then increase the counter by one while adding the item in the pinned list.
+	 * While replacing the item :
+	 * 1) if pinned item is changed into item , decrease the counter
+	 * 2) if item is changed into pinned item , increase the counter
+	 * 3) if the position is same for item/pinned item, counter remains same in both the cases
+	 *
+	 * NOTE : Pinned value should be modified only for entity sets
 	 *
 	 * @param existingUserSet
 	 * @param newItem
@@ -278,19 +291,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		UserSet extUserSet = null;
 		if (existingUserSet.getItems() == null) {
 			addNewItemToList(existingUserSet, -1, newItem);
-			// if pinned item, increase the pinned counter by 1
-			if(pinnedItem) {
-				existingUserSet.setPinned(existingUserSet.getPinned()+1);
-			}
+			increasePinned(existingUserSet, pinnedItem);
 			extUserSet = updateItemList(existingUserSet);
 		} else {
 			if (!existingUserSet.getItems().contains(newItem)) {
 				// add item
 				addNewItemToList(existingUserSet, positionInt, newItem);
-				// if pinned item, increase the pinned counter by 1
-				if(pinnedItem) {
-					existingUserSet.setPinned(existingUserSet.getPinned()+1);
-				}
+				increasePinned(existingUserSet,pinnedItem);
 				extUserSet = updateItemList(existingUserSet);
 
 			} else {
@@ -302,6 +309,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 					extUserSet = getUserSetUtils().updatePagination(existingUserSet);
 				} else {
 					replaceItem(existingUserSet, positionInt, newItem);
+					increasePinned(existingUserSet, pinnedItem);
+					decreasePinned(existingUserSet, currentPos);
 					extUserSet = updateItemList(existingUserSet);
 				}
 			}
@@ -309,6 +318,31 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 		return extUserSet;
 	}
+
+	/**
+	 * if user set is entity set and item is pinnedItem
+	 * increases the pinned value by 1
+	 * @param existingUserSet
+	 * @param pinnedItem
+	 */
+	private static void increasePinned(UserSet existingUserSet, boolean pinnedItem){
+    	if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
+			existingUserSet.setPinned(existingUserSet.getPinned()+1);
+		}
+	}
+
+	/**
+	 * if user set is entity set and item exist in the pinned list
+	 * hence item is being changed from pinned to normal item
+	 * decrease the pinned value by 1
+	 * @param existingUserSet
+	 */
+	private static void decreasePinned(UserSet existingUserSet, int currentPosition){
+		if(existingUserSet.isEntityBestItemsSet() && currentPosition < existingUserSet.getPinned()) {
+			existingUserSet.setPinned(existingUserSet.getPinned()-1);
+		}
+	}
+
     /*
      * (non-Javadoc)
      * 
