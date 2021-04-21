@@ -74,7 +74,7 @@ public class UsageStatsService {
      * @param visibility
      * @return UsersSetQuery
      */
-    private UserSetQuery buildUserSetQuery(String creator, String type, String visibility) {
+    public UserSetQuery buildUserSetQuery(String creator, String type, String visibility) {
         UserSetQuery userSetQuery = new UserSetQueryImpl();
         userSetQuery.setCreator(creator);
         userSetQuery.setType(type);

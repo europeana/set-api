@@ -23,7 +23,9 @@ public interface UserSetConfiguration{
 	public String getSearchApiKey();
 
 	public String getEntityUserSetUserId();
-	
+
+	public String getElevationFileLocation();
+
 	/**
 	 * checks annotation.environment=production property
 	 */
