@@ -163,13 +163,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    new String[] { WebUserSetModelFields.TITLE });
 	}
 
-	// validate Pinned
-	if (!webUserSet.isEntityBestItemsSet() && webUserSet.getPinned() > 0)	{
-		throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-				UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-				new String[] { WebUserSetModelFields.PINNED, webUserSet.getType() });
-	}
-
 	// validate context
 //	if (webUserSet.getContext() != null
 //		&& !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())) {
