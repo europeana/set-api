@@ -92,10 +92,10 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     @JsonGetter(WebUserSetFields.PINNED)
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveIntegerFilter.class)
     public int getPinned() {
-        if (!StringUtils.equals(super.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
-            return -1;
+        if (isEntityBestItemsSet()) {
+            return super.getPinned();
         }
-        return super.getPinned();
+        return -1;
     }
 
     @Override
