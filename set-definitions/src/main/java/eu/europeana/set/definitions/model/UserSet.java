@@ -28,6 +28,10 @@ public interface UserSet extends PageInfo {
 
     void setSubject(List<String> subject);
 
+    int getPinned();
+
+    void setPinned(int pinned);
+
     List<String> getContributor();
 
     void setContributor(List<String> contributorList);

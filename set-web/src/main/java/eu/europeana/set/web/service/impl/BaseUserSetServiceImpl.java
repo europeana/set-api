@@ -261,17 +261,21 @@ public abstract class BaseUserSetServiceImpl {
 
     protected void setDefaults(UserSet newUserSet, Authentication authentication) {
 	Agent user = new WebUser();
-	// if entity set, assign entity admin user as a creator
-	// also, add user as 'contributor' if the role is editor
-	// default visibility for Entity set is Public, even if user submits
-	// differently.
-    if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
-    	newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
-    	user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
-		user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
-		if(hasEditorRights(authentication)) {
-			newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
-		}
+	/**
+	 * if entity set, assign entity admin user as a creator
+	 * also, add user as 'contributor' if the role is editor
+	 * default visibility for Entity set is Public, even if user submits
+	 * differently.
+	 *  For Pinned sets - set pinned to 0
+	 */
+	if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
+	    newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+	    user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
+	    user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+	    newUserSet.setPinned(0);
+	    if (hasEditorRights(authentication)) {
+		newUserSet.setContributor(Collections.singletonList(getUserId(authentication)));
+	    }
 	} else {
 		user.setHttpUrl(getUserId(authentication));
 		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());

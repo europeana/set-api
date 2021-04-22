@@ -1,6 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -311,7 +312,6 @@ public class WebUserSetRest extends BaseRest {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)" });
 	    }
-
 	    // validate items
 	    validateAndSetItems(existingUserSet, newUserSet, profile);
 	    // remove duplicated items
@@ -357,10 +357,15 @@ public class WebUserSetRest extends BaseRest {
 		if(existingUserSet.isEntityBestItemsSet() &&
 				getUserSetService().hasEditorRole(authentication)) {
 			String userId= getUserSetService().getUserId(authentication);
-			if(existingUserSet.getContributor().stream().anyMatch(c -> c.contains(userId))) {
-				existingUserSet.getContributor().remove(userId);
+			// check if contributor is not null, in case if entity set was created by super user
+			if(existingUserSet.getContributor() != null) {
+				if (existingUserSet.getContributor().contains(userId)) {
+					existingUserSet.getContributor().remove(userId);
+				}
+				existingUserSet.getContributor().add(userId);
+			} else {
+				existingUserSet.setContributor(Collections.singletonList(userId));
 			}
-			existingUserSet.getContributor().add(userId);
 		}
 
 	}
@@ -370,6 +375,22 @@ public class WebUserSetRest extends BaseRest {
 	// no validation of items for open sets, they are retrieved dynamically
 	if (storedUserSet.isOpenSet()) {
 	    return;
+	}
+
+	// for entity sets update :profile should be minimal and
+	// there must not be any items present in new user set
+	// only metadata can be update for entity sets
+	if(storedUserSet.isEntityBestItemsSet()) {
+		if (LdProfiles.MINIMAL != profile) {
+			throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED,
+					UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED, new String[] {},
+					HttpStatus.PRECONDITION_FAILED, null);
+		}
+		if (updateUserSet.getItems() != null && updateUserSet.getItems().size() > 0) {
+			throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
+					UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
+					HttpStatus.BAD_REQUEST, null);
+		}
 	}
 
 	// update the Set based on its identifier (replace member items with the new
@@ -447,6 +468,12 @@ public class WebUserSetRest extends BaseRest {
 		throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
 			new String[] { "'Insert item to existing user set'", "open" });
 	    }
+
+	    // if set is not entity set and position is "pin", throw exception
+	    if (!existingUserSet.isEntityBestItemsSet() && StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
+			throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+					new String[] { "Pinning item ", existingUserSet.getType() });
+		}
 
 	    // check visibility level for given user
 	    getUserSetService().checkPermissionToUpdate(existingUserSet, authentication, true);
@@ -623,6 +650,13 @@ public class WebUserSetRest extends BaseRest {
 			new String[] { datasetId + "/" + localId, identifier });
 	    }
 
+	    // check if it is a pinned item, decrease the counter by 1 for entity sets
+        if(existingUserSet.isEntityBestItemsSet()) {
+            int currentPosition = existingUserSet.getItems().indexOf(newItem);
+            if (currentPosition < existingUserSet.getPinned()) {
+                existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+            }
+        }
 	    // if already exists - remove item and update modified date
 	    existingUserSet.getItems().remove(newItem);
 

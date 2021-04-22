@@ -128,7 +128,7 @@ public interface UserSetService {
      * @return position The validated position in list to insert
      * @throws ApplicationAuthenticationException
      */
-    public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException;
+    public int validatePosition(String position, List<String> items, int pinnedItems) throws ApplicationAuthenticationException;
 
     /**
      * This method enriches user set by provided item
