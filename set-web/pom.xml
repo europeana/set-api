@@ -160,6 +160,13 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>${version.jaxb}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIO}</version>
+			<scope>compile</scope>
+		</dependency>
 		
 		<!-- Test dependencies -->
 		<dependency>
@@ -191,13 +198,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${version.commonsIO}</version>
-			<scope>test</scope>
-		</dependency>
-		
 	</dependencies>
 
 	<build>

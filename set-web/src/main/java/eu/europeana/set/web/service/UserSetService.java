@@ -248,4 +248,10 @@ public interface UserSetService {
      */
     UserSet applyProfile(UserSet userSet, LdProfiles profile);
 
+    /**
+     * Return the List of entity sets with
+     * items, subject and type value
+     * @return
+     */
+    List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
 }

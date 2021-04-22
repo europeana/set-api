@@ -752,7 +752,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return userSet;
     }
 
-    private void setSerializedItemIds(UserSet userSet) {
+	/**
+	 * Return the List of entity sets with
+	 * items, subject and type value
+	 * @return
+	 */
+	@Override
+	public List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query) {
+	return getMongoPersistance().getEntitySetsItemAndSubject(query);
+    }
+
+	private void setSerializedItemIds(UserSet userSet) {
 	if (userSet.getItems() == null) {
 	    return;
 	}

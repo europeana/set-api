@@ -25,6 +25,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     public static final String VALUE_ENVIRONMENT_TEST        = "test";
     public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
     public static final String ENTITY_USERSET_USERID            = "entity.userset.user.id";
+    public static final String ELEVATION_FILE_LOCATION          = "elevation.file.folder";
 
     // TODO: move constants to api commons
     public static final String AUTHORIZATION_API_NAME           = "authorization.api.name";
@@ -100,6 +101,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     @Override
     public String getEntityUserSetUserId() {
         return getSetProperties().getProperty(ENTITY_USERSET_USERID);
+    }
+
+    @Override
+    public String getElevationFileLocation() {
+        return getSetProperties().getProperty(ELEVATION_FILE_LOCATION);
     }
 
     @Override
