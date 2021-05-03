@@ -7,10 +7,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import com.mongodb.AggregationOptions;
-import com.mongodb.BasicDBObject;
-import com.mongodb.Cursor;
-import com.mongodb.DBObject;
+import com.mongodb.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,10 +157,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return getDao().findOne(WebUserSetFields.MONGO_ID, new ObjectId(id));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<String> getDistinctCreators() {
-		return getDao().getCollection().distinct(WebUserSetFields.CREATOR);
+	public long getDistinctCreators() {
+		// create query : { type: { $eq: Collection } }
+		DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
+				new BasicDBObject(WebUserSetFields.MONGO_EQUALS, UserSetTypes.COLLECTION.getJsonValue()));
+		return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
 	}
 
 	@Override
@@ -205,8 +204,29 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
 		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
 
+//		return Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()),
+//				             group);
 		return Arrays.asList(match, group);
 	}
+
+	/**
+	 * creates a mongo query to get the items and entity reference for the entity sets
+	 *
+	 * @return
+	 */
+	@Override
+	public List<PersistentUserSet> getEntitySetsItemAndSubject(UserSetQuery userSetQuery) {
+		return buildMongoQuery(userSetQuery)
+				.project(WebUserSetFields.ITEMS, true)
+				.project(WebUserSetFields.TYPE, true)
+				.project(WebUserSetModelFields.SUBJECT, true).asList();
+	}
+
+//	// creates $match for mongo query
+//	private DBObject getMongoMatchForPipeLine(String matchId, String matchValue) {
+//		return new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+//				new BasicDBObject(matchId, matchValue));
+//	}
 
 	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {
@@ -262,7 +282,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    }
 	        
 	    if(query.getType() != null) {
-//		mongoQuery.filter(WebUserSetModelFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
 		mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
 	    }
 	    

@@ -62,3 +62,6 @@ authorization.api.name=usersets
 
 # User set API version
 set.api.version=
+
+# location for the elevation file
+elevation.file.folder=

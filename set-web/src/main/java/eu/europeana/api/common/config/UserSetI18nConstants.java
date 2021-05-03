@@ -35,7 +35,14 @@ public class UserSetI18nConstants {
     public static final String USERSET_CONTAINS_NO_ITEMS      = "error.userset_contains_no_items";
     public static final String USERSET_ALREADY_DISABLED       = "error.userset_already_disabled";
     public static final String USERSET_MINIMAL_UPDATE_PROFILE = "error.userset_minimal_update_profile";
+    public static final String USERSET_PROFILE_MINIMAL_ALLOWED = "error.userset_entity_minimal_profile";
+
     public static final String USER_SET_NOT_AVAILABLE         = "error.userset_not_available";
     
     public static final String USER_SET_OPERATION_NOT_ALLOWED = "error.userset_operation_not_allowed";
+    public static final String ENTITY_USER_SET_NOT_FOUND = "error.no_entity_userset_found";
+    public static final String ELEVATION_NOT_GENERATED = "error.no_elevation_generated";
+
+
+
 }

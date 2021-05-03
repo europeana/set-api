@@ -16,6 +16,7 @@ import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.mongo.model.internal.GeneratedUserSetIdImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Serializable>
@@ -36,6 +37,7 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 	
 	public PersistentUserSetDaoImpl(Class<E> clazz, Datastore datastore) {
 		super(datastore, clazz);
+		datastore.ensureIndexes(PersistentUserSetImpl.class);
 	}
 
 	@SuppressWarnings("deprecation")

@@ -128,7 +128,7 @@ public interface UserSetService {
      * @return position The validated position in list to insert
      * @throws ApplicationAuthenticationException
      */
-    public int validatePosition(String position, List<String> items) throws ApplicationAuthenticationException;
+    public int validatePosition(String position, List<String> items, int pinnedItems) throws ApplicationAuthenticationException;
 
     /**
      * This method enriches user set by provided item
@@ -248,4 +248,10 @@ public interface UserSetService {
      */
     UserSet applyProfile(UserSet userSet, LdProfiles profile);
 
+    /**
+     * Return the List of entity sets with
+     * items, subject and type value
+     * @return
+     */
+    List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
 }

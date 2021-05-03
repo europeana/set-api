@@ -1,17 +1,19 @@
 package eu.europeana.set.mongo.model.internal;
 
-import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.agent.Agent;
-import org.bson.types.ObjectId;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
+
+import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.agent.Agent;
+
 /**
  * @author GrafR
  */
+//@Entity
 public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     ObjectId getObjectId();
@@ -39,6 +41,10 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
     List<String> getSubject();
 
     void setSubject(List<String> subject);
+
+    int getPinned();
+
+    void setPinned(int pinned);
 
 //    List<String> getContributor();
 //

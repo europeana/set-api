@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,8 +22,8 @@ import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
 @JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TITLE, WebUserSetModelFields.SUBJECT,
-        WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.ITEMS,
-        WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
+        WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.PINNED,
+        WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
 	WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -91,6 +92,16 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     @JsonProperty(WebUserSetFields.SUBJECT)
     public List<String> getSubject() {
         return super.getSubject();
+    }
+
+    @Override
+    @JsonGetter(WebUserSetFields.PINNED)
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveIntegerFilter.class)
+    public int getPinned() {
+        if (isEntityBestItemsSet()) {
+            return super.getPinned();
+        }
+        return -1;
     }
 
     @Override
