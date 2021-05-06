@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -62,7 +63,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * europeana.UserSet.definitions.model.UserSet)
      */
     @Override
-    public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
+    public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException, IOException {
 	setDefaults(newUserSet, authentication);
 	if(newUserSet.isEntityBestItemsSet()) {
 		checkPermissionToUpdate(newUserSet, authentication, true);
@@ -155,7 +156,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, IOException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -399,7 +400,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
-	    LdProfiles profile) throws HttpException {
+	    LdProfiles profile) throws HttpException, IOException {
 
 	if (!userSet.isOpenSet()
 		&& (userSet.getItems() == null || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
@@ -408,16 +409,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	String apiKey = getConfiguration().getSearchApiKey();
-	String url = buildSearchApiUrl(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
-//    	uri = userSet.getIsDefinedBy() + additionalParameters;
-
+	String url = buildSearchApiPostUrl(userSet, apiKey);
+	SearchApiRequest searchApiRequest = buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
+	String jsonBody = serializeSearchApiRequest(searchApiRequest);
 	SearchApiResponse apiResult;
 	try {
 	    if (LdProfiles.STANDARD == profile) {
-		apiResult = getSearchApiClient().searchItems(url, apiKey, false);
+		apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, false);
 		setItemIds(userSet, apiResult);
 	    } else if (LdProfiles.ITEMDESCRIPTIONS == profile) {
-		apiResult = getSearchApiClient().searchItems(url, apiKey, true);
+		apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
 		int total = apiResult.getTotal();
 		if (!userSet.isOpenSet()) {
 		    // dereferenciation of closed sets is limited to 100
@@ -437,7 +438,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    @Override
+	@Override
     public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile,
 	    Authentication authentication) {
 	// add user information for visibility filtering criteria
@@ -450,7 +451,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
-	    throws HttpException {
+			throws HttpException, IOException {
 
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
@@ -488,7 +489,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, Authentication authentication,
-	    LdProfiles profile) throws HttpException {
+	    LdProfiles profile) throws HttpException, IOException {
 	List<UserSet> items = new ArrayList<>(results.getResults().size());
 
 	// TODO: define a second parameter for itemset page size

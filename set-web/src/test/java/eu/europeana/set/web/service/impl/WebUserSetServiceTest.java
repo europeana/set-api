@@ -101,7 +101,7 @@ public class WebUserSetServiceTest {
     }
 
 	@Test
-    public void deleteUserSet() throws  HttpException {
+    public void deleteUserSet() throws HttpException, IOException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);
@@ -125,7 +125,7 @@ public class WebUserSetServiceTest {
     }
 
 	@Test
-    public void getUserSet() throws HttpException {
+    public void getUserSet() throws HttpException, IOException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet userSet1200 = new WebUserSetImpl();
@@ -148,7 +148,7 @@ public class WebUserSetServiceTest {
 
 
     @Test
-    public void insertItemUserSet() throws HttpException {
+    public void insertItemUserSet() throws HttpException, IOException {
 
 	UserSet userSet = new WebUserSetImpl();
 	UserSet testUserSet = getObjectBuilder().buildUserSet(userSet, UserSetTestObjectBuilder.ITEMS_TEST_INPUT_FILE, true);

@@ -43,6 +43,8 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_REGULAR = "/content/userset_regular.json";
     public static final String USER_SET_MANDATORY = "/content/userset_mandatory.json";
     public static final String USER_SET_OPEN = "/content/userset_open.json";
+    public static final String USER_SET_MULTIPLE_QUERY_OPEN = "/content/userset_open_multiple_query.json";
+    public static final String USER_SET_LARGE_QUERY_OPEN = "/content/userset_open_large_query.json";
     public static final String USER_SET_LARGE = "/content/userset_large.json";
     public static final String USER_SET_REGULAR_PUBLIC = "/content/userset_regular_public.json";
     public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";

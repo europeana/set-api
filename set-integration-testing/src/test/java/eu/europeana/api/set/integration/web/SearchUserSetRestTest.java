@@ -181,7 +181,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchEntitySetByContributorUri() throws Exception {
 	// create object in database
@@ -201,14 +201,14 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	//default sorting should include the id on the first position
 	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
-	
+
 	//check contributor
 	assertTrue(containsKeyOrValue(result, contributorId));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchEntitySetBySubject() throws Exception {
 	// create object in database
@@ -235,7 +235,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchWithPublicVisibility_ItemsDescription() throws Exception {
 	// create object in database
@@ -251,6 +251,22 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
+
+	@Test
+	public void searchWithOpenUserSet_ItemsDescription() throws Exception {
+		// create object in database
+		UserSet set = createTestUserSet(USER_SET_OPEN, regularUserToken);
+
+		mockMvc.perform(
+				get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.OK.value()));
+
+		// delete item created by test
+		getUserSetService().deleteUserSet(set.getIdentifier());
+	}
 
     @Test
     public void searchWithPrivateVisibility() throws Exception {

@@ -32,7 +32,7 @@ public interface UserSetService {
      * @return UserSet object
      * @throws HttpException
      */
-    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException;
+    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException, IOException;
 
     /**
      * This method converts close set to open set by updating respective items
@@ -95,7 +95,7 @@ public interface UserSetService {
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, IOException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -182,7 +182,7 @@ public interface UserSetService {
 
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
-	    throws HttpException;
+            throws HttpException, IOException;
     
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
