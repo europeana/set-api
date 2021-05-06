@@ -4,9 +4,7 @@ package eu.europeana.set.search;
 public class SearchApiRequest {
 
     private String query;
-    private String[] qf;
-    private String[] reusability;
-    // default value if null for Search API post request
+    // default value for Search API post request
     private String[] profile = {"standard"};
     private int start = 1;
     private int rows ;
@@ -18,22 +16,6 @@ public class SearchApiRequest {
 
     public void setQuery(String query) {
         this.query = query;
-    }
-
-    public String[] getQf() {
-        return qf;
-    }
-
-    public void setQf(String[] qf) {
-        this.qf = qf;
-    }
-
-    public String[] getReusability() {
-        return reusability;
-    }
-
-    public void setReusability(String[] reusability) {
-        this.reusability = reusability;
     }
 
     public String[] getProfile() {
