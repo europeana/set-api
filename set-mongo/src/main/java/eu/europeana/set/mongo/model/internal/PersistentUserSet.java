@@ -90,14 +90,6 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     void setItems(List<String> items);
 
-    int getNext();
-
-    void setNext(int next);
-
-    int getPrev();
-
-    void setPrev(int prev);
-
     String getPartOf();
 
     void setPartOf(String partOf);
