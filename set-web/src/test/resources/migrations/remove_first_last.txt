@@ -1,0 +1,4 @@
+db.getCollection('userset').updateMany(
+    {},
+   { $unset: { first: "", last: "" } }
+)
