@@ -45,11 +45,10 @@ public interface UserSetService {
      * @param profile
      * @return updated set
      * @throws HttpException
-     * @throws IOException
      * @throws JSONException
      */
     public UserSet fetchItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr, int pageSize,
-	    LdProfiles profile) throws HttpException, IOException, JSONException;
+	    LdProfiles profile) throws HttpException, JSONException;
 
     /**
      * update (stored) <code>persistentUserSet</code> with values from

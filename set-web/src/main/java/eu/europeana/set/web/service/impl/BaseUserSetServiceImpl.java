@@ -437,9 +437,11 @@ public abstract class BaseUserSetServiceImpl {
 			.get(CommonApiConstants.QUERY_PARAM_QUERY);
 
 	StringBuilder query = new StringBuilder();
-	// form the query param for Search
-	for(String queryValue : queryParam) {
-		query.append(queryValue);
+	if(queryParam != null || !queryParam.isEmpty()) {
+		// form the query param for Search
+		for(String queryValue : queryParam) {
+			query.append(queryValue);
+		}
 	}
 	return query.toString();
 	}
@@ -569,7 +571,7 @@ public abstract class BaseUserSetServiceImpl {
      * @throws ParamValidationException
      * @throws RequestBodyValidationException
      */
-    void validateIsDefinedBy(UserSet webUserSet) throws ParamValidationException, RequestBodyValidationException, IOException {
+    void validateIsDefinedBy(UserSet webUserSet) throws ParamValidationException, RequestBodyValidationException {
 
 	if (webUserSet.isOpenSet()) {
 	    String searchUrl = getBaseSearchUrl(getConfiguration().getSearchApiUrl());
@@ -597,8 +599,11 @@ public abstract class BaseUserSetServiceImpl {
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] {
 				WebUserSetModelFields.IS_DEFINED_BY, "an error occured when calling " + validateUrl },
 			e);
-	    }
-
+	    } catch (IOException e) {
+			throw new RequestBodyValidationException(
+					UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, new String[] {},
+					e);
+		}
 	    if (apiResult.getTotal() <= 0) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY,
@@ -608,8 +613,8 @@ public abstract class BaseUserSetServiceImpl {
     }
 
 	String serializeSearchApiRequest(SearchApiRequest searchApiRequest) throws IOException {
-		UserSetLdSerializer serializer = new UserSetLdSerializer();
-		return serializer.serialize(searchApiRequest);
+	UserSetLdSerializer serializer = new UserSetLdSerializer();
+	return serializer.serialize(searchApiRequest);
 	}
 	/**
      * validates the EntityBestItemsSet for entity user set subject field must have

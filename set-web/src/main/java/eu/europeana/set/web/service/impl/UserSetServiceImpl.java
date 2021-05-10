@@ -156,7 +156,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, IOException {
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -400,7 +400,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
-	    LdProfiles profile) throws HttpException, IOException {
+	    LdProfiles profile) throws HttpException {
 
 	if (!userSet.isOpenSet()
 		&& (userSet.getItems() == null || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
@@ -411,9 +411,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	String apiKey = getConfiguration().getSearchApiKey();
 	String url = buildSearchApiPostUrl(userSet, apiKey);
 	SearchApiRequest searchApiRequest = buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
-	String jsonBody = serializeSearchApiRequest(searchApiRequest);
-	SearchApiResponse apiResult;
 	try {
+		String jsonBody = serializeSearchApiRequest(searchApiRequest);
+		SearchApiResponse apiResult;
 	    if (LdProfiles.STANDARD == profile) {
 		apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, false);
 		setItemIds(userSet, apiResult);
@@ -435,6 +435,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    } else {
 		throw new InternalServerException(e);
 	    }
+	} catch (IOException e) {
+		throw new RequestBodyValidationException(
+				UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, new String[] {},
+				e);
 	}
     }
 
@@ -489,7 +493,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage, Authentication authentication,
-	    LdProfiles profile) throws HttpException, IOException {
+	    LdProfiles profile) throws HttpException {
 	List<UserSet> items = new ArrayList<>(results.getResults().size());
 
 	// TODO: define a second parameter for itemset page size

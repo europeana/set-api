@@ -4,11 +4,16 @@ package eu.europeana.set.search;
 public class SearchApiRequest {
 
     private String query;
+    private String[] qf;
+    private String[] reusability;
+
     // default value for Search API post request
     private String[] profile = {"standard"};
     private int start = 1;
     private int rows ;
+    private String theme;
     private String[] sort;
+    private String[] colourPalette;
 
     public String getQuery() {
         return query;
@@ -48,5 +53,37 @@ public class SearchApiRequest {
 
     public void setSort(String[] sort) {
         this.sort = sort;
+    }
+
+    public String[] getQf() {
+        return qf;
+    }
+
+    public void setQf(String[] qf) {
+        this.qf = qf;
+    }
+
+    public String[] getReusability() {
+        return reusability;
+    }
+
+    public void setReusability(String[] reusability) {
+        this.reusability = reusability;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
+
+    public String[] getColourPalette() {
+        return colourPalette;
+    }
+
+    public void setColourPalette(String[] colourPalette) {
+        this.colourPalette = colourPalette;
     }
 }
