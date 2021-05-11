@@ -30,9 +30,6 @@ public class UserSetUtils {
         return resMap;
     }
 
-     /**
-   
-
     /**
      * This method forms an identifier URL
      *
@@ -88,7 +85,15 @@ public class UserSetUtils {
                }
                String lastPageStr = fillPage(userSet, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setLast(lastPageStr);
-           }
+	   } 
+           
+       } else if (userSet != null && userSet.getTotal() == 0) {
+	   // no items
+	   // #EA-2557 remove pagination for legacy usersets
+	   // will not be needed anymore after databse migration
+	   // should not be used for minimal profile
+	   userSet.setFirst(null);
+	   userSet.setLast(null);
        }
 
        return userSet;

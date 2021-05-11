@@ -19,12 +19,6 @@ public class BasePageInfo implements PageInfo{
     // Used to represent an ordered subsets of items from an OrderedCollection
     private int collectionPage;
 
-    // Indicates the next page of items
-    private int next;
-
-    // Indicates the previous page of items
-    private int prev;
-
     // Identifies the Collection to which CollectionPage objects items belong
     private String partOf;
 
@@ -113,40 +107,40 @@ public class BasePageInfo implements PageInfo{
      * 
      * @see eu.europeana.set.definitions.model.PageInfo#getNext()
      */
-    @Override
-    public int getNext() {
-	return next;
-    }
+//    @Override
+//    public int getNext() {
+//	return next;
+//    }
 
     /*
      * (non-Javadoc)
      * 
      * @see eu.europeana.set.definitions.model.PageInfo#setNext(int)
      */
-    @Override
-    public void setNext(int next) {
-	this.next = next;
-    }
+//    @Override
+//    public void setNext(int next) {
+//	this.next = next;
+//    }
 
     /*
      * (non-Javadoc)
      * 
      * @see eu.europeana.set.definitions.model.PageInfo#getPrev()
      */
-    @Override
-    public int getPrev() {
-	return prev;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.europeana.set.definitions.model.PageInfo#setPrev(int)
-     */
-    @Override
-    public void setPrev(int prev) {
-	this.prev = prev;
-    }
+//    @Override
+//    public int getPrev() {
+//	return prev;
+//    }
+//
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see eu.europeana.set.definitions.model.PageInfo#setPrev(int)
+//     */
+//    @Override
+//    public void setPrev(int prev) {
+//	this.prev = prev;
+//    }
 
     /*
      * (non-Javadoc)

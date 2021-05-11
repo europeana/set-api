@@ -68,16 +68,6 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	super.setVisibility(visibility);
     }
 
-    @JsonIgnore
-    public int getNext() {
-	return super.getNext();
-    }
-
-    @JsonIgnore
-    public int getPrev() {
-	return super.getPrev();
-    }
-
     @JsonProperty(WebUserSetFields.TITLE)
     public Map<String, String> getTitle() {
 	return super.getTitle();

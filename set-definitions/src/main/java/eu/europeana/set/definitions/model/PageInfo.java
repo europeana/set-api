@@ -18,14 +18,6 @@ public interface PageInfo {
 
 	void setCollectionPage(int collectionPage);
 
-	int getNext();
-
-	void setNext(int next);
-
-	int getPrev();
-
-	void setPrev(int prev);
-
 	String getPartOf();
 
 	void setPartOf(String partOf);
