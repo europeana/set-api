@@ -252,16 +252,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throws ApplicationAuthenticationException {
 	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 	// check if the position is "pin" and is a EntityBestItem set then
-	// insert the item at the 0 position
-	UserSet userSet;
-	if (StringUtils.equals(position, WebUserSetModelFields.PINNED_POSITION)
+	// insert the item at the 0 positio
+    UserSet userSet;
+
+	if (WebUserSetModelFields.PINNED_POSITION.equals(position)
 		&& existingUserSet.isEntityBestItemsSet()) {
 	    userSet = insertItem(existingUserSet, newItem, 0, true);
 	} else {
-	    // validate position
+		// validate position
 	    // -1 if invalid
 	    int positionInt = validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
-	    userSet = insertItem(existingUserSet, newItem, positionInt, false);
+		userSet = insertItem(existingUserSet, newItem, positionInt, false);
 	}
 	getUserSetUtils().updatePagination(userSet);
 	return userSet;
@@ -298,18 +299,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		extUserSet = updateItemList(existingUserSet);
 
 	    } else {
-		// replace item
-		int currentPos = existingUserSet.getItems().indexOf(newItem);
-		if (currentPos == positionInt) {
+        // replace item
+		int oldPosition = existingUserSet.getItems().indexOf(newItem);
+		if (oldPosition == positionInt) {
 		    // do not change user set
 		    // the items is already present at the correct position
-		    // EA-2557 pagination information must not be stored in the database
-//					extUserSet = getUserSetUtils().updatePagination(existingUserSet);
+			extUserSet = existingUserSet;
 		} else {
 		    replaceItem(existingUserSet, positionInt, newItem);
-		    increasePinned(existingUserSet, pinnedItem);
-		    decreasePinned(existingUserSet, currentPos);
-		    extUserSet = updateItemList(existingUserSet);
+			increasePinned(existingUserSet, pinnedItem);
+			decreasePinned(existingUserSet, oldPosition, pinnedItem);
+			extUserSet = updateItemList(existingUserSet);
 		}
 	    }
 	}
@@ -318,27 +318,29 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     /**
-     * if user set is entity set and item is pinnedItem increases the pinned value
-     * by 1
+     * if user set is entity set and
+	 * item is pinnedItem OR normal item is being converted to pinned item
+	 * increases the pinned value by 1
      * 
      * @param existingUserSet
      * @param pinnedItem
      */
     private static void increasePinned(UserSet existingUserSet, boolean pinnedItem) {
 	if (existingUserSet.isEntityBestItemsSet() && pinnedItem) {
-	    existingUserSet.setPinned(existingUserSet.getPinned() + 1);
+		existingUserSet.setPinned(existingUserSet.getPinned() + 1);
 	}
     }
 
     /**
-     * if user set is entity set and item exist in the pinned list hence item is
-     * being changed from pinned to normal item decrease the pinned value by 1
+     * if user set is entity set and
+	 * item exist in the pinned list and item is not pinnedItem now
+	 * ie; item is being converted from pinned to normal item decrease the pinned value by 1
      * 
      * @param existingUserSet
      */
-    private static void decreasePinned(UserSet existingUserSet, int currentPosition) {
-	if (existingUserSet.isEntityBestItemsSet() && currentPosition < existingUserSet.getPinned()) {
-	    existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+    private static void decreasePinned(UserSet existingUserSet, int oldPosition, boolean pinnedItem) {
+	if (existingUserSet.isEntityBestItemsSet() && oldPosition < existingUserSet.getPinned() && !pinnedItem) {
+		existingUserSet.setPinned(existingUserSet.getPinned() - 1);
 	}
     }
 
