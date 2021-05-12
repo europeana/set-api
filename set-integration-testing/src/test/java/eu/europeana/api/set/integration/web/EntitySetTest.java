@@ -67,7 +67,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     
     // create Entity user set validation tests
     @Test
-    public void create_EntityUserSet_Unauthorized_InvalidUserRole() throws Exception {
+    void create_EntityUserSet_Unauthorized_InvalidUserRole() throws Exception {
 	String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
 
 	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
@@ -77,7 +77,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void create_EntityUserSet_Unauthorized_EmptyToken() throws Exception {
+    void create_EntityUserSet_Unauthorized_EmptyToken() throws Exception {
 	String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
 
 	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
@@ -88,7 +88,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
     // create entity user set with editor token
     @Test
-    public void create_EntityUserSet_Success() throws Exception {
+    void create_EntityUserSet_Success() throws Exception {
 	String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
 
 	String result = mockMvc
@@ -108,7 +108,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void create_EntityUserSet_InvalidSubject() throws Exception {
+    void create_EntityUserSet_InvalidSubject() throws Exception {
 	String requestJson = getJsonStringInput(ENTITY_USER_SET_INVALID_SUBJECT);
 
 	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
@@ -118,7 +118,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void create_EntityUserSet_InvalidMultipleSubjects() throws Exception {
+    void create_EntityUserSet_InvalidMultipleSubjects() throws Exception {
 	String requestJson = getJsonStringInput(ENTITY_USER_SET_INVALID_MULTIPLE_SUBJECTS);
 
 	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
@@ -129,7 +129,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
     // check if editor can update the entity set
     @Test
-    public void update_EntityUserSet_withEditor() throws Exception {
+    void update_EntityUserSet_withEditor() throws Exception {
 
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
@@ -145,7 +145,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void update_EntityUserSet_withRegularUser() throws Exception {
+    void update_EntityUserSet_withRegularUser() throws Exception {
 
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
@@ -162,7 +162,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 
     @Test
-    public void update_EntityUserSet_noSubject() throws Exception {
+    void update_EntityUserSet_noSubject() throws Exception {
 
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
@@ -178,7 +178,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
 
 	@Test
-	public void update_EntityUserSet_profileStandard() throws Exception {
+	void update_EntityUserSet_profileStandard() throws Exception {
 
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
@@ -194,7 +194,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	}
 
 	@Test
-	public void update_EntityUserSet_profileMinimalWithItems() throws Exception {
+	void update_EntityUserSet_profileMinimalWithItems() throws Exception {
 
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
@@ -210,7 +210,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	}
 
     @Test
-    public void update_EntityUserSet_ok() throws Exception {
+    void update_EntityUserSet_ok() throws Exception {
 
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
@@ -235,7 +235,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 
     @Test
-    public void delete_EntityUserSet_withRegularUser() throws Exception {
+    void delete_EntityUserSet_withRegularUser() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
 
@@ -249,7 +249,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void delete_EntityUserSet_withEditorUser() throws Exception {
+    void delete_EntityUserSet_withEditorUser() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 	String identifier = userSet.getIdentifier();
 
@@ -262,7 +262,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 
     @Test
-	public void insertItems_EntityUserSets_withRegularUser() throws Exception {
+	void insertItems_EntityUserSets_withRegularUser() throws Exception {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
@@ -277,7 +277,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	}
 
 	@Test
-	public void insertItems_EntityUserSets_withEditorUser() throws Exception {
+	void insertItems_EntityUserSets_withEditorUser() throws Exception {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
@@ -297,7 +297,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 	// test adding multiple pinned items, then adding normal item at different positions.
 	@Test
-	public void insertPinnedItems_EntityUserSets_withEditorUser() throws Exception {
+	void insertPinnedItems_EntityUserSets_withEditorUser() throws Exception {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
@@ -341,30 +341,24 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		String entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "05", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
-		assertEquals(4, existingUserSet.getPinned());
-		assertEquals(7, existingUserSet.getItems().size());
-		// entity item at 4+0 position
-		assertEquals(4, existingUserSet.getItems().indexOf(entityItem));
+		//total increase , pinned - same, position - 4+0 position
+		checkItemCountAndPosition(existingUserSet, entityItem, 7,4,4);
 
         // add entity item at 3 position
 		getUserSetService().insertItem("06",  "123_normalItem", "3", existingUserSet);
 		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "06", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
-		assertEquals(4, existingUserSet.getPinned());
-		assertEquals(8, existingUserSet.getItems().size());
-		// entity item at 4+3 position
-		assertEquals(7, existingUserSet.getItems().indexOf(entityItem));
+		//total increase , pinned - same, position - 4+3 entity item
+		checkItemCountAndPosition(existingUserSet, entityItem, 8,4,7);
 
 		// add item without giving position
 		getUserSetService().insertItem("07",  "123_normalItem", null, existingUserSet);
 		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
-		assertEquals(4, existingUserSet.getPinned());
-		assertEquals(9, existingUserSet.getItems().size());
-		// will be added at last
-		assertEquals(existingUserSet.getItems().size() -1, existingUserSet.getItems().indexOf(entityItem));
+		//total increase , pinned - same, position at last
+		checkItemCountAndPosition(existingUserSet, entityItem, 9,4,existingUserSet.getItems().size() -1);
 
         // add existing normal item in the same position
 		int currentPosition = existingUserSet.getItems().indexOf(entityItem);
@@ -372,30 +366,23 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
-		assertEquals(4, existingUserSet.getPinned());
-		assertEquals(9, existingUserSet.getItems().size());
-		// will be in the same position
-		assertEquals(currentPosition, existingUserSet.getItems().indexOf(entityItem));
+		//total , pinned and position remains same
+		checkItemCountAndPosition(existingUserSet, entityItem, 9,4,currentPosition);
 
 		// add existing normal item without providing any position
 		getUserSetService().insertItem("07",  "123_normalItem", null, existingUserSet);
 		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
-		assertEquals(4, existingUserSet.getPinned());
-		assertEquals(9, existingUserSet.getItems().size());
-		// will be in the same position
-		assertEquals(existingUserSet.getItems().size() -1, existingUserSet.getItems().indexOf(entityItem));
-
-
+		//total , pinned and position remains same
+		checkItemCountAndPosition(existingUserSet, entityItem, 9,4,existingUserSet.getItems().size()-1);
 
 		getUserSetService().deleteUserSet(identifier);
-
 	}
 
 	// test conversion of pinned -> normal item
 	@Test
-	public void insertAlreadyExistingPinnedItemAsNormalItem_EntityUserSets_withEditorUser() throws Exception {
+	void insertAlreadyExistingPinnedItemAsNormalItem_EntityUserSets_withEditorUser() throws Exception {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 		// add 3 pinned items
@@ -410,7 +397,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinUnpinItem")));
 
 		//pinned
-		assertEquals(userSet.getPinned(), 4);
+		assertEquals(4, userSet.getPinned());
 		//total
 		assertEquals(6, userSet.getItems().size());
 		// item to be converted into normal entity item with position < pinned items
@@ -429,10 +416,8 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// check if item is present and pinned value is decreased
 		assertTrue(existingUserSet.getItems().contains(newItem));
-		assertEquals(3, existingUserSet.getPinned()); //pinned should be reduced
-		assertEquals(6, existingUserSet.getItems().size()); //total remains same
-		assertEquals(existingUserSet.getItems().size()-1, existingUserSet.getItems().indexOf(newItem)); //position = 2+3 = 5 so at the last
-
+		//total remains same, pinned should be reduced, position = 2+3 = 5 so at the last
+		checkItemCountAndPosition(existingUserSet, newItem, 6,3,existingUserSet.getItems().size()-1);
 		// convert another item without position
 		String anotherItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinUnpinItem");
 
@@ -449,9 +434,8 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// check if item is present and pinned value is decreased
 		assertTrue(existingUserSet1.getItems().contains(newItem));
-		assertEquals(2, existingUserSet1.getPinned()); //pinned should be reduced
-		assertEquals(6, existingUserSet1.getItems().size()); //total remains same
-		assertEquals(existingUserSet1.getItems().size()-1, existingUserSet1.getItems().indexOf(anotherItem)); //position = null so at last
+		//total remains same, pinned should be reduced, position = null so at last
+		checkItemCountAndPosition(existingUserSet1, anotherItem, 6,2,existingUserSet1.getItems().size()-1);
 
 		// item to be converted into normal entity item with valid position
 		String thirditem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinUnpinItem");
@@ -469,17 +453,15 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// check if item is present and pinned value is decreased
 		assertTrue(existingUserSet2.getItems().contains(newItem));
-		assertEquals(1, existingUserSet2.getPinned()); //pinned should be reduced
-		assertEquals(6, existingUserSet2.getItems().size()); //total remains same
-		assertEquals(5, existingUserSet2.getItems().indexOf(thirditem)); //position = 5
-
+		//total remains same, pinned should be reduced,position = 5
+		checkItemCountAndPosition(existingUserSet2, thirditem, 6,1,5);
 		getUserSetService().deleteUserSet(identifier);
 	}
 
 	// test conversion of normal item  -> pinned item
 	// position will always be 'pin'
 	@Test
-	public void insertAlreadyExistingItemAsPinnedItem_EntityUserSets_withEditorUser() throws Exception {
+	void insertAlreadyExistingItemAsPinnedItem_EntityUserSets_withEditorUser() throws Exception {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 		// add 1 entity item
@@ -508,7 +490,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
 
 		assertTrue(existingUserSet.getItems().contains(newItem));
-		assertEquals(existingUserSet.getPinned(), 2 ); // pinned increases
+		assertEquals(2, existingUserSet.getPinned()); // pinned increases
 		assertEquals( 0, existingUserSet.getItems().indexOf(newItem)); // pinned item always added on top
 		assertEquals(4, userSet.getTotal()); // total remains same
 
@@ -517,7 +499,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	}
 
 	@Test
-	public void deletePinnedItems_EntityUserSets_withEditorUser() throws Exception {
+	void deletePinnedItems_EntityUserSets_withEditorUser() throws Exception {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		getUserSetService().insertItem("01",  "123_test", WebUserSetModelFields.PINNED_POSITION, userSet);
 		getUserSetService().insertItem("02",  "123_test", WebUserSetModelFields.PINNED_POSITION, userSet);
@@ -556,4 +538,11 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	JSONObject json = new JSONObject(result);
 	return Collections.singletonList(json.getString(WebUserSetModelFields.CONTRIBUTOR));
     }
+
+    private void checkItemCountAndPosition(UserSet existingUserSet, String newItem, int expectedTotalItems,
+										   int expectedPinnedItems, int expectedPositionOfItem) {
+		assertEquals(expectedPinnedItems, existingUserSet.getPinned());
+		assertEquals(expectedTotalItems, existingUserSet.getItems().size());
+		assertEquals(expectedPositionOfItem, existingUserSet.getItems().indexOf(newItem));
+	}
 }
