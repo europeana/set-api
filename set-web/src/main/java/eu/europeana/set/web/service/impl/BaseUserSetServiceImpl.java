@@ -340,8 +340,7 @@ public abstract class BaseUserSetServiceImpl {
      * @throws HttpException
      */
     SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, int pageSize) {
-	// use them to build the search query for retrieving item descriptions using
-	// minimal profile
+	// use them to build the search query for retrieving item descriptions
 	// europeana_id is in format /collectionId/recordId, this can be easily
 	// extracted from the
 	// full record ID by removing the base URL http://data.europeana.eu/item
@@ -365,7 +364,6 @@ public abstract class BaseUserSetServiceImpl {
 	// close bracket
 	query.append(')');
 	searchApiRequest.setQuery(query.toString());
-	searchApiRequest.setProfile(new String[]{CommonApiConstants.PROFILE_MINIMAL});
 	searchApiRequest.setRows(maxItems);
 	return searchApiRequest;
     }
@@ -393,34 +391,17 @@ public abstract class BaseUserSetServiceImpl {
 	/**
 	 * Returns the Search APi post Request body
 	 * @param userSet
-	 * @param apiKey
-	 * @param sort
-	 * @param sortOrder
-	 * @param pageNr
 	 * @param pageSize
 	 * @return
 	 */
-    SearchApiRequest buildSearchApiPostBody(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize) {
+    SearchApiRequest buildSearchApiPostBody(UserSet userSet, int pageSize) {
 
 	if (!userSet.isOpenSet()) {
 	    return buildSearchApiPostBodyForClosedSets(userSet, pageSize);
 	}
-
 	SearchApiRequest searchApiRequest = new SearchApiRequest();
-	// remove pagination and ordering
-	Integer start = pageNr * pageSize + 1;
-
 	searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
-	searchApiRequest.setProfile(new String[]{CommonApiConstants.PROFILE_MINIMAL});
-	searchApiRequest.setStart(start);
 	searchApiRequest.setRows(pageSize);
-
-	if(sort != null && sortOrder == null) {
-		searchApiRequest.setSort(new String[]{sort});
-	}
-	if (sort != null && sortOrder != null) {
-		searchApiRequest.setSort(new String[]{sort + " " + sortOrder});
-	}
 	return searchApiRequest;
     }
 
@@ -590,7 +571,7 @@ public abstract class BaseUserSetServiceImpl {
 		queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 		// the items are not required for validation, hence pageSize =0
 		// form the minimal post body
-		SearchApiRequest searchApiRequest = buildSearchApiPostBody(webUserSet, null, null, 0, 0);
+		SearchApiRequest searchApiRequest = buildSearchApiPostBody(webUserSet, 0);
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 
 		apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody , apiKey, false);
