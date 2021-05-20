@@ -416,7 +416,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	String apiKey = getConfiguration().getSearchApiKey();
 	String url = buildSearchApiPostUrl(userSet, apiKey);
-	SearchApiRequest searchApiRequest = buildSearchApiPostBody(userSet, pageSize);
+	SearchApiRequest searchApiRequest = buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 		SearchApiResponse apiResult;

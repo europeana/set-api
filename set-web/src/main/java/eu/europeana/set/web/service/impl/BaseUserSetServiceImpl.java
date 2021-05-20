@@ -332,7 +332,7 @@ public abstract class BaseUserSetServiceImpl {
      * This method retrieves item ids from the closed userSet to build SearchApiRequest.
 	 * e.g.
 	 * {query='europeana_id:("/165/https___bibdigital_rjb_csic_es_idviewer_11929_40" OR "/2020903/KKSgb2947_97")',
-	 * profile = [minimal], start=1, rows=5, sort=europeana_id}
+	 * start=1, rows=5, sort=europeana_id desc}
      *
      * @param userSet
      * @param pageSize
@@ -394,16 +394,28 @@ public abstract class BaseUserSetServiceImpl {
 	 * @param pageSize
 	 * @return
 	 */
-    SearchApiRequest buildSearchApiPostBody(UserSet userSet, int pageSize) {
+	SearchApiRequest buildSearchApiPostBody(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize) {
 
-	if (!userSet.isOpenSet()) {
-	    return buildSearchApiPostBodyForClosedSets(userSet, pageSize);
+		if (!userSet.isOpenSet()) {
+			return buildSearchApiPostBodyForClosedSets(userSet, pageSize);
+		}
+
+		SearchApiRequest searchApiRequest = new SearchApiRequest();
+		// remove pagination and ordering
+		Integer start = pageNr * pageSize + 1;
+
+		searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
+		searchApiRequest.setStart(start);
+		searchApiRequest.setRows(pageSize);
+
+		if(sort != null && sortOrder == null) {
+			searchApiRequest.setSort(new String[]{sort});
+		}
+		if (sort != null && sortOrder != null) {
+			searchApiRequest.setSort(new String[]{sort + " " + sortOrder});
+		}
+		return searchApiRequest;
 	}
-	SearchApiRequest searchApiRequest = new SearchApiRequest();
-	searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
-	searchApiRequest.setRows(pageSize);
-	return searchApiRequest;
-    }
 
 	/**
 	 * Returns the query param value from the url passed
@@ -571,7 +583,7 @@ public abstract class BaseUserSetServiceImpl {
 		queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 		// the items are not required for validation, hence pageSize =0
 		// form the minimal post body
-		SearchApiRequest searchApiRequest = buildSearchApiPostBody(webUserSet, 0);
+		SearchApiRequest searchApiRequest = buildSearchApiPostBody(webUserSet, null, null, 0, 0);
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 
 		apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody , apiKey, false);
