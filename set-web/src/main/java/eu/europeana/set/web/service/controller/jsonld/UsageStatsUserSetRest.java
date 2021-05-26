@@ -36,7 +36,7 @@ public class UsageStatsUserSetRest extends BaseRest {
      * @param request
      * @return
      */
-    @GetMapping(value = "/set/metrics", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+    @GetMapping(value = "/set/stats", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
     @ApiOperation(notes = SwaggerConstants.SET_USAGE_STATS, value = "Generate usage stats", nickname = "generateUserStats", response = java.lang.Void.class)
     public ResponseEntity<String> generateUsageStats(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
