@@ -68,7 +68,9 @@ public class ElevationUserSetRest extends BaseRest {
         if (elevation != null) {
             UserSetXMLSerializer xmlSerializer = new UserSetXMLSerializer();
             String xml = xmlSerializer.serialize(elevation);
-            writeElevation(getConfiguration().getElevationFileLocation(), xml);
+            
+            //TODO: enable writing to file, when the behaviour and server configurations with regard to write permissions are clarified
+//            writeElevation(getConfiguration().getElevationFileLocation(), xml);
             // returning the elevation response
             //TODO - remove the body, once we know how elevation file will be used
             return new ResponseEntity<>(xml, HttpStatus.OK);
