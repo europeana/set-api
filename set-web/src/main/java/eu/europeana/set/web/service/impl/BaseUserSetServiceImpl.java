@@ -225,8 +225,13 @@ public abstract class BaseUserSetServiceImpl {
 
     protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize, long totalInCollection,
 	    int lastPage, String type) {
-	String first = buildPageUrl(collectionUrl, 0, pageSize);
-	String last = buildPageUrl(collectionUrl, lastPage, pageSize);
+	String first = null;
+	String last = null;
+	
+	if(totalInCollection > 0) {
+	    first = buildPageUrl(collectionUrl, 0, pageSize);
+	    last = buildPageUrl(collectionUrl, lastPage, pageSize);
+	}
 	return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
     }
 

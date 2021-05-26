@@ -158,8 +158,9 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));
 	assertTrue(containsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.START_INDEX));
-	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
-	assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+	//for empty collections, isPartOf must not contain first and last 
+	assertFalse(containsKeyOrValue(result, WebUserSetFields.FIRST));
+	assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
 	//not available for empty sets
 	assertFalse(containsKeyOrValue(result, WebUserSetFields.PREV));
 	assertFalse(containsKeyOrValue(result, WebUserSetFields.NEXT));
