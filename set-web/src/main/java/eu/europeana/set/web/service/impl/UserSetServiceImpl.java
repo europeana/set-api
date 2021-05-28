@@ -420,7 +420,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    // use the number of item ids
 		    total = userSet.getItems().size();
 		}
-		setItems(userSet, apiResult.getItems(), total);
+		List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
+		setItems(userSet, sortedItemDescriptions, total);
 	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
@@ -431,6 +432,32 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		throw new InternalServerException(e);
 	    }
 	}
+    }
+
+    private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions) {
+	List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
+	String localId;
+	for (String itemUri : userSet.getItems()) {
+	    boolean found = false;
+	    localId = UserSetUtils.extractItemIdentifier(itemUri);
+	    //escape "/" to "\/" to match json string
+	    localId = StringUtils.replace(localId, "/", "\\/");
+	    for (String description : itemDescriptions) {
+		if(description.contains(localId)) {
+		    orderedItemDescriptions.add(description);
+		    found = true;
+		    break;
+		}
+	    }
+	    if(!found) {
+		logger.debug("No item description found for id: {}", localId);
+	    }
+	    if(orderedItemDescriptions.size() == itemDescriptions.size()) {
+		//skip items not included in the current page
+		break;
+	    }
+	}
+	return orderedItemDescriptions;
     }
 
     @Override

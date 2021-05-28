@@ -351,19 +351,22 @@ public abstract class BaseUserSetServiceImpl {
 	// e.g. europeana_id:("/08641/1037479000000476635" OR
 	// "/08641/1037479000000476943")
 	String id;
-	String fullId;
+	String itemUri;
 //	int maxDerefItems = 100;
 	int maxItems = Math.min(userSet.getItems().size(), pageSize);
 
 	StringBuilder query = new StringBuilder(100);
 	query.append("europeana_id:(");
 	for (int i = 0; i < maxItems; i++) {
-	    fullId = userSet.getItems().get(i);
+	    itemUri = userSet.getItems().get(i);
 	    if (i > 0) {
 		query.append(" OR ");
+//		query.append(" ");
 	    }
-	    id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
-	    query.append('"').append('/').append(id).append('"');
+	    id = UserSetUtils.extractItemIdentifier(itemUri); // .replace("/", "%2F");
+	    //term boosting doesn't work as the default solr sorting is replaced by search api  
+//	    query.append('"').append(id).append("\"^"+ (maxItems -i));
+	    query.append('"').append(id).append('"');
 	}
 	// close bracket
 	query.append(')');
@@ -374,6 +377,8 @@ public abstract class BaseUserSetServiceImpl {
 	// append rows=100
 	url.append('&').append(CommonApiConstants.QUERY_PARAM_ROWS).append('=').append(maxItems);
 
+	url.append("&sort=score+desc");
+	
 	return url.toString();
     }
 
