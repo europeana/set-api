@@ -3,6 +3,8 @@ package eu.europeana.set.definitions.model.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
@@ -140,6 +142,16 @@ public class UserSetUtils {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+    
+    /**
+     * extract item local id from data.europeana URI
+     * @param dataEuropeanaUri
+     * @return
+     */
+    public static String extractItemIdentifier(String dataEuropeanaUri) {
+	//preserve the first / in the item id
+	return StringUtils.substring(dataEuropeanaUri, WebUserSetFields.BASE_ITEM_URL.length() -1);
     }
  
 }
