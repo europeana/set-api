@@ -1,25 +1,23 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import javax.annotation.Resource;
 
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.oauth2.model.ApiCredentials;
-import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
@@ -27,7 +25,6 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
@@ -48,6 +45,8 @@ public abstract class BaseUserSetServiceImpl {
     I18nService i18nService;
 
     UserSetUtils userSetUtils = new UserSetUtils();
+
+    UserSetSearchApiUtils userSetSearchApiUtils = new UserSetSearchApiUtils();
 
     @Resource
     UserSetConfiguration configuration;
@@ -88,7 +87,11 @@ public abstract class BaseUserSetServiceImpl {
 	return configuration;
     }
 
-    /**
+	protected UserSetSearchApiUtils getSearchApiUtils() {
+		return userSetSearchApiUtils;
+	}
+
+	/**
      * @deprecated check if the update test must merge the properties or if it
      *             simply overwrites it
      * @param persistedSet
@@ -328,133 +331,6 @@ public abstract class BaseUserSetServiceImpl {
 		return false;
 	}
 
-    /**
-     * This method retrieves item ids from the closed userSet to build SearchApiRequest.
-	 * e.g.
-	 * {query='europeana_id:("/165/https___bibdigital_rjb_csic_es_idviewer_11929_40" OR "/2020903/KKSgb2947_97")',
-	 * start=1, rows=5, sort=europeana_id desc}
-     *
-     * @param userSet
-     * @param pageSize
-     * @return
-     * @throws HttpException
-     */
-    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, int pageSize) {
-	// use them to build the search query for retrieving item descriptions
-	// europeana_id is in format /collectionId/recordId, this can be easily
-	// extracted from the
-	// full record ID by removing the base URL http://data.europeana.eu/item
-	// e.g. europeana_id:("/08641/1037479000000476635" OR
-	// "/08641/1037479000000476943")
-	SearchApiRequest searchApiRequest = new SearchApiRequest();
-	String id;
-	String fullId;
-	int maxItems = Math.min(userSet.getItems().size(), pageSize);
-
-	StringBuilder query = new StringBuilder(100);
-	query.append("europeana_id:(");
-	for (int i = 0; i < maxItems; i++) {
-	    fullId = userSet.getItems().get(i);
-	    if (i > 0) {
-		query.append(" OR ");
-	    }
-	    id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
-	    query.append('"').append('/').append(id).append('"');
-	}
-	// close bracket
-	query.append(')');
-	searchApiRequest.setQuery(query.toString());
-	searchApiRequest.setRows(maxItems);
-	return searchApiRequest;
-    }
-
-	/**
-	 * Will create the Serach Api post request url
-	 * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
-	 *
-	 * @param userSet
-	 * @param apiKey
-	 * @return
-	 */
-    String buildSearchApiPostUrl(UserSet userSet, String apiKey) {
-	StringBuilder url = new StringBuilder();
-	if (!userSet.isOpenSet()) {
-		url.append(getBaseSearchUrl(getConfiguration().getSearchApiUrl()));
-	} else {
-		url.append(StringUtils.substringBefore(userSet.getIsDefinedBy(), "?"));
-	}
-	// add apikey
-	url.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
-	return url.toString();
-    }
-
-	/**
-	 * Returns the Search APi post Request body
-	 * @param userSet
-	 * @param pageSize
-	 * @return
-	 */
-	SearchApiRequest buildSearchApiPostBody(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize) {
-
-		if (!userSet.isOpenSet()) {
-			return buildSearchApiPostBodyForClosedSets(userSet, pageSize);
-		}
-
-		SearchApiRequest searchApiRequest = new SearchApiRequest();
-		// remove pagination and ordering
-		Integer start = pageNr * pageSize + 1;
-
-		searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
-		searchApiRequest.setStart(start);
-		searchApiRequest.setRows(pageSize);
-
-		if(sort != null && sortOrder == null) {
-			searchApiRequest.setSort(new String[]{sort});
-		}
-		if (sort != null && sortOrder != null) {
-			searchApiRequest.setSort(new String[]{sort + " " + sortOrder});
-		}
-		return searchApiRequest;
-	}
-
-	/**
-	 * Returns the query param value from the url passed
-	 * @param url
-	 * @return
-	 */
-	private static String getQueryParamFromURL(String url) {
-	// decode the url
-	String decodedUrl = java.net.URLDecoder.decode(url, StandardCharsets.UTF_8);
-    // get the query param value from the getIsDefinedBy
-	List<String> queryParam = UriComponentsBuilder.fromUriString(decodedUrl).build().getQueryParams()
-			.get(CommonApiConstants.QUERY_PARAM_QUERY);
-
-	StringBuilder query = new StringBuilder();
-	if(queryParam != null || !queryParam.isEmpty()) {
-		// form the query param for Search
-		for(String queryValue : queryParam) {
-			query.append(queryValue);
-		}
-	}
-	return query.toString();
-	}
-
-    /**
-     * This method extracts base URL from the search URL
-     * 
-     * @param searchUrl
-     * @return base URL
-     */
-    String getBaseSearchUrl(String searchUrl) {
-	String res = searchUrl;
-
-	int endPos = searchUrl.indexOf('?');
-	if (endPos >= 0) {
-	    res = searchUrl.substring(0, endPos);
-	}
-	return res;
-    }
-
     void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
 	if (apiResult.getItems() == null) {
 	    return;
@@ -567,9 +443,8 @@ public abstract class BaseUserSetServiceImpl {
     void validateIsDefinedBy(UserSet webUserSet) throws ParamValidationException, RequestBodyValidationException {
 
 	if (webUserSet.isOpenSet()) {
-	    String searchUrl = getBaseSearchUrl(getConfiguration().getSearchApiUrl());
-	    StringBuilder validateUrl = new StringBuilder(webUserSet.getIsDefinedBy());
-		StringBuilder queryUrl = new StringBuilder(getBaseSearchUrl(validateUrl.toString()));
+	    String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
+		StringBuilder queryUrl = new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
 	    if (!searchUrl.equals(queryUrl.toString())) {
 		throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
@@ -583,24 +458,23 @@ public abstract class BaseUserSetServiceImpl {
 		queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 		// the items are not required for validation, hence pageSize =0
 		// form the minimal post body
-		SearchApiRequest searchApiRequest = buildSearchApiPostBody(webUserSet, null, null, 0, 0);
+		SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet, null, null, 0, 0);
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 
 		apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody , apiKey, false);
 	    } catch (SearchApiClientException e) {
 		throw new RequestBodyValidationException(
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] {
-				WebUserSetModelFields.IS_DEFINED_BY, "an error occured when calling " + validateUrl },
+				WebUserSetModelFields.IS_DEFINED_BY, "an error occured when calling " + webUserSet.getIsDefinedBy() },
 			e);
 	    } catch (IOException e) {
 			throw new RequestBodyValidationException(
-					UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, new String[] {},
-					e);
+					UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, null ,e);
 		}
 	    if (apiResult.getTotal() <= 0) {
 		throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 			new String[] { WebUserSetModelFields.IS_DEFINED_BY,
-				"no items returned when calling " + validateUrl });
+				"no items returned when calling " + webUserSet.getIsDefinedBy() });
 	    }
 	}
     }

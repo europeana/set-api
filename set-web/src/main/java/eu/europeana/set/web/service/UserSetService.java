@@ -94,7 +94,7 @@ public interface UserSetService {
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, IOException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -181,7 +181,7 @@ public interface UserSetService {
 
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
-            throws HttpException, IOException;
+            throws HttpException;
     
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);

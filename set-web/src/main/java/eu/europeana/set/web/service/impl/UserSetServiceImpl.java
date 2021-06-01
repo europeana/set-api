@@ -63,7 +63,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * europeana.UserSet.definitions.model.UserSet)
      */
     @Override
-    public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException, IOException {
+    public UserSet storeUserSet(UserSet newUserSet, Authentication authentication) throws HttpException {
 	setDefaults(newUserSet, authentication);
 	if (newUserSet.isEntityBestItemsSet()) {
 	    checkPermissionToUpdate(newUserSet, authentication, true);
@@ -157,7 +157,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     public void validateWebUserSet(UserSet webUserSet)
-	    throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
+			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -407,16 +407,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
 	    LdProfiles profile) throws HttpException {
-
-	if (!userSet.isOpenSet()
+        if (!userSet.isOpenSet()
 		&& (userSet.getItems() == null || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
 	    // if empty closed userset, nothing to do
 	    return userSet;
 	}
 
 	String apiKey = getConfiguration().getSearchApiKey();
-	String url = buildSearchApiPostUrl(userSet, apiKey);
-	SearchApiRequest searchApiRequest = buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
+	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
+	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 		SearchApiResponse apiResult;
@@ -425,12 +424,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		setItemIds(userSet, apiResult);
 	    } else if (LdProfiles.ITEMDESCRIPTIONS == profile) {
 		apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
-		int total = apiResult.getTotal();
+        int total = apiResult.getTotal();
 		if (!userSet.isOpenSet()) {
 		    // dereferenciation of closed sets is limited to 100
 		    // use the number of item ids
 		    total = userSet.getItems().size();
-		}
+        }
 		setItems(userSet, apiResult.getItems(), total);
 	    }
 	    return userSet;
@@ -461,7 +460,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
-			throws HttpException, IOException {
+			throws HttpException {
 
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
