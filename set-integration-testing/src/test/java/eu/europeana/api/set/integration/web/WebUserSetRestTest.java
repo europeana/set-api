@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -158,6 +160,18 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	int idCount = StringUtils.countMatches(result, "\"id\"");
 	//1 id for userset + 100 ids for dereferenced items, but not all are available in the index anymore
 	assertTrue(idCount > 50);
+	
+	JSONObject json = new JSONObject(result);
+	JSONArray itemDescriptions = json.getJSONArray("items");
+	String itemDescription;
+	String itemIdentifier;
+	for (int i = 0; i < 5; i++) {
+	    itemDescription = itemDescriptions.get(i).toString();
+	    itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(i));
+	    //escape "/" to "\/" to match json string
+	    itemIdentifier = StringUtils.replace(itemIdentifier, "/", "\\/");
+	    assertTrue(itemDescription.contains(itemIdentifier));
+	}
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }

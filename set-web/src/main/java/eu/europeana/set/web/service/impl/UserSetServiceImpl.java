@@ -253,16 +253,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throws ApplicationAuthenticationException {
 	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 	// check if the position is "pin" and is a EntityBestItem set then
-	// insert the item at the 0 position
-	UserSet userSet;
-	if (StringUtils.equals(position, WebUserSetModelFields.PINNED_POSITION)
+	// insert the item at the 0 positio
+    UserSet userSet;
+
+	if (WebUserSetModelFields.PINNED_POSITION.equals(position)
 		&& existingUserSet.isEntityBestItemsSet()) {
 	    userSet = insertItem(existingUserSet, newItem, 0, true);
 	} else {
-	    // validate position
+		// validate position
 	    // -1 if invalid
 	    int positionInt = validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
-	    userSet = insertItem(existingUserSet, newItem, positionInt, false);
+		userSet = insertItem(existingUserSet, newItem, positionInt, false);
 	}
 	getUserSetUtils().updatePagination(userSet);
 	return userSet;
@@ -289,58 +290,47 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	UserSet extUserSet = null;
 	if (existingUserSet.getItems() == null) {
 	    addNewItemToList(existingUserSet, -1, newItem);
-	    increasePinned(existingUserSet, pinnedItem);
-	    extUserSet = updateItemList(existingUserSet);
+		if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
+			existingUserSet.setPinned(existingUserSet.getPinned() + 1);
+		}
+		extUserSet = updateItemList(existingUserSet);
 	} else {
 	    if (!existingUserSet.getItems().contains(newItem)) {
 		// add item
 		addNewItemToList(existingUserSet, positionInt, newItem);
-		increasePinned(existingUserSet, pinnedItem);
+		if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
+			existingUserSet.setPinned(existingUserSet.getPinned() + 1);
+		}
 		extUserSet = updateItemList(existingUserSet);
 
 	    } else {
-		// replace item
-		int currentPos = existingUserSet.getItems().indexOf(newItem);
-		if (currentPos == positionInt) {
+        // replace item
+		int oldPosition = existingUserSet.getItems().indexOf(newItem);
+		if (oldPosition == positionInt) {
 		    // do not change user set
 		    // the items is already present at the correct position
-		    // EA-2557 pagination information must not be stored in the database
-//					extUserSet = getUserSetUtils().updatePagination(existingUserSet);
+			extUserSet = existingUserSet;
 		} else {
 		    replaceItem(existingUserSet, positionInt, newItem);
-		    increasePinned(existingUserSet, pinnedItem);
-		    decreasePinned(existingUserSet, currentPos);
-		    extUserSet = updateItemList(existingUserSet);
+		    if(existingUserSet.isEntityBestItemsSet()) {
+		    	if (pinnedItem){
+					existingUserSet.setPinned(existingUserSet.getPinned() + 1);
+				} else if (oldPosition < existingUserSet.getPinned()) {
+					// For entity sets : if existing item is converted from Pinned --> Normal item,
+					// decrease the pinned counter
+					// ie; already existing Normal item being added as a pinned item now
+					// This condition will avoid any changes in Pinned counter:
+					// while adding a already existing Normal item as a Normal item again in different position
+					// As the old position of Normal item will always be greater than existingUserSet.getPinned()
+					existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+				}
+			}
+			extUserSet = updateItemList(existingUserSet);
 		}
 	    }
 	}
 
 	return extUserSet;
-    }
-
-    /**
-     * if user set is entity set and item is pinnedItem increases the pinned value
-     * by 1
-     * 
-     * @param existingUserSet
-     * @param pinnedItem
-     */
-    private static void increasePinned(UserSet existingUserSet, boolean pinnedItem) {
-	if (existingUserSet.isEntityBestItemsSet() && pinnedItem) {
-	    existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-	}
-    }
-
-    /**
-     * if user set is entity set and item exist in the pinned list hence item is
-     * being changed from pinned to normal item decrease the pinned value by 1
-     * 
-     * @param existingUserSet
-     */
-    private static void decreasePinned(UserSet existingUserSet, int currentPosition) {
-	if (existingUserSet.isEntityBestItemsSet() && currentPosition < existingUserSet.getPinned()) {
-	    existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-	}
     }
 
     /*
@@ -429,8 +419,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		    // dereferenciation of closed sets is limited to 100
 		    // use the number of item ids
 		    total = userSet.getItems().size();
-        }
-		setItems(userSet, apiResult.getItems(), total);
+		List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
+		setItems(userSet, sortedItemDescriptions, total);
 	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
@@ -448,6 +438,33 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
 	@Override
+    private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions) {
+	List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
+	String localId;
+	for (String itemUri : userSet.getItems()) {
+	    boolean found = false;
+	    localId = UserSetUtils.extractItemIdentifier(itemUri);
+	    //escape "/" to "\/" to match json string
+	    localId = StringUtils.replace(localId, "/", "\\/");
+	    for (String description : itemDescriptions) {
+		if(description.contains(localId)) {
+		    orderedItemDescriptions.add(description);
+		    found = true;
+		    break;
+		}
+	    }
+	    if(!found) {
+		logger.debug("No item description found for id: {}", localId);
+	    }
+	    if(orderedItemDescriptions.size() == itemDescriptions.size()) {
+		//skip items not included in the current page
+		break;
+	    }
+	}
+	return orderedItemDescriptions;
+    }
+
+    @Override
     public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile,
 	    Authentication authentication) {
 	// add user information for visibility filtering criteria
