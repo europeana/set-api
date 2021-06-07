@@ -589,7 +589,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		CommonLdConstants.COLLECTION);
 
 	int startIndex = pageNr * pageSize;
-	CollectionPage page = new CollectionPage(userSet, partOf, startIndex);
+	CollectionPage page = new CollectionPage(partOf, startIndex);
 	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize));
 
 	if (pageNr > 0) {
@@ -604,7 +604,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
 	if (endIndex > startIndex) {
 	    List<String> items = userSet.getItems().subList(startIndex, endIndex);
-	    page.setItems(items);
+	    // fix for serialisation of itemDescription profile; See - EA-2544
+		// set itemList present in CollectionPage
+	    page.setItemList(items);
 	    page.setTotalInPage(items.size());
 	} else {
 	    page.setTotalInPage(0);

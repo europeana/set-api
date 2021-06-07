@@ -2,18 +2,20 @@ package eu.europeana.set.web.model.search;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import eu.europeana.set.definitions.model.UserSet;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+
+import java.util.List;
 
 public class CollectionPage extends BaseUserSetResultPage<String>{
 
-    UserSet set;
+//    UserSet set;
     int startIndex;
+    List<String> itemList;
     public static final String COLLECTION_PAGE = "CollectionPage";
 	
     
-    public CollectionPage(UserSet set, CollectionOverview partOf, int startIndex) {
-	this.set = set;
+    public CollectionPage(CollectionOverview partOf, int startIndex) {
 	this.partOf = partOf;
 	this.startIndex = startIndex;
 	super.setType(COLLECTION_PAGE);
@@ -26,14 +28,15 @@ public class CollectionPage extends BaseUserSetResultPage<String>{
     public void setStartIndex(int startIndex) {
         this.startIndex = startIndex;
     }
-    
-    public void setSet(UserSet set) {
-        this.set = set;
+
+    @JsonProperty(WebUserSetFields.ITEMS)
+    @JsonRawValue
+    public List<String> getItemList() {
+        return itemList;
     }
-    
-    UserSet getSet() {
-        return set;
+
+    public void setItemList(List<String> itemList) {
+        this.itemList = itemList;
     }
-    
     
 }
