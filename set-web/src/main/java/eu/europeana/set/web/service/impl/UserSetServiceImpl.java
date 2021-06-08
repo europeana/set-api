@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
+import eu.europeana.set.web.model.search.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -45,12 +46,6 @@ import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.model.search.BaseUserSetResultPage;
-import eu.europeana.set.web.model.search.CollectionPage;
-import eu.europeana.set.web.model.search.ItemIdsResultPage;
-import eu.europeana.set.web.model.search.CollectionOverview;
-import eu.europeana.set.web.model.search.UserSetIdsResultPage;
-import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
@@ -589,7 +584,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		CommonLdConstants.COLLECTION);
 
 	int startIndex = pageNr * pageSize;
-	CollectionPage page = new CollectionPage(partOf, startIndex);
+	CollectionPage page = null;
+	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
+	if (endIndex > startIndex) {
+		List<String> items = userSet.getItems().subList(startIndex, endIndex);
+		if (LdProfiles.ITEMDESCRIPTIONS == profile) {
+			page = new ItemDescriptionsCollectionPage(partOf, startIndex);
+			((ItemDescriptionsCollectionPage) page).setItemList(items);
+		} else {
+			page = new ItemIdsCollectionPage(partOf, startIndex);
+			page.setItems(items);
+		}
+		page.setTotalInPage(items.size());
+	} else {
+		// this if for the empty user Sets
+		page = new CollectionPage(partOf, startIndex);
+		page.setTotalInPage(0);
+	}
+
 	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize));
 
 	if (pageNr > 0) {
@@ -600,18 +612,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize));
 	}
 
-	
-	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
-	if (endIndex > startIndex) {
-	    List<String> items = userSet.getItems().subList(startIndex, endIndex);
-	    // fix for serialisation of itemDescription profile; See - EA-2544
-		// set itemList present in CollectionPage
-	    page.setItemList(items);
-	    page.setTotalInPage(items.size());
-	} else {
-	    page.setTotalInPage(0);
-	}
-	
 	return page;
     }
 

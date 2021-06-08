@@ -1,7 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -255,14 +254,25 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	@Test
 	public void searchWithOpenUserSet_ItemsDescription() throws Exception {
 		// create object in database
-		UserSet set = createTestUserSet(USER_SET_OPEN, regularUserToken);
+		UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
-		mockMvc.perform(
+		String result = mockMvc.perform(
 				get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
-						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-				.andExpect(status().is(HttpStatus.OK.value()));
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, (WebUserSetFields.SET_ID + WebUserSetFields.SEPARATOR_SEMICOLON + set.getIdentifier()))
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.header(HttpHeaders.AUTHORIZATION, regularUserToken))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertNotNull(result);
+
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
+		assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
+		assertEquals("1", getvalueOfkey(result, WebUserSetFields.TOTAL));
+		assertEquals(2, noOfOccurance(result, WebUserSetFields.ITEMS));
+
+		// extra check if the items are serialised properly and have extended fields
+		assertTrue(containsKeyOrValue(result, "dcDescription"));
 
 		// delete item created by test
 		getUserSetService().deleteUserSet(set.getIdentifier());

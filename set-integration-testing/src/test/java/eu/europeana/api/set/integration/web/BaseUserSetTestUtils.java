@@ -164,6 +164,18 @@ public abstract class BaseUserSetTestUtils {
 	return StringUtils.contains(jsonString, "\"" + property + "\"");
     }
 
+    protected int noOfOccurance(String jsonString, String property) {
+        return StringUtils.countMatches(jsonString, "\"" + property + "\"");
+    }
+
+    protected String getvalueOfkey(String jsonString, String property) throws JSONException  {
+        assertNotNull(jsonString);
+        JSONObject json = new JSONObject(jsonString);
+        String value = json.getString(property);
+        assertNotNull(value);
+        return value;
+    }
+
     protected String getSetIdentifier(String result) throws JSONException {
 	assertNotNull(result);
 	JSONObject json = new JSONObject(result);
