@@ -589,16 +589,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (endIndex > startIndex) {
 		List<String> items = userSet.getItems().subList(startIndex, endIndex);
 		if (LdProfiles.ITEMDESCRIPTIONS == profile) {
-			page = new ItemDescriptionsCollectionPage(partOf, startIndex);
+			page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
 			((ItemDescriptionsCollectionPage) page).setItemList(items);
 		} else {
-			page = new ItemIdsCollectionPage(partOf, startIndex);
+			page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
 			page.setItems(items);
 		}
 		page.setTotalInPage(items.size());
 	} else {
 		// this if for the empty user Sets
-		page = new CollectionPage(partOf, startIndex);
+		page = new CollectionPage(userSet, partOf, startIndex);
 		page.setTotalInPage(0);
 	}
 
