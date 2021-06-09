@@ -73,6 +73,14 @@
 			<artifactId>jackson-jsonld</artifactId>
 			<version>0.1.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${version.commonsIO}</version>
+			<scope>compile</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>

@@ -32,11 +32,10 @@ public class SearchApiClientImpl implements SearchApiClient {
 
    
     @Override
-    public SearchApiResponse searchItems(String uri, String apiKey, boolean descriptions) throws SearchApiClientException {
-
+    public SearchApiResponse searchItems(String uri, String serachPostBody,  String apiKey, boolean descriptions) throws SearchApiClientException {
 	SearchApiResponse searchApiResponse = new SearchApiResponse(apiKey, null);
 	uri = appendApiKey(uri, apiKey);
-	JSONObject jo = searchItems(uri);
+	JSONObject jo = searchItems(uri, serachPostBody);
 	List<String> res;
 	if(isSuccessfull(jo)) {
 	    if(descriptions) {
@@ -161,12 +160,16 @@ public class SearchApiClientImpl implements SearchApiClient {
 
     }
 
-    JSONObject searchItems(String uri) throws SearchApiClientException {
+    JSONObject searchItems(String uri, String postBody) throws SearchApiClientException {
 	String jsonResponse;
 	try {
-	    jsonResponse = createHttpConnection().getJsonResponse(uri);
+		if (postBody != null) {
+			jsonResponse = createHttpConnection().getURLContentWithBody(uri, postBody);
+		} else {
+			jsonResponse = createHttpConnection().getJsonResponse(uri);
+		}
 	    if (jsonResponse == null) {
-		// HTTP Error Code
+			// HTTP Error Code
 		throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY, null);
 	    }
 	    return new JSONObject(jsonResponse);
@@ -188,8 +191,8 @@ public class SearchApiClientImpl implements SearchApiClient {
      * eu.europeana.set.search.service.SearchApiClient#searchItemDescriptions(java.
      * lang.String, java.lang.String)
      */
-    public SearchApiResponse searchItemDescriptions(String uri, String apiKey) throws SearchApiClientException {
-	return searchItems(uri, apiKey, true);
+    public SearchApiResponse searchItemDescriptions(String uri,String searchPostBody, String apiKey) throws SearchApiClientException {
+	return searchItems(uri, searchPostBody, apiKey, true);
     }
 
 }

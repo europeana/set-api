@@ -1,7 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -181,7 +180,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchEntitySetByContributorUri() throws Exception {
 	// create object in database
@@ -201,14 +200,14 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	//default sorting should include the id on the first position
 	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
-	
+
 	//check contributor
 	assertTrue(containsKeyOrValue(result, contributorId));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchEntitySetBySubject() throws Exception {
 	// create object in database
@@ -235,7 +234,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-    
+
     @Test
     public void searchWithPublicVisibility_ItemsDescription() throws Exception {
 	// create object in database
@@ -251,6 +250,33 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
+
+	@Test
+	public void searchWithOpenUserSet_ItemsDescription() throws Exception {
+		// create object in database
+		UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+		String result = mockMvc.perform(
+				get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, (WebUserSetFields.SET_ID + WebUserSetFields.SEPARATOR_SEMICOLON + set.getIdentifier()))
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.header(HttpHeaders.AUTHORIZATION, regularUserToken))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertNotNull(result);
+
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
+		assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
+		assertEquals("1", getvalueOfkey(result, WebUserSetFields.TOTAL));
+		assertEquals(2, noOfOccurance(result, WebUserSetFields.ITEMS));
+
+		// extra check if the items are serialised properly and have extended fields
+		assertTrue(containsKeyOrValue(result, "dcDescription"));
+
+		// delete item created by test
+		getUserSetService().deleteUserSet(set.getIdentifier());
+	}
 
     @Test
     public void searchWithPrivateVisibility() throws Exception {

@@ -5,6 +5,7 @@
 package eu.europeana.set.common.http;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -16,6 +17,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -212,11 +214,11 @@ public class HttpConnection {
     @SuppressWarnings("deprecation")
     public String getURLContentWithBody(String url, String jsonParamValue) throws IOException {
 	PostMethod post = new PostMethod(url);
+	post.setRequestHeader("Content-Type", "application/json");
 	post.setRequestBody(jsonParamValue);
 
 	return callHttpMethod(post);
     }
-
     
     public String getJsonResponse(String url) throws IOException {
         GetMethod get = new GetMethod(url);
@@ -230,8 +232,8 @@ public class HttpConnection {
 	    client.executeMethod(httpMethod);
 
 	    if (httpMethod.getStatusCode() >= STATUS_OK_START && httpMethod.getStatusCode() <= STATUS_OK_END) {
-		byte[] byteResponse = httpMethod.getResponseBody();
-		return new String(byteResponse, StandardCharsets.UTF_8);
+		InputStream responseBodyAsStream = httpMethod.getResponseBodyAsStream();
+		return IOUtils.toString(responseBodyAsStream, StandardCharsets.UTF_8);
 	    } else {
 		return null;
 	    }

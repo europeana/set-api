@@ -32,7 +32,7 @@ public interface UserSetService {
      * @return UserSet object
      * @throws HttpException
      */
-    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException;
+    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException, IOException;
 
     /**
      * This method converts close set to open set by updating respective items
@@ -45,11 +45,10 @@ public interface UserSetService {
      * @param profile
      * @return updated set
      * @throws HttpException
-     * @throws IOException
      * @throws JSONException
      */
     public UserSet fetchItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr, int pageSize,
-	    LdProfiles profile) throws HttpException, IOException, JSONException;
+	    LdProfiles profile) throws HttpException, JSONException;
 
     /**
      * update (stored) <code>persistentUserSet</code> with values from
@@ -182,7 +181,7 @@ public interface UserSetService {
 
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
-	    throws HttpException;
+            throws HttpException;
     
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
