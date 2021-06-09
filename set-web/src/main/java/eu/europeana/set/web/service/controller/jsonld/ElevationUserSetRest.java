@@ -5,6 +5,7 @@ import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -102,7 +103,7 @@ public class ElevationUserSetRest extends BaseRest {
         List<Doc> docList = new ArrayList<>();
         if (userset.getItems() != null) {
             for(String item : userset.getItems()) {
-            docList.add(new Doc(item));
+                docList.add(new Doc(UserSetUtils.extractItemIdentifier(item)));
             }
         }
         if (!text.isEmpty() && !docList.isEmpty()) {
