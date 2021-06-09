@@ -88,6 +88,8 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
+	//verify that the ids are not escaped
+	assertTrue(containsKeyOrValue(result, "http://data.europeana.eu/item/11648/_Botany_L_1444437")); 
 //	assertTrue(constainsKeyOrValue(result, WebUserSetFields.ITEMS));
 
 	int idCount = StringUtils.countMatches(result, "\"id\"");
@@ -192,6 +194,8 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
+	//verify that ids are not escaped, use one item from second page
+	assertTrue(containsKeyOrValue(result, "http://data.europeana.eu/item/11647/_Botany_AMD_87140"));
 
 	int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
 	int pageSize = StringUtils.countMatches(result, "http://data.europeana.eu/item/");
@@ -200,6 +204,31 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
+    @Test
+    public void getUserSetPaginationItemDescriptions() throws Exception {
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
+
+	// get the identifier
+	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+	//
+	String result = response.getContentAsString();
+	assertNotNull(result);
+	assertEquals(HttpStatus.OK.value(), response.getStatus());
+	//verify that ids are not escaped, use one item from second page
+	assertTrue(containsKeyOrValue(result, "\\/11647\\/_Botany_AMD_87140"));
+
+	int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
+	int pageSize = StringUtils.countMatches(result, "\\/item\\/");
+	assertEquals(defaultPageSize, pageSize);
+
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
+    
     @Test
     public void getUserSetPaginationEmptyPageNr() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
@@ -217,7 +246,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
 	assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE));
-
+	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
