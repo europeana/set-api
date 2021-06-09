@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
+import eu.europeana.set.web.model.search.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -44,12 +46,6 @@ import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.model.search.BaseUserSetResultPage;
-import eu.europeana.set.web.model.search.CollectionPage;
-import eu.europeana.set.web.model.search.ItemIdsResultPage;
-import eu.europeana.set.web.model.search.CollectionOverview;
-import eu.europeana.set.web.model.search.UserSetIdsResultPage;
-import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
@@ -156,7 +152,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     public void validateWebUserSet(UserSet webUserSet)
-	    throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
+			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -396,33 +392,32 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public UserSet fetchItems(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize,
 	    LdProfiles profile) throws HttpException {
-
-	if (!userSet.isOpenSet()
+        if (!userSet.isOpenSet()
 		&& (userSet.getItems() == null || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
 	    // if empty closed userset, nothing to do
 	    return userSet;
 	}
 
 	String apiKey = getConfiguration().getSearchApiKey();
-	String url = buildSearchApiUrl(userSet, apiKey, sort, sortOrder, pageNr, pageSize);
-//    	uri = userSet.getIsDefinedBy() + additionalParameters;
-
-	SearchApiResponse apiResult;
+	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
+	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
 	try {
+		String jsonBody = serializeSearchApiRequest(searchApiRequest);
+		SearchApiResponse apiResult;
 	    if (LdProfiles.STANDARD == profile) {
-		apiResult = getSearchApiClient().searchItems(url, apiKey, false);
+		apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, false);
 		setItemIds(userSet, apiResult);
 	    } else if (LdProfiles.ITEMDESCRIPTIONS == profile) {
-		apiResult = getSearchApiClient().searchItems(url, apiKey, true);
-		int total = apiResult.getTotal();
-		if (!userSet.isOpenSet()) {
-		    // dereferenciation of closed sets is limited to 100
-		    // use the number of item ids
-		    total = userSet.getItems().size();
+			apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
+			int total = apiResult.getTotal();
+			if (!userSet.isOpenSet()) {
+				// dereferenciation of closed sets is limited to 100
+				// use the number of item ids
+				total = userSet.getItems().size();
+			}
+			List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
+			setItems(userSet, sortedItemDescriptions, total);
 		}
-		List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
-		setItems(userSet, sortedItemDescriptions, total);
-	    }
 	    return userSet;
 	} catch (SearchApiClientException e) {
 	    if (SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY.equals(e.getMessage())) {
@@ -431,33 +426,41 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    } else {
 		throw new InternalServerException(e);
 	    }
+	} catch (IOException e) {
+		throw new RequestBodyValidationException(
+				UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, new String[] {},
+				e);
 	}
     }
 
     private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions) {
 	List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
 	String localId;
-	for (String itemUri : userSet.getItems()) {
-	    boolean found = false;
-	    localId = UserSetUtils.extractItemIdentifier(itemUri);
-	    //escape "/" to "\/" to match json string
-	    localId = StringUtils.replace(localId, "/", "\\/");
-	    for (String description : itemDescriptions) {
-		if(description.contains(localId)) {
-		    orderedItemDescriptions.add(description);
-		    found = true;
-		    break;
+	if(userSet.getItems() != null) {
+		for (String itemUri : userSet.getItems()) {
+			boolean found = false;
+			localId = UserSetUtils.extractItemIdentifier(itemUri);
+			//escape "/" to "\/" to match json string
+			localId = StringUtils.replace(localId, "/", "\\/");
+			for (String description : itemDescriptions) {
+				if (description.contains(localId)) {
+					orderedItemDescriptions.add(description);
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				logger.debug("No item description found for id: {}", localId);
+			}
+			if (orderedItemDescriptions.size() == itemDescriptions.size()) {
+				//skip items not included in the current page
+				break;
+			}
 		}
-	    }
-	    if(!found) {
-		logger.debug("No item description found for id: {}", localId);
-	    }
-	    if(orderedItemDescriptions.size() == itemDescriptions.size()) {
-		//skip items not included in the current page
-		break;
-	    }
+		return orderedItemDescriptions;
 	}
-	return orderedItemDescriptions;
+	// if open set OR userSet.getItems == null , return the same order as retrieved
+	return itemDescriptions;
     }
 
     @Override
@@ -473,7 +476,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
-	    throws HttpException {
+			throws HttpException {
 
 	BaseUserSetResultPage<?> resPage = null;
 	int resultPageSize = results.getResults().size();
@@ -581,7 +584,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		CommonLdConstants.COLLECTION);
 
 	int startIndex = pageNr * pageSize;
-	CollectionPage page = new CollectionPage(userSet, partOf, startIndex);
+	CollectionPage page = null;
+	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
+	if (endIndex > startIndex) {
+		List<String> items = userSet.getItems().subList(startIndex, endIndex);
+		if (LdProfiles.ITEMDESCRIPTIONS == profile) {
+			page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
+			((ItemDescriptionsCollectionPage) page).setItemList(items);
+		} else {
+			page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
+			page.setItems(items);
+		}
+		page.setTotalInPage(items.size());
+	} else {
+		// this if for the empty user Sets
+		page = new CollectionPage(userSet, partOf, startIndex);
+		page.setTotalInPage(0);
+	}
+
 	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize));
 
 	if (pageNr > 0) {
@@ -592,16 +612,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize));
 	}
 
-	
-	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
-	if (endIndex > startIndex) {
-	    List<String> items = userSet.getItems().subList(startIndex, endIndex);
-	    page.setItems(items);
-	    page.setTotalInPage(items.size());
-	} else {
-	    page.setTotalInPage(0);
-	}
-	
 	return page;
     }
 

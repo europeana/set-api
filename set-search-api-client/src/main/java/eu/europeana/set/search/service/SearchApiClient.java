@@ -11,10 +11,9 @@ import eu.europeana.set.search.exception.SearchApiClientException;
 
 public interface SearchApiClient {
 
-	
-	
     /**
      * @param uri
+     * @param searchPostBody Search post request json body
      * @param apiKey
      * @param descriptions if true include item descriptions, otherwise only ids
      * @return
@@ -23,12 +22,13 @@ public interface SearchApiClient {
      * @throws SearchApiClientException 
      * @throws HttpException
      */
-    public SearchApiResponse searchItems(String uri, String apiKey, boolean descriptions) 
+    public SearchApiResponse searchItems(String uri, String searchPostBody, String apiKey, boolean descriptions)
     		throws SearchApiClientException;
 
     /**
      * This method queries Europeana API by URI retrieves item descriptions
      * @param uri
+     * @param searchPostBody Search post request json body
      * @param apiKey
      * @return
      * @throws IOException
@@ -36,7 +36,7 @@ public interface SearchApiClient {
      * @throws SearchApiClientException 
      * @throws HttpException
      */
-    public SearchApiResponse searchItemDescriptions(String uri, String apiKey) 
+    public SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, String apiKey)
     		throws SearchApiClientException;
     
 }

@@ -175,6 +175,67 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
+
+	@Test
+	public void getOpenUserSet_ItemDescriptions() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(USER_SET_OPEN, regularUserToken);
+
+		// get the identifier
+		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+		//
+		String result = response.getContentAsString();
+		assertNotNull(result);
+		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+
+		getUserSetService().deleteUserSet(userSet.getIdentifier());
+	}
+
+	// this test is to verify item search for large queries using POST Search API
+	@Test
+	public void getOpenUserSetLargeQuery_ItemDescriptions_DefaultPageSize() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE_QUERY_OPEN, regularUserToken);
+
+		String result = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).
+				andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertNotNull(result);
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+		assertEquals("69", getvalueOfkey(result, WebUserSetFields.TOTAL));
+		// one of set and one for creator and items = 10 (default pageSize)
+		assertEquals(2 + 10, noOfOccurance(result, WebUserSetFields.ID));
+
+		getUserSetService().deleteUserSet(userSet.getIdentifier());
+	}
+
+	// this test is fail-safe check for the open sets, if isdefinedBy has multiple query values
+	// to check if UriComponentsBuilder picks all the values from query param correctly
+	// See : buildSearchApiPostBody()
+	@Test
+	public void getOpenUserSetMultipleQuery_ItemDescriptions() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(USER_SET_MULTIPLE_QUERY_OPEN, regularUserToken);
+
+		// get the identifier
+		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+		//
+		String result = response.getContentAsString();
+		assertNotNull(result);
+		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+
+		getUserSetService().deleteUserSet(userSet.getIdentifier());
+	}
     
     // Update user set Tests
 

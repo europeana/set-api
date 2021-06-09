@@ -1,0 +1,10 @@
+{
+  "type": "Collection",
+  "title": {
+     "en": "Sportswear"
+  },
+  "description": {
+     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
+  },
+  "isDefinedBy": "https://api.europeana.eu/record/v2/search.json?query=europeana_id%28what%3A%28%22%D0%B0%D1%80%D0%BC%D0%B8%D1%8F%22%20OR%20%22%D0%BD%D0%BE%D1%81%D0%B8%D1%8F%22%20OR%20%221900%22%20OR%20%22%D0%94%D0%90%20%D0%9F%D0%BB%D0%BE%D0%B2%D0%B4%D0%B8%D0%B2%3B%20%D1%84.%20972%D0%9A%3B%20%D0%BE%D0%BF.%202.%22%20OR%20%22Veska%20Karaeva%20and%20the%20Karastoyanov%20family%22%29%5E0.8%20OR%20who%3A%28%22%D0%A1%D0%B8%D1%80%D0%BC%D0%B0%D0%BD%D0%BE%D0%B2%2C%20%D0%99%D0%B5%D1%80%D0%BE%D1%82%D0%B5%D0%B9%22%29%5E0.5%29%20NOT%20europeana_id%3A%22%2F2024905%2Fphotography_ProvidedCHO_NALIS_Foundation_F13819327490877%22&profile=minimal&wskey=api2demo"
+}

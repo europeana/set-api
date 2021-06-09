@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.stats.model.Metric;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
@@ -69,6 +70,18 @@ public class UserSetLdSerializer {
     public String serialize(Metric metricData) throws IOException {
         mapper.registerModule(new JsonldModule());
         return mapper.writer().writeValueAsString(metricData);
+    }
+
+    /**
+     * This method provides full serialization of a searchApiRequest
+     *
+     * @param searchApiRequest
+     * @return json String of searchApiRequest
+     * @throws IOException
+     */
+    public String serialize(SearchApiRequest searchApiRequest) throws IOException {
+        mapper.registerModule(new JsonldModule());
+        return mapper.writer().writeValueAsString(searchApiRequest);
     }
 
     /**
