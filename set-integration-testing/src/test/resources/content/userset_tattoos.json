@@ -1,0 +1,40 @@
+{
+  "type": "Collection",
+  "visibility": "public",
+  "title": {
+     "en": "Tattoos"
+  },
+  "description": {
+     "en": "From decorative to symbolic, tattoos have been worn on people's bodies for centuries. This gallery features tattoos across cultures and time periods, showing the art of this body modification."
+  },
+  "items": [
+      "http://data.europeana.eu/item/91625/nomu_photo_NMA0033941",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo65992C",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo111145A",
+      "http://data.europeana.eu/item/91625/nomu_photo_NMA0033941",
+      "http://data.europeana.eu/item/2051945/data_euscreenXL_http___www_ceskatelevize_cz_ivysilani_10727240820_kmeny_214562260850011_tattoo_",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo65978C",
+      "http://data.europeana.eu/item/916118/S_TEK_photo_TEKA0071748",
+      "http://data.europeana.eu/item/9200387/BibliographicResource_3000117247957",
+      "http://data.europeana.eu/item/91627/SMVK_EM_fotografi_1545161",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo84744AB",
+      "http://data.europeana.eu/item/2084002/contributions_5bb9f180_59cb_0136_be15_620aa6c174ff",
+      "http://data.europeana.eu/item/91609/SMVK_VKM_fotografi_1308333",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo224585",
+      "http://data.europeana.eu/item/9200387/BibliographicResource_3000117280115",
+      "http://data.europeana.eu/item/91625/nomu_photo_NMA0028656",
+      "http://data.europeana.eu/item/2048429/item_R7TJBHFWLMPVHIFIL6ZMOEQ6ZGKO6OH4",
+      "http://data.europeana.eu/item/2048429/item_MGQUHAHXRJD3PQ3WX7PEOKEHOCEAS5U7",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo224595",
+      "http://data.europeana.eu/item/91609/SMVK_VKM_fotografi_1224972",
+      "http://data.europeana.eu/item/91625/nomu_photo_NMA0035064",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo65982C",
+      "http://data.europeana.eu/item/2021633/AtlantisPubliek_detail_aspx_xmldescid_87074835",
+      "http://data.europeana.eu/item/9200387/BibliographicResource_3000117244073",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo224590",
+      "http://data.europeana.eu/item/9200387/BibliographicResource_3000117293622",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo111144A",
+      "http://data.europeana.eu/item/916109/smm_sm_photo_Fo224574",
+      "http://data.europeana.eu/item/91627/SMVK_EM_fotografi_1488320"
+  ]
+}
