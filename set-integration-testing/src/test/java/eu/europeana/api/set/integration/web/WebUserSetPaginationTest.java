@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -229,6 +232,50 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
     
+    
+    @Test
+    public void getUserSetPaginationItemDescriptionsOrder() throws Exception {
+	WebUserSetImpl userSet = createTestUserSet(USER_SET_TATTOOS, regularUserToken);
+
+	// get the identifier
+	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "0")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
+		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+	//
+	String result = response.getContentAsString();
+	assertNotNull(result);
+	assertEquals(HttpStatus.OK.value(), response.getStatus());
+	
+	int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
+	int pageSize = StringUtils.countMatches(result, "\\/item\\/");
+	verifyItemOrder(userSet, result);
+	assertEquals(defaultPageSize, pageSize);
+
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
+    
+    
+    private void verifyItemOrder(WebUserSetImpl userSet, String result) throws JSONException {
+	JSONObject itemPage = new JSONObject(result);
+	JSONArray itemDescriptions = itemPage.getJSONArray("items");
+	JSONObject itemDescription;
+	String identifier, id;
+	int pos;
+	for (int i= 0; i < 10; i++) {
+	    itemDescription = itemDescriptions.getJSONObject(i);
+	    identifier = itemDescription.getString("id");
+	    id = "http://data.europeana.eu/item" + identifier;
+	    pos = userSet.getItems().indexOf(id);
+	    System.out.println("verifying position for item with identifier: " + identifier + " (id: " + id +")");
+	    assertEquals(pos, i);
+	}
+	
+    }
+
     @Test
     public void getUserSetPaginationEmptyPageNr() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
