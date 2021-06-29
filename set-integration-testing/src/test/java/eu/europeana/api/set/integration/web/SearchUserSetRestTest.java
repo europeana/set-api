@@ -320,7 +320,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     }
     
     @Test
-    public void searchEntitySetByTextQuery() throws Exception {
+    public void searchEntitySetBySubject() throws Exception {
 	// create object in database
 	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
 //	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();

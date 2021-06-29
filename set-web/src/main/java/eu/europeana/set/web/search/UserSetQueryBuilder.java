@@ -163,6 +163,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
 		//allow separator for URIs
 		//TODO: for the time being we assume that queries with URIs do not use multiple criterions
 		value = toParse;
+		toParse="";
 	    }else {
 		//multiple search criteria, extract value and remove processed criterion
 		value = StringUtils.substringBefore(toParse, separator).trim();
