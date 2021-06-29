@@ -13,6 +13,7 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     String item;
     String user;
     String setId;
+    String text;
     
     @Override
     public String getUser() {
@@ -92,5 +93,15 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     @Override
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
+    @Override
+    public void setText(String text) {
+        this.text = text;
     }
 }
