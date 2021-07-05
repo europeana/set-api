@@ -233,13 +233,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
 	    long totalInCollection = mongoQuery.count();
 
-		FindOptions options = buildMongoPaginationOptions(query);
+	    FindOptions options = buildMongoPaginationOptions(query);
 	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
-
-		return res;
+	    return res;
 	}
 
 	private FindOptions buildMongoPaginationOptions(UserSetQuery query) {
@@ -304,6 +303,11 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if (query.getSetId() != null) {
 		mongoQuery.filter(WebUserSetModelFields.IDENTIFIER, query.getSetId());
 	    }
+	    
+	    if (query.getText() != null) {
+		mongoQuery.search(query.getText());
+	    }
+	    
 
 	    if(query.getSortCriteria() == null) {
 		//default ordering if none is defined by the user
