@@ -143,6 +143,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	String field;
 	String value;
 
+	// if query field is not empty, default to text search
+	if (!toParse.isEmpty() && !toParse.contains(separator)) {
+		criteria.put(WebUserSetFields.TEXT, toParse);
+	}
+
 	while (toParse.contains(separator)) {
 	    field = StringUtils.substringBefore(toParse, separator).trim();
 	    if(StringUtils.isEmpty(field)) {

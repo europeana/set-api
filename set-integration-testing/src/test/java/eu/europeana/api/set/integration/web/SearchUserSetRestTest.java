@@ -235,7 +235,46 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
-    @Test
+	@Test
+	public void searchSetByTextQueryDefault() throws Exception {
+		// create object in database
+		UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
+		//subject in json file: http://data.europeana.eu/concept/base/114
+		final String title = set.getTitle().get("en");
+		String query = "sportswear golf";
+		String result = mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertNotNull(result);
+		// check id
+		//default sorting should include the id on the first position
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+
+		//check subject
+		assertTrue(containsKeyOrValue(result, title));
+
+		// delete item created by test
+		getUserSetService().deleteUserSet(set.getIdentifier());
+	}
+
+
+	@Test
+	public void searchSetByTextQueryDefaultAndOther() throws Exception {
+		String query = "sportswear golf visibility:public";
+		mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+
+	}
+
+	@Test
     public void searchSetByTextAndVisibility() throws Exception {
 	// create object in database
 	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
