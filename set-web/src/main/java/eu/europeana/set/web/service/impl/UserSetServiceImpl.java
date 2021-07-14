@@ -77,7 +77,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	public UserSet storeBestBetUserSet(UserSet bestBetUserSet) throws HttpException {
 		setDefaults(bestBetUserSet, null);
 		validateEntityBestItemsSet(bestBetUserSet);
-
+		// update pinned items
+		bestBetUserSet.setPinned(bestBetUserSet.getItems().size());
 		// store in mongo database
 		updateTotal(bestBetUserSet);
 		UserSet updatedUserSet = getMongoPersistence().store(bestBetUserSet);
