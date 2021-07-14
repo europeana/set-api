@@ -86,4 +86,8 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String CONCEPT                   = "concept";
     public static final String TIMESPAN                  = "timespan";
     public static final String ENTITY_REFERENCE_URL      = "http://data.europeana.eu/";
+
+    // Best bets Constants
+    public static final String BEST_BETS_FILENAME        = "sets.txt";
+    public static final String ENTITY_HEADER             = "entity:";
 }

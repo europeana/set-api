@@ -11,6 +11,7 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.stats.model.Metric;
+import eu.europeana.set.web.model.bestbets.BestBetsResults;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
@@ -70,6 +71,18 @@ public class UserSetLdSerializer {
     public String serialize(Metric metricData) throws IOException {
         mapper.registerModule(new JsonldModule());
         return mapper.writer().writeValueAsString(metricData);
+    }
+
+    /**
+     * This method provides full serialization of a BestBetsResponse View (Load best bets results)
+     *
+     * @param bestBetsResults
+     * @return full bestBetsResults view
+     * @throws IOException
+     */
+    public String serialize(BestBetsResults bestBetsResults) throws IOException {
+        mapper.registerModule(new JsonldModule());
+        return mapper.writer().writeValueAsString(bestBetsResults);
     }
 
     /**

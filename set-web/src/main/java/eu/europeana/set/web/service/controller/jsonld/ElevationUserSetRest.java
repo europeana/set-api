@@ -5,18 +5,25 @@ import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.model.bestbets.BestBetsResults;
+import eu.europeana.set.web.model.bestbets.BestBetsUserSet;
 import eu.europeana.set.web.model.elevation.Doc;
 import eu.europeana.set.web.model.elevation.Elevation;
 import eu.europeana.set.web.model.elevation.Query;
+import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.utils.TextReaderUtils;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +33,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import eu.europeana.set.definitions.model.UserSet;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import eu.europeana.set.web.service.controller.BaseRest;
@@ -157,5 +164,94 @@ public class ElevationUserSetRest extends BaseRest {
             throw new InternalServerException("Error creating the " + WebUserSetFields.ELEVATION_FILENAME + " file", e);
         }
     }
+    }
+
+    /**
+     * Loads the best Bets sets into the Set API
+     *
+     * @param wsKey
+     * @param request
+     * @return
+     * @throws HttpException
+     */
+    @GetMapping(value = { "/set/load/bestbets" }, produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+            HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
+    @ApiOperation(value = "Load Best Bets Sets", nickname = "load best bets sets", response = java.lang.Void.class)
+    public ResponseEntity<String> loadBestBets(
+            @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
+            HttpServletRequest request) throws HttpException, IOException {
+        verifyReadAccess(request);
+        return loadBestBets();
+    }
+
+    /**
+     * will load the best bets into the User Sets API by creating a new Set for each Entity
+     * and placing the items in the order.
+     * A CSV file will be supplied with the information.
+     *
+     * @return
+     * @throws HttpException
+     * @throws IOException
+     */
+    private ResponseEntity<String> loadBestBets() throws HttpException, IOException {
+    try {
+        List<BestBetsUserSet> bestBetsUerSets = new ArrayList<>();
+        TextReaderUtils.readTxtFile(getConfiguration().getBestBetsFileLocation(), bestBetsUerSets);
+        List<String> bestBetsCreated = new ArrayList<>();
+        List<String> failedBestBets = new ArrayList<>();
+        for(BestBetsUserSet bestBet : bestBetsUerSets) {
+            String id = checkIfUserSetAlreadyExists(bestBet.getEntityId());
+            if(id != null)  {
+                failedBestBets.add("User set " + WebUserSetFields.BASE_SET_URL+id + " already exist for " +bestBet.getEntityId());
+            }
+            else {
+                UserSet userSet = new WebUserSetImpl();
+                userSet.setType(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue());
+                userSet.setSubject(Collections.singletonList(bestBet.getEntityId()));
+                userSet.setItems(bestBet.getItems());
+                // store the best Bet
+                UserSet storedUserSet = getUserSetService().storeBestBetUserSet(userSet);
+
+                // fall back check. Will delete the user set stored if something is wrong
+                if (!StringUtils.equals(storedUserSet.getSubject().get(0), bestBet.getEntityId()) && (bestBet.getItems().size() != storedUserSet.getItems().size())) {
+                    getUserSetService().deleteUserSet(storedUserSet.getIdentifier());
+                    failedBestBets.add(bestBet.getEntityId());
+                } else {
+                    bestBetsCreated.add(WebUserSetFields.BASE_SET_URL + storedUserSet.getIdentifier());
+                }
+            }
+        }
+        BestBetsResults bestBetsResults = new BestBetsResults((bestBetsUerSets.size() - failedBestBets.size()), failedBestBets.size(), bestBetsCreated, failedBestBets);
+        return new ResponseEntity<>(serializeBestBetsResults(bestBetsResults), HttpStatus.OK);
+        } catch (HttpException e) {
+            throw new InternalServerException(e);
+        }
+    }
+
+    /**
+     * checks if user set already exists for the entityId
+     *
+     * @param entityId
+     * @return the userset ID if exists
+     * @throws HttpException
+     */
+    private String checkIfUserSetAlreadyExists(String entityId) throws HttpException {
+    List<PersistentUserSet> userSets = getUserSetService().getUserSetByEntityId(entityId);
+    if (!userSets.isEmpty()) {
+        return userSets.get(0).getIdentifier();
+    }
+    return null;
+    }
+
+    /**
+     * Serialises the best bets results
+     *
+     * @param bestBetsResults
+     * @return
+     * @throws IOException
+     */
+    private String serializeBestBetsResults(BestBetsResults bestBetsResults) throws IOException {
+    UserSetLdSerializer serializer = new UserSetLdSerializer();
+    return serializer.serialize(bestBetsResults);
     }
 }

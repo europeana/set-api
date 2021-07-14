@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.set.web.model.search.*;
@@ -72,7 +73,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return updatedUserSet;
     }
 
-    @Override
+	@Override
+	public UserSet storeBestBetUserSet(UserSet bestBetUserSet) throws HttpException {
+		setDefaults(bestBetUserSet, null);
+		validateEntityBestItemsSet(bestBetUserSet);
+
+		// store in mongo database
+		updateTotal(bestBetUserSet);
+		UserSet updatedUserSet = getMongoPersistence().store(bestBetUserSet);
+		getUserSetUtils().updatePagination(updatedUserSet);
+		return updatedUserSet;
+    }
+
+	@Override
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
 	UserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
 	if (userSet == null) {
@@ -87,6 +100,15 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException {
 	return getMongoPersistence().getByCreator(creatorId).asList();
     }
+
+
+	@Override
+	public List<PersistentUserSet> getUserSetByEntityId(String entityId) throws HttpException {
+		UserSetQuery userSetQuery = new UserSetQueryImpl();
+		userSetQuery.setSubject(entityId);
+		userSetQuery.setAdmin(true);
+		return getMongoPersistance().find(userSetQuery).getResults();
+	}
 
     /**
      * This method checks if a user set with provided type and user already exists
@@ -806,7 +828,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	return getMongoPersistance().getEntitySetsItemAndSubject(query);
     }
 
-    private void setSerializedItemIds(UserSet userSet) {
+	private void setSerializedItemIds(UserSet userSet) {
 	if (userSet.getItems() == null) {
 	    return;
 	}

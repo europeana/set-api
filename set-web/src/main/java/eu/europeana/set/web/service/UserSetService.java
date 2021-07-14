@@ -253,4 +253,17 @@ public interface UserSetService {
      * @return
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
+
+    /**
+     * Returns the stored Best bet User set
+     * @return
+     */
+    public UserSet storeBestBetUserSet(UserSet userSet) throws HttpException;
+
+    /**
+     * Returns the user set with that subject
+     * @return
+     */
+    public List<PersistentUserSet> getUserSetByEntityId(String entityId) throws HttpException;
+
 }
