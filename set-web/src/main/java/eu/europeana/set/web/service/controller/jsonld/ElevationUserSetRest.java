@@ -179,9 +179,10 @@ public class ElevationUserSetRest extends BaseRest {
     @ApiOperation(value = "Load Best Bets Sets", nickname = "load best bets sets", response = java.lang.Void.class)
     public ResponseEntity<String> loadBestBets(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
+            @RequestParam(value = "location", required = false) String fileLocation,
             HttpServletRequest request) throws HttpException, IOException {
         verifyReadAccess(request);
-        return loadBestBets();
+        return loadBestBets(fileLocation);
     }
 
     /**
@@ -193,10 +194,10 @@ public class ElevationUserSetRest extends BaseRest {
      * @throws HttpException
      * @throws IOException
      */
-    private ResponseEntity<String> loadBestBets() throws HttpException, IOException {
+    private ResponseEntity<String> loadBestBets(String fileLocation) throws HttpException, IOException {
     try {
         List<BestBetsUserSet> bestBetsUerSets = new ArrayList<>();
-        TextReaderUtils.readTxtFile(getConfiguration().getBestBetsFileLocation(), bestBetsUerSets);
+        TextReaderUtils.readTxtFile((fileLocation.isEmpty() ? getConfiguration().getBestBetsFileLocation() : fileLocation), bestBetsUerSets);
         List<String> bestBetsCreated = new ArrayList<>();
         List<String> failedBestBets = new ArrayList<>();
         for(BestBetsUserSet bestBet : bestBetsUerSets) {
