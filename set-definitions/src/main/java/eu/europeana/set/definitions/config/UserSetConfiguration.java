@@ -26,8 +26,6 @@ public interface UserSetConfiguration{
 
 	public String getElevationFileLocation();
 
-	public String getBestBetsFileLocation();
-
 	/**
 	 * checks annotation.environment=production property
 	 */

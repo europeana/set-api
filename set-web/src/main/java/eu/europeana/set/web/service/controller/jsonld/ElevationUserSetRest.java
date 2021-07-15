@@ -179,7 +179,7 @@ public class ElevationUserSetRest extends BaseRest {
     @ApiOperation(value = "Load Best Bets Sets", nickname = "load best bets sets", response = java.lang.Void.class)
     public ResponseEntity<String> loadBestBets(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
-            HttpServletRequest request) throws HttpException, IOException {
+            HttpServletRequest request) throws HttpException {
         verifyReadAccess(request);
         return loadBestBets();
     }
@@ -193,18 +193,18 @@ public class ElevationUserSetRest extends BaseRest {
      * @throws HttpException
      * @throws IOException
      */
-    private ResponseEntity<String> loadBestBets() throws HttpException, IOException {
+    private ResponseEntity<String> loadBestBets() throws HttpException {
     try {
         List<BestBetsUserSet> bestBetsUerSets = new ArrayList<>();
-        TextReaderUtils.readTxtFile(getConfiguration().getBestBetsFileLocation(), bestBetsUerSets);
+        TextReaderUtils textReaderUtils = new TextReaderUtils();
+        textReaderUtils.readTxtFile(bestBetsUerSets);
         List<String> bestBetsCreated = new ArrayList<>();
         List<String> failedBestBets = new ArrayList<>();
-        for(BestBetsUserSet bestBet : bestBetsUerSets) {
+        for (BestBetsUserSet bestBet : bestBetsUerSets) {
             String id = checkIfUserSetAlreadyExists(bestBet.getEntityId());
-            if(id != null)  {
-                failedBestBets.add("User set " + WebUserSetFields.BASE_SET_URL+id + " already exist for " +bestBet.getEntityId());
-            }
-            else {
+            if (id != null) {
+                failedBestBets.add("User set " + WebUserSetFields.BASE_SET_URL + id + " already exist for " + bestBet.getEntityId());
+            } else {
                 UserSet userSet = new WebUserSetImpl();
                 userSet.setType(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue());
                 userSet.setSubject(Collections.singletonList(bestBet.getEntityId()));
@@ -223,9 +223,9 @@ public class ElevationUserSetRest extends BaseRest {
         }
         BestBetsResults bestBetsResults = new BestBetsResults((bestBetsUerSets.size() - failedBestBets.size()), failedBestBets.size(), bestBetsCreated, failedBestBets);
         return new ResponseEntity<>(serializeBestBetsResults(bestBetsResults), HttpStatus.OK);
-        } catch (HttpException e) {
-            throw new InternalServerException(e);
-        }
+    } catch (IOException e) {
+        throw new InternalServerException(e);
+    }
     }
 
     /**

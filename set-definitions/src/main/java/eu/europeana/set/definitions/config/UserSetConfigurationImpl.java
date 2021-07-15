@@ -110,10 +110,6 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     }
 
     @Override
-    public String getBestBetsFileLocation() {
-        return getSetProperties().getProperty(BEST_BETS_FILE_LOCATION);    }
-
-    @Override
     public String getSearchApiUrl() {
 	return getSetProperties().getProperty(KEY_SEARCH_URL);
     }
