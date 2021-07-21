@@ -18,7 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 public class UserSetQueryBuilder extends QueryBuilder {
 
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT, WebUserSetFields.TEXT};
+	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
     Set<String> suportedFields = Set.of(fields);
     
     public static final String SEARCH_ALL = "*";
@@ -143,12 +143,14 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	String field;
 	String value;
 
+	// if query field is not empty, default to text-title search
+	// Multiple criteria are not supported with text-title search
+	if (!toParse.isEmpty() && !toParse.contains(separator)) {
+		criteria.put(WebUserSetFields.TEXT, toParse);
+	}
+
 	while (toParse.contains(separator)) {
 	    field = StringUtils.substringBefore(toParse, separator).trim();
-	    if(StringUtils.isEmpty(field)) {
-		//default to text
-		field = WebUserSetFields.TEXT;
-	    }
 	    
 	    toParse = StringUtils.substringAfter(toParse, separator).trim();
 	    if (!suportedFields.contains(field)) {
