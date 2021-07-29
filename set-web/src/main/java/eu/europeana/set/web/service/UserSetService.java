@@ -186,7 +186,7 @@ public interface UserSetService {
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
     
-    public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, boolean itemsFetched, HttpServletRequest request) throws HttpException;
+    public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
 
     /**
      * This method validates input if the user is the owner/creator of the user set or is admin
