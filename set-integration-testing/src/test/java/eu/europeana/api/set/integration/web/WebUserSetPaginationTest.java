@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -209,7 +208,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void getUserSetPaginationItemDescriptionsDefaultPageSize() throws Exception {
+    public void getUserSetPaginationItemDescriptions() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 	// get the identifier
@@ -219,11 +218,12 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
+	//
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
-	// verify it contains the item with in pagesize range
-	assertTrue(containsKeyOrValue(result, "\\/11648\\/_Botany_L_1444437"));
+	//verify that ids are not escaped, use one item from second page
+	assertTrue(containsKeyOrValue(result, "\\/11647\\/_Botany_AMD_87140"));
 
 	int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
 	int pageSize = StringUtils.countMatches(result, "\\/item\\/");
@@ -231,76 +231,9 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
-
-	@Test
-	public void getUserSetPaginationItemDescriptionsWithPageSize() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
-
-		// get the identifier
-		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "80")
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
-
-		//
-		String result = response.getContentAsString();
-		assertNotNull(result);
-		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		// verify it contains the item with in pagesize range
-		assertTrue(containsKeyOrValue(result, "\\/11614\\/KXHERBARIUMXK000844485"));
-
-		// verify number of items in result
-		int pageSize = StringUtils.countMatches(result, "\\/item\\/");
-		assertEquals(80, pageSize);
-
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-
-	@Test
-	public void getUserSetPaginationOpenSetItemDescriptionsWithDefaultPageSize() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE_QUERY_OPEN, regularUserToken);
-
-		// get the identifier
-		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
-
-		//
-		String result = response.getContentAsString();
-		assertNotNull(result);
-		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		// verify it contains the item with in pagesize range
-		assertTrue(containsKeyOrValue(result, "\\/11614\\/KXHERBARIUMXK000844485"));
-
-		// verify number of items in result
-		int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
-		int pageSize = StringUtils.countMatches(result, "\\/item\\/");
-		assertEquals(defaultPageSize, pageSize);
-
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-
-	@Test
-	public void getUserSetPaginationItemDescriptionsWithInvalidPageSize() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
-
-		// get the identifier
-		 mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "150")
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-	}
-
-
-
-	@Test
+    
+    
+    @Test
     public void getUserSetPaginationItemDescriptionsOrder() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_TATTOOS, regularUserToken);
 
@@ -337,7 +270,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 	    identifier = itemDescription.getString("id");
 	    id = "http://data.europeana.eu/item" + identifier;
 	    pos = userSet.getItems().indexOf(id);
-		System.out.println("verifying position for item with identifier: " + identifier + " (id: " + id +")");
+	    System.out.println("verifying position for item with identifier: " + identifier + " (id: " + id +")");
 	    assertEquals(pos, i);
 	}
 	
