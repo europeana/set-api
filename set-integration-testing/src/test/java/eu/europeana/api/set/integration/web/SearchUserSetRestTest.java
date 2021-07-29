@@ -208,7 +208,149 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
+	@Test
+	public void searchSetByEmptyTextQuery() throws Exception {
+		//subject in json file: http://data.europeana.eu/concept/base/114
+		String query = ":";
+		mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchSetByTitleQuery() throws Exception {
+		//subject in json file: http://data.europeana.eu/concept/base/114
+		String query = "title:test";
+		mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
     @Test
+    public void searchSetByTextQuery() throws Exception {
+	String query = ":sportswear golf";
+	  mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse().getContentAsString();
+    }
+
+	@Test
+	public void searchSetByTextQueryDefault() throws Exception {
+		// create object in database
+		UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
+		//subject in json file: http://data.europeana.eu/concept/base/114
+		final String title = set.getTitle().get("en");
+		String query = "sportswear golf";
+		String result = mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertNotNull(result);
+		// check id
+		//default sorting should include the id on the first position
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+
+		//check subject
+		assertTrue(containsKeyOrValue(result, title));
+
+		// delete item created by test
+		getUserSetService().deleteUserSet(set.getIdentifier());
+	}
+
+	@Test
+	public void searchSetByTextQueryWithMultipleCriteria1() throws Exception {
+		String query = "sportswear golf visibility:public";
+		mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse().getContentAsString();
+	}
+
+	@Test
+    public void searchSetByTextWithMultipleCriteria2() throws Exception {
+	//query parsing for combination like "visibility:public sportswear golf"; is invalid
+	String query = "visibility:public :sportswear golf";
+	mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @Test
+    public void searchSetByTextWithVisibilityFilter() throws Exception {
+	// create object in database
+	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
+//	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
+	//subject in json file: http://data.europeana.eu/concept/base/114
+	final String title = set.getTitle().get("en");
+	String query = "sportswear golf";
+	String qf = "visibility:public";
+	String result = mockMvc
+		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+			.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+			.queryParam(CommonApiConstants.QUERY_PARAM_QF, qf)
+			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+	assertNotNull(result);
+	// check id
+	//default sorting should include the id on the first position
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+
+	//check subject
+	assertTrue(containsKeyOrValue(result, title));
+
+	// delete item created by test
+	getUserSetService().deleteUserSet(set.getIdentifier());
+    }
+
+
+	@Test
+	public void searchSetMultipleCriteriaWithOutTextQuery() throws Exception {
+		// create object in database
+		UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
+//	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
+		//subject in json file: http://data.europeana.eu/concept/base/114
+		final String title = set.getTitle().get("en");
+		String query = "visibility:public item:/08641/1037479000000476703";
+		String result = mockMvc
+				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+				.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+		assertNotNull(result);
+		// check id
+		//default sorting should include the id on the first position
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+
+		//check subject
+		assertTrue(containsKeyOrValue(result, title));
+
+		// delete item created by test
+		getUserSetService().deleteUserSet(set.getIdentifier());
+	}
+
+
+	@Test
     public void searchEntitySetBySubject() throws Exception {
 	// create object in database
 	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
@@ -234,7 +376,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// delete item created by test
 	getUserSetService().deleteUserSet(set.getIdentifier());
     }
-
+    
     @Test
     public void searchWithPublicVisibility_ItemsDescription() throws Exception {
 	// create object in database
