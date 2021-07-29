@@ -565,9 +565,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    // This method is exceuted only while retrival of user set if pageNr in the request is not null or empty
     @Override
-    public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, boolean itemsFetched,
+    public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize,
 	    HttpServletRequest request) throws ParamValidationException {
 
 	int totalInCollection = userSet.getTotal();
@@ -584,21 +583,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
 		CommonLdConstants.COLLECTION);
 
+	int startIndex = pageNr * pageSize;
 	CollectionPage page = null;
-    int startIndex = 0;
-	final int endIndex;
-
-	// If items are fetched for the user sets from Search API, items list consist of exact count of items requested
-	// ie; Min(pagesize, [maxpagesize(closeset) OR dereference-items (openset)])
-	// hence, the complete itemList will be listed to avoid ArrayIndexOutOfBound exception.
-	// for other cases, all the items are available in the userset.getItems(). See: EA-2630
-	if (itemsFetched) {
-		endIndex = Math.min(pageSize, userSet.getItems().size());
-	} else  {
-		startIndex = pageNr * pageSize;
-		endIndex = Math.min(startIndex + pageSize, totalInCollection);
-	}
-
+	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
 	if (endIndex > startIndex) {
 		List<String> items = userSet.getItems().subList(startIndex, endIndex);
 		if (LdProfiles.ITEMDESCRIPTIONS == profile) {

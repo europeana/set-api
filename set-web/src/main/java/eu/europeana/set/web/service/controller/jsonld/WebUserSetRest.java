@@ -214,13 +214,13 @@ public class WebUserSetRest extends BaseRest {
 		getUserSetService().verifyOwnerOrAdmin(userSet, authentication, false);
 	    }
 
-	    boolean mustFetchItems = mustFetchItems(userSet, profile);
-	    if (mustFetchItems) {
+	    if (mustFetchItems(userSet, profile)) {
 		int derefItems = getDerefItemsCount(userSet, pageSize);
 		int page = (pageNr  != null) ? pageNr : CommonApiConstants.DEFAULT_PAGE;
 		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, page, derefItems, profile);
 	    }
-		return buildGetResponse(userSet, profile, pageNr, pageSize, mustFetchItems, request);
+
+	    return buildGetResponse(userSet, profile, pageNr, pageSize, request);
 
 	} catch (HttpException e) {
 	    // avoid wrapping http exception
@@ -329,15 +329,14 @@ public class WebUserSetRest extends BaseRest {
 	    // modified date is set in the service;
 	    UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
 
-	    boolean mustFetchItems = mustFetchItems(updatedUserSet, profile);
-	    if (mustFetchItems) {
+	    if (mustFetchItems(updatedUserSet, profile)) {
 //		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
 		int derefItems = getDerefItemsCount(updatedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null,
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
 	    }
 
-	    return buildGetResponse(updatedUserSet, profile, -1, -1, mustFetchItems, request);
+	    return buildGetResponse(updatedUserSet, profile, -1, -1, request);
 
 	} catch (UserSetValidationException | UserSetInstantiationException e) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
