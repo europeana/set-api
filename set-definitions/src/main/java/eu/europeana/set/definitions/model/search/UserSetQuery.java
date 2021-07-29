@@ -40,5 +40,9 @@ public interface UserSetQuery extends Query{
 
     String getSubject();
 
+    void setText(String text);
+
+    String getText();
+
     
 }
