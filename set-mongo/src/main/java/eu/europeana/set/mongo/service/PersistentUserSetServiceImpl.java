@@ -1,9 +1,6 @@
 package eu.europeana.set.mongo.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.Resource;
 
@@ -172,6 +169,69 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	/**
+	 * Returns a Map<String, String> with the top most liked items
+	 * and their count across all BookmarkFolders type user sets
+	 *
+	 * creates a mongo query to count the total item present in BookmarkFolder
+	 * Mongo Query :
+	 * db.aggregate ([{"$facet":{
+	 *              "mostLikedItems":[
+	 *             {"$match":{"type":"BookmarkFolder"}},
+	 *             {"$unwind":"$items"},
+	 *             {"$sortByCount":"$items"},
+	 *             {"$limit":10}] } } ])
+	 *
+	 * @param topLikedItems
+	 * @return Map<String, String>
+	 */
+	@Override
+	public Map<String, String> getMostLikedItems(int topLikedItems) {
+		Map<String, String> mostLikedItemsMap = new HashMap<>();
+		// Cursor is needed in aggregate command
+		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+		Cursor cursor =getDao().getCollection().aggregate(getFacetPipeline(topLikedItems) , aggregationOptions);
+		if (cursor != null) {
+			while(cursor.hasNext()) {
+				DBObject object = cursor.next();
+				List<DBObject> mostLikedItemsList = (List<DBObject>) object.get(WebUserSetFields.MONGO_FACET_NAME_ITEMS);
+				for (DBObject o: mostLikedItemsList) {
+					mostLikedItemsMap.put(String.valueOf(o.get(WebUserSetFields.MONGO_ID)), String.valueOf(o.get(WebUserSetFields.MONGO_COUNT)));
+				}
+
+			}
+		}
+		return mostLikedItemsMap;
+	}
+
+	/**
+	 * create a facet query on top of most liked Items pipeline
+	 *
+	 * @param topLikedItems
+	 * @return
+	 */
+	private List<DBObject> getFacetPipeline(int topLikedItems) {
+		return Arrays.asList(new BasicDBObject(WebUserSetFields.MONGO_FACET, getMostLikedItemsPipeline(topLikedItems)));
+	}
+
+	/**
+	 * creates mongo query : "mostLikedItems": [
+	 *   {$match : {type : 'BookmarkFolder'}},{ $unwind : "$items"},
+	 *   {$sortByCount : "$items"},{$limit : <topLikedItems> }]
+	 * @param topLikedItems
+	 * @return
+	 */
+	private DBObject getMostLikedItemsPipeline(int topLikedItems) {
+		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+		DBObject unwind = new BasicDBObject(WebUserSetFields.MONGO_UNWIND, WebUserSetFields.MONGO_ITEMS);
+		DBObject sortByCount = new BasicDBObject(WebUserSetFields.MONGO_SORTBYCOUNT, WebUserSetFields.MONGO_ITEMS);
+		DBObject limit = new BasicDBObject(WebUserSetFields.MONGO_LIMIT, topLikedItems);
+		List<DBObject> mostLikedItemsPipeline = Arrays.asList(match, unwind, sortByCount, limit );
+
+		return  new BasicDBObject(WebUserSetFields.MONGO_FACET_NAME_ITEMS, mostLikedItemsPipeline);
+	}
+
+	/**
 	 *  creates a mongo query to count the total item present in BookmarkFolder
 	 *  Mongo Query : db.getCollection('userset').aggregate([
 	 *  {$match:{"type":"BookmarkFolder"}},{$group: {_id:null, totalLikes: {$sum: "$total"}}}
@@ -203,9 +263,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
 		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
 		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
-
-//		return Arrays.asList(getMongoMatchForPipeLine(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()),
-//				             group);
 		return Arrays.asList(match, group);
 	}
 
@@ -221,12 +278,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 				.project(WebUserSetFields.TYPE, true)
 				.project(WebUserSetModelFields.SUBJECT, true).asList();
 	}
-
-//	// creates $match for mongo query
-//	private DBObject getMongoMatchForPipeLine(String matchId, String matchValue) {
-//		return new BasicDBObject(WebUserSetFields.MONGO_MATCH,
-//				new BasicDBObject(matchId, matchValue));
-//	}
 
 	@Override
 	public ResultSet<PersistentUserSet> find(UserSetQuery query) {

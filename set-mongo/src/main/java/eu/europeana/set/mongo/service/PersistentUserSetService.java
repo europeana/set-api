@@ -9,6 +9,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import org.mongodb.morphia.query.QueryResults;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
 
@@ -101,6 +102,14 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 */
 	List<PersistentUserSet> getEntitySetsItemAndSubject(UserSetQuery query);
-	
+
+
+	/**
+	 *  creates a mongo query to get the most liked items
+	 * @return
+	 */
+	Map<String, String> getMostLikedItems(int topLikedItems);
+
+
 }
 
