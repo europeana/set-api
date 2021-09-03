@@ -49,7 +49,6 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String MONGO_FACET                = "$facet";
     public static final String MONGO_COUNT                = "count";
     public static final String MONGO_VISIBILITY           = "$visibility";
-    public static final String MOST_LIKED_ITEMS_FACETS    = "mostLikedItems";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";

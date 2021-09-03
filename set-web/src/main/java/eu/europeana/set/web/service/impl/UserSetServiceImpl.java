@@ -474,7 +474,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if(LdProfiles.FACETS == profile && facetQuery != null) {
 		Map<String, Long> valueCountMap = getMongoPersistence().getFacets(facetQuery);
 		results.setFacetFields(Arrays.asList(new FacetFieldViewImpl
-				(StringUtils.substringAfter(facetQuery.getFacet(), "$"), setFacetResultPage(valueCountMap), valueCountMap)));
+				(facetQuery.getOutputField(), setFacetResultPage(valueCountMap), valueCountMap)));
 	}
 	return results;
     }

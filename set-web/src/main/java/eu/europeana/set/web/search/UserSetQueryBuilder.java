@@ -194,8 +194,8 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	}
     }
 
-    public UserSetFacetQuery buildUserSetFacetQuery(String facet, int facetLimit, LdProfiles profile) throws RequestValidationException, ParamValidationException {
-	if (LdProfiles.FACETS == profile && (facet == null || facet.isEmpty()) ) {
+    public UserSetFacetQuery buildUserSetFacetQuery(String facet, int facetLimit) throws RequestValidationException, ParamValidationException {
+	if (facet == null || facet.isEmpty()) {
 		throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 				new String[]{CommonApiConstants.QUERY_PARAM_FACET + " (for facets profile)"});
 		}
@@ -235,11 +235,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
     // For item facets - we get the most liked items. Hence, the match should be {type : 'BookmarkFolder'}
 	// also as items is an array unwind will be true
     if(facet.equals(WebUserSetFields.ITEM)) {
-    	return new UserSetFacetQuery(WebUserSetFields.MOST_LIKED_ITEMS_FACETS, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
+    	return new UserSetFacetQuery(facet, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
 				true, WebUserSetFields.MONGO_ITEMS, facetLimit);
 	}
     if(facet.equals(WebUserSetFields.VISIBILITY)) {
-		return new UserSetFacetQuery(WebUserSetFields.VISIBILITY, null, null,
+		return new UserSetFacetQuery(facet, null, null,
 				false, WebUserSetFields.MONGO_VISIBILITY, facetLimit);
 	}
     return null;

@@ -82,7 +82,11 @@ public class SearchUserSetRest extends BaseRest {
 	    // valdidate params
 	    LdProfiles profile = getProfile(profileStr, request);
 
-		UserSetFacetQuery facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit, profile);
+	    // create facet query and validate facet - if profile is facets
+		UserSetFacetQuery facetQuery = null;
+		if (LdProfiles.FACETS == profile) {
+			facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
+		}
 	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
 	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profile, authentication);
