@@ -2,6 +2,11 @@ package eu.europeana.set.web.search;
 
 import java.util.*;
 
+import eu.europeana.api.common.config.UserSetI18nConstants;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
+import eu.europeana.set.definitions.model.vocabulary.*;
+import eu.europeana.set.web.exception.request.RequestValidationException;
 import org.apache.commons.lang3.StringUtils;
 
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
@@ -10,20 +15,18 @@ import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
-import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
 public class UserSetQueryBuilder extends QueryBuilder {
 
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
 	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
+    String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
+
     Set<String> suportedFields = Set.of(fields);
-    
-    public static final String SEARCH_ALL = "*";
+	Set<String> supportedFacets = Set.of(facetsFields);
+
+	public static final String SEARCH_ALL = "*";
     public static final String SEARCH_ALL_ALL = "*:*";
-		
 
     private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();
@@ -190,4 +193,56 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	    criteria.put(field, value);
 	}
     }
+
+    public UserSetFacetQuery buildUserSetFacetQuery(String facet, int facetLimit, LdProfiles profile) throws RequestValidationException, ParamValidationException {
+	if (LdProfiles.FACETS == profile && (facet == null || facet.isEmpty()) ) {
+		throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+				new String[]{CommonApiConstants.QUERY_PARAM_FACET + " (for facets profile)"});
+		}
+	validateFacet(facet);
+	return buildFacetQuery(facet, facetLimit);
+    }
+
+	/**
+	 * Will validate the facets field.
+	 * For now, we don't support multiple facets seperated with comma
+	 * @param facet
+	 * @return
+	 * @throws ParamValidationException
+	 */
+    private void validateFacet(String facet) throws ParamValidationException {
+    if (facet.contains(",")) {
+		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+				new String[] { "multiple facet value is not supported ", facet });
+	}
+    if (!supportedFacets.contains(facet)) {
+		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+				new String[] { "parameter value not supported in facets query ", facet });
+	}
+    }
+
+	/**
+	 * Builds facets query
+	 * facet value will be converted to mongo values
+	 * so $ is appended along with mongo Db value
+	 * ex : '$items' OR '$visibility'
+	 *
+	 * @param facet
+	 * @param facetLimit
+	 * @return
+	 */
+    private UserSetFacetQuery buildFacetQuery(String facet, int facetLimit) {
+    // For item facets - we get the most liked items. Hence, the match should be {type : 'BookmarkFolder'}
+	// also as items is an array unwind will be true
+    if(facet.equals(WebUserSetFields.ITEM)) {
+    	return new UserSetFacetQuery(WebUserSetFields.MOST_LIKED_ITEMS_FACETS, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
+				true, WebUserSetFields.MONGO_ITEMS, facetLimit);
+	}
+    if(facet.equals(WebUserSetFields.VISIBILITY)) {
+		return new UserSetFacetQuery(WebUserSetFields.VISIBILITY, null, null,
+				false, WebUserSetFields.MONGO_VISIBILITY, facetLimit);
+	}
+    return null;
+    }
+
 }

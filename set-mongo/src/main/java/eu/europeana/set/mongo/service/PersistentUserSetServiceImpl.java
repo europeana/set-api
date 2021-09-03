@@ -5,6 +5,7 @@ import java.util.*;
 import javax.annotation.Resource;
 
 import com.mongodb.*;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -169,66 +170,69 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	/**
-	 * Returns a Map<String, String> with the top most liked items
-	 * and their count across all BookmarkFolders type user sets
-	 *
-	 * creates a mongo query to count the total item present in BookmarkFolder
-	 * Mongo Query :
+	 * Returns a Map<String, Long> with the requested facets
+	 * Aggregate Query :
 	 * db.aggregate ([{"$facet":{
-	 *              "mostLikedItems":[
-	 *             {"$match":{"type":"BookmarkFolder"}},
-	 *             {"$unwind":"$items"},
-	 *             {"$sortByCount":"$items"},
-	 *             {"$limit":10}] } } ])
+	 *         <outputField1>: [ <stage1>, <stage2>, ... ] } } ])
 	 *
-	 * @param topLikedItems
-	 * @return Map<String, String>
+	 * @param facetQuery
+	 * @return Map<String, Long>
 	 */
 	@Override
-	public Map<String, String> getMostLikedItems(int topLikedItems) {
-		Map<String, String> mostLikedItemsMap = new HashMap<>();
+	public Map<String, Long> getFacets(UserSetFacetQuery facetQuery) {
+		Map<String, Long> valueCountMap = new LinkedHashMap<>();
 		// Cursor is needed in aggregate command
 		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
-		Cursor cursor =getDao().getCollection().aggregate(getFacetPipeline(topLikedItems) , aggregationOptions);
+		Cursor cursor =getDao().getCollection().aggregate(getFacetPipeline(facetQuery) , aggregationOptions);
 		if (cursor != null) {
 			while(cursor.hasNext()) {
 				DBObject object = cursor.next();
-				List<DBObject> mostLikedItemsList = (List<DBObject>) object.get(WebUserSetFields.MONGO_FACET_NAME_ITEMS);
-				for (DBObject o: mostLikedItemsList) {
-					mostLikedItemsMap.put(String.valueOf(o.get(WebUserSetFields.MONGO_ID)), String.valueOf(o.get(WebUserSetFields.MONGO_COUNT)));
+				List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
+				for (DBObject o: facet) {
+					valueCountMap.put(String.valueOf(o.get(WebUserSetFields.MONGO_ID)), Long.parseLong(String.valueOf(o.get(WebUserSetFields.MONGO_COUNT))));
 				}
-
 			}
 		}
-		return mostLikedItemsMap;
+		return valueCountMap;
 	}
 
 	/**
-	 * create a facet query on top of most liked Items pipeline
+	 * create a facet pipeline
+	 * { $facet:
+	 *    {<outputField1>: [ <stage1>, <stage2>, ... ]}
 	 *
-	 * @param topLikedItems
+	 * @param facetQuery
 	 * @return
 	 */
-	private List<DBObject> getFacetPipeline(int topLikedItems) {
-		return Arrays.asList(new BasicDBObject(WebUserSetFields.MONGO_FACET, getMostLikedItemsPipeline(topLikedItems)));
+	private List<DBObject> getFacetPipeline(UserSetFacetQuery facetQuery) {
+		return Arrays.asList(new BasicDBObject(WebUserSetFields.MONGO_FACET, getOutputFieldAndStages(facetQuery)));
 	}
 
 	/**
-	 * creates mongo query : "mostLikedItems": [
-	 *   {$match : {type : 'BookmarkFolder'}},{ $unwind : "$items"},
-	 *   {$sortByCount : "$items"},{$limit : <topLikedItems> }]
-	 * @param topLikedItems
+	 * creates facets output field and stages :  <outputField>: [ <stage1>, <stage2>, ... ],
+	 * example : "mostLikedItems": [
+	 *   {$match : {type : 'BookmarkFolder'}},
+	 *   { $unwind : "$items"},
+	 *   {$sortByCount : "$items"},
+	 *   {$limit : <topLikedItems> }]
+	 *
+	 * NOTE : we are currently not supporting multiple outputFields for faceting
+	 *
+	 * @param facetQuery
 	 * @return
 	 */
-	private DBObject getMostLikedItemsPipeline(int topLikedItems) {
-		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
-				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
-		DBObject unwind = new BasicDBObject(WebUserSetFields.MONGO_UNWIND, WebUserSetFields.MONGO_ITEMS);
-		DBObject sortByCount = new BasicDBObject(WebUserSetFields.MONGO_SORTBYCOUNT, WebUserSetFields.MONGO_ITEMS);
-		DBObject limit = new BasicDBObject(WebUserSetFields.MONGO_LIMIT, topLikedItems);
-		List<DBObject> mostLikedItemsPipeline = Arrays.asList(match, unwind, sortByCount, limit );
-
-		return  new BasicDBObject(WebUserSetFields.MONGO_FACET_NAME_ITEMS, mostLikedItemsPipeline);
+	private DBObject getOutputFieldAndStages(UserSetFacetQuery facetQuery) {
+		List<DBObject> outputFieldAndStages = new ArrayList<>();
+		if (facetQuery.getMatchField() != null && facetQuery.getMatchValue() != null) {
+			outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+					new BasicDBObject(facetQuery.getMatchField(), facetQuery.getMatchValue())));
+		}
+		if (facetQuery.isUnwind()) {
+			outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_UNWIND, facetQuery.getFacet()));
+		}
+		outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_SORTBYCOUNT, facetQuery.getFacet()));
+		outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_LIMIT, facetQuery.getFacetLimit()));
+		return new BasicDBObject(facetQuery.getOutputField(), outputFieldAndStages);
 	}
 
 	/**

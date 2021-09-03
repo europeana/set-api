@@ -6,6 +6,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
+import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import org.apache.commons.collections.ListUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,20 +70,22 @@ public class SearchUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false, defaultValue = "0") int page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false, defaultValue = ""
 		    + CommonApiConstants.DEFAULT_PAGE_SIZE) int pageSize,
-	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+		@RequestParam(value = CommonApiConstants.QUERY_PARAM_FACET, required = false) String facet,
+		@RequestParam(value = "facet.limit", required = false, defaultValue = "50") int facetLimit,
+		@RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
 	    HttpServletRequest request) throws HttpException {
 
 	try {
-
-	    // authorization
+		// authorization
 	    Authentication authentication = verifyReadAccess(request);
 
 	    // valdidate params
 	    LdProfiles profile = getProfile(profileStr, request);
 
+		UserSetFacetQuery facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit, profile);
 	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
-	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile, authentication);
+	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profile, authentication);
 	    String requestURL = request.getRequestURL().toString();
 
 	    @SuppressWarnings("rawtypes")

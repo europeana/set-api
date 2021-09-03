@@ -290,7 +290,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator, null, null, 0,
 		1);
-	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, LdProfiles.MINIMAL,
+	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null, LdProfiles.MINIMAL,
 		getAuthentication(regularUserToken));
 	assertEquals(0, results.getResultSize());
     }

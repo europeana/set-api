@@ -1,13 +1,13 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.api.commons.definitions.search.FacetFieldView;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.set.web.model.search.*;
@@ -464,14 +464,30 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     @Override
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile,
-	    Authentication authentication) {
+    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, LdProfiles profile,
+											   Authentication authentication) {
 	// add user information for visibility filtering criteria
 	searchQuery.setAdmin(hasAdminRights(authentication));
 	searchQuery.setUser(getUserId(authentication));
-
-	return getMongoPersistance().find(searchQuery);
+	ResultSet<PersistentUserSet> results = getMongoPersistance().find(searchQuery);
+	// get facets
+	if(LdProfiles.FACETS == profile && facetQuery != null) {
+		Map<String, Long> valueCountMap = getMongoPersistence().getFacets(facetQuery);
+		results.setFacetFields(Arrays.asList(new FacetFieldViewImpl
+				(StringUtils.substringAfter(facetQuery.getFacet(), "$"), setFacetResultPage(valueCountMap), valueCountMap)));
+	}
+	return results;
     }
+
+    private List<FacetValueResultPage> setFacetResultPage(Map<String, Long> valueCountMap) {
+	List<FacetValueResultPage> facetResultPage = new ArrayList<>();
+	if (valueCountMap != null && !valueCountMap.isEmpty()) {
+		for (Map.Entry<String, Long> entry : valueCountMap.entrySet()) {
+		facetResultPage.add(new FacetValueResultPage(entry.getKey(), entry.getValue()));
+		}
+	}
+	return facetResultPage;
+	}
 
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
@@ -500,6 +516,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	resPage.setPartOf(ResultList);
+	if (LdProfiles.FACETS == profile) {
+		resPage.setFacetFields(results.getFacetFields());
+	}
 	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage);
 
 	return resPage;

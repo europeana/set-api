@@ -47,10 +47,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String MONGO_SORTBYCOUNT          = "$sortByCount";
     public static final String MONGO_LIMIT                = "$limit";
     public static final String MONGO_FACET                = "$facet";
-    public static final String MONGO_FACET_NAME_ITEMS     = "mostLikedItems";
     public static final String MONGO_COUNT                = "count";
-
-
+    public static final String MONGO_VISIBILITY           = "$visibility";
+    public static final String MOST_LIKED_ITEMS_FACETS    = "mostLikedItems";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
@@ -69,10 +68,14 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String SET_ID                    = "set_id";
 
     //results page
-    public static final String PART_OF = "partOf";
-    public static final String NEXT = "next";
-    public static final String PREV = "prev";
-    
+    public static final String PART_OF                   = "partOf";
+    public static final String NEXT                      = "next";
+    public static final String PREV                      = "prev";
+    public static final String FACETS                    = "facets";
+    public static final String FIELD                     = "field";
+    public static final String VALUES                    = "values";
+    public static final String FACET_TYPE                = "facet";
+
     //collection page
     public static final String START_INDEX = "startIndex";
     
