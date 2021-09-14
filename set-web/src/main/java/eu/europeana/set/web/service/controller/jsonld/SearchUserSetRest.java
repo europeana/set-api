@@ -7,8 +7,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
-import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import org.apache.commons.collections.ListUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,23 +77,23 @@ public class SearchUserSetRest extends BaseRest {
 		// authorization
 	    Authentication authentication = verifyReadAccess(request);
 
-	    // valdidate params
-	    LdProfiles profile = getProfile(profileStr, request);
+		// validate params - profile
+        List<LdProfiles> profiles = getProfiles(profileStr, request);
 
 	    // create facet query and validate facet - if profile is facets
 		UserSetFacetQuery facetQuery = null;
-		if (LdProfiles.FACETS == profile) {
+		if (profiles.contains(LdProfiles.FACETS)) {
 			facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
 		}
 	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
-	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profile, authentication);
+	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profiles, authentication);
 	    String requestURL = request.getRequestURL().toString();
 
 	    @SuppressWarnings("rawtypes")
 	    BaseUserSetResultPage resultsPage;
 	    resultsPage = getUserSetService().buildResultsPage(searchQuery, results, requestURL,
-		    request.getQueryString(), profile, authentication);
+		    request.getQueryString(), profiles, authentication);
 
 	    String jsonLd = serializeResultsPage(resultsPage);
 	    return buildSearchResponse(jsonLd);

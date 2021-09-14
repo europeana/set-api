@@ -636,6 +636,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
 
+    // Facet validation
     @Test
 	public void searchFacetsNoFacetValidationTest() throws Exception {
     mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
@@ -673,6 +674,51 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
 		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item,visibility"))
 	    .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	// Multiple profile validation
+	@Test
+	public void searchFacetsMultipleProfileInvalid() throws Exception {
+    	String profile = LdProfiles.FACETS.name() + "," + "test";
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleProfileWithoutFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.STANDARD.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleInvalidProfileWithFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.FACETS.name() + "," + LdProfiles.STANDARD.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleValidProfileWithFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.FACETS.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.OK.value()));
 	}
 
 	@Test

@@ -177,11 +177,11 @@ public interface UserSetService {
      * @param authentication
      * @return
      */
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, LdProfiles profile,
+    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
                                                Authentication authentication);
 
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
+	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
             throws HttpException;
     
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,

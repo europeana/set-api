@@ -14,6 +14,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String SLASH                      = "/";
     public static final String PAR_CHAR                   = "?";
     public static final String AND                        = "&";
+    public static final String COMMA                        = ",";
     public static final String EQUALS_PARAMETER           = "=";
     public static final String JSON_LD_REST               = ".jsonld";
     public static final String FORMAT_JSONLD              = "jsonld";

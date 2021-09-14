@@ -40,6 +40,8 @@ import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
+import java.util.Collections;
+
 /**
  * Test class for UserSet controller.
  * <p>
@@ -290,7 +292,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator, null, null, 0,
 		1);
-	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null, LdProfiles.MINIMAL,
+	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null, Collections.singletonList(LdProfiles.MINIMAL),
 		getAuthentication(regularUserToken));
 	assertEquals(0, results.getResultSize());
     }

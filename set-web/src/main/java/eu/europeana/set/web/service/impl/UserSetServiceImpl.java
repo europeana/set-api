@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import eu.europeana.api.commons.definitions.search.FacetFieldView;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
@@ -464,14 +463,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     @Override
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, LdProfiles profile,
+    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
 											   Authentication authentication) {
 	// add user information for visibility filtering criteria
 	searchQuery.setAdmin(hasAdminRights(authentication));
 	searchQuery.setUser(getUserId(authentication));
 	ResultSet<PersistentUserSet> results = getMongoPersistance().find(searchQuery);
 	// get facets
-	if(LdProfiles.FACETS == profile && facetQuery != null) {
+	if (profiles.contains(LdProfiles.FACETS) && facetQuery != null) {
 		Map<String, Long> valueCountMap = getMongoPersistence().getFacets(facetQuery);
 		results.setFacetFields(Arrays.asList(new FacetFieldViewImpl
 				(facetQuery.getOutputField(), setFacetResultPage(valueCountMap), valueCountMap)));
@@ -491,7 +490,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
+	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
 			throws HttpException {
 
 	BaseUserSetResultPage<?> resPage = null;
@@ -505,9 +504,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
 	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
 		CommonLdConstants.RESULT_LIST);
-
-	if (LdProfiles.STANDARD == profile || LdProfiles.ITEMDESCRIPTIONS == profile) {
+	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
+		LdProfiles profile = null;
+		// get the profile other than facets from the list
+		for (LdProfiles ldProfile : profiles) {
+			if (!ldProfile.equals(LdProfiles.FACETS)) {
+				profile = ldProfile;
+			}
+		}
+		// LdProfiles.ITEMDESCRIPTIONS OR LdProfiles.STANDARD is passed as profile
 	    setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
 	} else {
 	    // LdProfiles.MINIMAL.equals(profile) - default
@@ -516,7 +522,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 
 	resPage.setPartOf(ResultList);
-	if (LdProfiles.FACETS == profile) {
+	if (profiles.contains(LdProfiles.FACETS)) {
 		resPage.setFacetFields(results.getFacetFields());
 	}
 	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage);
@@ -776,7 +782,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
 
-	// check that not more then maximal allowed number of items are
+    // check that not more then maximal allowed number of items are
 	// presented
 	if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
 	    int itemsCount = userSet.getItems().size();
