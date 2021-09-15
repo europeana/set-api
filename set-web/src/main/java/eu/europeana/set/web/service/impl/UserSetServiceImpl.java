@@ -508,6 +508,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    resPage = new UserSetResultPage();
 		LdProfiles profile = null;
 		// get the profile other than facets from the list
+		// do not want to change the parameters of other methods used by other functionality
 		for (LdProfiles ldProfile : profiles) {
 			if (!ldProfile.equals(LdProfiles.FACETS)) {
 				profile = ldProfile;

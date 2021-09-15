@@ -90,7 +90,8 @@ public class BaseRest extends BaseRestController {
     /**
      * This method takes profile string and validates the profiles
      * and return the List of LdProfiles
-     * NOTE : Multiple profiles are only supported in profile param string
+     * NOTE : Multiple profiles are only supported in profile param
+     *        string only for serach
      *
      * @param profileStr
      * @param request
@@ -99,7 +100,7 @@ public class BaseRest extends BaseRestController {
      */
     public List<LdProfiles> getProfiles(String profileStr, HttpServletRequest request) throws HttpException {
         List<LdProfiles> ldProfiles = new ArrayList<>();
-        // if multiple profiles seperated by comma
+        // if multiple profiles present seperated by comma
         if (profileStr.contains(WebUserSetFields.COMMA)) {
             for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.COMMA))) {
                 ldProfiles.add(getProfileFromParam(profile));
