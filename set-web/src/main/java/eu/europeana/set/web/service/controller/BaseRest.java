@@ -112,6 +112,7 @@ public class BaseRest extends BaseRestController {
         return ldProfiles;
     }
 
+    // TODO - This should be refactored once other profiles are deprecated
     /**
      * Method validates the multiple profile combinations
      * @param ldProfiles
