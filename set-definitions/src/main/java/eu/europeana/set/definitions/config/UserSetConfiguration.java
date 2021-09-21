@@ -25,11 +25,6 @@ public interface UserSetConfiguration{
 	public String getEntityUserSetUserId();
 
 	public String getElevationFileLocation();
-
-	/**
-	 * checks annotation.environment=production property
-	 */
-	public boolean isProductionEnvironment();
 	
 	/**
 	 * authorization settings
