@@ -34,10 +34,6 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     void setDescription(Map<String, String> description);
 
-//    String getItemType();
-//
-//    void setItemType(String itemType);
-
     List<String> getSubject();
 
     void setSubject(List<String> subject);
@@ -46,13 +42,6 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     void setPinned(int pinned);
 
-//    List<String> getContributor();
-//
-//    void setContributor(List<String> contributorList);
-
-//    String getSpatial();
-//
-//    void setSpatial(String spatial);
 
     boolean isUgc();
 
@@ -81,10 +70,6 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
     int getTotal();
 
     void setTotal(int total);
-
-//    int getCollectionPage();
-//
-//    void setCollectionPage(int collectionPage);
 
     List<String> getItems();
 

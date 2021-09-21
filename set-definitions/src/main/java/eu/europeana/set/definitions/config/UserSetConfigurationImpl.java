@@ -22,11 +22,6 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     public static final String USERSET_ENVIRONMENT           = "set.environment";
     public static final String BASEURL_PREFIX = USERSET_ENVIRONMENT + ".baseUrl.";
 
-//    public static final String VALUE_ENVIRONMENT_PRODUCTION  = "production";
-//    public static final String VALUE_ENVIRONMENT_TEST        = "test";
-//    public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
-//    public static final String VALUE_ENVIRONMENT_ACCEPTANCE = "development";
-    
     public static final String ENTITY_USERSET_USERID            = "entity.userset.user.id";
     public static final String ELEVATION_FILE_LOCATION          = "elevation.file.folder";
 
