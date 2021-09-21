@@ -82,9 +82,9 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
 
     void setTotal(int total);
 
-    int getCollectionPage();
-
-    void setCollectionPage(int collectionPage);
+//    int getCollectionPage();
+//
+//    void setCollectionPage(int collectionPage);
 
     List<String> getItems();
 

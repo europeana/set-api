@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Transient;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,7 +30,13 @@ import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WebUserSetImpl extends PersistentUserSetImpl {
 
+    @Transient
     List<String> serializedItems;
+    
+    //do not store
+    //used only for serialization purposes, must be overwritten with correct value in service
+    @Transient
+    String baseUrl = "/set/";
 
     @Override
     @JsonProperty(WebUserSetFields.ITEMS)
@@ -155,9 +162,9 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
      *
      * @return string presenting ID as URL
      */
-    @JsonProperty(WebUserSetModelFields.ID)
+    @JsonGetter(WebUserSetModelFields.ID)
     public String getId() {
-	return UserSetUtils.buildUserSetId(super.getIdentifier());
+	return UserSetUtils.buildUserSetId(getBaseUrl(), super.getIdentifier());
     }
 
     //TODO: switch to jsongetter to ignore deserialization of id field
@@ -230,5 +237,15 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     @JsonIgnore
     public boolean isBookmarksFolder() {
         return super.isBookmarksFolder();
+    }
+
+    @JsonIgnore
+    String getBaseUrl() {
+        return baseUrl;
+    }
+
+    @JsonIgnore
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 }

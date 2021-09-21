@@ -82,4 +82,9 @@ public interface UserSet extends PageInfo {
 
     public boolean isPublished();
 
+    /**
+     * set base URL for set id (URI)
+     * @param baseUrl
+     */
+    public void setBaseUrl(String baseUrl);
 }

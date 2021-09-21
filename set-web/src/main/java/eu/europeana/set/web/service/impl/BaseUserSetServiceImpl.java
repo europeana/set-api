@@ -170,7 +170,7 @@ public abstract class BaseUserSetServiceImpl {
 	persistentUserSet.setModified(new Date());
 	updateTotal(persistentUserSet);
 	UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
 	return updatedUserSet;
 	
     }
@@ -200,7 +200,8 @@ public abstract class BaseUserSetServiceImpl {
 	if (StringUtils.isNotBlank(searchProfile)) {
 	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
 	}
-
+	
+	//TODO: verify if base URL should be used instead
 	return requestUrl+"?"+queryString;
     }
 
@@ -290,7 +291,7 @@ public abstract class BaseUserSetServiceImpl {
 		user.setHttpUrl(getUserId(authentication));
 		user.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
 	}
-    newUserSet.setCreator(user);
+	newUserSet.setCreator(user);
 	if (newUserSet.getVisibility() == null) {
 	    newUserSet.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 	}

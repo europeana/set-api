@@ -6,8 +6,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 public class UserSetConfigurationImpl implements UserSetConfiguration {
 
-    public static final String SUFFIX_BASEURL = "baseUrl";
-
+    
     public static final String PREFIX_RETRIEVE_MAX_PAGE_SIZE  = "set.retrieve.maxpagesize.";
     public static final String KEY_SEARCH_DEREFERENCE_ITEMS   = "set.search.dereference.items.max";
     public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
@@ -21,9 +20,13 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     
 
     public static final String USERSET_ENVIRONMENT           = "set.environment";
+    public static final String BASEURL_PREFIX = USERSET_ENVIRONMENT + ".baseUrl.";
+
     public static final String VALUE_ENVIRONMENT_PRODUCTION  = "production";
     public static final String VALUE_ENVIRONMENT_TEST        = "test";
     public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
+    public static final String VALUE_ENVIRONMENT_ACCEPTANCE = "development";
+    
     public static final String ENTITY_USERSET_USERID            = "entity.userset.user.id";
     public static final String ELEVATION_FILE_LOCATION          = "elevation.file.folder";
 
@@ -51,7 +54,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
     @Override
     public String getUserSetBaseUrl() {
-	String key = USERSET_ENVIRONMENT + "." + getEnvironment() + "." + SUFFIX_BASEURL;
+	String key = BASEURL_PREFIX + getEnvironment();
 	return getSetProperties().getProperty(key);
     }
 
