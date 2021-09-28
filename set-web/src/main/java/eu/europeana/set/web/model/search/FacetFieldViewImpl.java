@@ -1,8 +1,11 @@
 package eu.europeana.set.web.model.search;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -17,11 +20,19 @@ public class FacetFieldViewImpl implements FacetFieldView {
 
     private String type = WebUserSetFields.FACET_TYPE;
     private String field;
-        private Map<String, Long> valueCountMap;
+    @JsonIgnore
+    private Map<String, Long> valueCountMap;
+    private List<FacetValue> facetValues;
 
     public FacetFieldViewImpl(String field, Map<String, Long> valueCountMap) {
         this.field = field;
         this.valueCountMap = valueCountMap;
+	if (valueCountMap != null && !valueCountMap.isEmpty()) {
+	    facetValues = new ArrayList<FacetValue>();
+	    for (Map.Entry<String, Long> entry : valueCountMap.entrySet()) {
+		facetValues.add(new FacetValue(entry.getKey(), entry.getValue()));
+	    }
+	}        
     }
 
     @Override
@@ -31,7 +42,6 @@ public class FacetFieldViewImpl implements FacetFieldView {
     }
 
     @Override
-    @JsonGetter(WebUserSetFields.VALUES)
     public Map<String, Long> getValueCountMap() {
         return valueCountMap;
     }
@@ -40,4 +50,10 @@ public class FacetFieldViewImpl implements FacetFieldView {
     String getType() {
         return type;
     }
+    
+    @JsonGetter(WebUserSetFields.VALUES)
+    public List<FacetValue> facetValues() {
+    	return facetValues;
+    }
 }
+

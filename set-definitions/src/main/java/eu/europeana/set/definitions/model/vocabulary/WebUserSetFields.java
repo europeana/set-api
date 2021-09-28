@@ -57,7 +57,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String FACETS                    = "facets";
     public static final String FIELD                     = "field";
     public static final String VALUES                    = "values";
-    public static final String FACET_TYPE                = "facet";
+    public static final String FACET_TYPE 		= "facet";
+    public static final String LABEL			= "label";
+    public static final String COUNT 			= "count";
 
     //collection page
     public static final String START_INDEX = "startIndex";
