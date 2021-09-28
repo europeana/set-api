@@ -4,11 +4,14 @@ import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import org.mongodb.morphia.query.QueryResults;
 
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
 
@@ -101,6 +104,14 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 */
 	List<PersistentUserSet> getEntitySetsItemAndSubject(UserSetQuery query);
-	
+
+
+	/**
+	 *  gets facets results from a facets query
+	 * @return
+	 */
+	Map<String, Long> getFacets(UserSetFacetQuery facetQuery);
+
+
 }
 

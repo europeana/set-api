@@ -1,12 +1,12 @@
 package eu.europeana.set.web.service.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.stats.service.UsageStatsService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -88,6 +88,52 @@ public class BaseRest extends BaseRestController {
     }
 
     /**
+     * This method takes profile string and validates the profiles
+     * and return the List of LdProfiles
+     * NOTE : Multiple profiles are only supported in profile param
+     *        string only for serach
+     *
+     * @param profileStr
+     * @param request
+     * @return
+     * @throws HttpException
+     */
+    public List<LdProfiles> getProfiles(String profileStr, HttpServletRequest request) throws HttpException {
+        List<LdProfiles> ldProfiles = new ArrayList<>();
+        // if multiple profiles present seperated by comma
+        if (profileStr.contains(WebUserSetFields.COMMA)) {
+            for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.COMMA))) {
+                ldProfiles.add(getProfileFromParam(profile));
+            }
+            validateMultipleProfile(ldProfiles, profileStr);
+        } else {
+            ldProfiles.add(getProfile(profileStr, request));
+        }
+        return ldProfiles;
+    }
+
+    // TODO - This should be refactored once other profiles are deprecated
+    /**
+     * Method validates the multiple profile combinations
+     * @param ldProfiles
+     * @return
+     * @throws HttpException
+     */
+    private void validateMultipleProfile(List<LdProfiles> ldProfiles, String profileStr) throws HttpException {
+        // For now maximum two profile-combinations are possible
+        // profile=facets OR profile=facets,minimal OR profile=standard,facets
+        if(ldProfiles.size() > 2) {
+            throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+                    new String[]{"Either of these should be provided ", StringUtils.remove(profileStr, LdProfiles.FACETS.getHeaderValue() + ",")});
+        }
+        // For now - if multiple profile then one of them has to be facets
+        if (ldProfiles.size() == 2 && !ldProfiles.contains(LdProfiles.FACETS)) {
+            throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+                    new String[]{"These profiles are not supported together ", profileStr });
+        }
+    }
+
+    /**
      * This method takes profile from a HTTP header if it exists or from the passed
      * request parameter.
      *
@@ -99,21 +145,23 @@ public class BaseRest extends BaseRestController {
      */
     // TODO: consider moving to api-commons
     public LdProfiles getProfile(String paramProfile, HttpServletRequest request) throws HttpException {
-
         LdProfiles profile = null;
         profile = getHeaderProfile(request);
         if (profile == null) {
             // get profile from param
-            try {
-                profile = LdProfiles.getByName(paramProfile);
-            } catch (UserSetProfileValidationException e) {
-                throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-                        new String[]{CommonApiConstants.QUERY_PARAM_PROFILE, paramProfile}, e);
-            }
+            profile = getProfileFromParam(paramProfile);
         }
         return profile;
     }
 
+    private LdProfiles getProfileFromParam(String paramProfile) throws HttpException {
+        try {
+            return LdProfiles.getByName(paramProfile);
+        } catch (UserSetProfileValidationException e) {
+            throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+                    new String[]{CommonApiConstants.QUERY_PARAM_PROFILE, paramProfile}, e);
+        }
+    }
 
     /**
      * This method identifies profile from a HTTP header if it exists.

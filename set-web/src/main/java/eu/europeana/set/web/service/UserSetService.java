@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.security.core.Authentication;
@@ -176,11 +177,11 @@ public interface UserSetService {
      * @param authentication
      * @return
      */
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, LdProfiles profile,
-	    Authentication authentication);
+    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
+                                               Authentication authentication);
 
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    String requestUrl, String reqParams, LdProfiles profile, Authentication authentication)
+	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
             throws HttpException;
     
     public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
