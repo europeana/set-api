@@ -1,20 +1,26 @@
 package eu.europeana.set.web.search;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-import eu.europeana.api.common.config.UserSetI18nConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
-import eu.europeana.set.definitions.model.vocabulary.*;
-import eu.europeana.set.web.exception.request.RequestValidationException;
 import org.apache.commons.lang3.StringUtils;
 
+import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.search.util.QueryBuilder;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
+import eu.europeana.set.mongo.model.UserSetMongoConstants;
+import eu.europeana.set.web.exception.request.RequestValidationException;
 
 public class UserSetQueryBuilder extends QueryBuilder {
 
@@ -236,11 +242,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	// also as items is an array unwind will be true
     if(facet.equals(WebUserSetFields.ITEM)) {
     	return new UserSetFacetQuery(facet, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
-				true, WebUserSetFields.MONGO_ITEMS, facetLimit);
+				true, UserSetMongoConstants.MONGO_ITEMS, facetLimit);
 	}
     if(facet.equals(WebUserSetFields.VISIBILITY)) {
 		return new UserSetFacetQuery(facet, null, null,
-				false, WebUserSetFields.MONGO_VISIBILITY, facetLimit);
+				false, UserSetMongoConstants.MONGO_VISIBILITY, facetLimit);
 	}
     return null;
     }

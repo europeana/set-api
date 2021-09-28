@@ -1,29 +1,43 @@
 package eu.europeana.set.mongo.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
-import com.mongodb.*;
-import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.*;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.FindOptions;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.QueryResults;
+import org.mongodb.morphia.query.Sort;
 import org.springframework.stereotype.Component;
+
+import com.mongodb.AggregationOptions;
+import com.mongodb.BasicDBObject;
+import com.mongodb.Cursor;
+import com.mongodb.DBObject;
 
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.dao.PersistentUserSetDao;
+import eu.europeana.set.mongo.model.UserSetMongoConstants;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 /**
@@ -152,14 +166,14 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 */
 	@Override
 	public PersistentUserSet findByID(String id) {
-		return getDao().findOne(WebUserSetFields.MONGO_ID, new ObjectId(id));
+		return getDao().findOne(UserSetMongoConstants.MONGO_ID, new ObjectId(id));
 	}
 
 	@Override
 	public long getDistinctCreators() {
 		// create query : { type: { $eq: Collection } }
 		DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
-				new BasicDBObject(WebUserSetFields.MONGO_EQUALS, UserSetTypes.COLLECTION.getJsonValue()));
+				new BasicDBObject(UserSetMongoConstants.MONGO_EQUALS, UserSetTypes.COLLECTION.getJsonValue()));
 		return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
 	}
 
@@ -189,7 +203,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 				DBObject object = cursor.next();
 				List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
 				for (DBObject o: facet) {
-					valueCountMap.put(String.valueOf(o.get(WebUserSetFields.MONGO_ID)), Long.parseLong(String.valueOf(o.get(WebUserSetFields.MONGO_COUNT))));
+					valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)), Long.parseLong(String.valueOf(o.get(UserSetMongoConstants.MONGO_COUNT))));
 				}
 			}
 		}
@@ -205,7 +219,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 * @return
 	 */
 	private List<DBObject> getFacetPipeline(UserSetFacetQuery facetQuery) {
-		return Arrays.asList(new BasicDBObject(WebUserSetFields.MONGO_FACET, getOutputFieldAndStages(facetQuery)));
+		return Arrays.asList(new BasicDBObject(UserSetMongoConstants.MONGO_FACET, getOutputFieldAndStages(facetQuery)));
 	}
 
 	/**
@@ -224,14 +238,14 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	private DBObject getOutputFieldAndStages(UserSetFacetQuery facetQuery) {
 		List<DBObject> outputFieldAndStages = new ArrayList<>();
 		if (facetQuery.getMatchField() != null && facetQuery.getMatchValue() != null) {
-			outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+			outputFieldAndStages.add(new BasicDBObject(UserSetMongoConstants.MONGO_MATCH,
 					new BasicDBObject(facetQuery.getMatchField(), facetQuery.getMatchValue())));
 		}
 		if (facetQuery.isUnwind()) {
-			outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_UNWIND, facetQuery.getFacet()));
+			outputFieldAndStages.add(new BasicDBObject(UserSetMongoConstants.MONGO_UNWIND, facetQuery.getFacet()));
 		}
-		outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_SORTBYCOUNT, facetQuery.getFacet()));
-		outputFieldAndStages.add(new BasicDBObject(WebUserSetFields.MONGO_LIMIT, facetQuery.getFacetLimit()));
+		outputFieldAndStages.add(new BasicDBObject(UserSetMongoConstants.MONGO_SORTBYCOUNT, facetQuery.getFacet()));
+		outputFieldAndStages.add(new BasicDBObject(UserSetMongoConstants.MONGO_LIMIT, facetQuery.getFacetLimit()));
 		return new BasicDBObject(facetQuery.getOutputField(), outputFieldAndStages);
 	}
 
@@ -252,7 +266,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		if (cursor != null) {
 			while(cursor.hasNext()) {
 				DBObject object = cursor.next();
-				totalLikes += Long.parseLong(String.valueOf(object.get(WebUserSetFields.MONGO_TOTAL_LIKES)));
+				totalLikes += Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
 			}
 		}
 		return totalLikes;
@@ -261,12 +275,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	// create $match and $group for mongo query
 	private List<DBObject> getAggregatePipeline() {
 
-		DBObject match = new BasicDBObject(WebUserSetFields.MONGO_MATCH,
+		DBObject match = new BasicDBObject(UserSetMongoConstants.MONGO_MATCH,
 				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
 
-		DBObject groupFields = new BasicDBObject(WebUserSetFields.MONGO_ID, null);
-		groupFields.put(WebUserSetFields.MONGO_TOTAL_LIKES, new BasicDBObject(WebUserSetFields.MONGO_SUM, WebUserSetFields.MONGO_TOTAL));
-		DBObject group = new BasicDBObject(WebUserSetFields.MONGO_GROUP, groupFields);
+		DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
+		groupFields.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+		DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
 		return Arrays.asList(match, group);
 	}
 
