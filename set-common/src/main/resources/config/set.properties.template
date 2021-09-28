@@ -9,7 +9,7 @@ set.environment.baseUrl.production=http://data.europeana.eu/set/
 #used only in acceptance environment
 set.environment.baseUrl.acceptance=http://set-api-acceptance.eanadev.org/set/
 
-#used only in production environment
+#used only in test environment
 set.environment.baseUrl.test=http://set-api-test.eanadev.org/set/
 
 #used only in develop environment
