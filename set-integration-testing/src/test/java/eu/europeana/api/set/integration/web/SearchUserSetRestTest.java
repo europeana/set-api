@@ -1,6 +1,8 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,12 +58,6 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 //    private static final String SORT_MODIFIED_WebUserSetFields.MODIFIED
     
     private static final String PAGE_SIZE = "100";
-
-//    private MockMvc mockMvc;
-//
-//    @Autowired
-//    private WebApplicationContext wac;
-
        
     @BeforeEach
     public void initApplication() {
@@ -153,7 +149,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String buildUserSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	final String buildUserSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, buildUserSetId));
 
 	// delete item created by test
@@ -176,7 +172,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	// delete item created by test
@@ -200,7 +196,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	//check contributor
@@ -262,7 +258,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertNotNull(result);
 		// check id
 		//default sorting should include the id on the first position
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 		//check subject
 		assertTrue(containsKeyOrValue(result, title));
@@ -314,7 +310,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 	//check subject
 	assertTrue(containsKeyOrValue(result, title));
@@ -342,7 +338,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertNotNull(result);
 		// check id
 		//default sorting should include the id on the first position
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 		//check subject
 		assertTrue(containsKeyOrValue(result, title));
@@ -370,7 +366,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 	//check subject
 	assertTrue(containsKeyOrValue(result, subject));
@@ -409,7 +405,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
 		assertNotNull(result);
 
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 		assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 		assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
 		assertEquals("1", getvalueOfkey(result, WebUserSetFields.TOTAL));
@@ -471,9 +467,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 	// check ids
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set1.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set2.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set3.getIdentifier())));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());

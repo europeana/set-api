@@ -69,12 +69,6 @@ public interface UserSetService {
      */
     public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
 
-    /**
-     * This method returns List<UserSet> for given user set creatorId
-     *
-     * @param
-     * @return List<PersistentUserSet>
-     */
     public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
 
     /**
@@ -121,16 +115,6 @@ public interface UserSetService {
     public void removeItemDuplicates(UserSet userSet);
 
     /**
-     * This method validates position input, if false responds with -1
-     * 
-     * @param position The given position
-     * @param items    The item list
-     * @return position The validated position in list to insert
-     * @throws ApplicationAuthenticationException
-     */
-    public int validatePosition(String position, List<String> items, int pinnedItems) throws ApplicationAuthenticationException;
-
-    /**
      * This method enriches user set by provided item
      * 
      * @param datasetId       The id of dataset
@@ -150,24 +134,6 @@ public interface UserSetService {
      * @return updated user set
      */
     public UserSet updateItemList(UserSet existingUserSet);
-
-    /**
-     * This method replaces item in user set
-     * 
-     * @param existingUserSet
-     * @param positionInt
-     * @param newItem
-     */
-    public void replaceItem(UserSet existingUserSet, int positionInt, String newItem);
-
-    /**
-     * Add item to the list in given position if provided.
-     * 
-     * @param existingUserSet
-     * @param positionInt
-     * @param newItem
-     */
-    public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem);
 
     /**
      * search user sets using the given query and profile

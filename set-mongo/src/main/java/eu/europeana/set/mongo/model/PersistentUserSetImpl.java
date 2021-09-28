@@ -55,7 +55,7 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 	@Id
 	private ObjectId id;
 
-    public ObjectId getObjectId() {
+	public ObjectId getObjectId() {
 		return id;
 	}
 
@@ -68,5 +68,10 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 		return "PersistentUserSet [Title:" + getTitle() + ", created:" + getCreated() + 
 				", Id:" + getObjectId() + ", Identifier:" + getIdentifier() + 
 				", modified: " + getModified() + "]";
+	}
+
+	@Override
+	public void setBaseUrl(String baseUrl) {
+	    //used only for web userset	    
 	}
 }

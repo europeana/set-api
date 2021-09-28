@@ -65,8 +65,8 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String START_INDEX = "startIndex";
     
 
-    // Pagination Cosntants
-    public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";
+    // Pagination Constants
+//    public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";
     public static final String BASE_ITEM_URL             = "http://data.europeana.eu/item/";
    
     // Serialization Constants

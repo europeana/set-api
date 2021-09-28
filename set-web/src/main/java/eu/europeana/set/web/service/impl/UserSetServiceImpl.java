@@ -67,7 +67,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// store in mongo database
 	updateTotal(newUserSet);
 	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
 	return updatedUserSet;
     }
 
@@ -78,7 +78,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
 		    UserSetI18nConstants.USERSET_NOT_FOUND, new String[] { userSetId });
 	}
-	getUserSetUtils().updatePagination(userSet);
+	getUserSetUtils().updatePagination(userSet, getConfiguration().getUserSetBaseUrl());
 	return userSet;
     }
 
@@ -99,7 +99,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     public UserSet getBookmarkFolder(String creatorId) {
-	return getMongoPersistence().getBookmarkFolder(creatorId);
+	UserSet set =  getMongoPersistence().getBookmarkFolder(creatorId);
+	if(set != null) {
+	    set.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+	}
+	return set;
     }
 
     @Override
@@ -214,7 +218,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @return position The validated position in list to insert
      * @throws ApplicationAuthenticationException
      */
-    public int validatePosition(String position, List<String> items, int pinnedItems)
+    int validatePosition(String position, List<String> items, int pinnedItems)
 	    throws ApplicationAuthenticationException {
 	int positionInt = -1;
 	if (StringUtils.isNotEmpty(position)) {
@@ -248,7 +252,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
 	// check if the position is "pin" and is a EntityBestItem set then
 	// insert the item at the 0 positio
-    UserSet userSet;
+	UserSet userSet;
 
 	if (WebUserSetModelFields.PINNED_POSITION.equals(position)
 		&& existingUserSet.isEntityBestItemsSet()) {
@@ -259,7 +263,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    int positionInt = validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
 		userSet = insertItem(existingUserSet, newItem, positionInt, false);
 	}
-	getUserSetUtils().updatePagination(userSet);
+	getUserSetUtils().updatePagination(userSet, getConfiguration().getUserSetBaseUrl());
 	return userSet;
     }
 
@@ -344,18 +348,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
 	UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
 	return updatedUserSet;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * This method replaces item in user set
      * 
-     * @see
-     * eu.europeana.set.web.service.UserSetService#replaceItem(eu.europeana.set.
-     * definitions.model.UserSet, int, java.lang.String)
+     * @param existingUserSet
+     * @param positionInt
+     * @param newItem
      */
-    public void replaceItem(UserSet existingUserSet, int positionInt, String newItem) {
+    void replaceItem(UserSet existingUserSet, int positionInt, String newItem) {
 	existingUserSet.getItems().remove(newItem);
 	// if item already existed, the size of item list has changed
 	// Check to avoid IndexOutOfBoundsException
@@ -365,14 +369,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	addNewItemToList(existingUserSet, positionInt, newItem);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Add item to the list in given position if provided.
      * 
-     * @see
-     * eu.europeana.set.web.service.UserSetService#addNewItemToList(eu.europeana.set
-     * .definitions.model.UserSet, int, java.lang.String)
+     * @param existingUserSet
+     * @param positionInt
+     * @param newItem
      */
-    public void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem) {
+    void addNewItemToList(UserSet existingUserSet, int positionInt, String newItem) {
 
 	if (existingUserSet.getItems() == null) {
 	    // empty items list
@@ -525,7 +529,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
 	for (UserSet set : results.getResults()) {
-	    items.add(((WebUserSetImpl) set).getId());
+	    items.add(UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier()));
 	}
 	resPage.setItems(items);
 	resPage.setTotalInPage(items.size());
@@ -554,6 +558,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		} else {
 		    // inlcude only the id
 		    WebUserSetImpl id = new WebUserSetImpl();
+		    id.setBaseUrl(getConfiguration().getUserSetBaseUrl());
 		    id.setIdentifier(userSet.getIdentifier());
 		    items.add(id);
 		}
@@ -773,8 +778,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @return profiled user set value
      */
     public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
-
-    // check that not more then maximal allowed number of items are
+	//update 
+	userSet.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+	
+	// check that not more then maximal allowed number of items are
 	// presented
 	if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
 	    int itemsCount = userSet.getItems().size();

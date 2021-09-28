@@ -28,7 +28,6 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
@@ -181,12 +180,12 @@ public abstract class BaseUserSetTestUtils {
         return value;
     }
 
-    protected String getSetIdentifier(String result) throws JSONException {
+    protected String getSetIdentifier(String baseUrl, String result) throws JSONException {
 	assertNotNull(result);
 	JSONObject json = new JSONObject(result);
 	String id = json.getString("id");
 	assertNotNull(id);
-	String identifier = id.replace(WebUserSetFields.BASE_SET_URL, "");
+	String identifier = id.replace(baseUrl, "");
 	return identifier;
     }
 

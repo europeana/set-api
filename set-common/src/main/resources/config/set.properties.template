@@ -1,16 +1,19 @@
 ##common settings
 
-#string value indicating if the application runs in "production", "test", "development" environment 
+#string value indicating if the application runs in "production", "acceptance", "test", "development" environment 
 set.environment=development
 
 #used only in production environment
-set.environment.production.baseUrl=http://data.europeana.eu/set
+set.environment.baseUrl.production=http://data.europeana.eu/set/
+
+#used only in acceptance environment
+set.environment.baseUrl.acceptance=http://data.europeana.eu/set/
 
 #used only in production environment
-set.environment.test.baseUrl=http://test-sets.europeana.eu/set
+set.environment.baseUrl.test=http://test-sets.europeana.eu/set/
 
-#used only in production environment
-set.environment.development.baseUrl=http://localhost:8080/set
+#used only in develop environment
+set.environment.baseUrl.development=http://localhost:8080/set/
 
 #configurable user id for the entity user set
 entity.userset.user.id=

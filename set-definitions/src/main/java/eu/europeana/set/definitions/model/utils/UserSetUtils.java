@@ -70,22 +70,27 @@ public class UserSetUtils {
     * @param userSet The user set object
     * @return user set object with updated pagination values
     */
-   public UserSet updatePagination(UserSet userSet) {
+   public UserSet updatePagination(UserSet userSet, String baseUrl) {
+       if(userSet == null) {
+	   return null;
+       }
        
-       if (userSet != null && userSet.getItems() != null) {
+       //set base URL for set.id 
+       userSet.setBaseUrl(baseUrl);
+       if (userSet.getItems() != null) {
            int total = userSet.getItems().size();
            userSet.setTotal(total);
            //NOTE: the first and last properties are not used now and might be deprecated, they should not be stored in the database
            if (total > 0) {
                
                int first = 0;
-               String firstPageStr = fillPage(userSet, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+               String firstPageStr = fillPage(userSet, baseUrl, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setFirst(firstPageStr);
                int last = (int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE); 
                if(last > 0) {
         	last = last - 1; // we start counting by 0    
                }
-               String lastPageStr = fillPage(userSet, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+               String lastPageStr = fillPage(userSet, baseUrl, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setLast(lastPageStr);
 	   } 
            
@@ -110,9 +115,9 @@ public class UserSetUtils {
      * @param pageIndex
      * @return pagination string
      */
-    public String fillPage(UserSet userSet, int pageIndex, int pageSize) {
+    public String fillPage(UserSet userSet, String baseUrl, int pageIndex, int pageSize) {
         StringBuilder pageUriBuilder = new StringBuilder();
-        return pageUriBuilder.append(String.format("%s%s?%s=%d&%s=%d",WebUserSetFields.BASE_SET_URL,
+        return pageUriBuilder.append(String.format("%s%s?%s=%d&%s=%d", baseUrl,
                 userSet.getIdentifier(), CommonApiConstants.QUERY_PARAM_PAGE, pageIndex
                 , CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize
         )).toString();
@@ -122,9 +127,12 @@ public class UserSetUtils {
    	return WebUserSetFields.DEFAULT_USER_BASE_URL + userId;
     }
     
-    public static String buildUserSetId(String identifier) {
+    public static String buildUserSetId(String baseUrl, String identifier) {
 	StringBuilder urlBuilder = new StringBuilder();
-	urlBuilder.append(WebUserSetFields.BASE_SET_URL);
+	urlBuilder.append(baseUrl);
+	if(!baseUrl.endsWith("/")) {
+	    urlBuilder.append("/");
+	}
 	urlBuilder.append(identifier);
 	return urlBuilder.toString();
     }
