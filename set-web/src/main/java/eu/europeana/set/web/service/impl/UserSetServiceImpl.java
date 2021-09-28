@@ -473,20 +473,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (profiles.contains(LdProfiles.FACETS) && facetQuery != null) {
 		Map<String, Long> valueCountMap = getMongoPersistence().getFacets(facetQuery);
 		results.setFacetFields(Arrays.asList(new FacetFieldViewImpl
-				(facetQuery.getOutputField(), setFacetResultPage(valueCountMap), valueCountMap)));
+				(facetQuery.getOutputField(), valueCountMap)));
 	}
 	return results;
     }
 
-    private List<FacetValueResultPage> setFacetResultPage(Map<String, Long> valueCountMap) {
-	List<FacetValueResultPage> facetResultPage = new ArrayList<>();
-	if (valueCountMap != null && !valueCountMap.isEmpty()) {
-		for (Map.Entry<String, Long> entry : valueCountMap.entrySet()) {
-		facetResultPage.add(new FacetValueResultPage(entry.getKey(), entry.getValue()));
-		}
-	}
-	return facetResultPage;
-	}
+//    private List<FacetValue> setFacetResultPage(Map<String, Long> valueCountMap) {
+//	List<FacetValue> facetResultPage = new ArrayList<>();
+//	if (valueCountMap != null && !valueCountMap.isEmpty()) {
+//		for (Map.Entry<String, Long> entry : valueCountMap.entrySet()) {
+//		facetResultPage.add(new FacetValue(entry.getKey(), entry.getValue()));
+//		}
+//	}
+//	return facetResultPage;
+//	}
 
     @Override
     public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,

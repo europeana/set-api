@@ -1,11 +1,11 @@
 package eu.europeana.set.web.model.search;
 
-public class FacetValueResultPage {
+public class FacetValue {
 
     private String label;
     private long count;
 
-    public FacetValueResultPage(String label, long count) {
+    public FacetValue(String label, long count) {
         this.label = label;
         this.count = count;
     }

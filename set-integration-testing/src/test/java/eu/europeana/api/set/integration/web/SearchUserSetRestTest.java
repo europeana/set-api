@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import eu.europeana.set.web.model.search.FacetValueResultPage;
+import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -749,9 +749,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
 
-	private void checkItemFacets(List<FacetValueResultPage> facetValueResultPages) {
+	private void checkItemFacets(List<FacetValue> facetValueResultPages) {
 	assertEquals(15, facetValueResultPages.size());
-	for (FacetValueResultPage facet : facetValueResultPages) {
+	for (FacetValue facet : facetValueResultPages) {
 		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXSP")) {
 			assertEquals(2, facet.getCount());
 		}

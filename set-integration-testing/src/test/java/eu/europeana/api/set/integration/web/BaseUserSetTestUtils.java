@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.europeana.set.web.model.search.FacetValueResultPage;
+import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -190,8 +190,8 @@ public abstract class BaseUserSetTestUtils {
 	return identifier;
     }
 
-    protected List<FacetValueResultPage> getFacetResultPage(String result) throws JSONException {
-    List<FacetValueResultPage> facetValueResultPages = new ArrayList<>();
+    protected List<FacetValue> getFacetResultPage(String result) throws JSONException {
+    List<FacetValue> facetValueResultPages = new ArrayList<>();
     assertNotNull(result);
     JSONObject json = new JSONObject(result);
     JSONArray facets = json.getJSONArray(WebUserSetFields.FACETS);
@@ -199,7 +199,7 @@ public abstract class BaseUserSetTestUtils {
     JSONArray values = ((JSONObject) facets.get(0)).getJSONArray(WebUserSetFields.VALUES);
     for (int i =0; i < values.length(); i++) {
         JSONObject o = (JSONObject) values.get(i);
-       facetValueResultPages.add(new FacetValueResultPage(o.getString("label"), o.getLong("count")));
+       facetValueResultPages.add(new FacetValue(o.getString("label"), o.getLong("count")));
     }
     return facetValueResultPages;
     }

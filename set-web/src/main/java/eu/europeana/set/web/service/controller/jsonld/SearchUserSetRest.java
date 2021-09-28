@@ -2,12 +2,11 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
-import org.apache.commons.collections.ListUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,6 +27,7 @@ import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
@@ -163,8 +163,14 @@ public class SearchUserSetRest extends BaseRest {
 		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 	    }
 
-	    @SuppressWarnings("unchecked")
-	    List<String> filtered = (itemIds != null)? ListUtils.retainAll(existingUserSet.getItems(), itemIds) : existingUserSet.getItems();
+	    List<String> filtered;
+	    if(itemIds == null) {
+		filtered = existingUserSet.getItems();
+	    }else {
+		filtered = new ArrayList<String>(existingUserSet.getItems());
+		filtered.retainAll(itemIds);
+		
+	    }
 	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(filtered, page, pageSize,
 		    request);
 
