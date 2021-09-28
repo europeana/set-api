@@ -7,10 +7,10 @@ set.environment=development
 set.environment.baseUrl.production=http://data.europeana.eu/set/
 
 #used only in acceptance environment
-set.environment.baseUrl.acceptance=http://data.europeana.eu/set/
+set.environment.baseUrl.acceptance=http://set-api-acceptance.eanadev.org/set/
 
 #used only in production environment
-set.environment.baseUrl.test=http://test-sets.europeana.eu/set/
+set.environment.baseUrl.test=http://set-api-test.eanadev.org/set/
 
 #used only in develop environment
 set.environment.baseUrl.development=http://localhost:8080/set/
