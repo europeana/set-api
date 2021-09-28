@@ -7,7 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
+import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -629,4 +631,136 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set1.getIdentifier());
 	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
+
+    // Facet validation
+    @Test
+	public void searchFacetsNoFacetValidationTest() throws Exception {
+    mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+	    .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    }
+
+	@Test
+	public void searchFacetsInvalidFacetValidationTest() throws Exception {
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "test"))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsEmptyFacetValidationTest() throws Exception {
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+	    .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, ""))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleFacetValidationTest() throws Exception {
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item,visibility"))
+	    .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	// Multiple profile validation
+	@Test
+	public void searchFacetsMultipleProfileInvalid() throws Exception {
+    	String profile = LdProfiles.FACETS.name() + "," + "test";
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleProfileWithoutFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.STANDARD.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleInvalidProfileWithFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.FACETS.name() + "," + LdProfiles.STANDARD.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleValidProfileWithFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.FACETS.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.OK.value()));
+	}
+
+	@Test
+	public void searchFacetsValidFacetTest() throws Exception {
+    // delete the bookmarkFolder already if exists
+	deleteBookmarkFolder(regularUserToken);
+	deleteBookmarkFolder(editorUserToken);
+
+	UserSet set1 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+	UserSet set2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER_1, editorUserToken);
+
+	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item"))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+     // check result
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FACETS));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TYPE));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIELD));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.VALUES));
+    // verify the facet values
+	checkItemFacets(getFacetResultPage(result));
+	// delete item created by test
+	getUserSetService().deleteUserSet(set1.getIdentifier());
+	getUserSetService().deleteUserSet(set2.getIdentifier());
+    }
+
+	private void checkItemFacets(List<FacetValue> facetValueResultPages) {
+	assertEquals(15, facetValueResultPages.size());
+	for (FacetValue facet : facetValueResultPages) {
+		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXSP")) {
+			assertEquals(2, facet.getCount());
+		}
+		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXAC")) {
+			assertEquals(2, facet.getCount());
+		}
+		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXACC")) {
+			assertEquals(2, facet.getCount());
+		}
+		if(facet.getLabel().equals("http://data.europeana.eu/item/08641/1037479000000476703")) {
+			assertEquals(1, facet.getCount());
+		}
+	}
+	}
+
 }

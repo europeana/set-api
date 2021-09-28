@@ -14,6 +14,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String SLASH                      = "/";
     public static final String PAR_CHAR                   = "?";
     public static final String AND                        = "&";
+    public static final String COMMA                        = ",";
     public static final String EQUALS_PARAMETER           = "=";
     public static final String JSON_LD_REST               = ".jsonld";
     public static final String FORMAT_JSONLD              = "jsonld";
@@ -33,16 +34,6 @@ public class WebUserSetFields extends WebUserSetModelFields {
     @Deprecated(since = "")
     public static final String PARAM_SORT_ORDER           = "sortOrder";
 
-    // Mongo Constants
-    public static final String MONGO_ID                   = "_id";
-    public static final String MONGO_MATCH                = "$match";
-    public static final String MONGO_GROUP                = "$group";
-    public static final String MONGO_TOTAL_LIKES          = "totalLikes";
-    public static final String MONGO_SUM                  = "$sum";
-    public static final String MONGO_TOTAL                = "$total";
-    public static final String MONGO_EQUALS               = "$eq";
-    public static final String MONGO_PROJECT              = "$project";
-
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
     public static final String CONTEXT_FIELD              = "@context";
@@ -60,10 +51,16 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String SET_ID                    = "set_id";
 
     //results page
-    public static final String PART_OF = "partOf";
-    public static final String NEXT = "next";
-    public static final String PREV = "prev";
-    
+    public static final String PART_OF                   = "partOf";
+    public static final String NEXT                      = "next";
+    public static final String PREV                      = "prev";
+    public static final String FACETS                    = "facets";
+    public static final String FIELD                     = "field";
+    public static final String VALUES                    = "values";
+    public static final String FACET_TYPE 		= "facet";
+    public static final String LABEL			= "label";
+    public static final String COUNT 			= "count";
+
     //collection page
     public static final String START_INDEX = "startIndex";
     

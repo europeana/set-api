@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
+import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +53,7 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";
     public static final String USER_SET_COMPLETE_PUBLIC = "/content/userset_complete.json";
     public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
+    public static final String USER_SET_BOOKMARK_FOLDER_1 = "/content/userset_bookmark_folder_1.json";
     public static final String USER_SET_BEST_ITEMS = "/content/userset_entity_best_items.json";
     public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
     public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
@@ -183,5 +187,19 @@ public abstract class BaseUserSetTestUtils {
 	assertNotNull(id);
 	String identifier = id.replace(baseUrl, "");
 	return identifier;
+    }
+
+    protected List<FacetValue> getFacetResultPage(String result) throws JSONException {
+    List<FacetValue> facetValueResultPages = new ArrayList<>();
+    assertNotNull(result);
+    JSONObject json = new JSONObject(result);
+    JSONArray facets = json.getJSONArray(WebUserSetFields.FACETS);
+    // for now we have only single faceting- hence only one facet will be present
+    JSONArray values = ((JSONObject) facets.get(0)).getJSONArray(WebUserSetFields.VALUES);
+    for (int i =0; i < values.length(); i++) {
+        JSONObject o = (JSONObject) values.get(i);
+       facetValueResultPages.add(new FacetValue(o.getString("label"), o.getLong("count")));
+    }
+    return facetValueResultPages;
     }
 }

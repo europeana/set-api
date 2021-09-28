@@ -2,11 +2,11 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.collections.ListUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,6 +27,7 @@ import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
@@ -67,26 +68,32 @@ public class SearchUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false, defaultValue = "0") int page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false, defaultValue = ""
 		    + CommonApiConstants.DEFAULT_PAGE_SIZE) int pageSize,
-	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+		@RequestParam(value = CommonApiConstants.QUERY_PARAM_FACET, required = false) String facet,
+		@RequestParam(value = "facet.limit", required = false, defaultValue = "50") int facetLimit,
+		@RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
 	    HttpServletRequest request) throws HttpException {
 
 	try {
-
-	    // authorization
+		// authorization
 	    Authentication authentication = verifyReadAccess(request);
 
-	    // valdidate params
-	    LdProfiles profile = getProfile(profileStr, request);
+		// validate params - profile
+        List<LdProfiles> profiles = getProfiles(profileStr, request);
 
+	    // create facet query and validate facet - if profile is facets
+		UserSetFacetQuery facetQuery = null;
+		if (profiles.contains(LdProfiles.FACETS)) {
+			facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
+		}
 	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
 
-	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, profile, authentication);
+	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profiles, authentication);
 	    String requestURL = request.getRequestURL().toString();
 
 	    @SuppressWarnings("rawtypes")
 	    BaseUserSetResultPage resultsPage;
 	    resultsPage = getUserSetService().buildResultsPage(searchQuery, results, requestURL,
-		    request.getQueryString(), profile, authentication);
+		    request.getQueryString(), profiles, authentication);
 
 	    String jsonLd = serializeResultsPage(resultsPage);
 	    return buildSearchResponse(jsonLd);
@@ -156,8 +163,14 @@ public class SearchUserSetRest extends BaseRest {
 		getUserSetService().verifyOwnerOrAdmin(existingUserSet, authentication, false);
 	    }
 
-	    @SuppressWarnings("unchecked")
-	    List<String> filtered = (itemIds != null)? ListUtils.retainAll(existingUserSet.getItems(), itemIds) : existingUserSet.getItems();
+	    List<String> filtered;
+	    if(itemIds == null) {
+		filtered = existingUserSet.getItems();
+	    }else {
+		filtered = new ArrayList<String>(existingUserSet.getItems());
+		filtered.retainAll(itemIds);
+		
+	    }
 	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(filtered, page, pageSize,
 		    request);
 

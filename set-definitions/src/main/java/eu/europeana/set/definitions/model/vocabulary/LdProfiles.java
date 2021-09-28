@@ -11,7 +11,8 @@ import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 public enum LdProfiles implements ProfileKeyword {
 
     MINIMAL(ProfileConstants.VALUE_LD_MINIMAL, ProfileConstants.VALUE_PREFER_MINIMAL), STANDARD(ProfileConstants.VALUE_LD_CONTAINEDIRIS, ProfileConstants.VALUE_PREFER_CONTAINEDIRIS),
-    ITEMDESCRIPTIONS(ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS, ProfileConstants.VALUE_PREFER_ITEM_DESCRIPTIONS);
+    ITEMDESCRIPTIONS(ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS, ProfileConstants.VALUE_PREFER_ITEM_DESCRIPTIONS), FACETS(ProfileConstants.VALUE_LD_FACETS, "");
+
 
     private String headerValue;
     private String preferHeaderValue;
