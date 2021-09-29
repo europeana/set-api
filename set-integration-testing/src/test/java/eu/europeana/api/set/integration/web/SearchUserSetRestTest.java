@@ -1,11 +1,15 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
+import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,12 +58,6 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 //    private static final String SORT_MODIFIED_WebUserSetFields.MODIFIED
     
     private static final String PAGE_SIZE = "100";
-
-//    private MockMvc mockMvc;
-//
-//    @Autowired
-//    private WebApplicationContext wac;
-
        
     @BeforeEach
     public void initApplication() {
@@ -151,7 +149,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String buildUserSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	final String buildUserSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, buildUserSetId));
 
 	// delete item created by test
@@ -174,7 +172,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	// delete item created by test
@@ -198,7 +196,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String userSetId = UserSetUtils.buildUserSetId(set.getIdentifier());
+	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	//check contributor
@@ -260,7 +258,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertNotNull(result);
 		// check id
 		//default sorting should include the id on the first position
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 		//check subject
 		assertTrue(containsKeyOrValue(result, title));
@@ -312,7 +310,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 	//check subject
 	assertTrue(containsKeyOrValue(result, title));
@@ -340,7 +338,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertNotNull(result);
 		// check id
 		//default sorting should include the id on the first position
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 		//check subject
 		assertTrue(containsKeyOrValue(result, title));
@@ -368,7 +366,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 
 	//check subject
 	assertTrue(containsKeyOrValue(result, subject));
@@ -407,7 +405,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
 		assertNotNull(result);
 
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
 		assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 		assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
 		assertEquals("1", getvalueOfkey(result, WebUserSetFields.TOTAL));
@@ -469,9 +467,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 	// check ids
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set1.getIdentifier())));
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set2.getIdentifier())));
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(set3.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set1.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set2.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set3.getIdentifier())));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());
@@ -633,4 +631,136 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	getUserSetService().deleteUserSet(set1.getIdentifier());
 	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
+
+    // Facet validation
+    @Test
+	public void searchFacetsNoFacetValidationTest() throws Exception {
+    mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+	    .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    }
+
+	@Test
+	public void searchFacetsInvalidFacetValidationTest() throws Exception {
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "test"))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsEmptyFacetValidationTest() throws Exception {
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+	    .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, ""))
+		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleFacetValidationTest() throws Exception {
+	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item,visibility"))
+	    .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	// Multiple profile validation
+	@Test
+	public void searchFacetsMultipleProfileInvalid() throws Exception {
+    	String profile = LdProfiles.FACETS.name() + "," + "test";
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleProfileWithoutFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.STANDARD.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleInvalidProfileWithFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.FACETS.name() + "," + LdProfiles.STANDARD.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleValidProfileWithFacets() throws Exception {
+		String profile = LdProfiles.MINIMAL.name() + "," + LdProfiles.FACETS.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.OK.value()));
+	}
+
+	@Test
+	public void searchFacetsValidFacetTest() throws Exception {
+    // delete the bookmarkFolder already if exists
+	deleteBookmarkFolder(regularUserToken);
+	deleteBookmarkFolder(editorUserToken);
+
+	UserSet set1 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+	UserSet set2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER_1, editorUserToken);
+
+	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item"))
+		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+     // check result
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FACETS));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.TYPE));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIELD));
+	assertTrue(containsKeyOrValue(result, WebUserSetFields.VALUES));
+    // verify the facet values
+	checkItemFacets(getFacetResultPage(result));
+	// delete item created by test
+	getUserSetService().deleteUserSet(set1.getIdentifier());
+	getUserSetService().deleteUserSet(set2.getIdentifier());
+    }
+
+	private void checkItemFacets(List<FacetValue> facetValueResultPages) {
+	assertEquals(15, facetValueResultPages.size());
+	for (FacetValue facet : facetValueResultPages) {
+		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXSP")) {
+			assertEquals(2, facet.getCount());
+		}
+		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXAC")) {
+			assertEquals(2, facet.getCount());
+		}
+		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXACC")) {
+			assertEquals(2, facet.getCount());
+		}
+		if(facet.getLabel().equals("http://data.europeana.eu/item/08641/1037479000000476703")) {
+			assertEquals(1, facet.getCount());
+		}
+	}
+	}
+
 }

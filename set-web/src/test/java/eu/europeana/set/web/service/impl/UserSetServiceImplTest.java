@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -94,7 +95,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-		LdProfiles.STANDARD, authentication);
+			Collections.singletonList(LdProfiles.STANDARD), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -122,7 +123,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-		LdProfiles.MINIMAL, authentication);
+			Collections.singletonList(LdProfiles.MINIMAL), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -147,7 +148,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-		LdProfiles.ITEMDESCRIPTIONS, authentication);
+			Collections.singletonList(LdProfiles.ITEMDESCRIPTIONS), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -175,7 +176,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-		LdProfiles.ITEMDESCRIPTIONS, authentication);
+			Collections.singletonList(LdProfiles.ITEMDESCRIPTIONS), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));

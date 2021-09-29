@@ -29,7 +29,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -39,6 +38,8 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
+
+import java.util.Collections;
 
 /**
  * Test class for UserSet controller.
@@ -80,7 +81,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 			.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-	String identifier = getSetIdentifier(result);
+	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result);
 	getUserSetService().deleteUserSet(identifier);
     }
 
@@ -155,7 +156,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 
 	int idCount = StringUtils.countMatches(result, "\"id\"");
 	//1 id for userset + 100 ids for dereferenced items, but not all are available in the index anymore
@@ -190,7 +191,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String result = response.getContentAsString();
 		assertNotNull(result);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 
 		getUserSetService().deleteUserSet(userSet.getIdentifier());
 	}
@@ -207,7 +208,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 				andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 
 		assertNotNull(result);
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 		assertEquals("69", getvalueOfkey(result, WebUserSetFields.TOTAL));
 		// one of set and one for creator and items = 10 (default pageSize)
 		assertEquals(2 + 10, noOfOccurance(result, WebUserSetFields.ID));
@@ -232,7 +233,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String result = response.getContentAsString();
 		assertNotNull(result);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 
 		getUserSetService().deleteUserSet(userSet.getIdentifier());
 	}
@@ -268,7 +269,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	String result = response.getContentAsString();
 	assertNotNull(result);
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
 
@@ -290,7 +291,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator, null, null, 0,
 		1);
-	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, LdProfiles.MINIMAL,
+	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null, Collections.singletonList(LdProfiles.MINIMAL),
 		getAuthentication(regularUserToken));
 	assertEquals(0, results.getResultSize());
     }

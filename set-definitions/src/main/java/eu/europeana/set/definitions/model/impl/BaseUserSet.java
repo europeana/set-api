@@ -14,7 +14,7 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
  *
  * @author GrafR Modified by Srishti Singh 2-2-2021
  */
-public class BaseUserSet extends BasePageInfo implements UserSet {
+public abstract class BaseUserSet extends BasePageInfo implements UserSet {
 
     // EDM Collection Profile
 
