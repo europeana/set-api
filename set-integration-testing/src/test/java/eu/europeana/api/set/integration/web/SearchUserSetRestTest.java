@@ -718,6 +718,28 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	}
 
 	@Test
+	public void searchFacetsMultipleValidProfileWithFacets_Debug() throws Exception {
+		String profile = LdProfiles.DEBUG.name() + "," + LdProfiles.FACETS.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.OK.value()));
+	}
+
+	@Test
+	public void searchFacetsMultipleValidProfileWithFacetsDebug() throws Exception {
+		String profile = LdProfiles.DEBUG.name() + "," + LdProfiles.FACETS.name() + "," + LdProfiles.MINIMAL.name();
+		mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
+						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+						.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+						.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+						.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
+				.andExpect(status().is(HttpStatus.OK.value()));
+	}
+
+	@Test
 	public void searchFacetsValidFacetTest() throws Exception {
     // delete the bookmarkFolder already if exists
 	deleteBookmarkFolder(regularUserToken);
