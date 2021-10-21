@@ -120,6 +120,10 @@ public class BaseRest extends BaseRestController {
      * @throws HttpException
      */
     private void validateMultipleProfile(List<LdProfiles> ldProfiles, String profileStr) throws HttpException {
+        // remove profile 'debug' as it's only used for stackTrace purpose
+        if (ldProfiles.contains(LdProfiles.DEBUG)) {
+            ldProfiles.remove(LdProfiles.DEBUG);
+        }
         // For now maximum two profile-combinations are possible
         // profile=facets OR profile=facets,minimal OR profile=standard,facets
         if(ldProfiles.size() > 2) {
