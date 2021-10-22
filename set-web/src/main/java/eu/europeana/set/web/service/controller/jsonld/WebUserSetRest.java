@@ -115,7 +115,6 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
 
 	    if (mustFetchItems(storedUserSet, profile)) {
-//		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
 		int derefItems = getDerefItemsCount(storedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 		storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null,
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
@@ -215,11 +214,10 @@ public class WebUserSetRest extends BaseRest {
 	    }
 
 	    if (mustFetchItems(userSet, profile)) {
-		int derefItems = getDerefItemsCount(userSet, pageSize);
+	    // pageNr, if empty default value 0 is sent	for fetching items
 		int page = (pageNr  != null) ? pageNr : CommonApiConstants.DEFAULT_PAGE;
-		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, page, derefItems, profile);
+		userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, page, pageSize, profile);
 	    }
-
 	    return buildGetResponse(userSet, profile, pageNr, pageSize, request);
 
 	} catch (HttpException e) {
@@ -330,7 +328,6 @@ public class WebUserSetRest extends BaseRest {
 	    UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
 
 	    if (mustFetchItems(updatedUserSet, profile)) {
-//		int dereferencedItems = getConfiguration().getMaxSearchDereferencedItems();
 		int derefItems = getDerefItemsCount(updatedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null,
 			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
