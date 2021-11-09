@@ -191,9 +191,9 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String result = response.getContentAsString();
 		assertNotNull(result);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		System.out.println("HERE " +result);
-		System.out.println("HERE " +UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier()));
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+		// as this is an integration test the collection overview will be build on http://localhost rather than based on environment set
+		// This is to avoid any failures in environments other than development
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId("http://localhost/set/", userSet.getIdentifier())));
 
 		int idCount = StringUtils.countMatches(result, "\"id\"");
 		// as pageSize is 100,  only 10 items will be requested for dereference
