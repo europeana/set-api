@@ -11,15 +11,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * Creates the Serach api urls and request body
+ * @author Srishti Singh
+ */
 public class UserSetSearchApiUtils {
 
     /**
      * Will create the Serach Api post request url
      * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
      *
-     * @param userSet
-     * @param apiKey
-     * @return
+     * @param userSet userset for which request is sent
+     * @param apiKey apikey for url
+     * @param searchUrl  base url for search api
+     * @return search api url
      */
     public String buildSearchApiPostUrl(UserSet userSet, String apiKey, String searchUrl) {
         StringBuilder url = new StringBuilder();
@@ -35,13 +40,24 @@ public class UserSetSearchApiUtils {
 
     /**
      * Returns the Search APi post Request body
+     * For open set, items requested are only returned using pageNr and pageSize.
+     *    The request if formed based on start and rows
+     *    ex: pageNr = 0, pageSize, 10 -> {"query":<isDefinedBy>,"qf":null,"start":1,"rows":10,"sort":null}
+     *
+     * For close-set, Only requested items are queried based on pageNr and pageSize.
+     *     Items are taken in the order of the items present in the user set
+     *    ex:{"query":"europeana_id:(\"123\" OR \"xyz\" OR \"abc\")","qf":null,"start":1,"rows":3,"sort":null}
+     *
      * @param userSet
+     * @param sort
+     * @param sortOrder
+     * @param pageNr
      * @param pageSize
      * @return
      */
     public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize) {
         if (!userSet.isOpenSet()) {
-            return buildSearchApiPostBodyForClosedSets(userSet, pageSize);
+            return buildSearchApiPostBodyForClosedSets(userSet, pageSize, pageNr);
         }
         SearchApiRequest searchApiRequest = new SearchApiRequest();
         // remove pagination and ordering
@@ -71,7 +87,7 @@ public class UserSetSearchApiUtils {
      * @return
      * @throws HttpException
      */
-    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, int pageSize) {
+    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, int pageSize, int pageNr) {
         // use them to build the search query for retrieving item descriptions
         // europeana_id is in format /collectionId/recordId, this can be easily
         // extracted from the
@@ -81,23 +97,24 @@ public class UserSetSearchApiUtils {
         SearchApiRequest searchApiRequest = new SearchApiRequest();
         String id;
         String fullId;
-        int maxItems = Math.min(userSet.getItems().size(), pageSize);
+        // calculate the index of from and uptill where items for query will be sent
+        Integer start = pageNr * pageSize;
+        Integer till = Math.min((start +  pageSize), userSet.getItems().size()); // should not exceed the size of item list
 
         StringBuilder query = new StringBuilder(100);
         query.append("europeana_id:(");
-        for (int i = 0; i < maxItems; i++) {
+        for (int i = start; i < till; i++) {
             fullId = userSet.getItems().get(i);
-            if (i > 0) {
+            if (i != start) {
                 query.append(" OR ");
             }
-            id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // .replace("/", "%2F");
+            id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // replace "/" with "%2F"
             query.append('"').append('/').append(id).append('"');
         }
         // close bracket
         query.append(')');
         searchApiRequest.setQuery(query.toString());
-        searchApiRequest.setRows(maxItems);
-
+        searchApiRequest.setRows(pageSize);
         return searchApiRequest;
     }
 
@@ -138,5 +155,4 @@ public class UserSetSearchApiUtils {
         }
         return query.toString();
     }
-
 }

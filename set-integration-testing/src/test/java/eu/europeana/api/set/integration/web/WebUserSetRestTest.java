@@ -143,7 +143,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     }
 
     @Test
-    public void getUserSet_ItemDescriptions() throws Exception {
+    public void getCloseUserSet_ItemDescriptions() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 	// get the identifier
@@ -152,30 +152,81 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
-	//
+
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
 	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 
 	int idCount = StringUtils.countMatches(result, "\"id\"");
-	//1 id for userset + 100 ids for dereferenced items, but not all are available in the index anymore
-	assertTrue(idCount > 50);
+	// as pageSize is not passed in the request, only 10 items will be requested for dereference
+	// so "id" = 13 (10 + creator id + userset Identifier + multilingual lang "id" in one of item edmPlaceLabelLangAware)
+	assertEquals(13, idCount);
 	
 	JSONObject json = new JSONObject(result);
 	JSONArray itemDescriptions = json.getJSONArray("items");
-	String itemDescription;
-	String itemIdentifier;
-	for (int i = 0; i < 5; i++) {
-	    itemDescription = itemDescriptions.get(i).toString();
-	    itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(i));
-	    //escape "/" to "\/" to match json string
-	    itemIdentifier = StringUtils.replace(itemIdentifier, "/", "\\/");
-	    assertTrue(itemDescription.contains(itemIdentifier));
+	// check 5 items
+	for (int i = 0; i < 5 ; i++) {
+		String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(i));
+		String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
+		assertEquals(itemIdentifier, itemDescriptionIdentifier);
 	}
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
+
+	@Test
+	public void getCloseUserSet_ItemDescriptionsWithPageValues() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
+
+		// get the identifier
+		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+
+
+		String result = response.getContentAsString();
+		assertNotNull(result);
+		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+
+		int idCount = StringUtils.countMatches(result, "\"id\"");
+		// as pageSize is 100,  only 10 items will be requested for dereference
+		// items returned by search api = 93
+		// other id : userset Identifier + partOf id + Creator id + one in edmPlaceLabelLangAware as a lang
+		// so "id" = 97
+		assertEquals(97, idCount);
+
+		JSONObject json = new JSONObject(result);
+		JSONArray itemDescriptions = json.getJSONArray("items");
+		int start = 1 * 100 ;
+		// check 5 items
+		for (int i = 0; i < 5 ; i++) {
+			String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(start));
+			String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
+			assertEquals(itemIdentifier, itemDescriptionIdentifier);
+			start ++;
+		}
+		getUserSetService().deleteUserSet(userSet.getIdentifier());
+	}
+
+	@Test
+	public void getCloseUserSet_ItemDescriptionsWithLastPage() throws Exception {
+		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
+
+		// set size = 249 items, request for more than lastPage
+		mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "3")
+				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
+				.header(HttpHeaders.AUTHORIZATION, regularUserToken))
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+
+		getUserSetService().deleteUserSet(userSet.getIdentifier());
+	}
 
 	@Test
 	public void getOpenUserSet_ItemDescriptions() throws Exception {

@@ -87,11 +87,11 @@ public class UserSetServiceImplTest {
 
 	userSetQuery.setPageNr(0);
 
-	String first = userSetService.buildPageUrl(REQUEST_URL + "?", 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL + "?", lastPage, userSetQuery.getPageSize());
-	String next = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() + 1,
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize());
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize());
-	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
+	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
@@ -113,13 +113,13 @@ public class UserSetServiceImplTest {
 
 	userSetQuery.setPageNr(2);
 
-	String first = userSetService.buildPageUrl(REQUEST_URL + "?", 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL + "?", lastPage, userSetQuery.getPageSize());
-	String next = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() + 1,
+	String first = userSetService.buildPageUrl(REQUEST_URL , 0, userSetQuery.getPageSize());
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize());
-	String prev = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() - 1,
+	String prev = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize());
-	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
+	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
@@ -140,11 +140,11 @@ public class UserSetServiceImplTest {
 
 	userSetQuery.setPageNr(lastPage);
 
-	String first = userSetService.buildPageUrl(REQUEST_URL + "?", 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL + "?", lastPage, userSetQuery.getPageSize());
-	String prev = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() - 1,
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize());
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	String prev = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize());
-	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
+	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
@@ -166,13 +166,13 @@ public class UserSetServiceImplTest {
 
 	userSetQuery.setPageNr(3);
 
-	String first = userSetService.buildPageUrl(REQUEST_URL + "?", 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL + "?", lastPage, userSetQuery.getPageSize());
-	String next = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() + 1,
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize());
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize());
-	String prev = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr() - 1,
+	String prev = userSetService.buildPageUrl(REQUEST_URL , userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize());
-	String curr = userSetService.buildPageUrl(REQUEST_URL + "?", userSetQuery.getPageNr(),
+	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
 		userSetQuery.getPageSize());
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
