@@ -38,6 +38,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Collections;
 
@@ -180,20 +181,20 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
 		// get the identifier
-		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+		MvcResult response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
 				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
 				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
-
-		String result = response.getContentAsString();
+		String result = response.getResponse().getContentAsString();
+		//String request = response.getRequest();
 		assertNotNull(result);
-		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		// as this is an integration test the collection overview will be build on http://localhost rather than based on environment set
-		// This is to avoid any failures in environments other than development
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId("http://localhost/set/", userSet.getIdentifier())));
+		assertEquals(HttpStatus.OK.value(), response.getResponse().getStatus());
+
+		// check the collection url
+		assertTrue(containsKeyOrValue(result, getUserSetService().buildCollectionUrl(null, response.getRequest().getRequestURL().toString(), "" )));
 
 		int idCount = StringUtils.countMatches(result, "\"id\"");
 		// as pageSize is 100,  only 10 items will be requested for dereference

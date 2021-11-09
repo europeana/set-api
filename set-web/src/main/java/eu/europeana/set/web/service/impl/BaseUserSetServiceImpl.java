@@ -188,7 +188,7 @@ public abstract class BaseUserSetServiceImpl {
 	return builder.toString();
     }
 
-    protected String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
+    public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
 	// remove out of scope parameters
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
