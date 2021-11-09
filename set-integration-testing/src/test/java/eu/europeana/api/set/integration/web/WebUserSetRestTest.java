@@ -191,6 +191,8 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String result = response.getContentAsString();
 		assertNotNull(result);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		System.out.println("HERE " +result);
+		System.out.println("HERE " +UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier()));
 		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
 
 		int idCount = StringUtils.countMatches(result, "\"id\"");
