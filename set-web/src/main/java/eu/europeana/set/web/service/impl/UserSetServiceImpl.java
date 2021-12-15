@@ -218,8 +218,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      * @return position The validated position in list to insert
      * @throws ApplicationAuthenticationException
      */
-    int validatePosition(String position, List<String> items, int pinnedItems)
-	    throws ApplicationAuthenticationException {
+    int validatePosition(String position, List<String> items, int pinnedItems) {
 	int positionInt = -1;
 	if (StringUtils.isNotEmpty(position)) {
 	    try {
@@ -400,14 +399,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    // if empty closed userset, nothing to do
 	    return userSet;
 	}
-
+    // for non-empty close-userset, do page validation before fetching items if pageNr exceeds the last page
+	// this is also to avoid sending any empty request to search api.
+	if (!userSet.isOpenSet() && userSet.getItems().size() > 0 ) {
+		validateLastPage(userSet.getItems().size(), pageSize, pageNr);
+	}
 	String apiKey = getConfiguration().getSearchApiKey();
 	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
 	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 		SearchApiResponse apiResult;
-	    if (LdProfiles.STANDARD == profile) {
+		if (LdProfiles.STANDARD == profile) {
 		apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, false);
 		setItemIds(userSet, apiResult);
 	    } else if (LdProfiles.ITEMDESCRIPTIONS == profile) {
@@ -465,6 +468,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// if open set OR userSet.getItems == null , return the same order as retrieved
 	return itemDescriptions;
     }
+
+    private int validateLastPage(long totalInCollection, int pageSize, int pageNr) throws ParamValidationException {
+	int lastPage = getLastPage(totalInCollection, pageSize);
+	if (pageNr > lastPage) {
+		throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+				UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+				new String[] { CommonApiConstants.QUERY_PARAM_PAGE,
+						"value our of range: " + pageNr + ", last page:" + lastPage });
+	}
+	return lastPage;
+	}
 
     @Override
     public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
@@ -592,36 +606,34 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    HttpServletRequest request) throws ParamValidationException {
 
 	int totalInCollection = userSet.getTotal();
-	int lastPage = getLastPage(totalInCollection, pageSize);
-	if (pageNr > lastPage) {
-	    throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-		    UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-		    new String[] { CommonApiConstants.QUERY_PARAM_PAGE,
-			    "value our of range: " + pageNr + ", last page:" + lastPage });
-	}
-
+	int lastPage = validateLastPage(totalInCollection, pageSize, pageNr);
 	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
 
 	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
 		CommonLdConstants.COLLECTION);
 
-	int startIndex = pageNr * pageSize;
 	CollectionPage page = null;
-	final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
-	if (endIndex > startIndex) {
-		List<String> items = userSet.getItems().subList(startIndex, endIndex);
-		if (LdProfiles.ITEMDESCRIPTIONS == profile) {
-			page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
-			((ItemDescriptionsCollectionPage) page).setItemList(items);
-		} else {
+	int startIndex = pageNr * pageSize;
+
+	 // handle ITEMDESCRIPTIONS profile separately as it will have only the requested items present
+	// Also, we don't want to sublist the item list, as number items returned from search api may not be equal to
+	// number of items requested
+	if (LdProfiles.ITEMDESCRIPTIONS == profile) {
+		page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
+		((ItemDescriptionsCollectionPage) page).setItemList(userSet.getItems());
+		page.setTotalInPage(userSet.getItems().size());
+	} else { // other profiles
+		final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
+		if (endIndex > startIndex) {
+			List<String> items = userSet.getItems().subList(startIndex, endIndex);
 			page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
 			page.setItems(items);
+			page.setTotalInPage(items.size());
+		} else {
+			// this if for the empty user Sets
+			page = new CollectionPage(userSet, partOf, startIndex);
+			page.setTotalInPage(0);
 		}
-		page.setTotalInPage(items.size());
-	} else {
-		// this if for the empty user Sets
-		page = new CollectionPage(userSet, partOf, startIndex);
-		page.setTotalInPage(0);
 	}
 
 	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize));

@@ -177,18 +177,18 @@ public abstract class BaseUserSetServiceImpl {
 
     protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
 	StringBuilder builder = new StringBuilder(collectionUrl);
-	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
-
+	// if collection url already has a query string, then append "&" or else "?"
+	if (collectionUrl.contains("?")) {
+		builder.append("&");
+	} else {
+		builder.append("?");
+	}
+	builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
-
 	return builder.toString();
     }
 
-    protected String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
-
-	// queryString = removeParam(WebAnnotationFields.PARAM_WSKEY,
-	// queryString);
-
+    public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
 	// remove out of scope parameters
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
@@ -198,11 +198,18 @@ public abstract class BaseUserSetServiceImpl {
 
 	// add mandatory parameters
 	if (StringUtils.isNotBlank(searchProfile)) {
-	    queryString += ("&" + CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
+		if (!queryString.isEmpty()) {
+			queryString += "&";
+		}
+		queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
+
 	}
 	
 	//TODO: verify if base URL should be used instead
-	return requestUrl+"?"+queryString;
+	if (!queryString.isEmpty()) {
+		return requestUrl+"?"+queryString;
+	}
+	return requestUrl;
     }
 
     protected String removeParam(final String queryParam, String queryParams) {
