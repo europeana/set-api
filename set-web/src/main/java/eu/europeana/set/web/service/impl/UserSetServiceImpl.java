@@ -285,49 +285,50 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     private UserSet insertItem(UserSet existingUserSet, String newItem, int positionInt, boolean pinnedItem) {
 	UserSet extUserSet = null;
-	if (existingUserSet.getItems() == null) {
-	    addNewItemToList(existingUserSet, -1, newItem);
-		if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
-			existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-		}
-		extUserSet = updateItemList(existingUserSet);
+	int finalPosition =  (existingUserSet.getItems() == null)? -1 : positionInt;
+	if (existingUserSet.getItems() == null || !existingUserSet.getItems().contains(newItem)) {
+	    // add item && create item list if needed
+	    addNewItemToList(existingUserSet, finalPosition, newItem);
+	    updatePinCount(existingUserSet, pinnedItem, -1);
+	    extUserSet = updateItemList(existingUserSet);
 	} else {
-	    if (!existingUserSet.getItems().contains(newItem)) {
-		// add item
-		addNewItemToList(existingUserSet, positionInt, newItem);
-		if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
-			existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-		}
-		extUserSet = updateItemList(existingUserSet);
-
-	    } else {
-        // replace item
-		int oldPosition = existingUserSet.getItems().indexOf(newItem);
-		if (oldPosition == positionInt) {
+	    // replace item
+	    int oldPosition = existingUserSet.getItems().indexOf(newItem);
+	    if (oldPosition == positionInt) {
 		    // do not change user set
 		    // the items is already present at the correct position
-			extUserSet = existingUserSet;
-		} else {
-		    replaceItem(existingUserSet, positionInt, newItem);
-		    if(existingUserSet.isEntityBestItemsSet()) {
-		    	if (pinnedItem){
-					existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-				} else if (oldPosition < existingUserSet.getPinned()) {
-					// For entity sets : if existing item is converted from Pinned --> Normal item,
-					// decrease the pinned counter
-					// ie; already existing Normal item being added as a pinned item now
-					// This condition will avoid any changes in Pinned counter:
-					// while adding a already existing Normal item as a Normal item again in different position
-					// As the old position of Normal item will always be greater than existingUserSet.getPinned()
-					existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-				}
-			}
-			extUserSet = updateItemList(existingUserSet);
+		    extUserSet = existingUserSet;
+	    } else {
+		    replaceItem(existingUserSet, finalPosition, newItem);
+		    updatePinCount(existingUserSet, pinnedItem, oldPosition);		
+		    extUserSet = updateItemList(existingUserSet);
 		}
 	    }
-	}
 
 	return extUserSet;
+    }
+
+    private void updatePinCount(UserSet existingUserSet, boolean pinnedItem, int oldPosition) {
+	boolean mustHandlePinCount = pinnedItem && existingUserSet.isEntityBestItemsSet();
+	if(!mustHandlePinCount) {
+	    return;
+	}
+	
+	final boolean previouslyPinned = (oldPosition >=0) && (oldPosition < existingUserSet.getPinned());
+	if (previouslyPinned) {
+	    //DECREASE PIN COUNT
+	    // For entity sets : if existing item is converted from Pinned --> Normal item,
+	    // decrease the pinned counter
+	    // ie; already existing Normal item being added as a pinned item now
+	    // This condition will avoid any changes in Pinned counter:
+	    // while adding a already existing Normal item as a Normal item again in
+	    // different position
+	    // As the old position of Normal item will always be greater than
+	    // existingUserSet.getPinned()
+	    existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+	} else {
+	    existingUserSet.setPinned(existingUserSet.getPinned() + 1);
+	}
     }
 
     /*
