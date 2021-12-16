@@ -220,24 +220,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     int validatePosition(String position, List<String> items, int pinnedItems) {
 	int positionInt = -1;
-	if (StringUtils.isNotEmpty(position)) {
-	    try {
-		positionInt = Integer.parseInt(position);
-		// if position less than pinned items
-		// change the position from the initial start of Entity sets items
-		if (positionInt <= pinnedItems) {
-		    positionInt = pinnedItems + positionInt;
-		}
-		if (positionInt > items.size()) {
-		    positionInt = -1;
-		}
-	    } catch (RuntimeException e) {
-		getLogger().trace("Position validation warning: {} ", position, e);
-		// invalid position, assume last (-1)
-	    }
-	}
-	return positionInt;
+    if (StringUtils.isNotEmpty(position)) {
+      try {
+        positionInt = Integer.parseInt(position);
+        // if position less than pinned items
+        // change the position from the initial start of Entity sets items
+        if (positionInt <= pinnedItems) {
+          positionInt = pinnedItems + positionInt;
+        }
+        if (positionInt > items.size()) {
+          positionInt = -1;
+        }
+      } catch (RuntimeException e) {
+        getLogger().trace("Position validation warning: {} ", position, e);
+        // invalid position, assume last (-1)
+      }
     }
+    return positionInt;
+  }
 
     /*
      * (non-Javadoc)
@@ -286,7 +286,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     private UserSet insertItem(UserSet existingUserSet, String newItem, int positionInt, boolean pinnedItem) {
 	UserSet extUserSet = null;
 	int finalPosition =  (existingUserSet.getItems() == null)? -1 : positionInt;
-	if (existingUserSet.getItems() == null || !existingUserSet.getItems().contains(newItem)) {
+	final boolean insertOrReplace = existingUserSet.getItems() == null || !existingUserSet.getItems().contains(newItem);
+  if (insertOrReplace) {
 	    // add item && create item list if needed
 	    addNewItemToList(existingUserSet, finalPosition, newItem);
 	    updatePinCount(existingUserSet, pinnedItem, -1);
@@ -309,13 +310,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void updatePinCount(UserSet existingUserSet, boolean pinnedItem, int oldPosition) {
-	boolean mustHandlePinCount = pinnedItem && existingUserSet.isEntityBestItemsSet();
+	boolean mustHandlePinCount = existingUserSet.isEntityBestItemsSet();
 	if(!mustHandlePinCount) {
 	    return;
 	}
 	
 	final boolean previouslyPinned = (oldPosition >=0) && (oldPosition < existingUserSet.getPinned());
-	if (previouslyPinned) {
+	if (previouslyPinned && !pinnedItem) {
 	    //DECREASE PIN COUNT
 	    // For entity sets : if existing item is converted from Pinned --> Normal item,
 	    // decrease the pinned counter
@@ -326,7 +327,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    // As the old position of Normal item will always be greater than
 	    // existingUserSet.getPinned()
 	    existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-	} else {
+	} else if(pinnedItem){
+	    //increase only if pinned item (do not increase for normal items)
 	    existingUserSet.setPinned(existingUserSet.getPinned() + 1);
 	}
     }
@@ -364,7 +366,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// if item already existed, the size of item list has changed
 	// Check to avoid IndexOutOfBoundsException
 	if (positionInt > existingUserSet.getItems().size()) {
-	    positionInt = positionInt - 1;
+	    positionInt = existingUserSet.getItems().size();
 	}
 	addNewItemToList(existingUserSet, positionInt, newItem);
     }
