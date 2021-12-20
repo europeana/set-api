@@ -14,6 +14,12 @@
 
     <name>Europeana (User) Sets  - Integration Testing</name>
     <description>Module containing integration tests</description>
+    
+    <properties>
+		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+    
 
     <dependencyManagement>
         <dependencies>

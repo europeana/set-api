@@ -51,7 +51,6 @@
 		
 		<!-- sonar - jacoco properties -->
 		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
         
 	</properties>
 

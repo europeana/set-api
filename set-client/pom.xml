@@ -14,7 +14,8 @@
 	<description>Implementation of a Java Client for remote invocation of Set REST API (see set-web)</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<dependencies>
