@@ -6,7 +6,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>${version.setApi}</version>
+		<version>${revision}</version>
 	</parent>
 
     <artifactId>set-integration-testing</artifactId>
@@ -38,13 +38,13 @@
     	<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

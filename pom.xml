@@ -6,7 +6,7 @@
 
 	<groupId>eu.europeana.set</groupId>
 	<artifactId>set-api</artifactId>
-	<version>${version.setApi}</version>
+	<version>${revision}</version>
 	<packaging>pom</packaging>
 	<name>Europeana  (User) Sets API parent</name>
 
@@ -22,7 +22,7 @@
 	</modules>
 
 	<properties>
-		<version.setApi>0.8-SNAPSHOT</version.setApi>
+		<revision>0.8-SNAPSHOT</revision>
 		<version.java>11</version.java>
 		<version.javac.release>11</version.javac.release>
 		<version.spring>5.2.7.RELEASE</version.spring>
@@ -97,7 +97,7 @@
 		<!-- configure source and output locations -->
 		<directory>target</directory>
 		<outputDirectory>target/classes</outputDirectory>
-		<finalName>${artifactId}-${version}</finalName>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 		<testOutputDirectory>target/test-classes</testOutputDirectory>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>

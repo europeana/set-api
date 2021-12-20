@@ -12,7 +12,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>${version.setApi}</version>
+		<version>${revision}</version>
 	</parent>
 
     <properties>
@@ -40,24 +40,24 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-mongo</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-search-api-client</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
 
         <dependency>
             <groupId>eu.europeana.set</groupId>
             <artifactId>set-usage-stats</artifactId>
-            <version>${version.setApi}</version>
+            <version>${project.version}</version>
         </dependency>
 	
 		<!-- europeana api commons -->
@@ -227,7 +227,7 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-mongo</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 			<classifier>tests</classifier>
 			<type>test-jar</type>
 			<scope>test</scope>
