@@ -86,7 +86,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key")
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
     }
 
     @Test
