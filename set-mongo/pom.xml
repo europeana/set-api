@@ -72,12 +72,7 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>${version.spring}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${version.spring}</version>
-		</dependency>
+		
 		
 		<!-- it seems that the test dependencies from api-commons-nosql are not imported automatically -->
 		<!-- Test dependencies -->
