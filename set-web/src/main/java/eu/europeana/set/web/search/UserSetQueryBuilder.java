@@ -24,16 +24,17 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 
 public class UserSetQueryBuilder extends QueryBuilder {
 
+
+  public static final String SEARCH_ALL = "*";
+  public static final String SEARCH_ALL_ALL = "*:*";
+  public static final String PREFIX_HTTP = "http";
+  
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
 	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
     String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
 
     Set<String> suportedFields = Set.of(fields);
 	Set<String> supportedFacets = Set.of(facetsFields);
-
-	public static final String SEARCH_ALL = "*";
-	public static final String SEARCH_ALL_ALL = "*:*";
-	static final String PREFIX_HTTP = "http";	
 
     private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();
