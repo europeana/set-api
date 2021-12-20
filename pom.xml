@@ -27,7 +27,7 @@
 		<version.javac.release>11</version.javac.release>
 		<version.spring>5.2.7.RELEASE</version.spring>
 		<version.aspectj>1.8.8</version.aspectj>
-		<version.log4j2>2.16.0</version.log4j2>
+		<version.log4j2>2.17.0</version.log4j2>
 		<version.commonsLang3>3.9</version.commonsLang3>
 		<version.jackson>2.9.4</version.jackson>
 		<version.commonsApi>0.3.13</version.commonsApi>
