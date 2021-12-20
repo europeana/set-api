@@ -50,6 +50,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		
 		<!-- sonar - jacoco properties -->
+		<sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
+		<jacoco-plugin.version>0.8.7</jacoco-plugin.version>
 		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
         
 	</properties>
@@ -90,7 +92,7 @@
 			</build>
 		</profile>
 	</profiles>
-	
+
 	<build>
 		<!-- configure source and output locations -->
 		<directory>target</directory>
@@ -128,7 +130,19 @@
 						<release>${version.javac.release}</release>
 					</configuration>
 				</plugin>
+				<!--  sonar plugings -->
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>${sonar-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco-plugin.version}</version>
+				</plugin>
 			</plugins>
+
 		</pluginManagement>
 	</build>
 </project>
