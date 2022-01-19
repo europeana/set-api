@@ -12,20 +12,25 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>${version.setApi}</version>
+		<version>${revision}</version>
 	</parent>
+
+    <properties>
+		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -33,12 +38,14 @@
 			<version>${version.commonsApi}</version>
 			<artifactId>commons-nosql</artifactId>
 			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${version.log4j2}</version>
+			<!-- 
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
+			</exclusions>
+			 -->
 		</dependency>
 
 		<dependency>
@@ -65,12 +72,7 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>${version.spring}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${version.spring}</version>
-		</dependency>
+		
 		
 		<!-- it seems that the test dependencies from api-commons-nosql are not imported automatically -->
 		<!-- Test dependencies -->
@@ -83,6 +85,10 @@
                 <exclusion>
                     <groupId>org.junit.vintage</groupId>
                     <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+                <exclusion>
+                	<groupId>org.apache.logging.log4j</groupId>
+                	<artifactId>log4j-to-slf4j</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

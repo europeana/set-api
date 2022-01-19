@@ -12,8 +12,13 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>${version.setApi}</version>
+		<version>${revision}</version>
 	</parent>
+
+    <properties>
+		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
 
 	<repositories>
 		<!-- jetty repos -->
@@ -31,17 +36,65 @@
 
 	<dependencies>
 
+		<!-- set projects -->
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-mongo</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-search-api-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+        <dependency>
+            <groupId>eu.europeana.set</groupId>
+            <artifactId>set-usage-stats</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	
 		<!-- europeana api commons -->
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-web</artifactId>
 			<version>${version.commonsApi}</version>
+			<exclusions>
+			<!-- 
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
+			 -->
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-oauth</artifactId>
 			<version>${version.commonsApi}</version>
+			<!-- 
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
+			</exclusions>
+			 -->
 		</dependency>
 
 		<dependency>
@@ -52,33 +105,15 @@
 				<exclusion>
 					<groupId>org.apache.solr</groupId>
 					<artifactId>solr-solrj</artifactId>
-
 				</exclusion>
+				<!-- 
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
+				 -->
 			</exclusions>
 		</dependency>
-
-		<!-- set projects -->
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-mongo</artifactId>
-			<version>${version.setApi}</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-common</artifactId>
-			<version>${version.setApi}</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-search-api-client</artifactId>
-			<version>${version.setApi}</version>
-		</dependency>
-
-        <dependency>
-            <groupId>eu.europeana.set</groupId>
-            <artifactId>set-usage-stats</artifactId>
-            <version>${version.setApi}</version>
-        </dependency>
 
 		<!-- aspectj /profiling -->
 		<dependency>
@@ -192,7 +227,7 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-mongo</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 			<classifier>tests</classifier>
 			<type>test-jar</type>
 			<scope>test</scope>
