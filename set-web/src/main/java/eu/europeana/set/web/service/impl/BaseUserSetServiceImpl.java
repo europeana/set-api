@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.annotation.Resource;
 
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.utils.UserSetSearchApiUtils;
@@ -175,7 +176,7 @@ public abstract class BaseUserSetServiceImpl {
 	
     }
 
-    protected String buildPageUrl(String collectionUrl, int page, int pageSize) {
+    protected String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
 	StringBuilder builder = new StringBuilder(collectionUrl);
 	// if collection url already has a query string, then append "&" or else "?"
 	if (collectionUrl.contains("?")) {
@@ -185,6 +186,10 @@ public abstract class BaseUserSetServiceImpl {
 	}
 	builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
+	// add the profile param if profile is not standard
+	if (profile != null && LdProfiles.STANDARD != profile) {
+		builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=").append(profile.name().toLowerCase());
+	}
 	return builder.toString();
     }
 
@@ -192,6 +197,8 @@ public abstract class BaseUserSetServiceImpl {
 	// remove out of scope parameters
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
+	// facets are not part of items pagination. Facets are displayed separately
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_FACET, queryString);
 
 	// avoid duplication of query parameters
 	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
@@ -237,13 +244,13 @@ public abstract class BaseUserSetServiceImpl {
     }
 
     protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize, long totalInCollection,
-	    int lastPage, String type) {
+	    int lastPage, String type, LdProfiles profile) {
 	String first = null;
 	String last = null;
 	
 	if(totalInCollection > 0) {
-	    first = buildPageUrl(collectionUrl, 0, pageSize);
-	    last = buildPageUrl(collectionUrl, lastPage, pageSize);
+	    first = buildPageUrl(collectionUrl, 0, pageSize, profile);
+	    last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
 	}
 	return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
     }

@@ -86,16 +86,17 @@ public class UserSetServiceImplTest {
 	assertTrue(lastPage == 4);
 
 	userSetQuery.setPageNr(0);
-
-	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	LdProfiles profile = LdProfiles.STANDARD;
+	// check with minimal profile
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), profile);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-			Collections.singletonList(LdProfiles.STANDARD), authentication);
+			Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -112,18 +113,19 @@ public class UserSetServiceImplTest {
 	assertTrue(lastPage == 4);
 
 	userSetQuery.setPageNr(2);
-
-	String first = userSetService.buildPageUrl(REQUEST_URL , 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	LdProfiles profile = LdProfiles.MINIMAL;
+	// check with minimal profile
+	String first = userSetService.buildPageUrl(REQUEST_URL , 0, userSetQuery.getPageSize(), profile);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() - 1,
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-			Collections.singletonList(LdProfiles.MINIMAL), authentication);
+			Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -139,16 +141,17 @@ public class UserSetServiceImplTest {
 	assertTrue(lastPage == 4);
 
 	userSetQuery.setPageNr(lastPage);
-
-	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
+    // check with item description profile
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), profile);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() - 1,
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-			Collections.singletonList(LdProfiles.ITEMDESCRIPTIONS), authentication);
+			Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -166,17 +169,18 @@ public class UserSetServiceImplTest {
 
 	userSetQuery.setPageNr(3);
 
-	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize());
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize());
+	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), profile);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(REQUEST_URL , userSetQuery.getPageNr() - 1,
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
-		userSetQuery.getPageSize());
+		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, REQUEST_URL, "",
-			Collections.singletonList(LdProfiles.ITEMDESCRIPTIONS), authentication);
+			Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
