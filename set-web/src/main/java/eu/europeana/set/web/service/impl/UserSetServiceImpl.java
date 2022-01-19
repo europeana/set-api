@@ -522,7 +522,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	}
 	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
-	System.out.println(collectionUrl);
 	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
 		CommonLdConstants.RESULT_LIST, profile);
 
