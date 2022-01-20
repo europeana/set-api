@@ -514,16 +514,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
 	// get profile for pagination urls and item Page
-	// do not want to change the parameters of other methods used by other functionality
-	LdProfiles profile = null;
-	for (LdProfiles ldProfile : profiles) {
-		if (!ldProfile.equals(LdProfiles.FACETS)) {
-			profile = ldProfile;
-		}
-	}
+	LdProfiles profile = getProfileForPagination(profiles);
+
 	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
 	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.RESULT_LIST, profile);
+		CommonLdConstants.RESULT_LIST, null);
 
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
@@ -612,9 +607,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int totalInCollection = userSet.getTotal();
 	int lastPage = validateLastPage(totalInCollection, pageSize, pageNr);
 	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
-
+	// we don't want to add profile in partOf, hence profile is passed null
 	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION, profile);
+		CommonLdConstants.COLLECTION, null);
 
 	CollectionPage page = null;
 	int startIndex = pageNr * pageSize;

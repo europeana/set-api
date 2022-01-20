@@ -1,8 +1,5 @@
 package eu.europeana.set.web.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +22,8 @@ import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(locations = { "classpath:set-web-test.xml" })
 //@ExtendWith(MockitoExtension.class)
@@ -88,8 +87,8 @@ public class UserSetServiceImplTest {
 	userSetQuery.setPageNr(0);
 	LdProfiles profile = LdProfiles.STANDARD;
 	// check with minimal profile
-	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), profile);
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), null);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), null);
 	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
 	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
@@ -103,7 +102,8 @@ public class UserSetServiceImplTest {
 	assertNull(result.getPrevPageUri());
 	assertTrue(StringUtils.equals(next, result.getNextPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
-    }
+	checkPartOfUrls(result);
+	}
 
     @Test
     public void testPaginationForPage2() throws Exception {
@@ -115,8 +115,8 @@ public class UserSetServiceImplTest {
 	userSetQuery.setPageNr(2);
 	LdProfiles profile = LdProfiles.MINIMAL;
 	// check with minimal profile
-	String first = userSetService.buildPageUrl(REQUEST_URL , 0, userSetQuery.getPageSize(), profile);
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(REQUEST_URL , 0, userSetQuery.getPageSize(), null);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), null);
 	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() - 1,
@@ -132,6 +132,7 @@ public class UserSetServiceImplTest {
 	assertTrue(StringUtils.equals(next, result.getNextPageUri()));
 	assertTrue(StringUtils.equals(prev, result.getPrevPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
+	checkPartOfUrls(result);
     }
 
     @Test
@@ -143,8 +144,8 @@ public class UserSetServiceImplTest {
 	userSetQuery.setPageNr(lastPage);
 	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
     // check with item description profile
-	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), profile);
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), null);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), null);
 	String prev = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize(), profile);
 	String curr = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr(),
@@ -158,7 +159,9 @@ public class UserSetServiceImplTest {
 	assertNull(result.getNextPageUri());
 	assertTrue(StringUtils.equals(prev, result.getPrevPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
-    }
+	checkPartOfUrls(result);
+
+	}
 
     @Test
     public void testPaginationForOddNumberResults() throws Exception {
@@ -170,8 +173,8 @@ public class UserSetServiceImplTest {
 	userSetQuery.setPageNr(3);
 
 	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
-	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), profile);
-	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(REQUEST_URL, 0, userSetQuery.getPageSize(), null);
+	String last = userSetService.buildPageUrl(REQUEST_URL, lastPage, userSetQuery.getPageSize(), null);
 	String next = userSetService.buildPageUrl(REQUEST_URL, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(REQUEST_URL , userSetQuery.getPageNr() - 1,
@@ -187,6 +190,12 @@ public class UserSetServiceImplTest {
 	assertTrue(StringUtils.equals(next, result.getNextPageUri()));
 	assertTrue(StringUtils.equals(prev, result.getPrevPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
+	checkPartOfUrls(result);
+    }
+
+    private void checkPartOfUrls(BaseUserSetResultPage<?> result) {
+    	assertFalse(StringUtils.contains(result.getPartOf().getFirst(), "profile"));
+		assertFalse(StringUtils.contains(result.getPartOf().getLast(), "profile"));
     }
 
 }
