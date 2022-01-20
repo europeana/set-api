@@ -102,7 +102,7 @@ public class UserSetServiceImplTest {
 	assertNull(result.getPrevPageUri());
 	assertTrue(StringUtils.equals(next, result.getNextPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
-	checkPartOfUrls(result);
+	checkPartOfUrls(result, profile);
 	}
 
     @Test
@@ -132,7 +132,7 @@ public class UserSetServiceImplTest {
 	assertTrue(StringUtils.equals(next, result.getNextPageUri()));
 	assertTrue(StringUtils.equals(prev, result.getPrevPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
-	checkPartOfUrls(result);
+	checkPartOfUrls(result, profile);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class UserSetServiceImplTest {
 	assertNull(result.getNextPageUri());
 	assertTrue(StringUtils.equals(prev, result.getPrevPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
-	checkPartOfUrls(result);
+	checkPartOfUrls(result, profile);
 
 	}
 
@@ -190,12 +190,12 @@ public class UserSetServiceImplTest {
 	assertTrue(StringUtils.equals(next, result.getNextPageUri()));
 	assertTrue(StringUtils.equals(prev, result.getPrevPageUri()));
 	assertTrue(StringUtils.equals(curr, result.getCurrentPageUri()));
-	checkPartOfUrls(result);
+	checkPartOfUrls(result, profile);
     }
 
-    private void checkPartOfUrls(BaseUserSetResultPage<?> result) {
-    	assertFalse(StringUtils.contains(result.getPartOf().getFirst(), "profile"));
-		assertFalse(StringUtils.contains(result.getPartOf().getLast(), "profile"));
+    private void checkPartOfUrls(BaseUserSetResultPage<?> result, LdProfiles profile) {
+    	assertFalse(StringUtils.contains(result.getPartOf().getFirst(), "profile="+profile.name().toLowerCase()));
+		assertFalse(StringUtils.contains(result.getPartOf().getLast(), "profile="+profile.name().toLowerCase()));
     }
 
 }
