@@ -125,7 +125,7 @@ public class BaseRest extends BaseRestController {
             ldProfiles.remove(LdProfiles.DEBUG);
         }
         // For now maximum two profile-combinations are possible
-        // profile=facets OR profile=facets,minimal OR profile=standard,facets
+        // profile=facets OR profile=facets,minimal OR profile=standard,facets OR profile=itemDescription,facets
         if(ldProfiles.size() > 2) {
             throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
                     new String[]{"Either of these should be provided ", StringUtils.remove(profileStr, LdProfiles.FACETS.getHeaderValue() + ",")});

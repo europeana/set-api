@@ -7,7 +7,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>${version.setApi}</version>
+		<version>${revision}</version>
 	</parent>
 
 	<artifactId>set-definitions</artifactId>
@@ -16,6 +16,12 @@
 		<name>Europeana Foundation + AIT</name>
 	</organization>
 	<url>http://www.europeanalabs.eu</url>
+	
+	<properties>
+		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+	
 
 	<dependencies>
 		<dependency>

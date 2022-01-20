@@ -220,24 +220,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     int validatePosition(String position, List<String> items, int pinnedItems) {
 	int positionInt = -1;
-	if (StringUtils.isNotEmpty(position)) {
-	    try {
-		positionInt = Integer.parseInt(position);
-		// if position less than pinned items
-		// change the position from the initial start of Entity sets items
-		if (positionInt <= pinnedItems) {
-		    positionInt = pinnedItems + positionInt;
-		}
-		if (positionInt > items.size()) {
-		    positionInt = -1;
-		}
-	    } catch (RuntimeException e) {
-		getLogger().trace("Position validation warning: {} ", position, e);
-		// invalid position, assume last (-1)
-	    }
-	}
-	return positionInt;
+    if (StringUtils.isNotEmpty(position)) {
+      try {
+        positionInt = Integer.parseInt(position);
+        // if position less than pinned items
+        // change the position from the initial start of Entity sets items
+        if (positionInt <= pinnedItems) {
+          positionInt = pinnedItems + positionInt;
+        }
+        if (positionInt > items.size()) {
+          positionInt = -1;
+        }
+      } catch (RuntimeException e) {
+        getLogger().trace("Position validation warning: {} ", position, e);
+        // invalid position, assume last (-1)
+      }
     }
+    return positionInt;
+  }
 
     /*
      * (non-Javadoc)
@@ -285,49 +285,52 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     private UserSet insertItem(UserSet existingUserSet, String newItem, int positionInt, boolean pinnedItem) {
 	UserSet extUserSet = null;
-	if (existingUserSet.getItems() == null) {
-	    addNewItemToList(existingUserSet, -1, newItem);
-		if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
-			existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-		}
-		extUserSet = updateItemList(existingUserSet);
+	int finalPosition =  (existingUserSet.getItems() == null)? -1 : positionInt;
+	final boolean insertOrReplace = existingUserSet.getItems() == null || !existingUserSet.getItems().contains(newItem);
+  if (insertOrReplace) {
+	    // add item && create item list if needed
+	    addNewItemToList(existingUserSet, finalPosition, newItem);
+	    updatePinCount(existingUserSet, pinnedItem, -1);
+	    extUserSet = updateItemList(existingUserSet);
 	} else {
-	    if (!existingUserSet.getItems().contains(newItem)) {
-		// add item
-		addNewItemToList(existingUserSet, positionInt, newItem);
-		if(existingUserSet.isEntityBestItemsSet() && pinnedItem) {
-			existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-		}
-		extUserSet = updateItemList(existingUserSet);
-
-	    } else {
-        // replace item
-		int oldPosition = existingUserSet.getItems().indexOf(newItem);
-		if (oldPosition == positionInt) {
+	    // replace item
+	    int oldPosition = existingUserSet.getItems().indexOf(newItem);
+	    if (oldPosition == positionInt) {
 		    // do not change user set
 		    // the items is already present at the correct position
-			extUserSet = existingUserSet;
-		} else {
-		    replaceItem(existingUserSet, positionInt, newItem);
-		    if(existingUserSet.isEntityBestItemsSet()) {
-		    	if (pinnedItem){
-					existingUserSet.setPinned(existingUserSet.getPinned() + 1);
-				} else if (oldPosition < existingUserSet.getPinned()) {
-					// For entity sets : if existing item is converted from Pinned --> Normal item,
-					// decrease the pinned counter
-					// ie; already existing Normal item being added as a pinned item now
-					// This condition will avoid any changes in Pinned counter:
-					// while adding a already existing Normal item as a Normal item again in different position
-					// As the old position of Normal item will always be greater than existingUserSet.getPinned()
-					existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-				}
-			}
-			extUserSet = updateItemList(existingUserSet);
+		    extUserSet = existingUserSet;
+	    } else {
+		    replaceItem(existingUserSet, finalPosition, newItem);
+		    updatePinCount(existingUserSet, pinnedItem, oldPosition);		
+		    extUserSet = updateItemList(existingUserSet);
 		}
 	    }
-	}
 
 	return extUserSet;
+    }
+
+    private void updatePinCount(UserSet existingUserSet, boolean pinnedItem, int oldPosition) {
+	boolean mustHandlePinCount = existingUserSet.isEntityBestItemsSet();
+	if(!mustHandlePinCount) {
+	    return;
+	}
+	
+	final boolean previouslyPinned = (oldPosition >=0) && (oldPosition < existingUserSet.getPinned());
+	if (previouslyPinned && !pinnedItem) {
+	    //DECREASE PIN COUNT
+	    // For entity sets : if existing item is converted from Pinned --> Normal item,
+	    // decrease the pinned counter
+	    // ie; already existing Normal item being added as a pinned item now
+	    // This condition will avoid any changes in Pinned counter:
+	    // while adding a already existing Normal item as a Normal item again in
+	    // different position
+	    // As the old position of Normal item will always be greater than
+	    // existingUserSet.getPinned()
+	    existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+	} else if(pinnedItem){
+	    //increase only if pinned item (do not increase for normal items)
+	    existingUserSet.setPinned(existingUserSet.getPinned() + 1);
+	}
     }
 
     /*
@@ -363,7 +366,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// if item already existed, the size of item list has changed
 	// Check to avoid IndexOutOfBoundsException
 	if (positionInt > existingUserSet.getItems().size()) {
-	    positionInt = positionInt - 1;
+	    positionInt = existingUserSet.getItems().size();
 	}
 	addNewItemToList(existingUserSet, positionInt, newItem);
     }
@@ -475,7 +478,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 				UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
 				new String[] { CommonApiConstants.QUERY_PARAM_PAGE,
-						"value our of range: " + pageNr + ", last page:" + lastPage });
+						"value our out range: " + pageNr + ", last page:" + lastPage });
 	}
 	return lastPage;
 	}
@@ -509,20 +512,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	String searchProfile = searchQuery.getSearchProfile();
 	long totalInCollection = results.getResultSize();
 
-	int lastPage = getLastPage(totalInCollection, pageSize);
+	int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
+	// get profile for pagination urls and item Page
+	LdProfiles profile = getProfileForPagination(profiles);
+
 	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
 	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.RESULT_LIST);
+		CommonLdConstants.RESULT_LIST, null);
+
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
-		LdProfiles profile = null;
-		// get the profile other than facets from the list
-		// do not want to change the parameters of other methods used by other functionality
-		for (LdProfiles ldProfile : profiles) {
-			if (!ldProfile.equals(LdProfiles.FACETS)) {
-				profile = ldProfile;
-			}
-		}
 		// LdProfiles.ITEMDESCRIPTIONS OR LdProfiles.STANDARD is passed as profile
 	    setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
 	} else {
@@ -535,7 +534,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (profiles.contains(LdProfiles.FACETS)) {
 		resPage.setFacetFields(results.getFacetFields());
 	}
-	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage);
+	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage, profile);
 
 	return resPage;
     }
@@ -585,18 +584,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void addPagination(BaseUserSetResultPage<?> resPage, String collectionUrl, int page, int pageSize,
-	    int lastPage) {
-	String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize);
+	    int lastPage, LdProfiles profile) {
+	String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
 	resPage.setCurrentPageUri(currentPageUrl);
 
 	if (page > 0) {
-	    String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize);
+	    String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
 	    resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
 	if (!isLastPage(page, lastPage)) {
-	    String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize);
+	    String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize, profile);
 	    resPage.setNextPageUri(nextPage);
 	}
     }
@@ -608,9 +607,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int totalInCollection = userSet.getTotal();
 	int lastPage = validateLastPage(totalInCollection, pageSize, pageNr);
 	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
-
+	// we don't want to add profile in partOf, hence profile is passed null
 	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION);
+		CommonLdConstants.COLLECTION, null);
 
 	CollectionPage page = null;
 	int startIndex = pageNr * pageSize;
@@ -636,14 +635,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	}
 
-	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize));
+	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize, profile));
 
 	if (pageNr > 0) {
-	    page.setPrevPageUri(buildPageUrl(collectionUrl, pageNr - 1, pageSize));
+	    page.setPrevPageUri(buildPageUrl(collectionUrl, pageNr - 1, pageSize, profile));
 	}
 
 	if (pageNr < lastPage) {
-	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize));
+	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize, profile));
 	}
 
 	return page;
@@ -662,8 +661,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    long totalnCollection = (long) itemIds.size();
 	    int lastPage = getLastPage(itemIds.size(), pageSize);
 
+	    // there is no profile param for search items in user set
 	    result.setPartOf(buildCollectionOverview(collectionUrl, pageSize, totalnCollection, lastPage,
-		    CommonLdConstants.RESULT_LIST));
+		    CommonLdConstants.RESULT_LIST, null));
 
 	    // build Result page properties
 	    int startPos = page * pageSize;
@@ -672,11 +672,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		List<String> pageItems = itemIds.subList(startPos, toIndex);
 		result.setItems(pageItems);
 		result.setTotalInPage(pageItems.size());
-		addPagination(result, collectionUrl, page, pageSize, lastPage);
+		// there is no profile param for searching items in user set
+		addPagination(result, collectionUrl, page, pageSize, lastPage, null);
 	    }
 	} else {
 	    // empty result page, but we must still return the ID
-	    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize));
+	    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize, null));
 	}
 
 	return result;

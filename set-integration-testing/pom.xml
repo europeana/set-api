@@ -6,7 +6,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>${version.setApi}</version>
+		<version>${revision}</version>
 	</parent>
 
     <artifactId>set-integration-testing</artifactId>
@@ -14,6 +14,12 @@
 
     <name>Europeana (User) Sets  - Integration Testing</name>
     <description>Module containing integration tests</description>
+    
+    <properties>
+		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+    
 
     <dependencyManagement>
         <dependencies>
@@ -32,13 +38,13 @@
     	<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>${version.setApi}</version>
+			<version>${project.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -86,19 +92,59 @@
     </dependencies>
 
 
-    <build>
-        <!-- set fixed name for easy deployment -->
-        <finalName>${project.artifactId}</finalName>
+	<build>
+		<!-- set fixed name for easy deployment -->
+		<finalName>${project.artifactId}</finalName>
 
-        <plugins>
-            <!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${version.surefire}</version>
-            </plugin>
+		<plugins>
+			<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${version.surefire}</version>
+			</plugin>
 
-        </plugins>
-    </build>
+			<!--  sonar coverage report aggregation -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>report</id>
+						<goals>
+							<goal>report-aggregate</goal>
+						</goals>
+						<phase>verify</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>report</id>
+								<goals>
+									<goal>report-aggregate</goal>
+								</goals>
+								<phase>verify</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
