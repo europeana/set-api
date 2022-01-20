@@ -512,20 +512,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	String searchProfile = searchQuery.getSearchProfile();
 	long totalInCollection = results.getResultSize();
 
-	int lastPage = getLastPage(totalInCollection, pageSize);
+	int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
+	// get profile for pagination urls and item Page
+	LdProfiles profile = getProfileForPagination(profiles);
+
 	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
 	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.RESULT_LIST);
+		CommonLdConstants.RESULT_LIST, null);
+
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
-		LdProfiles profile = null;
-		// get the profile other than facets from the list
-		// do not want to change the parameters of other methods used by other functionality
-		for (LdProfiles ldProfile : profiles) {
-			if (!ldProfile.equals(LdProfiles.FACETS)) {
-				profile = ldProfile;
-			}
-		}
 		// LdProfiles.ITEMDESCRIPTIONS OR LdProfiles.STANDARD is passed as profile
 	    setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
 	} else {
@@ -538,7 +534,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (profiles.contains(LdProfiles.FACETS)) {
 		resPage.setFacetFields(results.getFacetFields());
 	}
-	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage);
+	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage, profile);
 
 	return resPage;
     }
@@ -588,18 +584,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     private void addPagination(BaseUserSetResultPage<?> resPage, String collectionUrl, int page, int pageSize,
-	    int lastPage) {
-	String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize);
+	    int lastPage, LdProfiles profile) {
+	String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
 	resPage.setCurrentPageUri(currentPageUrl);
 
 	if (page > 0) {
-	    String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize);
+	    String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
 	    resPage.setPrevPageUri(prevPage);
 	}
 
 	// if current page is not the last one
 	if (!isLastPage(page, lastPage)) {
-	    String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize);
+	    String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize, profile);
 	    resPage.setNextPageUri(nextPage);
 	}
     }
@@ -611,9 +607,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int totalInCollection = userSet.getTotal();
 	int lastPage = validateLastPage(totalInCollection, pageSize, pageNr);
 	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
-
+	// we don't want to add profile in partOf, hence profile is passed null
 	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION);
+		CommonLdConstants.COLLECTION, null);
 
 	CollectionPage page = null;
 	int startIndex = pageNr * pageSize;
@@ -639,14 +635,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	}
 
-	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize));
+	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize, profile));
 
 	if (pageNr > 0) {
-	    page.setPrevPageUri(buildPageUrl(collectionUrl, pageNr - 1, pageSize));
+	    page.setPrevPageUri(buildPageUrl(collectionUrl, pageNr - 1, pageSize, profile));
 	}
 
 	if (pageNr < lastPage) {
-	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize));
+	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize, profile));
 	}
 
 	return page;
@@ -665,8 +661,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    long totalnCollection = (long) itemIds.size();
 	    int lastPage = getLastPage(itemIds.size(), pageSize);
 
+	    // there is no profile param for search items in user set
 	    result.setPartOf(buildCollectionOverview(collectionUrl, pageSize, totalnCollection, lastPage,
-		    CommonLdConstants.RESULT_LIST));
+		    CommonLdConstants.RESULT_LIST, null));
 
 	    // build Result page properties
 	    int startPos = page * pageSize;
@@ -675,11 +672,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		List<String> pageItems = itemIds.subList(startPos, toIndex);
 		result.setItems(pageItems);
 		result.setTotalInPage(pageItems.size());
-		addPagination(result, collectionUrl, page, pageSize, lastPage);
+		// there is no profile param for searching items in user set
+		addPagination(result, collectionUrl, page, pageSize, lastPage, null);
 	    }
 	} else {
 	    // empty result page, but we must still return the ID
-	    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize));
+	    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize, null));
 	}
 
 	return result;
