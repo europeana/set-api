@@ -431,5 +431,28 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	public PersistentUserSet update(PersistentUserSet userSet) throws  UserSetValidationException {
 		return store(userSet);
 	}
+	
+	/**
+	 * Getting the ids of the duplicate sets.
+	 */
+	public List<String> getDuplicateUserSetsIds(UserSet userSet) {
+	  
+	     if(userSet.getSubject()==null || userSet.getSubject().size()==0) return null;
+	       
+	     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
+	     query.filter(FIELD_TYPE, UserSetTypes.ENTITYBESTITEMSSET.toString());     
+	     query.filter(WebUserSetModelFields.SUBJECT + " size", userSet.getSubject().size());
+         query.filter(WebUserSetModelFields.SUBJECT + " all", userSet.getSubject());
+	     query.project(WebUserSetModelFields.IDENTIFIER, true);
+	     List<PersistentUserSet> resultMongo = getUserSetDao().find(query).asList();
+	     List<String> result =  null;
+	     if (resultMongo!=null && resultMongo.size()>0) {
+	       result = new ArrayList<String>();
+	       for (PersistentUserSet set : resultMongo) {
+	           result.add(set.getIdentifier());
+	       }
+	     }
+	     return result;
+	}
 
 }

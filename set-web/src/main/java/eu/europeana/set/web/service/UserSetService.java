@@ -58,8 +58,9 @@ public interface UserSetService {
      * @param persistentUserSet
      * @param webUserSet
      * @return
+     * @throws HttpException 
      */
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
+    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws HttpException;
 
     /**
      * This method returns UserSet object for given user set identifier.
@@ -220,4 +221,7 @@ public interface UserSetService {
      * @return
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
+    
+    List<String> checkDuplicateUserSets(UserSet userSet);
+
 }

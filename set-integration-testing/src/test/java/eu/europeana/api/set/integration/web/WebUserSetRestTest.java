@@ -82,7 +82,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 			.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result);
+	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result).substring(1);
 	getUserSetService().deleteUserSet(identifier);
     }
 
@@ -385,6 +385,8 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	mockMvc.perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, "")
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+	
+	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
 //    @Test //a second token is required for this test to work propertly

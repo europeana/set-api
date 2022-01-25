@@ -46,6 +46,7 @@ import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
@@ -854,6 +855,36 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	((WebUserSetImpl) userSet).setSerializedItems(jsonSerialized);
 //	userSet.setItems(null);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
+     * europeana.UserSet.definitions.model.UserSet, boolean)
+     */
+//    @Override
+    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws HttpException {
+    mergeUserSetProperties(persistentUserSet, webUserSet);
+    // update modified date
+    persistentUserSet.setModified(new Date());
+    updateTotal(persistentUserSet);
+    //check the new set uniqueness
+    List<String> duplicateSetsIds = checkDuplicateUserSets(persistentUserSet);
+    if(duplicateSetsIds!=null) {
+        String [] i18nParamsSetDuplicates = new String [1];
+        i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
+        throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
+            UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
+    }
+    UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
+    getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
+    return updatedUserSet;
+    
+    }
+    
+    public List<String> checkDuplicateUserSets(UserSet userSet) {
+      return getMongoPersistence().getDuplicateUserSetsIds(userSet);
     }
 
 }

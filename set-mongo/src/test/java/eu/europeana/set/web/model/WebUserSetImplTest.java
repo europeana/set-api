@@ -13,7 +13,7 @@ import eu.europeana.set.definitions.model.util.UserSetTestObjectBuilder;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 
-public class WeUserSetImplTest {
+public class WebUserSetImplTest {
 
     private static final String IDENTIFIER = "test_identifier";
     UserSetTestObjectBuilder objectBuilder = new UserSetTestObjectBuilder();

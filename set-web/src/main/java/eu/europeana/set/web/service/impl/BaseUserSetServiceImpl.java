@@ -1,20 +1,17 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
-
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.search.SearchApiRequest;
-import eu.europeana.set.web.search.UserSetLdSerializer;
-import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
@@ -24,11 +21,13 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
@@ -37,6 +36,8 @@ import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.vocabulary.Roles;
+import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
 public abstract class BaseUserSetServiceImpl {
 
@@ -156,24 +157,6 @@ public abstract class BaseUserSetServiceImpl {
 		persistedSet.setDescription(updates.getDescription());
 	    }
 	}
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
-     * europeana.UserSet.definitions.model.UserSet, boolean)
-     */
-//    @Override
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
-	mergeUserSetProperties(persistentUserSet, webUserSet);
-	// update modified date
-	persistentUserSet.setModified(new Date());
-	updateTotal(persistentUserSet);
-	UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
-	return updatedUserSet;
-	
     }
 
     protected String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
@@ -572,4 +555,5 @@ public abstract class BaseUserSetServiceImpl {
 	    existingUserSet.setTotal(0);
 	}
     }
+    
 }

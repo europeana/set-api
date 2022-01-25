@@ -58,9 +58,11 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_BEST_ITEMS = "/content/userset_entity_best_items.json";
     public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
     public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
+    public static final String ENTITY_USER_SET_REGULAR_2 = "/content/entity_userset_2.json";
     public static final String ENTITY_USER_SET_INVALID_SUBJECT = "/content/entity_userset_invalid_subject.json";
     public static final String ENTITY_USER_SET_INVALID_MULTIPLE_SUBJECTS = "/content/entity_userset_invalid_multiple_subjects.json";
     public static final String ENTITY_USER_SET_UPDATE = "/content/entity_userset_update.json";
+    public static final String ENTITY_USER_SET_UPDATE_2 = "/content/entity_userset_update_2.json";
     public static final String ENTITY_USER_SET_NO_SUBJECT = "/content/entity_userset_invalid_subject.json";
 
     protected MockMvc mockMvc;
@@ -203,4 +205,5 @@ public abstract class BaseUserSetTestUtils {
     }
     return facetValueResultPages;
     }
+
 }

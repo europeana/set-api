@@ -3,9 +3,7 @@ package eu.europeana.set.web.service.controller.jsonld;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
@@ -23,9 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import com.fasterxml.jackson.core.JsonParseException;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
@@ -54,6 +50,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.controller.BaseRest;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -103,6 +100,15 @@ public class WebUserSetRest extends BaseRest {
 	    // parse user set
 	    UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
+	    //check the set uniqueness
+        List<String> duplicateSetsIds = getUserSetService().checkDuplicateUserSets(webUserSet);
+        if(duplicateSetsIds!=null) {
+            String [] i18nParamsSetDuplicates = new String [1];
+            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
+            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
+                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
+        }
+        
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
 	    // store the new Set with its respective id, together with all the containing

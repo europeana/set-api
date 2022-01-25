@@ -98,6 +98,8 @@ public class WebUserSetServiceTest {
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
 	String userSetJsonLdStr = serializer.serialize(webUserSet);
 	assertNotNull(userSetJsonLdStr);
+	
+	webUserSetService.deleteUserSet(storedUserSet.getIdentifier());
     }
 
 	@Test
@@ -144,6 +146,9 @@ public class WebUserSetServiceTest {
 	assertNotNull(db1200UserSet);
 	assertEquals(100, dbUserSet.getTotal());
 	assertEquals(1200, db1200UserSet.getTotal());
+	
+	webUserSetService.deleteUserSet(storedUserSet.getIdentifier());
+	webUserSetService.deleteUserSet(stored1200UserSet.getIdentifier());
     }
 
 
@@ -171,6 +176,8 @@ public class WebUserSetServiceTest {
 	dbUserSet = webUserSetService.insertItem(TEST_DATASET_ID, TEST_LOCAL_ID_7, TEST_POSITION_BIG, webUserSet);
 	assertEquals(3,dbUserSet.getItems().size());
 	assertTrue(dbUserSet.getItems().get(2).equals(INSERT_IN_POSITION_LAST_RES));
+	
+	webUserSetService.deleteUserSet(webUserSet.getIdentifier());
     }
 
     // provides Authentication for the unit test
