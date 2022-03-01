@@ -37,6 +37,7 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -67,6 +68,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	// store in mongo database
 	updateTotal(newUserSet);
+	
+	checkDuplicateUserSets(newUserSet, false);
+	
 	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
 	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
 	return updatedUserSet;
@@ -869,22 +873,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     // update modified date
     persistentUserSet.setModified(new Date());
     updateTotal(persistentUserSet);
-    //check the new set uniqueness
-    List<String> duplicateSetsIds = checkDuplicateUserSets(persistentUserSet);
-    if(duplicateSetsIds!=null) {
-        String [] i18nParamsSetDuplicates = new String [1];
-        i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
-        throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
-            UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
-    }
+    checkDuplicateUserSets(persistentUserSet, true);
     UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
     getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
     return updatedUserSet;
     
     }
     
-    public List<String> checkDuplicateUserSets(UserSet userSet) {
-      return getMongoPersistence().getDuplicateUserSetsIds(userSet);
+    public void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException {
+      //check the set uniqueness only for the EntityBestItemsSet type
+      if(userSet.getType().compareTo(UserSetTypes.ENTITYBESTITEMSSET.toString())==0) {
+        List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet, withoutItself);
+        if(duplicateSetsIds!=null) {
+            String [] i18nParamsSetDuplicates = new String [1];
+            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
+            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
+                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
+        }
+      }
     }
 
 }

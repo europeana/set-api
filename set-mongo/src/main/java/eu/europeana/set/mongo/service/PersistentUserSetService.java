@@ -110,7 +110,7 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 */
 	Map<String, Long> getFacets(UserSetFacetQuery facetQuery);
 
-	List<String> getDuplicateUserSetsIds(UserSet userSet);
+	List<String> getDuplicateUserSetsIds(UserSet userSet, boolean withoutItself);
 
 }
 

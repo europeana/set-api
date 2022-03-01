@@ -50,7 +50,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.service.controller.BaseRest;
-import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -100,15 +99,6 @@ public class WebUserSetRest extends BaseRest {
 	    // parse user set
 	    UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
-	    //check the set uniqueness
-        List<String> duplicateSetsIds = getUserSetService().checkDuplicateUserSets(webUserSet);
-        if(duplicateSetsIds!=null) {
-            String [] i18nParamsSetDuplicates = new String [1];
-            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
-            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
-                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
-        }
-        
 	    // validate and process the Set description for format and mandatory fields
 	    // if false respond with HTTP 400
 	    // store the new Set with its respective id, together with all the containing

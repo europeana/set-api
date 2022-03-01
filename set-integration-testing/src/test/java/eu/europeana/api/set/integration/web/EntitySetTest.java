@@ -256,11 +256,21 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
     WebUserSetImpl userSet1 = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
     String identifier1 = userSet1.getIdentifier();
+
+    //first update is to check that self update should be ok
+    String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
+    String result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier1)
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+    
     WebUserSetImpl userSet2 = createTestUserSet(ENTITY_USER_SET_REGULAR_2, editorUserToken);
     String identifier2 = userSet2.getIdentifier();
-
-    String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
-    String result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier2)
+    
+    //second update should fail
+    updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
+    result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier2)
         .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
         .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -275,7 +285,6 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     getUserSetService().deleteUserSet(identifier1);
     getUserSetService().deleteUserSet(identifier2);
     }
-
 
     @Test
     void delete_EntityUserSet_withRegularUser() throws Exception {

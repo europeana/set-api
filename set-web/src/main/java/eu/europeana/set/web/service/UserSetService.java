@@ -23,6 +23,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
 
@@ -222,6 +223,6 @@ public interface UserSetService {
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
     
-    List<String> checkDuplicateUserSets(UserSet userSet);
+    void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException;
 
 }
