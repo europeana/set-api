@@ -220,4 +220,15 @@ public interface UserSetService {
      * @return
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
+    
+    /**
+     * This method publishes and/or un-publishes an existing UserSet.
+     * @param userSetId
+     * @param authentication
+     * @param publishYesUnpublishNo
+     * @return
+     * @throws HttpException
+     */
+    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publishYesUnpublishNo) throws HttpException;
+
 }

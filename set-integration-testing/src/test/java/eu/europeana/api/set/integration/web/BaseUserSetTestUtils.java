@@ -78,6 +78,7 @@ public abstract class BaseUserSetTestUtils {
     protected static String editorUserToken;
     protected static String editor2UserToken;
     protected static String creatorEntitySetUserToken;
+    protected static String publisherUserToken;
 
     public void initApplication() {
 	if (mockMvc == null) {
@@ -86,8 +87,12 @@ public abstract class BaseUserSetTestUtils {
     }
 
     public static void initRegularUserToken() {
-	regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+      regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
     }
+    
+    public static void initPublisherUserToken() {
+      publisherUserToken = retrieveOatuhToken(EuropeanaOauthClient.PUBLISHER_USER);
+    }       
 
     public static void initEntitySetTokens() {
 	editorUserToken=
@@ -96,7 +101,6 @@ public abstract class BaseUserSetTestUtils {
 		retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
 	creatorEntitySetUserToken =
 		retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
-
     }
     
     

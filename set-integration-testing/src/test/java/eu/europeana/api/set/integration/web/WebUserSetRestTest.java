@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -25,7 +25,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -38,9 +39,6 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Collections;
 
 /**
  * Test class for UserSet controller.
@@ -65,6 +63,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     @BeforeAll
     public static void initTokens() {
 	initRegularUserToken();	
+	initPublisherUserToken();
     }
     
     @BeforeEach
@@ -329,6 +328,76 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
+    
+    //publish/unpublish user set tests
+    @Test
+    public void publishUnpublishUserSet_Success() throws Exception {
+      
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+      
+      MockHttpServletResponse response = mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andReturn().getResponse();
+  
+      String result = response.getContentAsString();
+      assertNotNull(result);
+      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+      assertTrue(containsKeyOrValue(result, "published"));
+      assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+      response = mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andReturn().getResponse();
+      
+      result = response.getContentAsString();
+      assertNotNull(result);
+      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+      assertTrue(containsKeyOrValue(result, "public"));
+      assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+      getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
+    
+    @Test
+    public void publishUnpublishUserSet_Exceptions() throws Exception {
+      
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+      
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+  
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andExpect(status().is(HttpStatus.FORBIDDEN.value()));    
+
+      getUserSetService().deleteUserSet(userSet.getIdentifier());
+      
+      userSet = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+      
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+      
+      getUserSetService().deleteUserSet(userSet.getIdentifier());
+      
+    }
+
 
     // Delete User associated Tests
     @Test
