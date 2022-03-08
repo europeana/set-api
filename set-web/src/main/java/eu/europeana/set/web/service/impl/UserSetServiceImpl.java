@@ -421,7 +421,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			int total = apiResult.getTotal();
 			if (!userSet.isOpenSet()) {
 				// dereferenciation of closed sets is limited to 100
-				// use the number of item ids
+				// use the count of item ids
 				total = userSet.getItems().size();
 			}
 			List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
@@ -606,10 +606,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 
 	int totalInCollection = userSet.getTotal();
 	int lastPage = validateLastPage(totalInCollection, pageSize, pageNr);
+	//TODO: update collection id 
 	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
 	// we don't want to add profile in partOf, hence profile is passed null
 	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION, null);
+		CommonLdConstants.COLLECTION, profile);
 
 	CollectionPage page = null;
 	int startIndex = pageNr * pageSize;

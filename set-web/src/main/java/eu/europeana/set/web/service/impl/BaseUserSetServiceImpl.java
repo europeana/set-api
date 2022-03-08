@@ -187,9 +187,7 @@ public abstract class BaseUserSetServiceImpl {
 	builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
 	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=").append(pageSize);
 	// add the profile param if profile is not standard
-	if (profile != null && LdProfiles.STANDARD != profile) {
-		builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=").append(profile.name().toLowerCase());
-	}
+	builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=").append(profile.getRequestParamValue());
 	return builder.toString();
     }
 
@@ -209,7 +207,6 @@ public abstract class BaseUserSetServiceImpl {
 			queryString += "&";
 		}
 		queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
-
 	}
 	
 	//TODO: verify if base URL should be used instead
@@ -248,7 +245,8 @@ public abstract class BaseUserSetServiceImpl {
 	String first = null;
 	String last = null;
 	
-	if(totalInCollection > 0) {
+	//do not generate first and last if pageSize=0
+	if(totalInCollection > 0 && pageSize > 0) {
 	    first = buildPageUrl(collectionUrl, 0, pageSize, profile);
 	    last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
 	}
@@ -264,7 +262,8 @@ public abstract class BaseUserSetServiceImpl {
      */
     protected int getLastPage(long totalResults, int pageSize) {
 	long lastPage = 0;
-	if (totalResults > 0) {
+	//avoid null divizion if pages size is 0 
+	if (totalResults > 0 && pageSize > 0) {
 	    long reaminder = (totalResults % pageSize);
 	    int extraPage = (reaminder == 0 ? 0 : 1);
 	    lastPage = ((totalResults / pageSize) + extraPage) - 1;
