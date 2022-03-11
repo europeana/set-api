@@ -67,7 +67,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// store in mongo database
 	updateTotal(newUserSet);
 	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
     }
 
@@ -78,7 +78,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
 		    UserSetI18nConstants.USERSET_NOT_FOUND, new String[] { userSetId });
 	}
-	getUserSetUtils().updatePagination(userSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(userSet, getConfiguration());
 	return userSet;
     }
 
@@ -101,7 +101,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet getBookmarkFolder(String creatorId) {
 	UserSet set =  getMongoPersistence().getBookmarkFolder(creatorId);
 	if(set != null) {
-	    set.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+	    set.setBaseUrl(getConfiguration().getSetDataEndpoint());
 	}
 	return set;
     }
@@ -248,7 +248,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 	    throws ApplicationAuthenticationException {
-	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
+	String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 	// check if the position is "pin" and is a EntityBestItem set then
 	// insert the item at the 0 positio
 	UserSet userSet;
@@ -262,7 +262,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    int positionInt = validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
 		userSet = insertItem(existingUserSet, newItem, positionInt, false);
 	}
-	getUserSetUtils().updatePagination(userSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(userSet, getConfiguration());
 	return userSet;
     }
 
@@ -350,7 +350,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
 	UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
     }
 
@@ -409,7 +409,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
 	String apiKey = getConfiguration().getSearchApiKey();
 	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
-	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
+	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 		SearchApiResponse apiResult;
@@ -448,7 +448,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if(userSet.getItems() != null) {
 		for (String itemUri : userSet.getItems()) {
 			boolean found = false;
-			localId = UserSetUtils.extractItemIdentifier(itemUri);
+			localId = UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
 			//escape "/" to "\/" to match json string
 			localId = StringUtils.replace(localId, "/", "\\/");
 			for (String description : itemDescriptions) {
@@ -542,7 +542,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
 	for (UserSet set : results.getResults()) {
-	    items.add(UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier()));
+	    items.add(UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier()));
 	}
 	resPage.setItems(items);
 	resPage.setTotalInPage(items.size());
@@ -571,7 +571,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		} else {
 		    // inlcude only the id
 		    WebUserSetImpl id = new WebUserSetImpl();
-		    id.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+		    id.setBaseUrl(getConfiguration().getSetDataEndpoint());
 		    id.setIdentifier(userSet.getIdentifier());
 		    items.add(id);
 		}
@@ -699,7 +699,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
 	    return false;
 	}
-	String userId = UserSetUtils.buildUserUri((String) authentication.getPrincipal());
+	String userId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), (String) authentication.getPrincipal());
 	return userSet.getCreator().getHttpUrl().equals(userId);
     }
 
@@ -793,7 +793,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
 	//update 
-	userSet.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+	userSet.setBaseUrl(getConfiguration().getSetDataEndpoint());
 	
 	// check that not more then maximal allowed number of items are
 	// presented

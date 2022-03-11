@@ -12,6 +12,7 @@ public interface UserSetConfiguration{
 	/**
 	 * uses annotation.environment.{$environment}.baseUrl property
 	 */
+	@Deprecated
 	public String getUserSetBaseUrl();
 	
 	public int getMaxPageSize(String profile);
@@ -33,4 +34,12 @@ public interface UserSetConfiguration{
 	public String getAuthorizationApiName();
 	public String getApiVersion();
 	public String getSearchApiUrl();
+
+  String getUserDataEndpoint();
+
+  String getSetDataEndpoint();
+
+  String getSetApiEndpoint();
+
+  String getItemDataEndpoint();
 }

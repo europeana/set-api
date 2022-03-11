@@ -171,7 +171,7 @@ public abstract class BaseUserSetServiceImpl {
 	persistentUserSet.setModified(new Date());
 	updateTotal(persistentUserSet);
 	UserSet updatedUserSet =  getMongoPersistence().update(persistentUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
 	
     }
@@ -294,7 +294,7 @@ public abstract class BaseUserSetServiceImpl {
 	 */
 	if (StringUtils.equals(newUserSet.getType(), UserSetTypes.ENTITYBESTITEMSSET.getJsonValue())) {
 	    newUserSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
-	    user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
+	    user.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEntityUserSetUserId()));
 	    user.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
 	    newUserSet.setPinned(0);
 	    if (hasEditorRights(authentication)) {
@@ -321,7 +321,7 @@ public abstract class BaseUserSetServiceImpl {
      * @return the user id
      */
     public String getUserId(Authentication authentication) {
-	return UserSetUtils.buildUserUri((String) authentication.getPrincipal());
+	return UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), (String) authentication.getPrincipal());
     }
 
     protected boolean hasAdminRights(Authentication authentication) {
@@ -358,7 +358,7 @@ public abstract class BaseUserSetServiceImpl {
 
 	List<String> items = new ArrayList<>(apiResult.getItems().size());
 	for (String item : apiResult.getItems()) {
-	    items.add(UserSetUtils.buildItemUrl(item));
+	    items.add(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item));
 	}
 	setItems(userSet, items, apiResult.getTotal());
     }
@@ -496,7 +496,7 @@ public abstract class BaseUserSetServiceImpl {
 		queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
 		// the items are not required for validation, hence pageSize =0
 		// form the minimal post body
-		SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet, null, null, 0, 0);
+		SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet, getConfiguration().getItemDataEndpoint(), null, null, 0, 0);
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 
 		apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody , apiKey, false);

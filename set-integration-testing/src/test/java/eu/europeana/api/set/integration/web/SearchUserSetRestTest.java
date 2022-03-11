@@ -182,7 +182,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// create object in database
 	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
 	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
-	final String contributorId = UserSetUtils.buildUserUri(contributor);
+	final String contributorId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), contributor);
 	String query = "contributor:"+ contributorId;
 	String result = mockMvc
 		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())

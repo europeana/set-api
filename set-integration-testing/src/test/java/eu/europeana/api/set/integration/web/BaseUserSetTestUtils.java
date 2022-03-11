@@ -143,7 +143,7 @@ public abstract class BaseUserSetTestUtils {
     protected void deleteBookmarkFolder(String token)
 	    throws ApiKeyExtractionException, AuthorizationExtractionException, UserSetNotFoundException {
 	Authentication authentication = getAuthentication(token);
-	String creatorId = UserSetUtils.buildUserUri((String) authentication.getPrincipal());
+	String creatorId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), (String) authentication.getPrincipal());
 	UserSet bookmarkFolder = getUserSetService().getBookmarkFolder(creatorId);
 	if (bookmarkFolder != null) {
 	    getUserSetService().deleteUserSet(bookmarkFolder.getIdentifier());

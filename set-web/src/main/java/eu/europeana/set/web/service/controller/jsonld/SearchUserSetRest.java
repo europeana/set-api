@@ -85,7 +85,7 @@ public class SearchUserSetRest extends BaseRest {
 		if (profiles.contains(LdProfiles.FACETS)) {
 			facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
 		}
-	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
+	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize, getConfiguration());
 
 	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profiles, authentication);
 	    String requestURL = request.getRequestURL().toString();
@@ -205,7 +205,7 @@ public class SearchUserSetRest extends BaseRest {
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] { "qf", qf[i] });
 	    }
 	    recordId = qf[i].replace(ITEM_PREFIX, "").trim();
-	    itemIds.add(UserSetUtils.buildItemUrl(recordId));
+	    itemIds.add(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), recordId));
 	}
 	return itemIds;
     }

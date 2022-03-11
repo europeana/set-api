@@ -168,7 +168,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	JSONArray itemDescriptions = json.getJSONArray("items");
 	// check 5 items
 	for (int i = 0; i < 5 ; i++) {
-		String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(i));
+		String itemIdentifier = UserSetUtils.extractItemIdentifier(getConfiguration().getItemDataEndpoint(), userSet.getItems().get(i));
 		String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
 		assertEquals(itemIdentifier, itemDescriptionIdentifier);
 	}
@@ -208,7 +208,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		int start = 1 * 100 ;
 		// check 5 items
 		for (int i = 0; i < 5 ; i++) {
-			String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(start));
+			String itemIdentifier = UserSetUtils.extractItemIdentifier(getConfiguration().getItemDataEndpoint(), userSet.getItems().get(start));
 			String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
 			assertEquals(itemIdentifier, itemDescriptionIdentifier);
 			start ++;
@@ -344,7 +344,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	// TODO: use search by user to verify that all usersets were deleted
 	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator, null, null, 0,
-		1);
+		1, getConfiguration());
 	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null, Collections.singletonList(LdProfiles.MINIMAL),
 		getAuthentication(regularUserToken));
 	assertEquals(0, results.getResultSize());

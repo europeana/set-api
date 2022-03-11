@@ -559,7 +559,7 @@ public class WebUserSetRest extends BaseRest {
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
 
-	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
+	    String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 
 	    // check if item already exists in the Set, if so respond with
 	    // HTTP 200, otherwise respond with HTTP 404.
@@ -636,7 +636,7 @@ public class WebUserSetRest extends BaseRest {
 		// for entity user sets, add users with 'editor' role as contributors
 		addContributorForEntitySet(existingUserSet, authentication);
 
-	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
+	    String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 
 	    // check if item already exists in the Set, if not respond with HTTP 404
 	    boolean hasItem = existingUserSet.getItems() != null && existingUserSet.getItems().contains(newItem);
@@ -806,7 +806,7 @@ public class WebUserSetRest extends BaseRest {
 						HttpStatus.FORBIDDEN);
 			}
 			if (! StringUtils.startsWith(creatorId, "http")) {
-				return UserSetUtils.buildUserUri(creatorId);
+				return UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), creatorId);
 			}
 		}
 		return creatorId;
