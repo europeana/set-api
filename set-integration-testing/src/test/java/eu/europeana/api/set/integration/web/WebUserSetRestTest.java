@@ -91,6 +91,16 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		.content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isBadRequest());
     }
+    
+    @Test
+    public void create_published_UserSet_400_bad_request_InvalidInput() throws Exception {
+      String requestJson = getJsonStringInput(USER_SET_REGULAR_PUBLISHED);
+      mockMvc
+          .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+              .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+              .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+          .andExpect(status().isBadRequest());
+    }
 
     @Test
     public void create_UserSet_400_unauthorized_InvalidJWTToken() throws Exception {
@@ -196,11 +206,12 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		assertTrue(containsKeyOrValue(result, getUserSetService().buildCollectionUrl(null, response.getRequest().getRequestURL().toString(), "" )));
 
 		int idCount = StringUtils.countMatches(result, "\"id\"");
+		System.out.println(result);
 		// as pageSize is 100,  only 10 items will be requested for dereference
-		// items returned by search api = 93
+		// items returned by search api = 92
 		// other id : userset Identifier + partOf id + Creator id + one in edmPlaceLabelLangAware as a lang
-		// so "id" = 97
-		assertEquals(97, idCount);
+		// so "id" = 96
+		assertEquals(96, idCount);
 
 		JSONObject json = new JSONObject(result);
 		JSONArray itemDescriptions = json.getJSONArray("items");
@@ -309,6 +320,19 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
+    @Test
+    public void updateUserSet_PublishedBadRequest() throws Exception {
+      
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+     
+      String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_PUBLISHED);
+      mockMvc.perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()).content(updatedRequestJson)
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+          .andExpect(status().isBadRequest());
+    }
+    
     @Test
     public void updateUserSet_Success() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);

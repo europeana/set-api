@@ -5,11 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-
-import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
@@ -32,6 +29,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.SearchUserSetRest;
 
@@ -67,8 +65,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @BeforeAll
     public static void initTokens() {
 	initRegularUserToken();
-	editorUserToken=
-		    retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+	editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+    initPublisherUserToken();
     }
     
     @Test
@@ -439,7 +437,13 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithPublishedVisibility() throws Exception {
-	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLISHED, regularUserToken);
+	UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+	//publish a user set
+	mockMvc.perform(
+        MockMvcRequestBuilders.put(BASE_URL + set.getIdentifier() + "/publish")
+        .header(HttpHeaders.AUTHORIZATION, publisherUserToken))
+        .andReturn().getResponse();
+    
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLISHED_VISIBILITY)

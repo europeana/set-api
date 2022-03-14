@@ -184,7 +184,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
-
+	
+	// check that the visibility cannot be set to published
+    if (webUserSet.isPublished()) {
+      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
+    }
+    
 	validateBookmarkFolder(webUserSet);
 	validateEntityBestItemsSet(webUserSet);
 	validateControlledValues(webUserSet);
