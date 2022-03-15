@@ -44,4 +44,6 @@ public interface UserSetConfiguration{
   String getItemDataEndpoint();
 
   String getApiBasePath();
+
+  boolean isApiKeyValidationEnabled();
 }

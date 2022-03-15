@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -22,14 +22,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
 /**
@@ -301,27 +299,43 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
-    verifyItemOrder(userSet, result);
-    assertEquals(defaultPageSize, pageSize);
+    String[] missingItems = new String[] {
+        "http://data.europeana.eu/item/2051945/data_euscreenXL_http___www_ceskatelevize_cz_ivysilani_10727240820_kmeny_214562260850011_tattoo_",
+        "http://data.europeana.eu/item/9200387/BibliographicResource_3000117247957"
+    };
+    verifyItemOrder(userSet, result, missingItems);
+    assertEquals(defaultPageSize - missingItems.length, pageSize);
 
     getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
-  private void verifyItemOrder(WebUserSetImpl userSet, String result) throws JSONException {
+  private void verifyItemOrder(WebUserSetImpl userSet, String result, String[] missingItems) throws JSONException {
     JSONObject itemPage = new JSONObject(result);
     JSONArray itemDescriptions = itemPage.getJSONArray("items");
     JSONObject itemDescription;
     String identifier, id;
     int pos;
-    for (int i = 0; i < 10; i++) {
+    
+    //remove missingItems
+    userSet.getItems().removeAll(List.of(missingItems));
+    
+    for (int i = 0; i < itemDescriptions.length(); i++) {
       itemDescription = itemDescriptions.getJSONObject(i);
       identifier = itemDescription.getString("id");
       id = "http://data.europeana.eu/item" + identifier;
       pos = userSet.getItems().indexOf(id);
       System.out.println(
           "verifying position for item with identifier: " + identifier + " (id: " + id + ")");
-      assertEquals(pos, i);
+     
+      if(pos >= 0) {
+        if(pos > i) {
+          System.out.println("Expected items order: \n" +  userSet.getItems());
+        }
+        assertEquals(pos, i);
+      }else {
+        System.out.println("skipped verification of position for missing item: " + id);
+      }
     }
 
   }

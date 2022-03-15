@@ -509,7 +509,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int resultPageSize = results.getResults().size();
 	int pageSize = searchQuery.getPageSize();
 	int currentPage = searchQuery.getPageNr();
-	String searchProfile = searchQuery.getSearchProfile();
+//	String searchProfile = searchQuery.getSearchProfile();
 	long totalInCollection = results.getResultSize();
 
 	int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
@@ -519,10 +519,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	String[] parts = requestUrl.split(getConfiguration().getApiBasePath());
 //	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + parts[parts.length-1];
 	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search"; 	
-	String resultsPageUrl = buildResultsPageUrl(apiEndpointUrl, reqParams, searchProfile);
+	String resultsPageUrl = buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getRequestParamValue());
 	
 	CollectionOverview ResultList = buildCollectionOverview(resultsPageUrl, resultsPageUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.RESULT_LIST, null);
+		CommonLdConstants.RESULT_LIST, profile);
 
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
@@ -669,8 +669,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	new ResultsPageImpl<T>()
 	ItemIdsResultPage result = new ItemIdsResultPage();
 
-	String requestURL = request.getRequestURL().toString();
-	String collectionUrl = buildResultsPageUrl(null, requestURL, request.getQueryString());
+//	String requestURL = request.getUrl();
+	String baseUrl = getConfiguration().getSetApiEndpoint().replaceFirst(getConfiguration().getApiBasePath(), "");
+	String resultPageId = baseUrl + request.getPathInfo(); 
+	String collectionUrl = buildResultsPageUrl(resultPageId, request.getQueryString(), null);
 
 	if (itemIds != null && !itemIds.isEmpty()) {
 	    // build isPartOf (result)
@@ -678,8 +680,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    int lastPage = getLastPage(itemIds.size(), pageSize);
 
 	    // there is no profile param for search items in user set
-	    result.setPartOf(buildCollectionOverview(buildSetIdUrl(setIdentifier), collectionUrl, pageSize, totalnCollection, lastPage,
-		    CommonLdConstants.RESULT_LIST, null));
+	    final CollectionOverview collectionOverview = buildCollectionOverview(collectionUrl, collectionUrl, pageSize, totalnCollection, lastPage,
+	        CommonLdConstants.RESULT_LIST, null);
+        result.setPartOf(
+  	        collectionOverview);
 
 	    // build Result page properties
 	    int startPos = page * pageSize;

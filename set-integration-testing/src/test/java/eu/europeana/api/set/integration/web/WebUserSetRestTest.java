@@ -245,7 +245,8 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String result = response.getContentAsString();
 		assertNotNull(result);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+		final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier());
+        assertTrue(containsKeyOrValue(result, userSetId));
 
 		getUserSetService().deleteUserSet(userSet.getIdentifier());
 	}

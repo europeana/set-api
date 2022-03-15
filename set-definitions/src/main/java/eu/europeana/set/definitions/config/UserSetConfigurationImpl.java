@@ -1,7 +1,7 @@
 package eu.europeana.set.definitions.config;
 
 import java.util.Properties;
-
+import org.apache.commons.lang3.StringUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 public class UserSetConfigurationImpl implements UserSetConfiguration {
@@ -38,10 +38,14 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
   public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY =
       "europeana.apikey.jwttoken.siganturekey";
+  public static final String KEY_APIKEY_SERVICE_URL = "europeana.apikey.serviceurl";  
+  
+  
   public static final String KEY_SEARCH_APIKEY = "europeana.search.apikey";
   public static final String KEY_SEARCH_URL = "europeana.search.url";
   public static final String API_VERSION = "set.api.version";
 
+  
   private Properties setProperties;
 
   @Override
@@ -141,5 +145,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   @Override
   public String getApiBasePath() {
     return "/set/";
+  }
+  
+  @Override
+  public boolean isApiKeyValidationEnabled() {
+    return getSetProperties().containsKey(KEY_APIKEY_SERVICE_URL) 
+        && StringUtils.isNotBlank(getSetProperties().getProperty(KEY_APIKEY_SERVICE_URL));
   }
 }

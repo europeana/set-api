@@ -186,9 +186,11 @@ public abstract class BaseUserSetServiceImpl {
     builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
     builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
         .append(pageSize);
-    // add the profile param if profile is not standard
-    builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
+    // add the profile param if profile is not null (search items in set doesn't use a profile)
+    if(profile != null) {
+      builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
         .append(profile.getRequestParamValue());
+    }
     return builder.toString();
   }
 
@@ -390,6 +392,10 @@ public abstract class BaseUserSetServiceImpl {
       if (LdProfiles.FACETS != profile) {
         profile = ldProfile;
       }
+    }
+    
+    if(profile == null) {
+      profile = LdProfiles.STANDARD;
     }
     return profile;
   }
