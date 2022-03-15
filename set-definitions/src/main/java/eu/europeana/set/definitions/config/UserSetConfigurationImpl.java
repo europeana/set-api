@@ -138,4 +138,8 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     return getSetProperties().getProperty(KEY_SEARCH_URL);
   }
 
+  @Override
+  public String getApiBasePath() {
+    return "/set/";
+  }
 }

@@ -42,4 +42,6 @@ public interface UserSetConfiguration{
   String getSetApiEndpoint();
 
   String getItemDataEndpoint();
+
+  String getApiBasePath();
 }

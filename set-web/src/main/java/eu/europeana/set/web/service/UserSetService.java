@@ -150,7 +150,7 @@ public interface UserSetService {
 	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
             throws HttpException;
     
-    public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
+    public ItemIdsResultPage buildItemIdsResultsPage(String setId, List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
     
     public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;

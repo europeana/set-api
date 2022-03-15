@@ -136,7 +136,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	//the default minimal profile is used
 	assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 	//without page in request, it is not a collection page
-	assertFalse(containsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
+	assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
 	assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
 	
 	
@@ -194,7 +194,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		assertEquals(HttpStatus.OK.value(), response.getResponse().getStatus());
 
 		// check the collection url
-		assertTrue(containsKeyOrValue(result, getUserSetService().buildCollectionUrl(null, response.getRequest().getRequestURL().toString(), "" )));
+		assertTrue(containsKeyOrValue(result, getUserSetService().buildResultsPageUrl(null, response.getRequest().getRequestURL().toString(), "" )));
 
 		int idCount = StringUtils.countMatches(result, "\"id\"");
 		// as pageSize is 100,  only 10 items will be requested for dereference

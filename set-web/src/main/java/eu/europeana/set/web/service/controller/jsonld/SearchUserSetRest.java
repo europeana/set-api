@@ -171,7 +171,7 @@ public class SearchUserSetRest extends BaseRest {
 		filtered.retainAll(itemIds);
 		
 	    }
-	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(filtered, page, pageSize,
+	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(identifier, filtered, page, pageSize,
 		    request);
 
 	    UserSetLdSerializer serializer = new UserSetLdSerializer();
