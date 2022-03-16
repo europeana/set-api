@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +39,7 @@ import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
-public abstract class BaseUserSetServiceImpl {
+public abstract class BaseUserSetServiceImpl implements UserSetService{
 
   @Resource
   PersistentUserSetService mongoPersistance;
@@ -175,7 +176,8 @@ public abstract class BaseUserSetServiceImpl {
 
   }
 
-  protected String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
+  @Override
+  public String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
     StringBuilder builder = new StringBuilder(collectionUrl);
     // if collection url already has a query string, then append "&" or else "?"
     if (collectionUrl.contains("?")) {

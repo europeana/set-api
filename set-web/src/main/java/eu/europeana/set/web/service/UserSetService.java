@@ -220,4 +220,6 @@ public interface UserSetService {
      * @return
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
+
+    String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile);
 }

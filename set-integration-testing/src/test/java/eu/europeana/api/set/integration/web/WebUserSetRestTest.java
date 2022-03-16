@@ -9,9 +9,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-
+import org.springframework.test.web.servlet.MvcResult;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -35,12 +36,8 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Collections;
 
 /**
  * Test class for UserSet controller.
@@ -157,23 +154,31 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	String result = response.getContentAsString();
 	assertNotNull(result);
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
 	int idCount = StringUtils.countMatches(result, "\"id\"");
 	// as pageSize is not passed in the request, only 10 items will be requested for dereference
 	// so "id" = 13 (10 + creator id + userset Identifier + multilingual lang "id" in one of item edmPlaceLabelLangAware)
 	assertEquals(13, idCount);
 	
-	JSONObject json = new JSONObject(result);
-	JSONArray itemDescriptions = json.getJSONArray("items");
-	// check 5 items
-	for (int i = 0; i < 5 ; i++) {
-		String itemIdentifier = UserSetUtils.extractItemIdentifier(getConfiguration().getItemDataEndpoint(), userSet.getItems().get(i));
-		String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
-		assertEquals(itemIdentifier, itemDescriptionIdentifier);
-	}
+	verifyFiveItems(userSet, result, 0);
 	
 	getUserSetService().deleteUserSet(userSet.getIdentifier());
+    }
+
+    private void verifyFiveItems(WebUserSetImpl userSet, String result, int offset) throws JSONException {
+      JSONObject json = new JSONObject(result);
+      JSONArray itemDescriptions = json.getJSONArray("items");
+      
+      // check 5 items
+      for (int i = 0; i < 5 ; i++) {
+      	String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(i+ offset), getConfiguration().getItemDataEndpoint());
+      	String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
+      	if(!itemDescriptionIdentifier.equals(itemIdentifier)) {
+      	  System.out.println("item not available anymore: " + itemIdentifier);
+      	}
+      	assertEquals(itemIdentifier, itemDescriptionIdentifier);
+      }
     }
 
 	@Test
@@ -194,25 +199,29 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		assertEquals(HttpStatus.OK.value(), response.getResponse().getStatus());
 
 		// check the collection url
-		assertTrue(containsKeyOrValue(result, getUserSetService().buildResultsPageUrl(null, response.getRequest().getRequestURL().toString(), "" )));
+		String baseUrl = getConfiguration().getSetApiEndpoint().replaceFirst(getConfiguration().getApiBasePath(), "");
+	    String requestedPage = baseUrl + response.getRequest().getPathInfo();
+	    int pageSize = 100;
+	    int page = 1;
+		final String collectionUrl = getUserSetService().buildResultsPageUrl(requestedPage, response.getRequest().getQueryString(), null);
+		final String resultPageId = getUserSetService().buildPageUrl(collectionUrl, 1, 100, LdProfiles.ITEMDESCRIPTIONS);
+		assertTrue(containsKeyOrValue(result, resultPageId));
+        
+        //check part of ID
+        final String partOfId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier());
+        assertTrue(containsKeyOrValue(result, partOfId));
+        
 
 		int idCount = StringUtils.countMatches(result, "\"id\"");
-		// as pageSize is 100,  only 10 items will be requested for dereference
-		// items returned by search api = 93
-		// other id : userset Identifier + partOf id + Creator id + one in edmPlaceLabelLangAware as a lang
+		System.out.println(response);
+		// as pageSize is 100,  
+		// items returned by search api = 89
+		// other id : userset Identifier + partOf id + Creator id + one in edmPlaceLabelLangAware as a lang + 
 		// so "id" = 97
-		assertEquals(97, idCount);
+		assertEquals(96, idCount);
 
-		JSONObject json = new JSONObject(result);
-		JSONArray itemDescriptions = json.getJSONArray("items");
-		int start = 1 * 100 ;
-		// check 5 items
-		for (int i = 0; i < 5 ; i++) {
-			String itemIdentifier = UserSetUtils.extractItemIdentifier(getConfiguration().getItemDataEndpoint(), userSet.getItems().get(start));
-			String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
-			assertEquals(itemIdentifier, itemDescriptionIdentifier);
-			start ++;
-		}
+		verifyFiveItems(userSet, result, page * pageSize);
+	    
 		getUserSetService().deleteUserSet(userSet.getIdentifier());
 	}
 
@@ -263,7 +272,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 				andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 
 		assertNotNull(result);
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 		assertEquals("69", getvalueOfkey(result, WebUserSetFields.TOTAL));
 		// one of set and one for creator and items = 10 (default pageSize)
 		assertEquals(2 + 10, noOfOccurance(result, WebUserSetFields.ID));
@@ -288,7 +297,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		String result = response.getContentAsString();
 		assertNotNull(result);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
 		getUserSetService().deleteUserSet(userSet.getIdentifier());
 	}
@@ -324,7 +333,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	String result = response.getContentAsString();
 	assertNotNull(result);
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
 

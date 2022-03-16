@@ -48,7 +48,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
-public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
+public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     /*
      * (non-Javadoc)
