@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mongodb.morphia.query.QueryResults;
@@ -198,6 +199,8 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     assertNull(deletedUserSet);
   }
 
+  // will remove all the user sets if accidentally ran in any environment other than development
+  @Disabled
   @Test
   public void removeAll() {
     // add two user sets
