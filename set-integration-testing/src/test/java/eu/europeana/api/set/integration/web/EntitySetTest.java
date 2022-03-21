@@ -281,7 +281,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_test");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -301,7 +301,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinnedItem");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinnedItem");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinnedItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -324,9 +324,9 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		getUserSetService().insertItem("04",  "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION, existingUserSet);
 
 		// check if item is present
-		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinnedItem")));
-		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "03", "123_pinnedItem")));
-		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinnedItem")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "123_pinnedItem")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "03", "123_pinnedItem")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "04", "123_pinnedItem")));
 
 		assertEquals(4, existingUserSet.getPinned()); // pinned 4
 		assertEquals(6, existingUserSet.getItems().size()); // total 6
@@ -338,7 +338,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// add entity item at 0 position
 		getUserSetService().insertItem("05",  "123_normalItem", "0", existingUserSet);
-		String entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "05", "123_normalItem");
+		String entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "05", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total increase , pinned - same, position - 4+0 position
@@ -346,7 +346,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
         // add entity item at 3 position
 		getUserSetService().insertItem("06",  "123_normalItem", "3", existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "06", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "06", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total increase , pinned - same, position - 4+3 entity item
@@ -354,7 +354,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// add item without giving position
 		getUserSetService().insertItem("07",  "123_normalItem", null, existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total increase , pinned - same, position at last
@@ -363,7 +363,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
         // add existing normal item in the same position
 		int currentPosition = existingUserSet.getItems().indexOf(entityItem);
 		getUserSetService().insertItem("07",  "123_normalItem", String.valueOf(currentPosition), existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total , pinned and position remains same
@@ -371,7 +371,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// add existing normal item without providing any position
 		getUserSetService().insertItem("07",  "123_normalItem", null, existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total , pinned and position remains same
@@ -391,17 +391,17 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		getUserSetService().insertItem("03",  "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION, userSet);
 		getUserSetService().insertItem("04",  "123_pinUnpinItem", WebUserSetModelFields.PINNED_POSITION, userSet);
 		// check if pinned item is present
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinUnpinItem")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinUnpinItem")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "03", "123_pinnedItem")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinUnpinItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinUnpinItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "123_pinUnpinItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "03", "123_pinnedItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "04", "123_pinUnpinItem")));
 
 		//pinned
 		assertEquals(4, userSet.getPinned());
 		//total
 		assertEquals(6, userSet.getItems().size());
 		// item to be converted into normal entity item with position < pinned items
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinUnpinItem");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinUnpinItem");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinUnpinItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -419,7 +419,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		//total remains same, pinned should be reduced, position = 2+3 = 5 so at the last
 		checkItemCountAndPosition(existingUserSet, newItem, 6,3,existingUserSet.getItems().size()-1);
 		// convert another item without position
-		String anotherItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinUnpinItem");
+		String anotherItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "123_pinUnpinItem");
 
 		String result1 = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02", "123_pinUnpinItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -438,7 +438,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		checkItemCountAndPosition(existingUserSet1, anotherItem, 6,2,existingUserSet1.getItems().size()-1);
 
 		// item to be converted into normal entity item with valid position
-		String thirditem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinUnpinItem");
+		String thirditem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "04", "123_pinUnpinItem");
 
 		String result2 = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "04", "123_pinUnpinItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -470,13 +470,13 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		getUserSetService().insertItem("01",  "123_pinned", WebUserSetModelFields.PINNED_POSITION, userSet);
 
 		// check if pinned item is present
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "normal_item")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinned")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "normal_item")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinned")));
 		assertEquals(1, userSet.getPinned()); // pinned
 		assertEquals(4, userSet.getTotal()); // total
 
 		// item to be converted into pinned Item entity
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02",  "normal_item");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02",  "normal_item");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02",  "normal_item")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -507,7 +507,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertEquals(2, userSet.getPinned());
 		String identifier = userSet.getIdentifier();
 
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_test");
 
 		String result = mockMvc.perform(delete(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())

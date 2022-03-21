@@ -103,7 +103,7 @@ public class ElevationUserSetRest extends BaseRest {
         List<Doc> docList = new ArrayList<>();
         if (userset.getItems() != null) {
             for(String item : userset.getItems()) {
-                docList.add(new Doc(UserSetUtils.extractItemIdentifier(item)));
+                docList.add(new Doc(UserSetUtils.extractItemIdentifier(item, getConfiguration().getItemDataEndpoint())));
             }
         }
         if (!text.isEmpty() && !docList.isEmpty()) {

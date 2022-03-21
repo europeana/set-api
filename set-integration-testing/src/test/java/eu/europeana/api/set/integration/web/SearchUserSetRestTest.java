@@ -1,15 +1,13 @@
 package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-
-import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +20,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
@@ -32,6 +29,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.SearchUserSetRest;
 
@@ -82,11 +80,17 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchInvalidApiKey() throws Exception {
-	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
-		.queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key")
-		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
-		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+	
+      if(getConfiguration().isApiKeyValidationEnabled()) {
+        mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .queryParam(CommonApiConstants.PARAM_WSKEY, "invalid_api_key")
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+            .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));  
+      }else {
+        System.out.println("skipped apikey validation test!");
+      }
+      
     }
 
     @Test
@@ -149,7 +153,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String buildUserSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
+	final String buildUserSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, buildUserSetId));
 
 	// delete item created by test
@@ -172,7 +176,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
+	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	// delete item created by test
@@ -184,7 +188,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	// create object in database
 	UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
 	String contributor =  (String) getAuthentication(editorUserToken).getPrincipal();
-	final String contributorId = UserSetUtils.buildUserUri(contributor);
+	final String contributorId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), contributor);
 	String query = "contributor:"+ contributorId;
 	String result = mockMvc
 		.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -196,7 +200,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier());
+	final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier());
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	//check contributor
@@ -247,7 +251,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
 		//subject in json file: http://data.europeana.eu/concept/base/114
 		final String title = set.getTitle().get("en");
-		String query = "sportswear golf";
+//		String query = "sportswear golf";
+		String query = title;
 		String result = mockMvc
 				.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
 						.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
@@ -258,7 +263,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertNotNull(result);
 		// check id
 		//default sorting should include the id on the first position
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier())));
 
 		//check subject
 		assertTrue(containsKeyOrValue(result, title));
@@ -310,7 +315,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier())));
 
 	//check subject
 	assertTrue(containsKeyOrValue(result, title));
@@ -338,7 +343,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertNotNull(result);
 		// check id
 		//default sorting should include the id on the first position
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier())));
 
 		//check subject
 		assertTrue(containsKeyOrValue(result, title));
@@ -366,7 +371,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	// check id
 	//default sorting should include the id on the first position
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier())));
 
 	//check subject
 	assertTrue(containsKeyOrValue(result, subject));
@@ -405,7 +410,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
 		assertNotNull(result);
 
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier())));
+		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier())));
 		assertTrue(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 		assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
 		assertEquals("1", getvalueOfkey(result, WebUserSetFields.TOTAL));
@@ -467,9 +472,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 			.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 	// check ids
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set1.getIdentifier())));
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set2.getIdentifier())));
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set3.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set1.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set2.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set3.getIdentifier())));
 
 	// delete item created by test
 	getUserSetService().deleteUserSet(set1.getIdentifier());
@@ -740,7 +745,35 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	}
 
 	@Test
-	public void searchFacetsValidFacetTest() throws Exception {
+    public void searchFacetsValidFacetTest() throws Exception {
+    // delete the bookmarkFolder already if exists
+    deleteBookmarkFolder(regularUserToken);
+    deleteBookmarkFolder(editorUserToken);
+
+    UserSet set1 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+    UserSet set2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER_1, editorUserToken);
+
+    String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+        .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+        .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
+        .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+        .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item"))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+
+     // check result
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.FACETS));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.TYPE));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.FIELD));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.VALUES));
+    // verify the facet values
+    checkItemFacets(getFacetResultPage(result));
+    // delete item created by test
+    getUserSetService().deleteUserSet(set1.getIdentifier());
+    getUserSetService().deleteUserSet(set2.getIdentifier());
+    }
+
+	@Test
+	public void searchFacet0PageSizeTest() throws Exception {
     // delete the bookmarkFolder already if exists
 	deleteBookmarkFolder(regularUserToken);
 	deleteBookmarkFolder(editorUserToken);
@@ -748,10 +781,11 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	UserSet set1 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
 	UserSet set2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER_1, editorUserToken);
 
-	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.name())
+//	   /set/search?pageSize=0&query=*&profile=facets&wskey=&facet=item
+	String result = mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.FACETS.getRequestParamValue())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
-		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "0")
 		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item"))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 
@@ -760,6 +794,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.TYPE));
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.FIELD));
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.VALUES));
+	//no items if pageSize is 0
+	assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
     // verify the facet values
 	checkItemFacets(getFacetResultPage(result));
 	// delete item created by test
