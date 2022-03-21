@@ -757,7 +757,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
         .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
         .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
         .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
-        .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item"))
+        .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item")
+		.queryParam("facet.limit", "11"))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 
      // check result
@@ -786,7 +787,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "0")
-		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item"))
+		.queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item")
+	    .queryParam("facet.limit", "11"))
 		.andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
 
      // check result
