@@ -37,7 +37,6 @@ import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.exception.SearchApiClientException;
@@ -509,20 +508,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	int resultPageSize = results.getResults().size();
 	int pageSize = searchQuery.getPageSize();
 	int currentPage = searchQuery.getPageNr();
-//	String searchProfile = searchQuery.getSearchProfile();
 	long totalInCollection = results.getResultSize();
 
 	int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
 	// get profile for pagination urls and item Page
 	LdProfiles profile = getProfileForPagination(profiles);
 
-//	String[] parts = requestUrl.split(getConfiguration().getApiBasePath());
-//	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + parts[parts.length-1];
-	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search"; 	
+	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search";
+	// 'id' field of the page Url
 	String resultsPageUrl = buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getRequestParamValue());
-	
-	CollectionOverview ResultList = buildCollectionOverview(resultsPageUrl, resultsPageUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.RESULT_LIST, profile);
+
+	// we don't want to add profile in partOf, hence profile is passed null
+	CollectionOverview ResultList = buildCollectionOverview(resultsPageUrl, apiEndpointUrl, pageSize, totalInCollection, lastPage,
+			CommonLdConstants.RESULT_LIST, null);
 
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
@@ -538,8 +536,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	if (profiles.contains(LdProfiles.FACETS)) {
 		resPage.setFacetFields(results.getFacetFields());
 	}
-	addPagination(resPage, resultsPageUrl, currentPage, pageSize, lastPage, profile);
-
+	addPagination(resPage, apiEndpointUrl, currentPage, pageSize, lastPage, profile);
 	return resPage;
     }
 
@@ -619,7 +616,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String overviewId = buildSetIdUrl(userSet.getIdentifier());
 	// we don't want to add profile in partOf, hence profile is passed null
 	CollectionOverview partOf = buildCollectionOverview(overviewId, paginationBaseUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION, profile);
+		CommonLdConstants.COLLECTION, null);
 
 	//build Collection Page object
 	CollectionPage page = null;

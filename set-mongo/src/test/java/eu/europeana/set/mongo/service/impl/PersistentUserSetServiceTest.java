@@ -50,11 +50,9 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
   /**
    * Initialize the testing session
-   *
-   * @throws IOException
    */
   @BeforeEach
-  public void setup() throws IOException {
+  public void setup(){
     // mongo server is started as resoource
     // userSetDao.getCollection().drop();
     setBaseUserSetUrl(configuration.getSetDataEndpoint());
@@ -62,9 +60,11 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
   @Test
   public void storeUserSet() {
-
     UserSet storedUserSet = createUserSet(true);
     assertTrue(storedUserSet instanceof UserSet);
+
+    // delete test object
+    userSetService.remove(storedUserSet.getIdentifier());
   }
 
   @Test
@@ -72,13 +72,13 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     UserSet storedUserSet = createUserSet(false);
     assertTrue(storedUserSet instanceof UserSet);
     assertEquals(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), storedUserSet.getType());
-    // delete object
+
+    // delete test object
     deleteBookmarkFolder();
   }
 
   @Test
   public void getUserSetById() {
-
     UserSet storedUserSet = createUserSet(true);
     UserSet foundUserSet =
         userSetService.findByID(((PersistentUserSetImpl) storedUserSet).getObjectId().toString());
@@ -87,13 +87,13 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     assertTrue(storedUserSet instanceof UserSet);
     assertEquals(((WebUserSetImpl) storedUserSet).getObjectId().toString(),
         ((WebUserSetImpl) foundUserSet).getObjectId().toString());
+
     // delete test object
     userSetService.remove(storedUserSet.getIdentifier());
   }
 
   @Test
   public void getUserSetByIdentifier() {
-
     UserSet storedUserSet = createUserSet(true);
     UserSet foundUserSet = userSetService.getByIdentifier(storedUserSet.getIdentifier());
     checkUserSet(foundUserSet, storedUserSet);
@@ -114,6 +114,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     assertNotNull(foundUserSet);
     checkUserSet(foundUserSet, storedUserSet);
     assertTrue(storedUserSet instanceof UserSet);
+
     // delete test object
     userSetService.remove(storedUserSet.getIdentifier());
   }
@@ -144,12 +145,14 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     UserSet bf = retrieveOrCreateBookmarkFolder();
     String creatorId = buildTestUserIdUri();
     UserSetQuery query = new UserSetQueryImpl();
+    query.setPageSize(10);
     query.setUser(creatorId);
     query.setType(UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
     query.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
 
     List<PersistentUserSet> userSetList = userSetService.find(query).getResults();
     assertTrue(userSetList.size() > 0);
+
     // delete created object
     userSetService.remove(bf.getIdentifier());
   }
@@ -159,13 +162,14 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     UserSet set = createUserSet(true);
     String creatorId = buildTestUserIdUri();
     UserSetQuery query = new UserSetQueryImpl();
+    query.setPageSize(10);
     query.setUser(creatorId);
     query.setType(UserSetTypes.COLLECTION.getJsonValue());
 
     List<PersistentUserSet> userSetList = userSetService.find(query).getResults();
     assertTrue(userSetList.size() > 0);
 
-    // delete created object
+    // delete test object
     userSetService.remove(set.getIdentifier());
   }
 
@@ -175,6 +179,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
     UserSetQuery query = new UserSetQueryImpl();
     query.setAdmin(true);
+    query.setPageSize(10);
 
     List<PersistentUserSet> userSetList = userSetService.find(query).getResults();
     assertTrue(userSetList.size() > 0);
@@ -195,15 +200,19 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
   @Test
   public void removeAll() {
+    // add two user sets
+    UserSet collectionUserSet = createUserSet(true);
+    UserSet bookmarkFolderUserSet = createUserSet(false);
+    // search all
     UserSetQuery query = new UserSetQueryImpl();
     query.setAdmin(true);
+    query.setPageSize(10);
     List<PersistentUserSet> userSetList = userSetService.find(query).getResults();
 
     assertTrue(userSetList.size() > 0);
 
     userSetService.removeAll(userSetList);
     List<PersistentUserSet> userSetListnow = userSetService.find(query).getResults();
-
     assertTrue(userSetListnow.size() == 0);
   }
 

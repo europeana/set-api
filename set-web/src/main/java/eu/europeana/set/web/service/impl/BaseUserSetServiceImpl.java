@@ -189,7 +189,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
         .append(pageSize);
     // add the profile param if profile is not null (search items in set doesn't use a profile)
-    if(profile != null) {
+    if (profile != null) {
       builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
         .append(profile.getRequestParamValue());
     }
