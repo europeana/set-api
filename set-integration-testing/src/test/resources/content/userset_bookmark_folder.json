@@ -1,12 +1,12 @@
 {
   "type": "BookmarkFolder",
   "items":[
-  "http://data.europeana.eu/item/08641/1037479000000476703",
-  "http://data.europeana.eu/item/08641/1037479000000476591",
-  "http://data.europeana.eu/item/08641/1037479000000476459",
-  "http://data.europeana.eu/item/08641/1037479000000476943",
-  "http://data.europeana.eu/item/11616/OPENUPXSP",
-  "http://data.europeana.eu/item/11616/OPENUPXAC",
-  "http://data.europeana.eu/item/11616/OPENUPXACC"
+  "http://data.europeana.eu/item/test1/test1",
+  "http://data.europeana.eu/item/test2/test2",
+  "http://data.europeana.eu/item/test3/test3",
+  "http://data.europeana.eu/item/test4/test4",
+  "http://data.europeana.eu/item/tes5/test5",
+  "http://data.europeana.eu/item/test6/test6",
+  "http://data.europeana.eu/item/test7/test7"
   ]
 }

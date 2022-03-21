@@ -804,18 +804,18 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     }
 
 	private void checkItemFacets(List<FacetValue> facetValueResultPages) {
-	assertEquals(15, facetValueResultPages.size());
+	assertEquals(11, facetValueResultPages.size());
 	for (FacetValue facet : facetValueResultPages) {
-		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXSP")) {
+		if(facet.getLabel().equals("http://data.europeana.eu/item/test1/test")) {
 			assertEquals(2, facet.getCount());
 		}
-		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXAC")) {
+		if(facet.getLabel().equals("http://data.europeana.eu/item/tes5/test5")) {
 			assertEquals(2, facet.getCount());
 		}
-		if(facet.getLabel().equals("http://data.europeana.eu/item/11616/OPENUPXACC")) {
+		if(facet.getLabel().equals("http://data.europeana.eu/item/tes6/test6")) {
 			assertEquals(2, facet.getCount());
 		}
-		if(facet.getLabel().equals("http://data.europeana.eu/item/08641/1037479000000476703")) {
+		if(facet.getLabel().equals("http://data.europeana.eu/item/test11/test11")) {
 			assertEquals(1, facet.getCount());
 		}
 	}
