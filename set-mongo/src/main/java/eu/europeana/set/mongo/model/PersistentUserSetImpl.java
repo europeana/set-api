@@ -23,6 +23,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
     @Index(fields = {@Field(WebUserSetFields.SUBJECT)}),
     @Index(fields = {@Field(WebUserSetFields.ITEMS)}),
     @Index(fields = {@Field(WebUserSetModelFields.MODIFIED)}),
+    @Index(fields = {@Field(WebUserSetFields.PROVIDER)}),
     @Index(options = @IndexOptions(name = "text", disableValidation=true), fields = {
 			@Field(value = WebUserSetFields.TITLE+".en", type = IndexType.TEXT),
 			@Field(value = WebUserSetFields.TITLE+".nl", type = IndexType.TEXT),

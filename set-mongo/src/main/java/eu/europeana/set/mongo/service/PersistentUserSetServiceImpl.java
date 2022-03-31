@@ -361,6 +361,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if(query.getCreator() != null) {
 		mongoQuery.filter(WebUserSetModelFields.CREATOR + ".httpUrl", query.getCreator());
 	    }
+
+        if(query.getProvider() != null) {
+        mongoQuery.filter(WebUserSetModelFields.PROVIDER + ".id", query.getProvider());       
+        }	    
 	    
 	    if(query.getContributor() != null) {
 		mongoQuery.filter(WebUserSetModelFields.CONTRIBUTOR + " in", query.getContributor());
