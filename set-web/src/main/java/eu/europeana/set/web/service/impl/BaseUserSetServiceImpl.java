@@ -582,7 +582,7 @@ public abstract class BaseUserSetServiceImpl {
     }
     
     protected PersistentUserSet updateUserSetForPublish (PersistentUserSet userSet) {
-      //update the visibility
+      //update the visibility to publish
       if(!userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
         Agent creator = new WebUser();
         creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
@@ -590,18 +590,15 @@ public abstract class BaseUserSetServiceImpl {
         userSet.setCreator(creator);
         
         userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
-        
         userSet.setModified(new Date());
-          
         return getMongoPersistence().update(userSet);
-      }
-      else {      
+      } else {
         return userSet;
       }
     }
     
     protected PersistentUserSet updateUserSetForUnpublish (PersistentUserSet userSet, Authentication authentication) {
-      //update the visibility
+      //update the visibility to public
       if(userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
         Agent creator = new WebUser();
         creator.setHttpUrl(getUserId(authentication));
@@ -609,12 +606,9 @@ public abstract class BaseUserSetServiceImpl {
         userSet.setCreator(creator);
       
         userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
-        
         userSet.setModified(new Date());
-        
         return getMongoPersistence().update(userSet);
-      }
-      else {
+      } else {
         return userSet;
       }
         

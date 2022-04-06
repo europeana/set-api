@@ -225,10 +225,10 @@ public interface UserSetService {
      * This method publishes and/or un-publishes an existing UserSet.
      * @param userSetId
      * @param authentication
-     * @param publishYesUnpublishNo
+     * @param publish
      * @return
      * @throws HttpException
      */
-    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publishYesUnpublishNo) throws HttpException;
+    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException;
 
 }

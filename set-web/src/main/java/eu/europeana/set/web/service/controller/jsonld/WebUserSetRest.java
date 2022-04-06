@@ -427,7 +427,7 @@ public class WebUserSetRest extends BaseRest {
       // check user credentials, if invalid respond with HTTP 401,
       // or if unauthorized respond with HTTP 403
       Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
-      return publishUnpublishUserSetApiLevel(identifier, authentication, true, profileStr, request);
+      return publishUnpublishUserSet(identifier, authentication, true, profileStr, request);
     }
 
     @PutMapping(value = { "/set/{identifier}/unpublish" }, produces = {
@@ -440,13 +440,12 @@ public class WebUserSetRest extends BaseRest {
       // check user credentials, if invalid respond with HTTP 401,
       // or if unauthorized respond with HTTP 403
       Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
-      return publishUnpublishUserSetApiLevel(identifier, authentication, false, profileStr, request);
+      return publishUnpublishUserSet(identifier, authentication, false, profileStr, request);
     }
-    
-    protected ResponseEntity<String> publishUnpublishUserSetApiLevel (String identifier, Authentication authentication, boolean publishYesUnpublishNo, String profileStr, HttpServletRequest request) throws HttpException {
-      try {
 
-        UserSet updatedUserSet = getUserSetService().publishUnpublishUserSet(identifier, authentication, publishYesUnpublishNo);
+    protected ResponseEntity<String> publishUnpublishUserSet(String identifier, Authentication authentication, boolean publish, String profileStr, HttpServletRequest request) throws HttpException {
+      try {
+      	UserSet updatedUserSet = getUserSetService().publishUnpublishUserSet(identifier, authentication, publish);
     
         // serialize to JsonLd
         LdProfiles profile = getProfile(profileStr, request);
