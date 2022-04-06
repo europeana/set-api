@@ -1,25 +1,21 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
-import eu.europeana.set.search.SearchApiRequest;
-import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
-import eu.europeana.set.web.model.search.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -34,16 +30,29 @@ import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationExcep
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
+import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
+import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.CollectionOverview;
+import eu.europeana.set.web.model.search.CollectionPage;
+import eu.europeana.set.web.model.search.FacetFieldViewImpl;
+import eu.europeana.set.web.model.search.ItemDescriptionsCollectionPage;
+import eu.europeana.set.web.model.search.ItemIdsCollectionPage;
+import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.model.search.UserSetIdsResultPage;
+import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.service.UserSetService;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
@@ -174,7 +183,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
 	}
-
+	
+	// check that the visibility cannot be set to published
+    if (webUserSet.isPublished()) {
+      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
+    }
+    
 	validateBookmarkFolder(webUserSet);
 	validateEntityBestItemsSet(webUserSet);
 	validateControlledValues(webUserSet);
@@ -872,5 +888,41 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	((WebUserSetImpl) userSet).setSerializedItems(jsonSerialized);
 //	userSet.setItems(null);
     }
+    
+    @Override
+    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException {
+       PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
+		//if the user set does not exist, return 404
+		if (userSet == null) {
+			throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
+					UserSetI18nConstants.USERSET_NOT_FOUND, new String[] { userSetId });
+		}
+       validateUserSetForPublishUnPublish(userSet, authentication);
+      if (publish) {
+        return updateUserSetForPublish(userSet);
+      }
+      else {
+        return updateUserSetForUnpublish(userSet, authentication);
+      }
+    }
 
+	/**
+	 * Validates the user set for publishing or un-publishing
+	 * @param userSet
+	 * @param authentication
+	 * @throws HttpException
+	 */
+	private void validateUserSetForPublishUnPublish (PersistentUserSet userSet, Authentication authentication)throws HttpException {
+		// Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond with 400;
+		if(userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet()) {
+			throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+					new String[] { "Publish/Unpublish user set ", userSet.getType() });
+		}
+		//check if the user is authorized, otherwise return 403
+		if(!hasPublisherRights(authentication) && !hasAdminRights(authentication)) {
+			throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
+					UserSetI18nConstants.USER_NOT_AUTHORIZED,
+					new String[] { "Only a publisher user or admin can perform this operation." }, HttpStatus.FORBIDDEN);
+		}
+	}
 }

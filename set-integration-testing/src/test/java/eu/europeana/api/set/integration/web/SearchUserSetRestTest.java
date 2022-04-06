@@ -20,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
@@ -65,8 +66,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     @BeforeAll
     public static void initTokens() {
 	initRegularUserToken();
-	editorUserToken=
-		    retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+	editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+    initPublisherUserToken();
     }
     
     @Test
@@ -444,7 +445,13 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 
     @Test
     public void searchWithPublishedVisibility() throws Exception {
-	UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLISHED, regularUserToken);
+	UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+	//publish a user set
+	mockMvc.perform(
+        MockMvcRequestBuilders.put(BASE_URL + set.getIdentifier() + "/publish")
+        .header(HttpHeaders.AUTHORIZATION, publisherUserToken))
+        .andReturn().getResponse();
+    
 	mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLISHED_VISIBILITY)

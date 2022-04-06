@@ -14,8 +14,7 @@ public class SetIntegrationConfiguration {
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR = "oauth.token.request.params.editor";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR2 = "oauth.token.request.params.editor2";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET = "oauth.token.request.params.creator.entityset";
-    
-
+    protected static final String PROP_OAUTH_REQUEST_PARAMS_PUBLISHER = "oauth.token.request.params.publisher";
 
     private static Properties properties = null;
     private static SetIntegrationConfiguration singleton;
@@ -119,5 +118,14 @@ public class SetIntegrationConfiguration {
      */
     public String getOauthRequestParamsCreatorEntitySet() {
         return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET);
+    }
+    
+    /**
+     * This method returns the request params needed to acquire a new token for a user with publisher role
+     *
+     * @return
+     */
+    public String getOauthRequestParamsPublisher() {
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_PUBLISHER);
     }
 }

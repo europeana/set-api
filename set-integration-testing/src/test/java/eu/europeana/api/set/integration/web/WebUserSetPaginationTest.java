@@ -292,7 +292,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();
 
-    //
     String result = response.getContentAsString();
     assertNotNull(result);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -304,7 +303,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
         "http://data.europeana.eu/item/9200387/BibliographicResource_3000117247957"
     };
     verifyItemOrder(userSet, result, missingItems);
-    assertEquals(defaultPageSize - missingItems.length, pageSize);
+    assertEquals(defaultPageSize, pageSize);
 
     getUserSetService().deleteUserSet(userSet.getIdentifier());
   }

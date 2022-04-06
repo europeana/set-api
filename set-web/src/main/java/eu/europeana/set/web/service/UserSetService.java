@@ -221,5 +221,24 @@ public interface UserSetService {
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
 
-    String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile);
+    /**
+     * Builds page Url
+     * @param collectionUrl
+     * @param page
+     * @param pageSize
+     * @param profile
+     * @return
+     */
+    String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) ;
+
+    /**
+     * This method publishes and/or un-publishes an existing UserSet.
+     * @param userSetId
+     * @param authentication
+     * @param publish
+     * @return
+     * @throws HttpException
+     */
+    UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException;
+
 }

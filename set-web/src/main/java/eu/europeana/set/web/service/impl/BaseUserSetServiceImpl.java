@@ -357,6 +357,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
 
+  protected boolean hasPublisherRights(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        return hasRole(authentication, Roles.PUBLISHER.getName());
+    }
+
   void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
     if (apiResult.getItems() == null) {
       return;
@@ -370,10 +377,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
   void setItems(UserSet userSet, List<String> items, int total) {
-    // if (!items.isEmpty()) {
     userSet.setItems(items);
     userSet.setTotal(total);
-    // }
   }
 
 
@@ -593,4 +598,37 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       existingUserSet.setTotal(0);
     }
   }
+    
+    protected PersistentUserSet updateUserSetForPublish (PersistentUserSet userSet) {
+      //update the visibility to publish
+      if(!userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
+        Agent creator = new WebUser();
+        creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEntityUserSetUserId()));
+        creator.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+        userSet.setCreator(creator);
+        
+        userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
+        userSet.setModified(new Date());
+        return getMongoPersistence().update(userSet);
+      } else {
+        return userSet;
+      }
+    }
+    
+    protected PersistentUserSet updateUserSetForUnpublish (PersistentUserSet userSet, Authentication authentication) {
+      //update the visibility to public
+      if(userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
+        Agent creator = new WebUser();
+        creator.setHttpUrl(getUserId(authentication));
+        creator.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+        userSet.setCreator(creator);
+      
+        userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+        userSet.setModified(new Date());
+        return getMongoPersistence().update(userSet);
+      } else {
+        return userSet;
+      }
+        
+    }
 }
