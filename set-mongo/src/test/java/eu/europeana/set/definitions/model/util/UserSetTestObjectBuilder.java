@@ -66,7 +66,7 @@ public class UserSetTestObjectBuilder {
 
 	Agent creator = new Person();
 	creator.setName(TEST_AGENT);
-	creator.setHttpUrl(UserSetUtils.buildUserUri(TEST_AGENT));
+	creator.setHttpUrl(UserSetUtils.buildUserUri("http://data.europeana.eu/user/", TEST_AGENT));
 	creator.setHomepage(TEST_HOMEPAGE);
 	userSet.setCreator(creator);
 	try {

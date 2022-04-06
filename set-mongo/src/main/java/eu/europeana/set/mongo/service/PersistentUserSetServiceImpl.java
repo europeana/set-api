@@ -303,8 +303,13 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    long totalInCollection = mongoQuery.count();
 
 	    FindOptions options = buildMongoPaginationOptions(query);
-	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
+	    List<PersistentUserSet> userSets = new ArrayList<PersistentUserSet>();
+	    //workaround as limit=0 still returns all results 
+	    if(options.getLimit() > 0) {
+	      userSets = mongoQuery.asList(options);
+	    }
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
+	    
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
 	    return res;

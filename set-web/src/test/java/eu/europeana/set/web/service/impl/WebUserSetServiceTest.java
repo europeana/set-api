@@ -74,7 +74,7 @@ public class WebUserSetServiceTest {
      */
     @BeforeEach
     public void setup() throws IOException {
-	setBaseUserSetUrl(configuration.getUserSetBaseUrl());
+	setBaseUserSetUrl(configuration.getSetDataEndpoint());
     }
 
 	@Test
