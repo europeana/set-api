@@ -237,7 +237,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		int start = 1 * 100 ;
 		// check 5 items
 		for (int i = 0; i < 5 ; i++) {
-			String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(start));
+			String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(start), getConfiguration().getItemDataEndpoint());
 			String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
 			assertEquals(itemIdentifier, itemDescriptionIdentifier);
 			start ++;
@@ -389,7 +389,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
   
       String result = response.getContentAsString();
       assertNotNull(result);
-      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
       assertTrue(containsKeyOrValue(result, "published"));
       assertEquals(HttpStatus.OK.value(), response.getStatus());
 
@@ -402,7 +402,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
       
       result = response.getContentAsString();
       assertNotNull(result);
-      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
       assertTrue(containsKeyOrValue(result, "public"));
       assertEquals(HttpStatus.OK.value(), response.getStatus());
 

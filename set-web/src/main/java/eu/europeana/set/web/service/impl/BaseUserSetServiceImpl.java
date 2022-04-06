@@ -356,92 +356,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     return false;
   }
 
-    /**
-     * This method retrieves user id from authentication object
-     * 
-     * @param authentication
-     * @return the user id
-     */
-    public String getUserId(Authentication authentication) {
-	return UserSetUtils.buildUserUri((String) authentication.getPrincipal());
-    }
 
-    protected boolean hasAdminRights(Authentication authentication) {
-	if (authentication == null) {
-	    return false;
-	}
-	return hasRole(authentication, Roles.ADMIN.getName());
-    }
-
-    protected boolean hasEditorRights(Authentication authentication) {
-		if (authentication == null) {
-			return false;
-		}
-		return hasRole(authentication, Roles.EDITOR.getName());
-	}
-
-	protected boolean hasPublisherRights(Authentication authentication) {
+  protected boolean hasPublisherRights(Authentication authentication) {
         if (authentication == null) {
             return false;
         }
         return hasRole(authentication, Roles.PUBLISHER.getName());
     }
-	
-
-	protected boolean hasRole(Authentication authentication, String roleType) {
-		for (Iterator<? extends GrantedAuthority> iterator = authentication.getAuthorities().iterator(); iterator
-				.hasNext();) {
-			// role based authorization
-			String role = iterator.next().getAuthority();
-			if (StringUtils.equalsIgnoreCase(roleType, role)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-
-    void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
-	if (apiResult.getItems() == null) {
-	    return;
-	}
-
-	List<String> items = new ArrayList<>(apiResult.getItems().size());
-	for (String item : apiResult.getItems()) {
-	    items.add(UserSetUtils.buildItemUrl(item));
-	}
-	setItems(userSet, items, apiResult.getTotal());
-    }
-
-    void setItems(UserSet userSet, List<String> items, int total) {
-//	if (!items.isEmpty()) {
-	userSet.setItems(items);
-	userSet.setTotal(total);
-//	}
-    }
-
-
-    private boolean isUri(String value) {
-	return value.startsWith("http://") || value.startsWith("https://");
-    }
-
-	/**
-	 * Gets the profile for pagination urls and item page.
-	 * Basically gets the profile valid for collection page from the list
-	 * of profiles passed during search request
-	 *
-	 * @param profiles
-	 * @return
-	 */
-	public LdProfiles getProfileForPagination(List<LdProfiles> profiles) {
-	LdProfiles profile = null;
-	for (LdProfiles ldProfile : profiles) {
-		if (LdProfiles.FACETS != profile) {
-			profile = ldProfile;
-		}
-	}
-	return profile;
-	}
 
   void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
     if (apiResult.getItems() == null) {
@@ -456,10 +377,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
   void setItems(UserSet userSet, List<String> items, int total) {
-    // if (!items.isEmpty()) {
     userSet.setItems(items);
     userSet.setTotal(total);
-    // }
   }
 
 
@@ -678,12 +597,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     } else {
       existingUserSet.setTotal(0);
     }
+  }
     
     protected PersistentUserSet updateUserSetForPublish (PersistentUserSet userSet) {
       //update the visibility to publish
       if(!userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
         Agent creator = new WebUser();
-        creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getEntityUserSetUserId()));
+        creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEntityUserSetUserId()));
         creator.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
         userSet.setCreator(creator);
         
