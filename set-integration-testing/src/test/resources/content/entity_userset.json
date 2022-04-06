@@ -13,5 +13,9 @@
   "items":[
     "http://data.europeana.eu/item/08641/1037479000000476703",
     "http://data.europeana.eu/item/08641/1037479000000476591"
-  ]
+  ],
+  "provider": {
+    "id": "https://pro.europeana.eu/project/europeana-xx",
+    "name": "Europeana XX"
+  }
 }

@@ -101,10 +101,11 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	assertNotNull(getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result));
 	String creator = getSetCreator(result);
 	assertNotNull(creator);
+	String provider = getSetCreator(result);
+	assertNotNull(provider);
 	assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
 	assertNotNull(getSetContributors(result));
 	getUserSetService().deleteUserSet(identifier);
-
     }
 
     @Test
@@ -529,8 +530,14 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	assertNotNull(result);
 	JSONObject json = new JSONObject(result);
 	String creator = json.getString(WebUserSetModelFields.CREATOR);
-	assertNotNull(creator);
 	return creator;
+    }
+    
+    private String getSetProvider(String result) throws JSONException {
+    assertNotNull(result);
+    JSONObject json = new JSONObject(result);
+    String provider = json.getString(WebUserSetModelFields.PROVIDER);
+    return provider;
     }
 
     private List<String> getSetContributors(String result) throws JSONException {

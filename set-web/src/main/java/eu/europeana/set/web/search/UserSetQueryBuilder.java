@@ -3,9 +3,7 @@ package eu.europeana.set.web.search;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
@@ -30,8 +28,9 @@ public class UserSetQueryBuilder extends QueryBuilder {
   public static final String SEARCH_ALL_ALL = "*:*";
   public static final String PREFIX_HTTP = "http";
   
-    String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
+    String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY, WebUserSetFields.TYPE, 
+        WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT, 
+        WebUserSetFields.PROVIDER};
     String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
 
     Set<String> suportedFields = Set.of(fields);
@@ -48,6 +47,8 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	addCreatorCriterion(searchCriteria, searchQuery, config.getUserDataEndpoint());
 	
 	addContributorCriterion(searchCriteria, searchQuery, config.getUserDataEndpoint());
+	
+	addProviderCriterion(searchCriteria, searchQuery);
 	
 	addSubjectCriterion(searchCriteria, searchQuery);
 	
@@ -129,6 +130,19 @@ public class UserSetQueryBuilder extends QueryBuilder {
           }else {
       	searchQuery.setCreator(UserSetUtils.buildUserUri(userDataEndpoint, creatorId));
           }
+      }
+    }
+    
+    private void addProviderCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+        throws ParamValidationException {
+      
+      if (searchCriteria.containsKey(WebUserSetModelFields.PROVIDER)) {
+          String providerId = searchCriteria.get(WebUserSetModelFields.PROVIDER);
+          if(providerId!=null && !providerId.startsWith(PREFIX_HTTP)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+            new String[] { "invalid value for search field, provider (id) must be a URI", providerId });
+          }
+          searchQuery.setProvider(providerId);
       }
     }
 
