@@ -97,7 +97,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
 
-	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result).substring(1);
+	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
 	assertNotNull(identifier);
 	String creator = getSetCreator(result);
 	assertNotNull(creator);

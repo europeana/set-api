@@ -77,7 +77,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
 	// store in mongo database
 	updateTotal(newUserSet);
-	
+	checkDuplicateUserSets(newUserSet, false);
 	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
 	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
@@ -167,7 +167,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     public void validateWebUserSet(UserSet webUserSet)
-			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, SetUniquenessValidationException {
+			throws RequestBodyValidationException, ParamValidationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {

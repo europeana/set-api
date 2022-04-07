@@ -403,9 +403,8 @@ public class WebUserSetRest extends BaseRest {
 			HttpStatus.PRECONDITION_FAILED, null);
 	    }
 	} else { // it is a Standard profile
-	    if (updateUserSet.getItems() == null || updateUserSet.getItems().size() == 0) { // new user set contains no
-											    // items
-		throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS,
+	    if (updateUserSet.getItems() == null || updateUserSet.getItems().size() == 0) { // new user set contains no									    // items
+	      throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS,
 			UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS, new String[] {}, HttpStatus.PRECONDITION_FAILED,
 			null);
 	    }

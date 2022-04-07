@@ -92,7 +92,7 @@ public interface UserSetService {
      * @throws ParamValidationException
      * @throws SetUniquenessValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, SetUniquenessValidationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException;
 
     /**
      * This method deletes user set by user set Id value.

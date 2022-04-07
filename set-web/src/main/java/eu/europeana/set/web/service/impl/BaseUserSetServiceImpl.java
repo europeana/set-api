@@ -603,10 +603,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
 	 * @param webUserSet
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
-	 * @throws SetUniquenessValidationException 
 	 */
     void validateEntityBestItemsSet(UserSet webUserSet)
-	    throws ParamValidationException, RequestBodyValidationException, SetUniquenessValidationException {
+	    throws ParamValidationException, RequestBodyValidationException {
 		if (!webUserSet.isEntityBestItemsSet()) {
 			return;
 		}
@@ -638,9 +637,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
     }
-		
-		checkDuplicateUserSets(webUserSet, false);
-
   }
     
     void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException {

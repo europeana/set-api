@@ -81,7 +81,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 			.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result).substring(1);
+	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
 	getUserSetService().deleteUserSet(identifier);
     }
 
