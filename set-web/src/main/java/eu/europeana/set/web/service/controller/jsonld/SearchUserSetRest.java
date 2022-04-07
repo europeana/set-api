@@ -85,8 +85,7 @@ public class SearchUserSetRest extends BaseRest {
 		if (profiles.contains(LdProfiles.FACETS)) {
 			facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
 		}
-	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize);
-
+	    UserSetQuery searchQuery = getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize, getConfiguration());
 	    ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, facetQuery, profiles, authentication);
 	    String requestURL = request.getRequestURL().toString();
 
@@ -133,7 +132,7 @@ public class SearchUserSetRest extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false, defaultValue = "0") int page,
 	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false, defaultValue = ""
 		    + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) int pageSize,
-//    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+//	    @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_STANDARD) String profileStr,
 	    HttpServletRequest request) throws HttpException {
 
 	try {
@@ -145,7 +144,7 @@ public class SearchUserSetRest extends BaseRest {
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] { "query", query
 				+ " Currently only * is supported as query, use qf for provinding the items list." });
 	    }
-
+	    
 	    // parses and validates qf
 	    List<String> itemIds = buildItemIdsList(query, qf);
 
@@ -171,7 +170,7 @@ public class SearchUserSetRest extends BaseRest {
 		filtered.retainAll(itemIds);
 		
 	    }
-	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(filtered, page, pageSize,
+	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(identifier, filtered, page, pageSize,
 		    request);
 
 	    UserSetLdSerializer serializer = new UserSetLdSerializer();
@@ -205,7 +204,7 @@ public class SearchUserSetRest extends BaseRest {
 			UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] { "qf", qf[i] });
 	    }
 	    recordId = qf[i].replace(ITEM_PREFIX, "").trim();
-	    itemIds.add(UserSetUtils.buildItemUrl(recordId));
+	    itemIds.add(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), recordId));
 	}
 	return itemIds;
     }

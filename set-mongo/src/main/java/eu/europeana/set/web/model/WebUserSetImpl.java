@@ -2,11 +2,9 @@ package eu.europeana.set.web.model;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Transient;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,18 +12,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
-
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.impl.Provider;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
-import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
 
 @JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.TITLE, WebUserSetModelFields.SUBJECT,
         WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.PINNED,
-        WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT,
-	WebUserSetFields.PREV })
+        WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.PROVIDER, 
+        WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT, WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WebUserSetImpl extends PersistentUserSetImpl {
@@ -120,7 +117,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     
 
     //TODO: change to use of getter and setter, or ingore unknown properties
-    @JsonldProperty(WebUserSetFields.CONTEXT_FIELD)
+    @JsonProperty(WebUserSetFields.CONTEXT_FIELD)
     public void setContext(String context) {
 	// do nothing, just to allow context in input
     }
@@ -135,7 +132,18 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     public void setCreator(Agent creator) {
 	super.setCreator(creator);
     }
-  
+    
+    @Override
+    @JsonProperty(WebUserSetFields.PROVIDER)
+    public Provider getProvider() {
+    return super.getProvider();
+    }
+
+    @Override
+    @JsonProperty(WebUserSetFields.PROVIDER)
+    public void setProvider(Provider provider) {
+    super.setProvider(provider);
+    }  
 
     @JsonIgnore
     public boolean isUgc() {

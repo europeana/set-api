@@ -412,6 +412,57 @@ public class WebUserSetRest extends BaseRest {
 	    storedUserSet.setItems(updateUserSet.getItems());
 	}
     }
+    
+    @PutMapping(value = { "/set/{identifier}/publish" }, produces = {
+        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
+    @ApiOperation(notes = SwaggerConstants.PUBLISH_SET_NOTE, value = "Publish an existing user set", nickname = "publish set", response = java.lang.Void.class)
+    public ResponseEntity<String> publishUserSet(
+        @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+        @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+        HttpServletRequest request) throws HttpException {
+      // check user credentials, if invalid respond with HTTP 401,
+      // or if unauthorized respond with HTTP 403
+      Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+      return publishUnpublishUserSet(identifier, authentication, true, profileStr, request);
+    }
+
+    @PutMapping(value = { "/set/{identifier}/unpublish" }, produces = {
+        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
+    @ApiOperation(notes = SwaggerConstants.PUBLISH_SET_NOTE, value = "Unpublish an existing user set", nickname = "unpublish set", response = java.lang.Void.class)
+    public ResponseEntity<String> unpublishUserSet(
+        @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+        @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+        HttpServletRequest request) throws HttpException {
+      // check user credentials, if invalid respond with HTTP 401,
+      // or if unauthorized respond with HTTP 403
+      Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+      return publishUnpublishUserSet(identifier, authentication, false, profileStr, request);
+    }
+
+    protected ResponseEntity<String> publishUnpublishUserSet(String identifier, Authentication authentication, boolean publish, String profileStr, HttpServletRequest request) throws HttpException {
+      try {
+      	UserSet updatedUserSet = getUserSetService().publishUnpublishUserSet(identifier, authentication, publish);
+    
+        // serialize to JsonLd
+        LdProfiles profile = getProfile(profileStr, request);
+        String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
+        String etag = generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+    
+        // build response entity with headers
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+        headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+        headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
+        headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+        headers.add(UserSetHttpHeaders.ETAG, etag);
+    
+        return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+        
+      } catch (HttpException e) {
+        throw e;
+      } catch (RuntimeException | IOException e) {
+        throw new InternalServerException(e);
+      }
+    }    
 
     @PutMapping(value = { "/set/{identifier}/{datasetId}/{localId}" }, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
@@ -555,7 +606,7 @@ public class WebUserSetRest extends BaseRest {
 	    // check if the Set is disabled, respond with HTTP 410
 	    HttpStatus httpStatus = null;
 
-	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
+	    String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 
 	    // check if item already exists in the Set, if so respond with
 	    // HTTP 200, otherwise respond with HTTP 404.
@@ -632,7 +683,7 @@ public class WebUserSetRest extends BaseRest {
 		// for entity user sets, add users with 'editor' role as contributors
 		addContributorForEntitySet(existingUserSet, authentication);
 
-	    String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
+	    String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 
 	    // check if item already exists in the Set, if not respond with HTTP 404
 	    boolean hasItem = existingUserSet.getItems() != null && existingUserSet.getItems().contains(newItem);
@@ -802,7 +853,7 @@ public class WebUserSetRest extends BaseRest {
 						HttpStatus.FORBIDDEN);
 			}
 			if (! StringUtils.startsWith(creatorId, "http")) {
-				return UserSetUtils.buildUserUri(creatorId);
+				return UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), creatorId);
 			}
 		}
 		return creatorId;

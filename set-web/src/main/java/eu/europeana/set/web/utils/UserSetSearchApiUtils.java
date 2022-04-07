@@ -55,9 +55,9 @@ public class UserSetSearchApiUtils {
      * @param pageSize
      * @return
      */
-    public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize) {
+    public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String itemDataEndpoint,String sort, String sortOrder, int pageNr, int pageSize) {
         if (!userSet.isOpenSet()) {
-            return buildSearchApiPostBodyForClosedSets(userSet, pageSize, pageNr);
+            return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageSize, pageNr);
         }
         SearchApiRequest searchApiRequest = new SearchApiRequest();
         // remove pagination and ordering
@@ -87,7 +87,7 @@ public class UserSetSearchApiUtils {
      * @return
      * @throws HttpException
      */
-    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, int pageSize, int pageNr) {
+    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, String itemDataEndpoint, int pageSize, int pageNr) {
         // use them to build the search query for retrieving item descriptions
         // europeana_id is in format /collectionId/recordId, this can be easily
         // extracted from the
@@ -108,7 +108,7 @@ public class UserSetSearchApiUtils {
             if (i != start) {
                 query.append(" OR ");
             }
-            id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // replace "/" with "%2F"
+            id = fullId.replace(itemDataEndpoint, ""); // replace "/" with "%2F"
             query.append('"').append('/').append(id).append('"');
         }
         // close bracket

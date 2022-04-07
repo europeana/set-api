@@ -55,10 +55,9 @@
 			exposed-headers="Access-Control-Allow-Origin, Allow, Link, ETag, Vary, Preference-Applied" max-age="600" allow-credentials="false"/>
 		<mvc:mapping path="/set/*/*/*" allowed-origins="*" allowed-methods="GET,HEAD,PUT,DELETE" 
 			exposed-headers="Access-Control-Allow-Origin, Allow, Preference-Applied" max-age="600" allow-credentials="false"/>
-		<!-- 	
-		<mvc:mapping path="/sets/**" allowed-origins="*" allowed-methods="GET, HEAD, OPTIONS" 
-			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/>
-		-->
+	
+<!-- 		<mvc:mapping path="/sets/**" allowed-origins="*" allowed-methods="GET, HEAD, OPTIONS"  -->
+<!-- 			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/> -->
 	</mvc:cors>
 
 	<import resource="./set-web-context.xml" />
