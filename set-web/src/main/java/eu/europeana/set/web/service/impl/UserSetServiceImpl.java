@@ -69,8 +69,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// store in mongo database
 	updateTotal(newUserSet);
 	
-	checkDuplicateUserSets(newUserSet, false);
-	
 	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
 	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
 	return updatedUserSet;
@@ -160,7 +158,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     }
 
     public void validateWebUserSet(UserSet webUserSet)
-			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
+			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, SetUniquenessValidationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -880,17 +878,5 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     
     }
     
-    public void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException {
-      //check the set uniqueness only for the EntityBestItemsSet type
-      if(userSet.getType().compareTo(UserSetTypes.ENTITYBESTITEMSSET.toString())==0) {
-        List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet, withoutItself);
-        if(duplicateSetsIds!=null) {
-            String [] i18nParamsSetDuplicates = new String [1];
-            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
-            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
-                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
-        }
-      }
-    }
 
 }

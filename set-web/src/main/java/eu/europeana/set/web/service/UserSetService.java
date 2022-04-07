@@ -90,8 +90,9 @@ public interface UserSetService {
      * @param webUserSet
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
+     * @throws SetUniquenessValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException, SetUniquenessValidationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -222,7 +223,5 @@ public interface UserSetService {
      * @return
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
-    
-    void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException;
 
 }

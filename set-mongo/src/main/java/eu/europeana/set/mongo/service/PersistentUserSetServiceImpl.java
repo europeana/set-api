@@ -6,9 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,12 +17,10 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.Sort;
 import org.springframework.stereotype.Component;
-
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Cursor;
 import com.mongodb.DBObject;
-
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -436,7 +432,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 * Getting the ids of the duplicate sets.
 	 */
 	public List<String> getDuplicateUserSetsIds(UserSet userSet, boolean withoutItself) {
-	  
 	     if(userSet.getSubject()==null || userSet.getSubject().size()==0) return null;
 	       
 	     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
@@ -445,7 +440,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	       query.filter(WebUserSetModelFields.IDENTIFIER + " !=", userSet.getIdentifier());
 	     }
 	     query.filter(WebUserSetModelFields.SUBJECT + " size", userSet.getSubject().size());
-         query.filter(WebUserSetModelFields.SUBJECT + " all", userSet.getSubject());
+	     query.filter(WebUserSetModelFields.SUBJECT + " all", userSet.getSubject());
 	     query.project(WebUserSetModelFields.IDENTIFIER, true);
 	     List<PersistentUserSet> resultMongo = getUserSetDao().find(query).asList();
 	     List<String> result =  null;

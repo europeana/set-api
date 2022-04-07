@@ -37,6 +37,7 @@ import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
 public abstract class BaseUserSetServiceImpl {
@@ -512,9 +513,10 @@ public abstract class BaseUserSetServiceImpl {
 	 * @param webUserSet
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
+	 * @throws SetUniquenessValidationException 
 	 */
     void validateEntityBestItemsSet(UserSet webUserSet)
-	    throws ParamValidationException, RequestBodyValidationException {
+	    throws ParamValidationException, RequestBodyValidationException, SetUniquenessValidationException {
 		if (!webUserSet.isEntityBestItemsSet()) {
 			return;
 		}
@@ -526,17 +528,16 @@ public abstract class BaseUserSetServiceImpl {
 					new String[] { WebUserSetModelFields.CREATOR });
 		}
 
-	final List<String> subject = webUserSet.getSubject();
-	if (subject == null || subject.isEmpty()) {
-		// subject must be present
-			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-						new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
-	} else if (subject.size() != 1 || !isUri(subject.get(0))) {
-//	   must include only one HTTP reference
+    	final List<String> subject = webUserSet.getSubject();
+    	if (subject == null || subject.isEmpty()) {
+    		// subject must be present
+    			throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+    					UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+    						new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
+    	} else if (subject.size() != 1 || !isUri(subject.get(0))) {
+    	//must include only one HTTP reference
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
 		    new String[] { WebUserSetModelFields.SUBJECT, String.valueOf(subject) });
-
 		}
 
 		// entity user set is a close set
@@ -545,8 +546,24 @@ public abstract class BaseUserSetServiceImpl {
 					UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
 					new String[] { WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType() });
 		}
+		
+		checkDuplicateUserSets(webUserSet, false);
 
 	}
+    
+    void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException {
+      //check the set uniqueness only for the EntityBestItemsSet type
+      if(UserSetTypes.ENTITYBESTITEMSSET.toString().equals(userSet.getType())) {
+        List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet, withoutItself);
+        if(duplicateSetsIds!=null) {
+            String [] i18nParamsSetDuplicates = new String [1];
+            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
+            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
+                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
+        }
+      }
+    }
+
 
     void updateTotal(UserSet existingUserSet) {
 	if(existingUserSet.getItems() != null) {
