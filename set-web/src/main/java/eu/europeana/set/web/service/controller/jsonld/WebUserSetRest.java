@@ -299,7 +299,6 @@ public class WebUserSetRest extends BaseRest {
 		newUserSet.setVisibility(existingUserSet.getVisibility());
 	    }
 	    newUserSet.setContributor(existingUserSet.getContributor());
-	    getUserSetService().validateWebUserSet(newUserSet);
 	    // TODO: move verification to validateMethod when new specs are available
 	    if (existingUserSet.isOpenSet() && !newUserSet.isOpenSet()) {
 		// isDefinedBy is mandatory for open sets

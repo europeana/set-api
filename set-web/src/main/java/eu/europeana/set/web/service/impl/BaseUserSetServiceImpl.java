@@ -172,12 +172,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
    * europeana.UserSet.definitions.model.UserSet, boolean)
    */
   // @Override
-  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws SetUniquenessValidationException {
+  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws SetUniquenessValidationException, RequestBodyValidationException, ParamValidationException {
     mergeUserSetProperties(persistentUserSet, webUserSet);
     // update modified date
     persistentUserSet.setModified(new Date());
     updateTotal(persistentUserSet);
-    checkDuplicateUserSets(persistentUserSet, true);
+    validateWebUserSet(persistentUserSet, true);
     UserSet updatedUserSet = getMongoPersistence().update(persistentUserSet);
     getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
@@ -597,15 +597,17 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
 	return serializer.serialize(searchApiRequest);
 	}
 	/**
-     * validates the EntityBestItemsSet for entity user set subject field must have
+	 * validates the EntityBestItemsSet for entity user set subject field must have
      * a entity reference.
-	 *
+     * 
 	 * @param webUserSet
+	 * @param checkDuplicatesWithoutItself
 	 * @throws ParamValidationException
 	 * @throws RequestBodyValidationException
+	 * @throws SetUniquenessValidationException
 	 */
-    void validateEntityBestItemsSet(UserSet webUserSet)
-	    throws ParamValidationException, RequestBodyValidationException {
+    void validateEntityBestItemsSet(UserSet webUserSet, boolean checkDuplicatesWithoutItself)
+	    throws ParamValidationException, RequestBodyValidationException, SetUniquenessValidationException {
 		if (!webUserSet.isEntityBestItemsSet()) {
 			return;
 		}
@@ -637,6 +639,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
     }
+    
+    checkDuplicateUserSets(webUserSet, checkDuplicatesWithoutItself);
   }
     
     void checkDuplicateUserSets(UserSet userSet, boolean withoutItself) throws SetUniquenessValidationException {

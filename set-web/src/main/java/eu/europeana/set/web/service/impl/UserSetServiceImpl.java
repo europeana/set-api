@@ -73,11 +73,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	if (newUserSet.isEntityBestItemsSet()) {
 	    checkPermissionToUpdate(newUserSet, authentication, true);
 	}
-	validateWebUserSet(newUserSet);
-
 	// store in mongo database
 	updateTotal(newUserSet);
-	checkDuplicateUserSets(newUserSet, false);
+    validateWebUserSet(newUserSet, false);
 	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
 	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
@@ -166,8 +164,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	}
     }
 
-    public void validateWebUserSet(UserSet webUserSet)
-			throws RequestBodyValidationException, ParamValidationException {
+    public void validateWebUserSet(UserSet webUserSet, boolean checkDuplicatesWithoutItself)
+			throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException {
 
 	// validate title
 	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -196,7 +194,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     
 	validateBookmarkFolder(webUserSet);
-	validateEntityBestItemsSet(webUserSet);
+	validateEntityBestItemsSet(webUserSet, checkDuplicatesWithoutItself);
 	validateControlledValues(webUserSet);
 	validateIsDefinedBy(webUserSet);
     }

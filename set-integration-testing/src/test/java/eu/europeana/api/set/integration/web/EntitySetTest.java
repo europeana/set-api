@@ -188,7 +188,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 	String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_NO_SUBJECT);
 	mockMvc.perform(put(BASE_URL + "{identifier}", identifier)
-		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
