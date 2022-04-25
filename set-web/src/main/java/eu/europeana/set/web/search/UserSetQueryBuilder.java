@@ -258,18 +258,18 @@ public class UserSetQueryBuilder extends QueryBuilder {
 		throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
 				new String[]{CommonApiConstants.QUERY_PARAM_FACET + " (for facets profile)"});
 		}
-	validateFacet(facet);
+	validateFacetAndLimit(facet, facetLimit);
 	return buildFacetQuery(facet, facetLimit);
     }
 
-	/**
-	 * Will validate the facets field.
-	 * For now, we don't support multiple facets seperated with comma
-	 * @param facet
-	 * @return
-	 * @throws ParamValidationException
-	 */
-    private void validateFacet(String facet) throws ParamValidationException {
+    /**
+     * Will validate the facet and the facet limit fields.
+     * For now, we don't support multiple facets seperated with comma
+     * @param facet
+     * @param facetLimit
+     * @throws ParamValidationException
+     */
+    private void validateFacetAndLimit(String facet, int facetLimit) throws ParamValidationException {
     if (facet.contains(",")) {
 		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
 				new String[] { "multiple facet value is not supported ", facet });
@@ -278,6 +278,10 @@ public class UserSetQueryBuilder extends QueryBuilder {
 		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
 				new String[] { "parameter value not supported in facets query ", facet });
 	}
+    if (facetLimit<=0) {
+      throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+              new String[] { "facet limit value needs to be positive ", String.valueOf(facetLimit) });
+    }
     }
 
 	/**
