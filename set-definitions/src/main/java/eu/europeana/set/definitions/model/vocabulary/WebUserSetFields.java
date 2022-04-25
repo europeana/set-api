@@ -63,16 +63,11 @@ public class WebUserSetFields extends WebUserSetModelFields {
 
     //collection page
     public static final String START_INDEX = "startIndex";
-    
-
-    // Pagination Constants
-//    public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";
-    public static final String BASE_ITEM_URL             = "http://data.europeana.eu/item/";
    
     // Serialization Constants
     public static final String SEPARATOR_SEMICOLON        = ":";
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
+//    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
 
     // Entity user set and Elevation Constants
     public static final String ELEVATION_FILENAME        = "elevate.xml";

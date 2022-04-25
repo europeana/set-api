@@ -3,14 +3,13 @@ package eu.europeana.set.web.search;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.search.util.QueryBuilder;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
@@ -29,14 +28,15 @@ public class UserSetQueryBuilder extends QueryBuilder {
   public static final String SEARCH_ALL_ALL = "*:*";
   public static final String PREFIX_HTTP = "http";
   
-    String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-	    WebUserSetFields.TYPE, WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT};
+    String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY, WebUserSetFields.TYPE, 
+        WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT, 
+        WebUserSetFields.PROVIDER};
     String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
 
     Set<String> suportedFields = Set.of(fields);
 	Set<String> supportedFacets = Set.of(facetsFields);
 
-    private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize) throws ParamValidationException {
+    private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page, int pageSize, UserSetConfiguration config) throws ParamValidationException {
 	UserSetQuery searchQuery = new UserSetQueryImpl();
 	searchQuery.setQuery(searchCriteria.toString());
 	
@@ -44,13 +44,15 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
 	addTypeCriterion(searchCriteria, searchQuery);
 
-	addCreatorCriterion(searchCriteria, searchQuery);
+	addCreatorCriterion(searchCriteria, searchQuery, config.getUserDataEndpoint());
 	
-	addContributorCriterion(searchCriteria, searchQuery);
+	addContributorCriterion(searchCriteria, searchQuery, config.getUserDataEndpoint());
+	
+	addProviderCriterion(searchCriteria, searchQuery);
 	
 	addSubjectCriterion(searchCriteria, searchQuery);
 	
-	addItemCriterion(searchCriteria, searchQuery);
+	addItemCriterion(searchCriteria, searchQuery, config.getItemDataEndpoint());
 
 	addSetIdCriterion(searchCriteria, searchQuery);
 
@@ -84,13 +86,13 @@ public class UserSetQueryBuilder extends QueryBuilder {
       }
     }
 
-    private void addItemCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery) {
+    private void addItemCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery, String itemDataEndpoint) {
       if (searchCriteria.containsKey(WebUserSetFields.ITEM)) {
           String item = searchCriteria.get(WebUserSetFields.ITEM);
           if(item.startsWith(PREFIX_HTTP)) {
       	searchQuery.setItem(item);
           }else {
-      	searchQuery.setItem(UserSetUtils.buildItemUrl(item));
+      	searchQuery.setItem(UserSetUtils.buildItemUrl(itemDataEndpoint, item));
           }
       }
     }
@@ -109,25 +111,38 @@ public class UserSetQueryBuilder extends QueryBuilder {
     }
 
     private void addContributorCriterion(Map<String, String> searchCriteria,
-        UserSetQuery searchQuery) {
+        UserSetQuery searchQuery, String userDataEndpoint) {
       if (searchCriteria.containsKey(WebUserSetModelFields.CONTRIBUTOR)) {
           String contributorId = searchCriteria.get(WebUserSetModelFields.CONTRIBUTOR);
           if(contributorId.startsWith(PREFIX_HTTP)) {
       	searchQuery.setContributor(contributorId);
           }else {
-      	searchQuery.setContributor(UserSetUtils.buildUserUri(contributorId));
+      	searchQuery.setContributor(UserSetUtils.buildUserUri(userDataEndpoint, contributorId));
           }
       }
     }
 
-    private void addCreatorCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery) {
+    private void addCreatorCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery, String userDataEndpoint) {
       if (searchCriteria.containsKey(WebUserSetModelFields.CREATOR)) {
           String creatorId = searchCriteria.get(WebUserSetModelFields.CREATOR);
           if(creatorId.startsWith(PREFIX_HTTP)) {
       	searchQuery.setCreator(creatorId);
           }else {
-      	searchQuery.setCreator(UserSetUtils.buildUserUri(creatorId));
+      	searchQuery.setCreator(UserSetUtils.buildUserUri(userDataEndpoint, creatorId));
           }
+      }
+    }
+    
+    private void addProviderCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+        throws ParamValidationException {
+      
+      if (searchCriteria.containsKey(WebUserSetModelFields.PROVIDER)) {
+          String providerId = searchCriteria.get(WebUserSetModelFields.PROVIDER);
+          if(providerId!=null && !providerId.startsWith(PREFIX_HTTP)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+            new String[] { "invalid value for search field, provider (id) must be a URI", providerId });
+          }
+          searchQuery.setProvider(providerId);
       }
     }
 
@@ -157,12 +172,12 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	}
     }
 
-    public UserSetQuery buildUserSetQuery(String query, String qf[], String sort, int page, int pageSize)
+    public UserSetQuery buildUserSetQuery(String query, String qf[], String sort, int page, int pageSize, UserSetConfiguration config)
 	    throws ParamValidationException {
 
 	Map<String, String> criteria = new HashMap<>();
 	parseSearchCriteria(criteria, query, qf);
-	return buildSearchQuery(criteria, sort, page, pageSize);
+	return buildSearchQuery(criteria, sort, page, pageSize, config);
     }
 
     private void parseSearchCriteria(Map<String, String> criteria, String query, String[] qf)

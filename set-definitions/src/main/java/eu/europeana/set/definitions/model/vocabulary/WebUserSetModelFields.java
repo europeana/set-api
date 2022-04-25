@@ -31,7 +31,7 @@ public class WebUserSetModelFields {
 	public static final String TITLE            = "title";
 	public static final String PINNED           = "pinned";
 	public static final String TEXT             = "text";
-	
+	public static final String PROVIDER         = "provider";
 
 	//** creator fields **/
 	public static final String NICKNAME         = "nickname";

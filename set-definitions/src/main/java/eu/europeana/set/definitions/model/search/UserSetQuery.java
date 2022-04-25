@@ -43,6 +43,9 @@ public interface UserSetQuery extends Query{
     void setText(String text);
 
     String getText();
+    
+    void setProvider(String provider);
 
+    String getProvider();
     
 }

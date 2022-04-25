@@ -49,6 +49,7 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_MULTIPLE_QUERY_OPEN = "/content/userset_open_multiple_query.json";
     public static final String USER_SET_LARGE_QUERY_OPEN = "/content/userset_open_large_query.json";
     public static final String USER_SET_LARGE = "/content/userset_large.json";
+    public static final String USER_SET_LARGE2 = "/content/userset_large2.json";
     public static final String USER_SET_TATTOOS = "/content/userset_tattoos.json";
     public static final String USER_SET_REGULAR_PUBLIC = "/content/userset_regular_public.json";
     public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";
@@ -78,6 +79,7 @@ public abstract class BaseUserSetTestUtils {
     protected static String editorUserToken;
     protected static String editor2UserToken;
     protected static String creatorEntitySetUserToken;
+    protected static String publisherUserToken;
 
     public void initApplication() {
 	if (mockMvc == null) {
@@ -86,8 +88,12 @@ public abstract class BaseUserSetTestUtils {
     }
 
     public static void initRegularUserToken() {
-	regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+      regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
     }
+    
+    public static void initPublisherUserToken() {
+      publisherUserToken = retrieveOatuhToken(EuropeanaOauthClient.PUBLISHER_USER);
+    }       
 
     public static void initEntitySetTokens() {
 	editorUserToken=
@@ -96,7 +102,6 @@ public abstract class BaseUserSetTestUtils {
 		retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
 	creatorEntitySetUserToken =
 		retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
-
     }
     
     
@@ -142,7 +147,7 @@ public abstract class BaseUserSetTestUtils {
     protected void deleteBookmarkFolder(String token)
 	    throws ApiKeyExtractionException, AuthorizationExtractionException, UserSetNotFoundException {
 	Authentication authentication = getAuthentication(token);
-	String creatorId = UserSetUtils.buildUserUri((String) authentication.getPrincipal());
+	String creatorId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), (String) authentication.getPrincipal());
 	UserSet bookmarkFolder = getUserSetService().getBookmarkFolder(creatorId);
 	if (bookmarkFolder != null) {
 	    getUserSetService().deleteUserSet(bookmarkFolder.getIdentifier());
