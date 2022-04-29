@@ -400,7 +400,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.OK.value()));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
 	@Test
@@ -592,7 +592,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, CommonLdConstants.ID));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(setIdentifier);
+//	getUserSetService().deleteUserSet(setIdentifier);
     }
 
     private String callSearchItemsInSet(String setIdentifier, String[] qf, String page, String pageSize,

@@ -111,7 +111,8 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	assertNotNull(provider);
 	assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
 	assertNotNull(getSetContributors(result));
-//	getUserSetService().deleteUserSet(identifier);
+	//this set is not registered in the createdUserSets, delete it manually
+	getUserSetService().deleteUserSet(identifier);
     }
     
     @Test
