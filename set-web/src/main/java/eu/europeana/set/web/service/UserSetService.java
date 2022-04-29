@@ -23,6 +23,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
 
@@ -57,9 +58,11 @@ public interface UserSetService {
      *
      * @param persistentUserSet
      * @param webUserSet
+     * @param profile
      * @return
+     * @throws HttpException 
      */
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
+    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws HttpException;
 
     /**
      * This method returns UserSet object for given user set identifier.
@@ -88,8 +91,9 @@ public interface UserSetService {
      * @param webUserSet
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
+     * @throws SetUniquenessValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
 
     /**
      * This method deletes user set by user set Id value.

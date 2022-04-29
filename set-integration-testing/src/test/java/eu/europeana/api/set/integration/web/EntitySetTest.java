@@ -15,6 +15,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,10 +66,15 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	initEntitySetTokens();
 	}
     
+    @AfterEach
+    protected void deleteCreatedSets() {
+      super.deleteCreatedSets();
+    }
+    
     // create Entity user set validation tests
     @Test
     void create_EntityUserSet_Unauthorized_InvalidUserRole() throws Exception {
-	String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+	String requestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE);
 
 	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -97,15 +103,34 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
 
-	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result);
-	assertNotNull(getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result));
+	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+	assertNotNull(identifier);
 	String creator = getSetCreator(result);
 	assertNotNull(creator);
 	String provider = getSetCreator(result);
 	assertNotNull(provider);
 	assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
 	assertNotNull(getSetContributors(result));
+	//this set is not registered in the createdUserSets, delete it manually
 	getUserSetService().deleteUserSet(identifier);
+    }
+    
+    @Test
+    void create_EntityUserSet_duplicate() throws Exception {
+    WebUserSetImpl userSetDuplicated = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+    assertNotNull(userSetDuplicated);
+    String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+
+    String result = mockMvc
+        .perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .content(requestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse().getContentAsString();
+
+    assertTrue(result.contains("duplicate"));
+
+    //getUserSetService().deleteUserSet(userSetDuplicated.getIdentifier());
+    
     }
 
     @Test
@@ -142,7 +167,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
     @Test
@@ -158,7 +183,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
 
@@ -170,12 +195,12 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 	String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_NO_SUBJECT);
 	mockMvc.perform(put(BASE_URL + "{identifier}", identifier)
-		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
 	@Test
@@ -191,7 +216,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().is(HttpStatus.PRECONDITION_FAILED.value()));
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
 	@Test
@@ -207,7 +232,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
     @Test
@@ -231,9 +256,43 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	assertEquals(userSet.getPinned(), updaedUserSet.getPinned());
 	assertEquals(userSet.getItems(), updaedUserSet.getItems());
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
+    
+    @Test
+    void update_EntityUserSet_duplicate() throws Exception {
 
+    WebUserSetImpl userSet1 = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+    String identifier1 = userSet1.getIdentifier();
+
+    //first update is to check that self update should be ok
+    String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
+    String result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier1)
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+    
+    WebUserSetImpl userSet2 = createTestUserSet(ENTITY_USER_SET_REGULAR_2, editorUserToken);
+    String identifier2 = userSet2.getIdentifier();
+    
+    //second update should fail
+    updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
+    result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier2)
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse().getContentAsString();
+
+    assertTrue(result.contains("duplicate"));
+
+    // check if a set is not overwritten
+    UserSet updaedUserSet = getUserSetService().getUserSetById(identifier2);
+    assertEquals(userSet2.getSubject().get(0), updaedUserSet.getSubject().get(0));
+
+//    getUserSetService().deleteUserSet(identifier1);
+//    getUserSetService().deleteUserSet(identifier2);
+    }
 
     @Test
     void delete_EntityUserSet_withRegularUser() throws Exception {
@@ -246,7 +305,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
     @Test
@@ -259,6 +318,8 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.AUTHORIZATION, editorUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+	
+//	getUserSetService().deleteUserSet(identifier);
     }
 
 
@@ -273,7 +334,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 	    .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
@@ -292,7 +353,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		assertTrue(containsKeyOrValue(result, newItem));
 		assertTrue(containsKeyOrValue(result, userSet.getId()));
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
@@ -378,7 +439,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		//total , pinned and position remains same
 		checkItemCountAndPosition(existingUserSet, entityItem, 9,4,existingUserSet.getItems().size()-1);
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
 	// test conversion of pinned -> normal item
@@ -456,7 +517,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertTrue(existingUserSet2.getItems().contains(newItem));
 		//total remains same, pinned should be reduced,position = 5
 		checkItemCountAndPosition(existingUserSet2, thirditem, 6,1,5);
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
 	// test conversion of normal item  -> pinned item
@@ -495,7 +556,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertEquals( 0, existingUserSet.getItems().indexOf(newItem)); // pinned item always added on top
 		assertEquals(4, userSet.getTotal()); // total remains same
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
@@ -522,7 +583,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		UserSet userSet1 = getUserSetService().getUserSetById(userSet.getIdentifier());
 		assertEquals(1, userSet1.getPinned());
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 

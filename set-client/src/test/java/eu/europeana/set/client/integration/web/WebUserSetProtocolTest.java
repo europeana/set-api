@@ -28,6 +28,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
     public void createUserSet() throws IOException {
 	String setId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
 	assertNotNull(setId);
+	getApiClient().deleteUserSet(setId);
     }
 
 	/**

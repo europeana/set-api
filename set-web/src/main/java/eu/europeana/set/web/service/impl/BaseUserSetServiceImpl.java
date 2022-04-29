@@ -1,10 +1,13 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
-
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.search.UserSetLdSerializer;
@@ -13,23 +16,26 @@ import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.oauth2.model.ApiCredentials;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
@@ -38,6 +44,9 @@ import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.vocabulary.Roles;
+import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
+import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
 public abstract class BaseUserSetServiceImpl implements UserSetService{
 
@@ -165,36 +174,49 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
    * europeana.UserSet.definitions.model.UserSet, boolean)
    */
   // @Override
-  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) {
+  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws SetUniquenessValidationException, RequestBodyValidationException, ParamValidationException, ApplicationAuthenticationException {
+    //###### FIRST Validate the input data, which is allowed to be partial ####/
+    resetImmutableFields(webUserSet, persistentUserSet);
+    // TODO: move verification to validateMethod when new specs are available
+    // TODO: reassess if the type should be kept muable 
+    if (persistentUserSet.isOpenSet() && !webUserSet.isOpenSet()) {
+    // isDefinedBy is mandatory for open sets
+    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+        new String[] { WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)" });
+    }
+    //validate input 
+    validateWebUserSet(webUserSet);
+    
+    //merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
+    
+    // validate items
+    validateAndSetItems(persistentUserSet, webUserSet, profile);
+    // remove duplicated items
+    removeItemDuplicates(webUserSet);
+
     // update modified date
     persistentUserSet.setModified(new Date());
     updateTotal(persistentUserSet);
     UserSet updatedUserSet = getMongoPersistence().update(persistentUserSet);
-    getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
 
   }
 
-  @Override
-  public String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
-    StringBuilder builder = new StringBuilder(collectionUrl);
-    // if collection url already has a query string, then append "&" or else "?"
-    if (collectionUrl.contains("?")) {
-      builder.append("&");
-    } else {
-      builder.append("?");
+  private void resetImmutableFields(UserSet webUserSet, PersistentUserSet persistentUserSet) {
+    // validate and process the Set description for format and mandatory fields
+    // if false respond with HTTP 400
+    // set immutable fields before validation
+    webUserSet.setCreator(persistentUserSet.getCreator());
+    webUserSet.setIdentifier(persistentUserSet.getIdentifier());
+//  newUserSet.setSubject(existingUserSet.getSubject());
+    if (webUserSet.getVisibility() == null) {
+      webUserSet.setVisibility(persistentUserSet.getVisibility());
     }
-    builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
-    builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
-        .append(pageSize);
-    // add the profile param if profile is not null (search items in set doesn't use a profile)
-    if (profile != null) {
-      builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
-        .append(profile.getRequestParamValue());
-    }
-    return builder.toString();
+    webUserSet.setContributor(persistentUserSet.getContributor());
   }
+
+
 
   public String buildResultsPageUrl(String apiUrl, String queryString, String searchProfile) {
     if (StringUtils.isNotBlank(queryString)) {
@@ -223,27 +245,27 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
   protected String removeParam(final String queryParam, String queryParams) {
-    String tmp;
-    // avoid name conflicts search "queryParam="
-    int startPos = queryParams.indexOf(queryParam + "=");
-    int startEndPos = queryParams.indexOf('&', startPos + 1);
+  String tmp;
+  // avoid name conflicts search "queryParam="
+  int startPos = queryParams.indexOf(queryParam + "=");
+  int startEndPos = queryParams.indexOf('&', startPos + 1);
 
-    if (startPos >= 0) {
+  if (startPos >= 0) {
       // make sure to remove the "&" if not the first param
       if (startPos > 0) {
-        startPos--;
+      startPos--;
       }
 
       tmp = queryParams.substring(0, startPos);
 
       if (startEndPos > 0) {
-        // tmp += queryParams.substring(startEndPos);
-        tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
+      // tmp += queryParams.substring(startEndPos);
+      tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
       }
-    } else {
+  } else {
       tmp = queryParams;
-    }
-    return tmp;
+  }
+  return tmp;
   }
 
   protected CollectionOverview buildCollectionOverview(String id, String paginationBaseUrl,
@@ -288,6 +310,66 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   protected boolean isLastPage(int currentPage, int lastPage) {
     return (currentPage == lastPage);
   }
+
+  @Override
+  public String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
+    StringBuilder builder = new StringBuilder(collectionUrl);
+    // if collection url already has a query string, then append "&" or else "?"
+    if (collectionUrl.contains("?")) {
+      builder.append("&");
+    } else {
+      builder.append("?");
+    }
+    builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
+    builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
+        .append(pageSize);
+    // add the profile param if profile is not null (search items in set doesn't use a profile)
+    if (profile != null) {
+      builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
+        .append(profile.getRequestParamValue());
+    }
+    return builder.toString();
+  }
+
+    public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
+	// remove out of scope parameters
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
+	// facets are not part of items pagination. Facets are displayed separately
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_FACET, queryString);
+
+	// avoid duplication of query parameters
+	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
+
+	// add mandatory parameters
+	if (StringUtils.isNotBlank(searchProfile)) {
+		if (!queryString.isEmpty()) {
+			queryString += "&";
+		}
+		queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
+
+	}
+	
+	//TODO: verify if base URL should be used instead
+	if (!queryString.isEmpty()) {
+		return requestUrl+"?"+queryString;
+	}
+	return requestUrl;
+    }
+
+
+
+    protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize, long totalInCollection,
+	    int lastPage, String type, LdProfiles profile) {
+	String first = null;
+	String last = null;
+	
+	if(totalInCollection > 0) {
+	    first = buildPageUrl(collectionUrl, 0, pageSize, profile);
+	    last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
+	}
+	return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
+    }
 
   protected void setDefaults(UserSet newUserSet, Authentication authentication) {
     Agent user = new WebUser();
@@ -405,6 +487,92 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       profile = LdProfiles.STANDARD;
     }
     return profile;
+  }
+  
+  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates, LdProfiles profile)
+      throws ApplicationAuthenticationException {
+    // no validation of items for open sets, they are retrieved dynamically
+    if (storedUserSet.isOpenSet()) {
+      return;
+    }
+
+    // for entity sets update :profile should be minimal and
+    // there must not be any items present in new user set
+    // only metadata can be update for entity sets
+    if (storedUserSet.isEntityBestItemsSet()) {
+      if (LdProfiles.MINIMAL != profile) {
+        throw new ApplicationAuthenticationException(
+            UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED,
+            UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED, new String[] {},
+            HttpStatus.PRECONDITION_FAILED, null);
+      }
+      if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) {
+        throw new ApplicationAuthenticationException(
+            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
+            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
+            HttpStatus.BAD_REQUEST, null);
+      }
+    }
+
+    // update the Set based on its identifier (replace member items with the new
+    // items
+    // that are present in the Set description only when a profile is indicated and
+    // is
+    // different from "ldp:PreferMinimalContainer" is referred in the "Prefer"
+    // header)
+    // if the provided userset contains a list of items and the profile is set to
+    // minimal,
+    // respond with HTTP 412)
+    if (LdProfiles.MINIMAL == profile) {
+      if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) { // new user set
+                                                                                     // contains
+        // items
+        throw new ApplicationAuthenticationException(
+            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
+            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
+            HttpStatus.PRECONDITION_FAILED, null);
+      }
+    } else { // it is a Standard profile
+      if (userSetUpdates.getItems() == null || userSetUpdates.getItems().size() == 0) { // new user
+                                                                                      // set
+                                                                                      // contains no
+                                                                                      // // items
+        throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS,
+            UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS, new String[] {},
+            HttpStatus.PRECONDITION_FAILED, null);
+      }
+      storedUserSet.setItems(userSetUpdates.getItems());
+    }
+  }
+  
+  public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException,
+      ParamValidationException, SetUniquenessValidationException {
+
+    // validate title
+    if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
+      throw new RequestBodyValidationException(
+          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+          new String[] {WebUserSetModelFields.TITLE});
+    }
+
+    // validate isDefinedBy and items - we should not have both of them
+    if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
+      throw new RequestBodyValidationException(
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+          new String[] {WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN});
+    }
+
+    // check that the visibility cannot be set to published
+    if (webUserSet.isPublished()) {
+      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+    }
+
+    validateBookmarkFolder(webUserSet);
+    validateControlledValues(webUserSet);
+    validateIsDefinedBy(webUserSet);
+    validateEntityBestItemsSet(webUserSet);
   }
 
   /**
@@ -541,24 +709,25 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     }
   }
 
-  String serializeSearchApiRequest(SearchApiRequest searchApiRequest) throws IOException {
-    UserSetLdSerializer serializer = new UserSetLdSerializer();
-    return serializer.serialize(searchApiRequest);
-  }
 
-  /**
-   * validates the EntityBestItemsSet for entity user set subject field must have a entity
-   * reference.
-   *
-   * @param webUserSet
-   * @throws ParamValidationException
-   * @throws RequestBodyValidationException
-   */
-  void validateEntityBestItemsSet(UserSet webUserSet)
-      throws ParamValidationException, RequestBodyValidationException {
-    if (!webUserSet.isEntityBestItemsSet()) {
-      return;
-    }
+	String serializeSearchApiRequest(SearchApiRequest searchApiRequest) throws IOException {
+	UserSetLdSerializer serializer = new UserSetLdSerializer();
+	return serializer.serialize(searchApiRequest);
+	}
+	/**
+	 * validates the EntityBestItemsSet for entity user set subject field must have
+     * a entity reference.
+     * 
+	 * @param webUserSet the user set to verify
+	 * @throws ParamValidationException
+	 * @throws RequestBodyValidationException
+	 * @throws SetUniquenessValidationException
+	 */
+    void validateEntityBestItemsSet(UserSet webUserSet)
+	    throws ParamValidationException, RequestBodyValidationException, SetUniquenessValidationException {
+		if (!webUserSet.isEntityBestItemsSet()) {
+			return;
+		}
 
     // creator must be present
     if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
@@ -578,7 +747,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       throw new RequestBodyValidationException(
           UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
           new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
-
     }
 
     // entity user set is a close set
@@ -588,8 +756,22 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
     }
-
+    
+    checkDuplicateUserSets(webUserSet);
   }
+    
+    void checkDuplicateUserSets(UserSet userSet) throws SetUniquenessValidationException {
+      //check the set uniqueness only for the EntityBestItemsSet type
+      if(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(userSet.getType())) {
+        List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet);
+        if(duplicateSetsIds!=null) {
+            String [] i18nParamsSetDuplicates = new String [1];
+            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
+            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
+                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
+        }
+      }
+    }
 
   void updateTotal(UserSet existingUserSet) {
     if (existingUserSet.getItems() != null) {
@@ -629,6 +811,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       } else {
         return userSet;
       }
-        
+
     }
+    
 }

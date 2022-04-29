@@ -17,6 +17,7 @@ public class UserSetI18nConstants {
     public static final String INVALID_SUBJECT_VALUE   = "error.userset_subject_invalid_value";
 
     public static final String USERSET_VALIDATION    			= "error.userset_validation";
+    public static final String USERSET_DUPLICATION              = "error.userset_duplication";
     public static final String USERSET_VALIDATION_MANDATORY_PROPERTY    = "error.userset_validation_mandatory_property";
     public static final String USERSET_VALIDATION_PROPERTY_VALUE        = "error.userset_validation_property_value";
     public static final String USERSET_VALIDATION_PROPERTY_NOT_ALLOWED  = "error.userset_validation_property_not_allowed";

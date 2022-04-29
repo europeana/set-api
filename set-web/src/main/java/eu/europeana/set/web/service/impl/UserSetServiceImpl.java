@@ -39,7 +39,6 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
-import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -53,7 +52,7 @@ import eu.europeana.set.web.model.search.ItemIdsCollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
-import eu.europeana.set.web.service.UserSetService;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
@@ -70,11 +69,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	if (newUserSet.isEntityBestItemsSet()) {
 	    checkPermissionToUpdate(newUserSet, authentication, true);
 	}
+	
 	validateWebUserSet(newUserSet);
-
+	
 	// store in mongo database
 	updateTotal(newUserSet);
-	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
+    UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
 	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
     }
@@ -160,41 +160,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	    List<String> distinctItems = userSet.getItems().stream().distinct().collect(Collectors.toList());
 	    userSet.setItems(distinctItems);
 	}
-    }
-
-    public void validateWebUserSet(UserSet webUserSet)
-			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
-
-	// validate title
-	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
-	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    new String[] { WebUserSetModelFields.TITLE });
-	}
-
-	// validate context
-//	if (webUserSet.getContext() != null
-//		&& !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())) {
-//	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-//		    new String[] { WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext() });
-//	}
-
-	// validate isDefinedBy and items - we should not have both of them
-	if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
-	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
-	}
-	
-	// check that the visibility cannot be set to published
-    if (webUserSet.isPublished()) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] { WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility() });
-    }
-    
-	validateBookmarkFolder(webUserSet);
-	validateEntityBestItemsSet(webUserSet);
-	validateControlledValues(webUserSet);
-	validateIsDefinedBy(webUserSet);
     }
 
     /*
@@ -888,7 +853,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	((WebUserSetImpl) userSet).setSerializedItems(jsonSerialized);
 //	userSet.setItems(null);
     }
-    
+
     @Override
     public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException {
        PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);

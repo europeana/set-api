@@ -1,5 +1,8 @@
 package eu.europeana.set.mongo.service;
 
+import java.util.List;
+import java.util.Map;
+import org.mongodb.morphia.query.QueryResults;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
@@ -7,11 +10,6 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import org.mongodb.morphia.query.QueryResults;
-
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
 
 public interface PersistentUserSetService extends AbstractNoSqlService<PersistentUserSet, String>{
 
@@ -112,6 +110,12 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 */
 	Map<String, Long> getFacets(UserSetFacetQuery facetQuery);
 
+	/**
+	 * verifies if the given user set is a duplicate of an existing set. Applicable only for BestItemsUserSet
+	 * @param userSet the set to verify for duplicates
+	 * @return list of existing duplicates
+	 */
+	List<String> getDuplicateUserSetsIds(UserSet userSet);
 
 }
 
