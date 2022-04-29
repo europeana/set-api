@@ -440,12 +440,12 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	/**
 	 * Getting the ids of the duplicate sets.
 	 */
-	public List<String> getDuplicateUserSetsIds(UserSet userSet, boolean withoutItself) {
+	public List<String> getDuplicateUserSetsIds(UserSet userSet) {
 	     if(userSet.getSubject()==null || userSet.getSubject().size()==0) return null;
 	       
 	     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
 	     query.filter(FIELD_TYPE, UserSetTypes.ENTITYBESTITEMSSET.toString());
-	     if(withoutItself) {
+	     if(StringUtils.isNotBlank(userSet.getIdentifier())) {
 	       query.filter(WebUserSetModelFields.IDENTIFIER + " !=", userSet.getIdentifier());
 	     }
 	     query.filter(WebUserSetModelFields.SUBJECT + " size", userSet.getSubject().size());

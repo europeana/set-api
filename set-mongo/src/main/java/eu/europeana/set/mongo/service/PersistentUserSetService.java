@@ -110,7 +110,12 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 */
 	Map<String, Long> getFacets(UserSetFacetQuery facetQuery);
 
-	List<String> getDuplicateUserSetsIds(UserSet userSet, boolean withoutItself);
+	/**
+	 * verifies if the given user set is a duplicate of an existing set. Applicable only for BestItemsUserSet
+	 * @param userSet the set to verify for duplicates
+	 * @return list of existing duplicates
+	 */
+	List<String> getDuplicateUserSetsIds(UserSet userSet);
 
 }
 

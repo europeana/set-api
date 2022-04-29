@@ -58,10 +58,11 @@ public interface UserSetService {
      *
      * @param persistentUserSet
      * @param webUserSet
+     * @param profile
      * @return
      * @throws HttpException 
      */
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws HttpException;
+    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws HttpException;
 
     /**
      * This method returns UserSet object for given user set identifier.
@@ -92,7 +93,7 @@ public interface UserSetService {
      * @throws ParamValidationException
      * @throws SetUniquenessValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet, boolean checkDuplicatesWithoutItself) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
 
     /**
      * This method deletes user set by user set Id value.
