@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +71,11 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     initPublisherUserToken();
     }
     
+    @AfterEach
+    protected void deleteCreatedSets() {
+      super.deleteCreatedSets();
+    }
+    
     @Test
     public void searchEmptyApiKey() throws Exception {
 //        UserSet set = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
@@ -111,7 +117,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
 
     }
 
@@ -136,7 +142,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.OK.value()));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
     @Test
@@ -158,7 +164,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, buildUserSetId));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
     @Test
@@ -181,7 +187,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, userSetId));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
     @Test
@@ -208,7 +214,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, contributorId));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
 	@Test
@@ -270,7 +276,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertTrue(containsKeyOrValue(result, title));
 
 		// delete item created by test
-		getUserSetService().deleteUserSet(set.getIdentifier());
+//		getUserSetService().deleteUserSet(set.getIdentifier());
 	}
 
 	@Test
@@ -322,7 +328,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, title));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
 
@@ -350,7 +356,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertTrue(containsKeyOrValue(result, title));
 
 		// delete item created by test
-		getUserSetService().deleteUserSet(set.getIdentifier());
+//		getUserSetService().deleteUserSet(set.getIdentifier());
 	}
 
 
@@ -378,7 +384,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, subject));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
     
     @Test
@@ -421,7 +427,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		assertTrue(containsKeyOrValue(result, "dcDescription"));
 
 		// delete item created by test
-		getUserSetService().deleteUserSet(set.getIdentifier());
+//		getUserSetService().deleteUserSet(set.getIdentifier());
 	}
 
     @Test
@@ -438,9 +444,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.OK.value()));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set1.getIdentifier());
-	getUserSetService().deleteUserSet(set2.getIdentifier());
-	getUserSetService().deleteUserSet(set3.getIdentifier());
+//	getUserSetService().deleteUserSet(set1.getIdentifier());
+//	getUserSetService().deleteUserSet(set2.getIdentifier());
+//	getUserSetService().deleteUserSet(set3.getIdentifier());
     }
 
     @Test
@@ -459,7 +465,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.OK.value()));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set.getIdentifier());
+//	getUserSetService().deleteUserSet(set.getIdentifier());
     }
 
     @Test
@@ -484,9 +490,9 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set3.getIdentifier())));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(set1.getIdentifier());
-	getUserSetService().deleteUserSet(set2.getIdentifier());
-	getUserSetService().deleteUserSet(set3.getIdentifier());
+//	getUserSetService().deleteUserSet(set1.getIdentifier());
+//	getUserSetService().deleteUserSet(set2.getIdentifier());
+//	getUserSetService().deleteUserSet(set3.getIdentifier());
     }
 
     @Test
@@ -523,7 +529,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(setIdentifier);
+//	getUserSetService().deleteUserSet(setIdentifier);
     }
 
     @Test
@@ -549,7 +555,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(setIdentifier);
+//	getUserSetService().deleteUserSet(setIdentifier);
     }
 
     @Test
@@ -568,7 +574,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 	assertTrue(containsKeyOrValue(result, CommonLdConstants.ID));
 
 	// delete item created by test
-	getUserSetService().deleteUserSet(setIdentifier);
+//	getUserSetService().deleteUserSet(setIdentifier);
     }
 
     @Test
@@ -640,8 +646,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.OK.value()));
 	// delete item created by test
-	getUserSetService().deleteUserSet(set1.getIdentifier());
-	getUserSetService().deleteUserSet(set2.getIdentifier());
+//	getUserSetService().deleteUserSet(set1.getIdentifier());
+//	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
 
     // Facet validation
@@ -776,8 +782,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     // verify the facet values
     checkItemFacets(getFacetResultPage(result));
     // delete item created by test
-    getUserSetService().deleteUserSet(set1.getIdentifier());
-    getUserSetService().deleteUserSet(set2.getIdentifier());
+//    getUserSetService().deleteUserSet(set1.getIdentifier());
+//    getUserSetService().deleteUserSet(set2.getIdentifier());
     }
 
 	@Test
@@ -808,8 +814,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     // verify the facet values
 	checkItemFacets(getFacetResultPage(result));
 	// delete item created by test
-	getUserSetService().deleteUserSet(set1.getIdentifier());
-	getUserSetService().deleteUserSet(set2.getIdentifier());
+//	getUserSetService().deleteUserSet(set1.getIdentifier());
+//	getUserSetService().deleteUserSet(set2.getIdentifier());
     }
 
 	private void checkItemFacets(List<FacetValue> facetValueResultPages) {

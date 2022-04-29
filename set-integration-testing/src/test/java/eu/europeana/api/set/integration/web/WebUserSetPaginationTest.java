@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,11 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     super.initApplication();
   }
 
+  @AfterEach
+  protected void deleteCreatedSets() {
+    super.deleteCreatedSets();
+  }
+  
   @Test
   public void getUserSetPagination() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
@@ -103,7 +109,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     // 1 id part of and one for collection page
     assertEquals(2, total);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
@@ -138,7 +144,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     // 1 total only for the set
     assertEquals(1, total);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -184,7 +190,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     // 2 totals: collection page and set
     assertEquals(2, total);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -211,7 +217,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int pageSize = StringUtils.countMatches(result, "http://data.europeana.eu/item/");
     assertEquals(defaultPageSize, pageSize);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -240,7 +246,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
     assertEquals(defaultPageSize, pageSize);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
@@ -273,7 +279,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
     assertEquals(secondPageSize, pageSize);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -305,7 +311,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     verifyItemOrder(userSet, result, missingItems);
     assertEquals(defaultPageSize, pageSize);
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
@@ -359,7 +365,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
     assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE));
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -382,7 +388,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
     assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE_SIZE));
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
+//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 }

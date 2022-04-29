@@ -1,14 +1,11 @@
 package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import eu.europeana.set.web.model.search.FacetValue;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -20,8 +17,6 @@ import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.api.commons.exception.ApiKeyExtractionException;
 import eu.europeana.api.commons.exception.AuthorizationExtractionException;
 import eu.europeana.api.commons.oauth2.utils.OAuthUtils;
@@ -29,8 +24,12 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 
@@ -73,7 +72,10 @@ public abstract class BaseUserSetTestUtils {
 
     @Autowired
     private UserSetService userSetService;
-
+    
+    @Autowired
+    PersistentUserSetService mongoPersistance;
+    
     @Autowired
     private UserSetConfiguration configuration;
 
@@ -82,6 +84,7 @@ public abstract class BaseUserSetTestUtils {
     protected static String editor2UserToken;
     protected static String creatorEntitySetUserToken;
     protected static String publisherUserToken;
+    protected static List<PersistentUserSet> createdUserSets = new ArrayList<>();
 
     public void initApplication() {
 	if (mockMvc == null) {
@@ -106,6 +109,10 @@ public abstract class BaseUserSetTestUtils {
 		retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
     }
     
+    protected void deleteCreatedSets() {
+      getMongoPersistance().removeAll(createdUserSets);
+      createdUserSets.clear();
+    }
     
     public UserSetServiceImpl getUserSetService() {
 	return (UserSetServiceImpl) userSetService;
@@ -140,10 +147,13 @@ public abstract class BaseUserSetTestUtils {
     }
 
     protected WebUserSetImpl createTestUserSet(String testFile, String token) throws Exception {
-	String requestJson = getJsonStringInput(testFile);
-	UserSet set = getUserSetService().parseUserSetLd(requestJson);
-	Authentication authentication = getAuthentication(token);
-	return (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
+      String requestJson = getJsonStringInput(testFile);
+      UserSet set = getUserSetService().parseUserSetLd(requestJson);
+      Authentication authentication = getAuthentication(token);
+      WebUserSetImpl createdSet =
+          (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
+      createdUserSets.add(createdSet);
+      return createdSet;
     }
 
     protected void deleteBookmarkFolder(String token)
@@ -209,6 +219,10 @@ public abstract class BaseUserSetTestUtils {
        facetValueResultPages.add(new FacetValue(o.getString("label"), o.getLong("count")));
     }
     return facetValueResultPages;
+    }
+
+    protected PersistentUserSetService getMongoPersistance() {
+      return mongoPersistance;
     }
 
 }
