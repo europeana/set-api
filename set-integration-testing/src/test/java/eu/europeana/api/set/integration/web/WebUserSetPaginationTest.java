@@ -304,10 +304,13 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
 
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
-    String[] missingItems = new String[] {
-        "http://data.europeana.eu/item/2051945/data_euscreenXL_http___www_ceskatelevize_cz_ivysilani_10727240820_kmeny_214562260850011_tattoo_",
-        "http://data.europeana.eu/item/9200387/BibliographicResource_3000117247957"
-    };
+
+    String[] missingItems = new String[0];
+//    String[] missingItems = new String[] {
+//        "http://data.europeana.eu/item/2051945/data_euscreenXL_http___www_ceskatelevize_cz_ivysilani_10727240820_kmeny_214562260850011_tattoo_",
+//        "http://data.europeana.eu/item/9200387/BibliographicResource_3000117247957"
+//    };
+    
     verifyItemOrder(userSet, result, missingItems);
     assertEquals(defaultPageSize, pageSize);
 
