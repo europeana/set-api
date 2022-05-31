@@ -388,7 +388,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 		validateLastPage(userSet.getItems().size(), pageSize, pageNr);
 	}
 	String apiKey = getConfiguration().getSearchApiKey();
-	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
+	String profileParam = null;
+	if(LdProfiles.ITEMDESCRIPTIONS == profile) {
+	  profileParam = getConfiguration().getSearchApiProfileForItemDescriptions();
+	}
+	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl(), profileParam);
 	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);

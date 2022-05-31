@@ -43,6 +43,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   
   public static final String KEY_SEARCH_APIKEY = "europeana.search.apikey";
   public static final String KEY_SEARCH_URL = "europeana.search.url";
+  public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
   public static final String API_VERSION = "set.api.version";
 
   
@@ -140,6 +141,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   @Override
   public String getSearchApiUrl() {
     return getSetProperties().getProperty(KEY_SEARCH_URL);
+  }
+  
+  @Override
+  public String getSearchApiProfileForItemDescriptions() {
+    return getSetProperties().getProperty(KEY_SEARCH_ITEM_DESCRIPTION_PROFILE);
   }
 
   @Override

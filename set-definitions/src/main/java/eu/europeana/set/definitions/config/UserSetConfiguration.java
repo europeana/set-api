@@ -22,6 +22,8 @@ public interface UserSetConfiguration{
 	public int getMaxRetrieveDereferencedItems();
 	
 	public String getSearchApiKey();
+	
+	public String getSearchApiProfileForItemDescriptions();
 
 	public String getEntityUserSetUserId();
 
