@@ -108,8 +108,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int total = StringUtils.countMatches(result, "\"total\"");
     // 1 id part of and one for collection page
     assertEquals(2, total);
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
@@ -189,8 +187,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int total = StringUtils.countMatches(result, "\"total\"");
     // 2 totals: collection page and set
     assertEquals(2, total);
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -216,8 +212,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
     int pageSize = StringUtils.countMatches(result, "http://data.europeana.eu/item/");
     assertEquals(defaultPageSize, pageSize);
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -245,8 +239,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
     assertEquals(defaultPageSize, pageSize);
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
@@ -278,8 +270,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int secondPageSize = 91;
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
     assertEquals(secondPageSize, pageSize);
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -306,11 +296,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
 
     String[] missingItems = new String[0];
-//    String[] missingItems = new String[] {
-//        "http://data.europeana.eu/item/2051945/data_euscreenXL_http___www_ceskatelevize_cz_ivysilani_10727240820_kmeny_214562260850011_tattoo_",
-//        "http://data.europeana.eu/item/9200387/BibliographicResource_3000117247957"
-//    };
-    
     verifyItemOrder(userSet, result, missingItems);
     assertEquals(defaultPageSize, pageSize);
 
@@ -326,7 +311,9 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     int pos;
     
     //remove missingItems
-    userSet.getItems().removeAll(List.of(missingItems));
+    if(missingItems != null && missingItems.length > 0) {
+      userSet.getItems().removeAll(List.of(missingItems));
+    }
     
     for (int i = 0; i < itemDescriptions.length(); i++) {
       itemDescription = itemDescriptions.getJSONObject(i);
@@ -367,8 +354,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     assertNotNull(result);
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
     assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE));
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -390,8 +375,6 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     assertNotNull(result);
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
     assertTrue(StringUtils.contains(result, CommonApiConstants.QUERY_PARAM_PAGE_SIZE));
-
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 }

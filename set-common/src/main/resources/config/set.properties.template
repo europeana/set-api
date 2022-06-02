@@ -35,7 +35,7 @@ set.search.dereference.items.max=10
 set.retrieve.dereference.items.max=100
 #max nr of items in a page, when retrieving sets with pagination
 set.retrieve.maxpagesize.standard=100
- 
+
 # Profiling configurations (enabling/disabling through profiler.expression property)
 # disable profiling
 # profiler.expression=within(none.*)
@@ -65,6 +65,8 @@ europeana.search.apikey=
 
 #API key used for invocation of search api
 europeana.search.url=https://api.europeana.eu/api/v2/search.json?profile=minimal&wskey=MY_KEY&query=
+europeana.search.itemdescription.profile=minimal
+
 
 #the name for annotation api resources in keykloack tokens
 authorization.api.name=usersets

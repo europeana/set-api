@@ -449,7 +449,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 			}
 			if (!found) {
 			  orderedItemDescriptions.add("{\"id\":\""+ localId +"\"}");
-			  logger.debug("No item description found for id: {}", localId);
 			}
 		}
 		return orderedItemDescriptions;
