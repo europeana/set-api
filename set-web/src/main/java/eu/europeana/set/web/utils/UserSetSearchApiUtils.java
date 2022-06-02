@@ -20,13 +20,14 @@ public class UserSetSearchApiUtils {
     /**
      * Will create the Serach Api post request url
      * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
-     *
-     * @param userSet userset for which request is sent
-     * @param apiKey apikey for url
-     * @param searchUrl  base url for search api
-     * @return search api url
+     * 
+     * @param userSet
+     * @param apiKey
+     * @param searchUrl
+     * @param profile
+     * @return
      */
-    public String buildSearchApiPostUrl(UserSet userSet, String apiKey, String searchUrl) {
+    public String buildSearchApiPostUrl(UserSet userSet, String apiKey, String searchUrl, String profile) {
         StringBuilder url = new StringBuilder();
         if (!userSet.isOpenSet()) {
             url.append(getBaseSearchUrl(searchUrl));
@@ -35,6 +36,10 @@ public class UserSetSearchApiUtils {
         }
         // add apikey
         url.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+        // add profile
+        if(profile!=null) {
+          url.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=').append(profile);
+        }
         return url.toString();
     }
 

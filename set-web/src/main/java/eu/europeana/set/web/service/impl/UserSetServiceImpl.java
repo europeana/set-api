@@ -388,7 +388,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 		validateLastPage(userSet.getItems().size(), pageSize, pageNr);
 	}
 	String apiKey = getConfiguration().getSearchApiKey();
-	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
+	String profileParam = null;
+	if(LdProfiles.ITEMDESCRIPTIONS == profile) {
+	  profileParam = getConfiguration().getSearchApiProfileForItemDescriptions();
+	}
+	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl(), profileParam);
 	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
@@ -404,7 +408,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 				// use the count of item ids
 				total = userSet.getItems().size();
 			}
-			List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
+			List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);
 			setItems(userSet, sortedItemDescriptions, total);
 		}
 	    return userSet;
@@ -422,11 +426,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	}
     }
 
-    private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions) {
+    private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions, int pageNr, int pageSize) {
 	List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
 	String localId;
 	if(userSet.getItems() != null) {
-		for (String itemUri : userSet.getItems()) {
+
+	    // calculate the index of from and until to get the right page of items
+        Integer start = pageNr * pageSize;
+        Integer till = Math.min((start +  pageSize), userSet.getItems().size()); // should not exceed the size of item list
+        for (int i = start; i < till; i++) {
+            String itemUri = userSet.getItems().get(i);
 			boolean found = false;
 			localId = UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
 			//escape "/" to "\/" to match json string
@@ -439,11 +448,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 				}
 			}
 			if (!found) {
-				logger.debug("No item description found for id: {}", localId);
-			}
-			if (orderedItemDescriptions.size() == itemDescriptions.size()) {
-				//skip items not included in the current page
-				break;
+			  orderedItemDescriptions.add("{\"id\":\""+ localId +"\"}");
 			}
 		}
 		return orderedItemDescriptions;
