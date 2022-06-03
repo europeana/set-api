@@ -273,10 +273,12 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
 	return res.toString();
     }
 
+    @Override
     public Provider getProvider() {
       return provider;
     }
 
+    @Override
     public void setProvider(Provider provider) {
       this.provider = provider;
     }

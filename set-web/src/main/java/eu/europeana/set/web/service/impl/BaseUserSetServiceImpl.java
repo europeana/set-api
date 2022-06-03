@@ -8,11 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.search.SearchApiRequest;
-import eu.europeana.set.web.search.UserSetLdSerializer;
-import eu.europeana.set.web.service.UserSetService;
-import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +27,7 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
@@ -45,6 +41,7 @@ import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
@@ -567,6 +564,21 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+    }
+
+    // check provider id if available
+    if (webUserSet.getProvider() != null
+        && !StringUtils.isBlank(webUserSet.getProvider().getId())) {
+      final String providerId = webUserSet.getProvider().getId();
+      boolean isAllowedProviderId =
+          (providerId.startsWith(WebUserSetFields.PROJECT_EUROPEANA_BASE_URL)
+              || providerId.startsWith(WebUserSetFields.DATA_EUROPEANA_BASE_URL));
+      if (!isAllowedProviderId) {
+        final String message = providerId + " - must be under one of the domains: " +WebUserSetFields.DATA_EUROPEANA_BASE_URL + ", " + WebUserSetFields.PROJECT_EUROPEANA_BASE_URL;
+        throw new RequestBodyValidationException(
+            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+            new String[] {WebUserSetModelFields.PROVIDER, message});
+      }
     }
 
     validateBookmarkFolder(webUserSet);

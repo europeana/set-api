@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.impl.Provider;
 
 public interface UserSet extends PageInfo {
 
@@ -87,4 +88,8 @@ public interface UserSet extends PageInfo {
      * @param baseUrl
      */
     public void setBaseUrl(String baseUrl);
+
+    void setProvider(Provider provider);
+
+    Provider getProvider();
 }

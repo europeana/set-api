@@ -77,5 +77,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String AGENT                     = "agent";
     public static final String CONCEPT                   = "concept";
     public static final String TIMESPAN                  = "timespan";
-    public static final String ENTITY_REFERENCE_URL      = "http://data.europeana.eu/";
+    public static final String DATA_EUROPEANA_BASE_URL      = "http://data.europeana.eu/";
+    public static final String PROJECT_EUROPEANA_BASE_URL      = "https://pro.europeana.eu/project/";
+    
 }

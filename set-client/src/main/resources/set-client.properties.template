@@ -8,5 +8,15 @@ set.api.key =
 #the URL for the endpoint of OAuth service  
 oauth.service.uri=
 
-#The parameters sent for retrieving a new ticket   
+#The parameters sent for retrieving a new token for regular user   
 oauth.token.request.params=username=
+
+#The parameters sent for retrieving a new token for editor user   
+oauth.token.request.params.editor=username=
+
+#The parameters sent for retrieving a new token for second editor user   
+oauth.token.request.params.editor2=username=
+
+#The parameters sent for retrieving a new token for publisher user      
+oauth.token.request.params.publisher=username=
+
