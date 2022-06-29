@@ -1,11 +1,11 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import eu.europeana.api.commons.definitions.statistics.UsageStatsFields;
+import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.set.stats.model.Metric;
-import eu.europeana.set.stats.vocabulary.UsageStatsFields;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.search.UserSetLdSerializer;
@@ -53,11 +53,12 @@ public class UsageStatsUserSetRest extends BaseRest {
         // authenticate and generate the new statistics
         verifyReadAccess(request);
         // create metric
-        Metric metric = new Metric();
+        SetMetric metric = new SetMetric();
         metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
         getUsageStatsService().getPublicPrivateSetsCount(metric);
         getUsageStatsService().getTotalItemsLiked(metric);
         getUsageStatsService().getAverageSetsPerUser(metric);
+        getUsageStatsService().getNumberOfUsersWithLike(metric);
         metric.setTimestamp(new Date());
 
         String json = serializeMetricView(metric);
@@ -74,7 +75,7 @@ public class UsageStatsUserSetRest extends BaseRest {
         return new ResponseEntity<>(json, headers, HttpStatus.OK);
     }
 
-    private String serializeMetricView(Metric metricData) throws IOException {
+    private String serializeMetricView(SetMetric metricData) throws IOException {
         UserSetLdSerializer serializer = new UserSetLdSerializer();
         return serializer.serialize(metricData);
     }

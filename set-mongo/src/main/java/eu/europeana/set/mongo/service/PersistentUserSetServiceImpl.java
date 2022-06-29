@@ -166,11 +166,15 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	@Override
-	public long getDistinctCreators() {
-		// create query : { type: { $eq: Collection } }
-		DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
-				new BasicDBObject(UserSetMongoConstants.MONGO_EQUALS, UserSetTypes.COLLECTION.getJsonValue()));
-		return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
+	public long getDistinctCreators(String type) {
+		// create query : { type: { $eq: <type> } }
+		if (type != null) {
+			DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
+					new BasicDBObject(UserSetMongoConstants.MONGO_EQUALS, type));
+			return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
+		} else {
+			return getDao().getCollection().distinct(WebUserSetFields.CREATOR).size();
+		}
 	}
 
 	@Override
