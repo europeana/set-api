@@ -30,9 +30,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 public class UserSetServiceImplTest {
 
-    private static final String REQUEST_URL = "http://set-api-test/set/search";
+	private static String REQUEST_URL;
 
-    @Autowired
+	@Autowired
     UserSetServiceImpl userSetService;
     UserSetQuery userSetQuery;
     ResultSet<? extends UserSet> resultSet;
@@ -47,7 +47,7 @@ public class UserSetServiceImplTest {
 	resultSet = new ResultSet<>();
 	userSetQuery = new UserSetQueryImpl();
 	authentication = Mockito.mock(Authentication.class);
-
+	REQUEST_URL = userSetService.getConfiguration().getSetApiEndpoint() + "search";
 	// userSetQuery.
 	userSetQuery.setPageSize(10);
     }
@@ -166,7 +166,6 @@ public class UserSetServiceImplTest {
     @Test
     public void testPaginationForOddNumberResults() throws Exception {
 	updateResultSetItems(57);
-//	resultSet.setResultSize(57);
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
 	assertTrue(lastPage == 5);
 
@@ -193,7 +192,12 @@ public class UserSetServiceImplTest {
 	checkPartOfUrls(result, profile);
     }
 
-    private void checkPartOfUrls(BaseUserSetResultPage<?> result, LdProfiles profile) {
+	/**
+	 * 'partOf' should not contain profile
+	 * @param result
+	 * @param profile
+	 */
+	private void checkPartOfUrls(BaseUserSetResultPage<?> result, LdProfiles profile) {
     	assertFalse(StringUtils.contains(result.getPartOf().getFirst(), "profile="+profile.name().toLowerCase()));
 		assertFalse(StringUtils.contains(result.getPartOf().getLast(), "profile="+profile.name().toLowerCase()));
     }

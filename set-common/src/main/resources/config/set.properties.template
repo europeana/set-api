@@ -15,6 +15,12 @@ set.environment.baseUrl.test=http://set-api-test.eanadev.org/set/
 #used only in develop environment
 set.environment.baseUrl.development=http://localhost:8080/set/
 
+#endpoint configurations, all must end with / 
+set.api.endpoint.baseUrl=http://localhost:8080/set/
+set.data.endpoint.baseUrl=http://data.europeana.eu/set/
+user.data.endpoint.baseUrl=http://data.europeana.eu/user/
+item.data.endpoint.baseUrl=http://data.europeana.eu/item/
+
 #configurable user id for the entity user set
 entity.userset.user.id=
 
@@ -29,7 +35,7 @@ set.search.dereference.items.max=10
 set.retrieve.dereference.items.max=100
 #max nr of items in a page, when retrieving sets with pagination
 set.retrieve.maxpagesize.standard=100
- 
+
 # Profiling configurations (enabling/disabling through profiler.expression property)
 # disable profiling
 # profiler.expression=within(none.*)
@@ -58,7 +64,9 @@ europeana.apikey.serviceurl=
 europeana.search.apikey=
 
 #API key used for invocation of search api
-europeana.search.url=https://api.europeana.eu/api/v2/search.json?profile=minimal&wskey=MY_KEY&query=
+europeana.search.url=https://api.europeana.eu/api/v2/search.json?wskey=MY_KEY&query=
+europeana.search.itemdescription.profile=minimal
+
 
 #the name for annotation api resources in keykloack tokens
 authorization.api.name=usersets

@@ -6,9 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,12 +17,10 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.Sort;
 import org.springframework.stereotype.Component;
-
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Cursor;
 import com.mongodb.DBObject;
-
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -165,16 +161,25 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 * @see eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl#findByID(java.io.Serializable)
 	 */
 	@Override
+	@Deprecated
+	/**
+	 * @deprecated use the getByIdentifier method instead
+	 */
 	public PersistentUserSet findByID(String id) {
 		return getDao().findOne(UserSetMongoConstants.MONGO_ID, new ObjectId(id));
 	}
 
+	
 	@Override
-	public long getDistinctCreators() {
-		// create query : { type: { $eq: Collection } }
-		DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
-				new BasicDBObject(UserSetMongoConstants.MONGO_EQUALS, UserSetTypes.COLLECTION.getJsonValue()));
-		return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
+	public long getDistinctCreators(String type) {
+		// create query : { type: { $eq: <type> } }
+		if (type != null) {
+			DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
+					new BasicDBObject(UserSetMongoConstants.MONGO_EQUALS, type));
+			return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
+		} else {
+			return getDao().getCollection().distinct(WebUserSetFields.CREATOR).size();
+		}
 	}
 
 	@Override
@@ -303,8 +308,13 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    long totalInCollection = mongoQuery.count();
 
 	    FindOptions options = buildMongoPaginationOptions(query);
-	    List<PersistentUserSet> userSets = mongoQuery.asList(options);
+	    List<PersistentUserSet> userSets = new ArrayList<PersistentUserSet>();
+	    //workaround as limit=0 still returns all results 
+	    if(options.getLimit() > 0) {
+	      userSets = mongoQuery.asList(options);
+	    }
 	    ResultSet<PersistentUserSet> res = new ResultSet<>();
+	    
 	    res.setResults(userSets);
 	    res.setResultSize(totalInCollection);
 	    return res;
@@ -356,6 +366,10 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if(query.getCreator() != null) {
 		mongoQuery.filter(WebUserSetModelFields.CREATOR + ".httpUrl", query.getCreator());
 	    }
+
+        if(query.getProvider() != null) {
+        mongoQuery.filter(WebUserSetModelFields.PROVIDER + ".id", query.getProvider());       
+        }	    
 	    
 	    if(query.getContributor() != null) {
 		mongoQuery.filter(WebUserSetModelFields.CONTRIBUTOR + " in", query.getContributor());
@@ -414,6 +428,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@Override
 	public void removeAll(List<PersistentUserSet> userSets) {
 		List<ObjectId> objectIds = new ArrayList<>();
+		//TODO: switch implementation to delete by identifier
 		if (!userSets.isEmpty()) {
 			for( PersistentUserSet userSet : userSets) {
 				objectIds.add(userSet.getObjectId());
@@ -430,6 +445,31 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	//TODO: use store instead
 	public PersistentUserSet update(PersistentUserSet userSet) throws  UserSetValidationException {
 		return store(userSet);
+	}
+	
+	/**
+	 * Getting the ids of the duplicate sets.
+	 */
+	public List<String> getDuplicateUserSetsIds(UserSet userSet) {
+	     if(userSet.getSubject()==null || userSet.getSubject().size()==0) return null;
+	       
+	     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
+	     query.filter(FIELD_TYPE, UserSetTypes.ENTITYBESTITEMSSET.toString());
+	     if(StringUtils.isNotBlank(userSet.getIdentifier())) {
+	       query.filter(WebUserSetModelFields.IDENTIFIER + " !=", userSet.getIdentifier());
+	     }
+	     query.filter(WebUserSetModelFields.SUBJECT + " size", userSet.getSubject().size());
+	     query.filter(WebUserSetModelFields.SUBJECT + " all", userSet.getSubject());
+	     query.project(WebUserSetModelFields.IDENTIFIER, true);
+	     List<PersistentUserSet> resultMongo = getUserSetDao().find(query).asList();
+	     List<String> result =  null;
+	     if (resultMongo!=null && resultMongo.size()>0) {
+	       result = new ArrayList<String>();
+	       for (PersistentUserSet set : resultMongo) {
+	           result.add(set.getIdentifier());
+	       }
+	     }
+	     return result;
 	}
 
 }

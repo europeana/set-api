@@ -23,6 +23,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
 
@@ -57,9 +58,11 @@ public interface UserSetService {
      *
      * @param persistentUserSet
      * @param webUserSet
+     * @param profile
      * @return
+     * @throws HttpException 
      */
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet);
+    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws HttpException;
 
     /**
      * This method returns UserSet object for given user set identifier.
@@ -88,8 +91,9 @@ public interface UserSetService {
      * @param webUserSet
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
+     * @throws SetUniquenessValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException;
+    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -150,7 +154,7 @@ public interface UserSetService {
 	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
             throws HttpException;
     
-    public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
+    public ItemIdsResultPage buildItemIdsResultsPage(String setId, List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
     
     public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
@@ -220,4 +224,25 @@ public interface UserSetService {
      * @return
      */
     List<PersistentUserSet> getEntitySetBestBetsItems(UserSetQuery query);
+
+    /**
+     * Builds page Url
+     * @param collectionUrl
+     * @param page
+     * @param pageSize
+     * @param profile
+     * @return
+     */
+    String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) ;
+
+    /**
+     * This method publishes and/or un-publishes an existing UserSet.
+     * @param userSetId
+     * @param authentication
+     * @param publish
+     * @return
+     * @throws HttpException
+     */
+    UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException;
+
 }

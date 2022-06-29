@@ -10,3 +10,4 @@ oauth.service.uri=
 
 #The parameters sent for retrieving a new ticket   
 oauth.token.request.params=username=
+

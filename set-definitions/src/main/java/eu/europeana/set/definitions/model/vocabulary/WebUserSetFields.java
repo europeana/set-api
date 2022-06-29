@@ -63,16 +63,11 @@ public class WebUserSetFields extends WebUserSetModelFields {
 
     //collection page
     public static final String START_INDEX = "startIndex";
-    
-
-    // Pagination Constants
-//    public static final String BASE_SET_URL              = "http://data.europeana.eu/set/";
-    public static final String BASE_ITEM_URL             = "http://data.europeana.eu/item/";
    
     // Serialization Constants
     public static final String SEPARATOR_SEMICOLON        = ":";
     public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
+//    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
 
     // Entity user set and Elevation Constants
     public static final String ELEVATION_FILENAME        = "elevate.xml";
@@ -82,5 +77,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String AGENT                     = "agent";
     public static final String CONCEPT                   = "concept";
     public static final String TIMESPAN                  = "timespan";
-    public static final String ENTITY_REFERENCE_URL      = "http://data.europeana.eu/";
+    public static final String DATA_EUROPEANA_BASE_URL      = "http://data.europeana.eu/";
+    public static final String PROJECT_EUROPEANA_BASE_URL      = "https://pro.europeana.eu/project/";
+    
 }

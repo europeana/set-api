@@ -21,6 +21,7 @@ public class EuropeanaOauthClient {
     public static final String EDITOR_USER = "EDITOR";
     public static final String EDITOR2_USER = "EDITOR2";
     public static final String CREATOR_ENTITYSETS = "CREATOR_ES";
+    public static final String PUBLISHER_USER = "PUBLISHER";
 
     public EuropeanaOauthClient() {
 	//
@@ -44,6 +45,9 @@ public class EuropeanaOauthClient {
 	    case CREATOR_ENTITYSETS:
 		oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsCreatorEntitySet();
 		break;
+	    case PUBLISHER_USER:
+	    oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsPublisher();
+	    break;
 	    }
 	    
 	    HttpConnection connection = new HttpConnection();

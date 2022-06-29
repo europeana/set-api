@@ -51,14 +51,19 @@
 		
 		<mvc:mapping path="/set/" allowed-origins="*" allowed-methods="POST,GET,OPTIONS,DELETE" 
 			exposed-headers="Access-Control-Allow-Origin, Allow, Link, ETag, Vary, Cache-Control, Preference-Applied" allowed-headers="*" max-age="600" allow-credentials="false"/>
+		<!--  get/update/delete/list items page/search/stats -->
 		<mvc:mapping path="/set/*" allowed-origins="*" allowed-methods="GET,PUT,DELETE" 
 			exposed-headers="Access-Control-Allow-Origin, Allow, Link, ETag, Vary, Preference-Applied" max-age="600" allow-credentials="false"/>
+		<!--  publish/unpublish -->	
+		<mvc:mapping path="/set/*/*" allowed-origins="*" allowed-methods="PUT" 
+			exposed-headers="Access-Control-Allow-Origin, Allow, ETag, Vary, Preference-Applied" max-age="600" allow-credentials="false"/>
+			
+		<!--  add/remove/exists item in set -->
 		<mvc:mapping path="/set/*/*/*" allowed-origins="*" allowed-methods="GET,HEAD,PUT,DELETE" 
 			exposed-headers="Access-Control-Allow-Origin, Allow, Preference-Applied" max-age="600" allow-credentials="false"/>
-		<!-- 	
-		<mvc:mapping path="/sets/**" allowed-origins="*" allowed-methods="GET, HEAD, OPTIONS" 
-			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/>
-		-->
+	
+<!-- 		<mvc:mapping path="/sets/**" allowed-origins="*" allowed-methods="GET, HEAD, OPTIONS"  -->
+<!-- 			exposed-headers="Allow, Vary, Link, ETag" max-age="600"/> -->
 	</mvc:cors>
 
 	<import resource="./set-web-context.xml" />

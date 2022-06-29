@@ -1,25 +1,21 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
-import eu.europeana.set.search.SearchApiRequest;
-import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
-import eu.europeana.set.web.model.search.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
@@ -34,21 +30,31 @@ import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationExcep
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
+import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.service.UserSetService;
+import eu.europeana.set.web.model.search.BaseUserSetResultPage;
+import eu.europeana.set.web.model.search.CollectionOverview;
+import eu.europeana.set.web.model.search.CollectionPage;
+import eu.europeana.set.web.model.search.FacetFieldViewImpl;
+import eu.europeana.set.web.model.search.ItemDescriptionsCollectionPage;
+import eu.europeana.set.web.model.search.ItemIdsCollectionPage;
+import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.model.search.UserSetIdsResultPage;
+import eu.europeana.set.web.model.search.UserSetResultPage;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
-public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSetService {
+public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     /*
      * (non-Javadoc)
@@ -62,12 +68,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (newUserSet.isEntityBestItemsSet()) {
 	    checkPermissionToUpdate(newUserSet, authentication, true);
 	}
+	
 	validateWebUserSet(newUserSet);
-
+	
 	// store in mongo database
 	updateTotal(newUserSet);
-	UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
+    UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
     }
 
@@ -78,7 +85,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
 		    UserSetI18nConstants.USERSET_NOT_FOUND, new String[] { userSetId });
 	}
-	getUserSetUtils().updatePagination(userSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(userSet, getConfiguration());
 	return userSet;
     }
 
@@ -101,7 +108,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public UserSet getBookmarkFolder(String creatorId) {
 	UserSet set =  getMongoPersistence().getBookmarkFolder(creatorId);
 	if(set != null) {
-	    set.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+	    set.setBaseUrl(getConfiguration().getSetDataEndpoint());
 	}
 	return set;
     }
@@ -152,34 +159,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    List<String> distinctItems = userSet.getItems().stream().distinct().collect(Collectors.toList());
 	    userSet.setItems(distinctItems);
 	}
-    }
-
-    public void validateWebUserSet(UserSet webUserSet)
-			throws RequestBodyValidationException, ParamValidationException, UserAuthorizationException {
-
-	// validate title
-	if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
-	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-		    new String[] { WebUserSetModelFields.TITLE });
-	}
-
-	// validate context
-//	if (webUserSet.getContext() != null
-//		&& !WebUserSetModelFields.VALUE_CONTEXT_EUROPEANA_COLLECTION.equals(webUserSet.getContext())) {
-//	    throw new RequestBodyValidationException(I18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-//		    new String[] { WebUserSetModelFields.AT_CONTEXT, webUserSet.getContext() });
-//	}
-
-	// validate isDefinedBy and items - we should not have both of them
-	if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
-	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-		    new String[] { WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN });
-	}
-
-	validateBookmarkFolder(webUserSet);
-	validateEntityBestItemsSet(webUserSet);
-	validateControlledValues(webUserSet);
-	validateIsDefinedBy(webUserSet);
     }
 
     /*
@@ -248,7 +227,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 	    throws ApplicationAuthenticationException {
-	String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, datasetId, localId);
+	String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 	// check if the position is "pin" and is a EntityBestItem set then
 	// insert the item at the 0 positio
 	UserSet userSet;
@@ -262,7 +241,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    int positionInt = validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
 		userSet = insertItem(existingUserSet, newItem, positionInt, false);
 	}
-	getUserSetUtils().updatePagination(userSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(userSet, getConfiguration());
 	return userSet;
     }
 
@@ -350,7 +329,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	// update an existing user set. merge user sets - insert new fields in existing
 	// object
 	UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
-	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration().getUserSetBaseUrl());
+	getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
 	return updatedUserSet;
     }
 
@@ -408,8 +387,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		validateLastPage(userSet.getItems().size(), pageSize, pageNr);
 	}
 	String apiKey = getConfiguration().getSearchApiKey();
-	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl());
-	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, sort, sortOrder, pageNr, pageSize);
+	String searchApiProfile = null;
+	searchApiProfile = getConfiguration().getSearchApiProfileForItemDescriptions();
+	
+	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl(), searchApiProfile);
+	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize, searchApiProfile);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 		SearchApiResponse apiResult;
@@ -421,10 +403,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 			int total = apiResult.getTotal();
 			if (!userSet.isOpenSet()) {
 				// dereferenciation of closed sets is limited to 100
-				// use the number of item ids
+				// use the count of item ids
 				total = userSet.getItems().size();
 			}
-			List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems());
+			List<String> sortedItemDescriptions = sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);
 			setItems(userSet, sortedItemDescriptions, total);
 		}
 	    return userSet;
@@ -442,13 +424,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	}
     }
 
-    private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions) {
+    private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions, int pageNr, int pageSize) {
 	List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
 	String localId;
 	if(userSet.getItems() != null) {
-		for (String itemUri : userSet.getItems()) {
+
+	    // calculate the index of from and until to get the right page of items
+        Integer start = pageNr * pageSize;
+        Integer till = Math.min((start +  pageSize), userSet.getItems().size()); // should not exceed the size of item list
+        for (int i = start; i < till; i++) {
+            String itemUri = userSet.getItems().get(i);
 			boolean found = false;
-			localId = UserSetUtils.extractItemIdentifier(itemUri);
+			localId = UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
 			//escape "/" to "\/" to match json string
 			localId = StringUtils.replace(localId, "/", "\\/");
 			for (String description : itemDescriptions) {
@@ -459,11 +446,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 				}
 			}
 			if (!found) {
-				logger.debug("No item description found for id: {}", localId);
-			}
-			if (orderedItemDescriptions.size() == itemDescriptions.size()) {
-				//skip items not included in the current page
-				break;
+			  orderedItemDescriptions.add("{\"id\":\""+ localId +"\"}");
 			}
 		}
 		return orderedItemDescriptions;
@@ -509,16 +492,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	int resultPageSize = results.getResults().size();
 	int pageSize = searchQuery.getPageSize();
 	int currentPage = searchQuery.getPageNr();
-	String searchProfile = searchQuery.getSearchProfile();
 	long totalInCollection = results.getResultSize();
 
 	int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
 	// get profile for pagination urls and item Page
 	LdProfiles profile = getProfileForPagination(profiles);
 
-	String collectionUrl = buildCollectionUrl(searchProfile, requestUrl, reqParams);
-	CollectionOverview ResultList = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.RESULT_LIST, null);
+	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search";
+	// 'id' field of the page Url
+	String resultsPageUrl = buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getRequestParamValue());
+
+	// we don't want to add profile in partOf, hence profile is passed null
+	CollectionOverview ResultList = buildCollectionOverview(resultsPageUrl, apiEndpointUrl, pageSize, totalInCollection, lastPage,
+			CommonLdConstants.RESULT_LIST, null);
 
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
 	    resPage = new UserSetResultPage();
@@ -534,15 +520,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (profiles.contains(LdProfiles.FACETS)) {
 		resPage.setFacetFields(results.getFacetFields());
 	}
-	addPagination(resPage, collectionUrl, currentPage, pageSize, lastPage, profile);
-
+	addPagination(resPage, apiEndpointUrl, currentPage, pageSize, lastPage, profile);
 	return resPage;
     }
 
     void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage, int resultPageSize) {
 	List<String> items = new ArrayList<>(resultPageSize);
 	for (UserSet set : results.getResults()) {
-	    items.add(UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), set.getIdentifier()));
+	    items.add(UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set.getIdentifier()));
 	}
 	resPage.setItems(items);
 	resPage.setTotalInPage(items.size());
@@ -571,7 +556,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		} else {
 		    // inlcude only the id
 		    WebUserSetImpl id = new WebUserSetImpl();
-		    id.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+		    id.setBaseUrl(getConfiguration().getSetDataEndpoint());
 		    id.setIdentifier(userSet.getIdentifier());
 		    items.add(id);
 		}
@@ -604,19 +589,26 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
     public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize,
 	    HttpServletRequest request) throws ParamValidationException {
 
+    //validate params  
 	int totalInCollection = userSet.getTotal();
 	int lastPage = validateLastPage(totalInCollection, pageSize, pageNr);
-	String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(), request.getQueryString());
+
+
+    //build partOf
+	final String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + userSet.getIdentifier();
+    String paginationBaseUrl = buildResultsPageUrl(apiEndpointUrl, request.getQueryString(), null);
+    String overviewId = buildSetIdUrl(userSet.getIdentifier());
 	// we don't want to add profile in partOf, hence profile is passed null
-	CollectionOverview partOf = buildCollectionOverview(collectionUrl, pageSize, totalInCollection, lastPage,
+	CollectionOverview partOf = buildCollectionOverview(overviewId, paginationBaseUrl, pageSize, totalInCollection, lastPage,
 		CommonLdConstants.COLLECTION, null);
 
+	//build Collection Page object
 	CollectionPage page = null;
 	int startIndex = pageNr * pageSize;
-
 	 // handle ITEMDESCRIPTIONS profile separately as it will have only the requested items present
 	// Also, we don't want to sublist the item list, as number items returned from search api may not be equal to
 	// number of items requested
+	//TODO: refactor to use setter methods
 	if (LdProfiles.ITEMDESCRIPTIONS == profile) {
 		page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
 		((ItemDescriptionsCollectionPage) page).setItemList(userSet.getItems());
@@ -635,26 +627,33 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 		}
 	}
 
-	page.setCurrentPageUri(buildPageUrl(collectionUrl, pageNr, pageSize, profile));
+	//add pagination URLs
+	page.setCurrentPageUri(buildPageUrl(paginationBaseUrl, pageNr, pageSize, profile));
 
 	if (pageNr > 0) {
-	    page.setPrevPageUri(buildPageUrl(collectionUrl, pageNr - 1, pageSize, profile));
+	    page.setPrevPageUri(buildPageUrl(paginationBaseUrl, pageNr - 1, pageSize, profile));
 	}
 
 	if (pageNr < lastPage) {
-	    page.setNextPageUri(buildPageUrl(collectionUrl, pageNr + 1, pageSize, profile));
+	    page.setNextPageUri(buildPageUrl(paginationBaseUrl, pageNr + 1, pageSize, profile));
 	}
 
 	return page;
     }
 
-    public ItemIdsResultPage buildItemIdsResultsPage(List<String> itemIds, int page, int pageSize,
+    private String buildSetIdUrl(final String identifier) {
+      return getConfiguration().getSetDataEndpoint() + identifier;
+    }
+
+    public ItemIdsResultPage buildItemIdsResultsPage(String setIdentifier, List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request) {
 //	new ResultsPageImpl<T>()
 	ItemIdsResultPage result = new ItemIdsResultPage();
 
-	String requestURL = request.getRequestURL().toString();
-	String collectionUrl = buildCollectionUrl(null, requestURL, request.getQueryString());
+//	String requestURL = request.getUrl();
+	String baseUrl = getConfiguration().getSetApiEndpoint().replaceFirst(getConfiguration().getApiBasePath(), "");
+	String resultPageId = baseUrl + request.getPathInfo(); 
+	String collectionUrl = buildResultsPageUrl(resultPageId, request.getQueryString(), null);
 
 	if (itemIds != null && !itemIds.isEmpty()) {
 	    // build isPartOf (result)
@@ -662,8 +661,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	    int lastPage = getLastPage(itemIds.size(), pageSize);
 
 	    // there is no profile param for search items in user set
-	    result.setPartOf(buildCollectionOverview(collectionUrl, pageSize, totalnCollection, lastPage,
-		    CommonLdConstants.RESULT_LIST, null));
+	    final CollectionOverview collectionOverview = buildCollectionOverview(collectionUrl, collectionUrl, pageSize, totalnCollection, lastPage,
+	        CommonLdConstants.RESULT_LIST, null);
+        result.setPartOf(
+  	        collectionOverview);
 
 	    // build Result page properties
 	    int startPos = page * pageSize;
@@ -698,7 +699,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 	if (userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
 	    return false;
 	}
-	String userId = UserSetUtils.buildUserUri((String) authentication.getPrincipal());
+	String userId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), (String) authentication.getPrincipal());
 	return userSet.getCreator().getHttpUrl().equals(userId);
     }
 
@@ -792,7 +793,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
      */
     public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
 	//update 
-	userSet.setBaseUrl(getConfiguration().getUserSetBaseUrl());
+	userSet.setBaseUrl(getConfiguration().getSetDataEndpoint());
 	
 	// check that not more then maximal allowed number of items are
 	// presented
@@ -856,4 +857,40 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl implements UserSe
 //	userSet.setItems(null);
     }
 
+    @Override
+    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException {
+       PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
+		//if the user set does not exist, return 404
+		if (userSet == null) {
+			throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
+					UserSetI18nConstants.USERSET_NOT_FOUND, new String[] { userSetId });
+		}
+       validateUserSetForPublishUnPublish(userSet, authentication);
+      if (publish) {
+        return updateUserSetForPublish(userSet);
+      }
+      else {
+        return updateUserSetForUnpublish(userSet, authentication);
+      }
+    }
+
+	/**
+	 * Validates the user set for publishing or un-publishing
+	 * @param userSet
+	 * @param authentication
+	 * @throws HttpException
+	 */
+	private void validateUserSetForPublishUnPublish (PersistentUserSet userSet, Authentication authentication)throws HttpException {
+		// Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond with 400;
+		if(userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet()) {
+			throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+					new String[] { "Publish/Unpublish user set ", userSet.getType() });
+		}
+		//check if the user is authorized, otherwise return 403
+		if(!hasPublisherRights(authentication) && !hasAdminRights(authentication)) {
+			throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
+					UserSetI18nConstants.USER_NOT_AUTHORIZED,
+					new String[] { "Only a publisher user or admin can perform this operation." }, HttpStatus.FORBIDDEN);
+		}
+	}
 }

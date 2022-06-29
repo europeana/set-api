@@ -6,3 +6,4 @@ oauth.token.request.params.regular=
 oauth.token.request.params.editor=
 oauth.token.request.params.editor=
 oauth.token.request.params.creator.entityset=
+oauth.token.request.params.publisher=

@@ -12,6 +12,7 @@ public interface UserSetConfiguration{
 	/**
 	 * uses annotation.environment.{$environment}.baseUrl property
 	 */
+	@Deprecated
 	public String getUserSetBaseUrl();
 	
 	public int getMaxPageSize(String profile);
@@ -21,6 +22,8 @@ public interface UserSetConfiguration{
 	public int getMaxRetrieveDereferencedItems();
 	
 	public String getSearchApiKey();
+	
+	public String getSearchApiProfileForItemDescriptions();
 
 	public String getEntityUserSetUserId();
 
@@ -33,4 +36,16 @@ public interface UserSetConfiguration{
 	public String getAuthorizationApiName();
 	public String getApiVersion();
 	public String getSearchApiUrl();
+
+  String getUserDataEndpoint();
+
+  String getSetDataEndpoint();
+
+  String getSetApiEndpoint();
+
+  String getItemDataEndpoint();
+
+  String getApiBasePath();
+
+  boolean isApiKeyValidationEnabled();
 }

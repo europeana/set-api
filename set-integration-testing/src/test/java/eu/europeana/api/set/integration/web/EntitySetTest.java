@@ -1,20 +1,19 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.Collections;
 import java.util.List;
-
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +25,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
+import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
@@ -65,10 +67,15 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	initEntitySetTokens();
 	}
     
+    @AfterEach
+    protected void deleteCreatedSets() {
+      super.deleteCreatedSets();
+    }
+    
     // create Entity user set validation tests
     @Test
     void create_EntityUserSet_Unauthorized_InvalidUserRole() throws Exception {
-	String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+	String requestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE);
 
 	mockMvc.perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -97,14 +104,72 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
 
-	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result);
-	assertNotNull(getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result));
-	String creator = getSetCreator(result);
+	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+	//register set to be deleted at the end
+	PersistentUserSet createdSet = mongoPersistance.getByIdentifier(identifier);
+	createdUserSets.add(createdSet);
+		
+	assertNotNull(identifier);
+	String creator = getCreator(result);
 	assertNotNull(creator);
 	assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
-	assertNotNull(getSetContributors(result));
-	getUserSetService().deleteUserSet(identifier);
+	String provider = getProvider(result);
+    assertNotNull(provider);
+    //check name
+    assertTrue(containsKeyOrValue(provider, "Europeana XX"));
+    //check id
+    assertTrue(containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
+    
+    assertNotNull(getSetContributors(result));
+    }
+    
+    
+ // create entity user set with editor token
+    @Test
+    void createEntityUserSetProviderId() throws Exception {
+    String requestJson = getJsonStringInput(ENTITY_USER_SET_PROVIDER_ID);
 
+    String result = mockMvc
+        .perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .content(requestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
+
+    String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+    //register set to be deleted at the end
+    PersistentUserSet createdSet = mongoPersistance.getByIdentifier(identifier);
+    createdUserSets.add(createdSet);
+        
+    assertNotNull(identifier);
+    String creator = getCreator(result);
+    assertNotNull(creator);
+    assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
+    String provider = getProvider(result);
+    assertNotNull(provider);
+    //check name - must not be present
+    assertFalse(containsKeyOrValue(provider, "Europeana XX"));
+    //check id
+    assertTrue(containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
+    
+    assertNotNull(getSetContributors(result));
+    }
+    
+    @Test
+    void create_EntityUserSet_duplicate() throws Exception {
+    WebUserSetImpl userSetDuplicated = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+    assertNotNull(userSetDuplicated);
+    String requestJson = getJsonStringInput(ENTITY_USER_SET_REGULAR);
+
+    String result = mockMvc
+        .perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .content(requestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse().getContentAsString();
+
+    assertTrue(result.contains("duplicate"));
+
+    //getUserSetService().deleteUserSet(userSetDuplicated.getIdentifier());
+    
     }
 
     @Test
@@ -141,7 +206,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
     @Test
@@ -157,7 +222,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
 
@@ -169,12 +234,12 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 	String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_NO_SUBJECT);
 	mockMvc.perform(put(BASE_URL + "{identifier}", identifier)
-		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
 	@Test
@@ -190,7 +255,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().is(HttpStatus.PRECONDITION_FAILED.value()));
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
 	@Test
@@ -206,7 +271,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
     @Test
@@ -230,9 +295,43 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 	assertEquals(userSet.getPinned(), updaedUserSet.getPinned());
 	assertEquals(userSet.getItems(), updaedUserSet.getItems());
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
+    
+    @Test
+    void updateEntityBestItemsSetDuplicate() throws Exception {
 
+    WebUserSetImpl userSet1 = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+    String identifier1 = userSet1.getIdentifier();
+
+    //first update is to check that self update should be ok
+    String updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
+    String result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier1)
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
+    
+    WebUserSetImpl userSet2 = createTestUserSet(ENTITY_USER_SET_REGULAR_2, editorUserToken);
+    String identifier2 = userSet2.getIdentifier();
+    
+    //second update should fail
+    updateRequestJson = getJsonStringInput(ENTITY_USER_SET_UPDATE_2);
+    result = mockMvc.perform(put(BASE_URL + "{identifier}", identifier2)
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, creatorEntitySetUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse().getContentAsString();
+
+    assertTrue(result.contains("duplicate"));
+
+    // check if a set is not overwritten
+    UserSet updaedUserSet = getUserSetService().getUserSetById(identifier2);
+    assertEquals(userSet2.getSubject().get(0), updaedUserSet.getSubject().get(0));
+
+//    getUserSetService().deleteUserSet(identifier1);
+//    getUserSetService().deleteUserSet(identifier2);
+    }
 
     @Test
     void delete_EntityUserSet_withRegularUser() throws Exception {
@@ -245,7 +344,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-	getUserSetService().deleteUserSet(identifier);
+//	getUserSetService().deleteUserSet(identifier);
     }
 
     @Test
@@ -258,6 +357,8 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.AUTHORIZATION, editorUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+	
+//	getUserSetService().deleteUserSet(identifier);
     }
 
 
@@ -272,7 +373,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 	    .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
@@ -281,7 +382,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_test");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -291,7 +392,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		assertTrue(containsKeyOrValue(result, newItem));
 		assertTrue(containsKeyOrValue(result, userSet.getId()));
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
@@ -301,7 +402,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
 		String identifier = userSet.getIdentifier();
 
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinnedItem");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinnedItem");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinnedItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -324,9 +425,9 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		getUserSetService().insertItem("04",  "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION, existingUserSet);
 
 		// check if item is present
-		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinnedItem")));
-		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "03", "123_pinnedItem")));
-		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinnedItem")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "123_pinnedItem")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "03", "123_pinnedItem")));
+		assertTrue(existingUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "04", "123_pinnedItem")));
 
 		assertEquals(4, existingUserSet.getPinned()); // pinned 4
 		assertEquals(6, existingUserSet.getItems().size()); // total 6
@@ -338,7 +439,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// add entity item at 0 position
 		getUserSetService().insertItem("05",  "123_normalItem", "0", existingUserSet);
-		String entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "05", "123_normalItem");
+		String entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "05", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total increase , pinned - same, position - 4+0 position
@@ -346,7 +447,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
         // add entity item at 3 position
 		getUserSetService().insertItem("06",  "123_normalItem", "3", existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "06", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "06", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total increase , pinned - same, position - 4+3 entity item
@@ -354,7 +455,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// add item without giving position
 		getUserSetService().insertItem("07",  "123_normalItem", null, existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total increase , pinned - same, position at last
@@ -363,7 +464,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
         // add existing normal item in the same position
 		int currentPosition = existingUserSet.getItems().indexOf(entityItem);
 		getUserSetService().insertItem("07",  "123_normalItem", String.valueOf(currentPosition), existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total , pinned and position remains same
@@ -371,13 +472,13 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 		// add existing normal item without providing any position
 		getUserSetService().insertItem("07",  "123_normalItem", null, existingUserSet);
-		entityItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "07", "123_normalItem");
+		entityItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "07", "123_normalItem");
 		// check the item
 		assertTrue(existingUserSet.getItems().contains(entityItem));
 		//total , pinned and position remains same
 		checkItemCountAndPosition(existingUserSet, entityItem, 9,4,existingUserSet.getItems().size()-1);
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
 	// test conversion of pinned -> normal item
@@ -391,17 +492,17 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		getUserSetService().insertItem("03",  "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION, userSet);
 		getUserSetService().insertItem("04",  "123_pinUnpinItem", WebUserSetModelFields.PINNED_POSITION, userSet);
 		// check if pinned item is present
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinUnpinItem")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinUnpinItem")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "03", "123_pinnedItem")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinUnpinItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinUnpinItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "123_pinUnpinItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "03", "123_pinnedItem")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "04", "123_pinUnpinItem")));
 
 		//pinned
 		assertEquals(4, userSet.getPinned());
 		//total
 		assertEquals(6, userSet.getItems().size());
 		// item to be converted into normal entity item with position < pinned items
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinUnpinItem");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinUnpinItem");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinUnpinItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -419,7 +520,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		//total remains same, pinned should be reduced, position = 2+3 = 5 so at the last
 		checkItemCountAndPosition(existingUserSet, newItem, 6,3,existingUserSet.getItems().size()-1);
 		// convert another item without position
-		String anotherItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "123_pinUnpinItem");
+		String anotherItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "123_pinUnpinItem");
 
 		String result1 = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02", "123_pinUnpinItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -438,7 +539,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		checkItemCountAndPosition(existingUserSet1, anotherItem, 6,2,existingUserSet1.getItems().size()-1);
 
 		// item to be converted into normal entity item with valid position
-		String thirditem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "04", "123_pinUnpinItem");
+		String thirditem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "04", "123_pinUnpinItem");
 
 		String result2 = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "04", "123_pinUnpinItem")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -455,7 +556,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertTrue(existingUserSet2.getItems().contains(newItem));
 		//total remains same, pinned should be reduced,position = 5
 		checkItemCountAndPosition(existingUserSet2, thirditem, 6,1,5);
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 	}
 
 	// test conversion of normal item  -> pinned item
@@ -470,13 +571,13 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		getUserSetService().insertItem("01",  "123_pinned", WebUserSetModelFields.PINNED_POSITION, userSet);
 
 		// check if pinned item is present
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02", "normal_item")));
-		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_pinned")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02", "normal_item")));
+		assertTrue(userSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_pinned")));
 		assertEquals(1, userSet.getPinned()); // pinned
 		assertEquals(4, userSet.getTotal()); // total
 
 		// item to be converted into pinned Item entity
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "02",  "normal_item");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "02",  "normal_item");
 
 		String result = mockMvc.perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02",  "normal_item")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -494,7 +595,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertEquals( 0, existingUserSet.getItems().indexOf(newItem)); // pinned item always added on top
 		assertEquals(4, userSet.getTotal()); // total remains same
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
@@ -507,7 +608,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		assertEquals(2, userSet.getPinned());
 		String identifier = userSet.getIdentifier();
 
-		String newItem = UserSetUtils.buildItemUrl(WebUserSetFields.BASE_ITEM_URL, "01", "123_test");
+		String newItem = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), "01", "123_test");
 
 		String result = mockMvc.perform(delete(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
 				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -521,16 +622,22 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		UserSet userSet1 = getUserSetService().getUserSetById(userSet.getIdentifier());
 		assertEquals(1, userSet1.getPinned());
 
-		getUserSetService().deleteUserSet(identifier);
+//		getUserSetService().deleteUserSet(identifier);
 
 	}
 
-    private String getSetCreator(String result) throws JSONException {
+    private String getCreator(String result) throws JSONException {
 	assertNotNull(result);
 	JSONObject json = new JSONObject(result);
 	String creator = json.getString(WebUserSetModelFields.CREATOR);
-	assertNotNull(creator);
 	return creator;
+    }
+    
+    private String getProvider(String result) throws JSONException {
+    assertNotNull(result);
+    JSONObject json = new JSONObject(result);
+    String provider = json.getString(WebUserSetModelFields.PROVIDER);
+    return provider;
     }
 
     private List<String> getSetContributors(String result) throws JSONException {

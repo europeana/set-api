@@ -20,13 +20,14 @@ public class UserSetSearchApiUtils {
     /**
      * Will create the Serach Api post request url
      * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
-     *
-     * @param userSet userset for which request is sent
-     * @param apiKey apikey for url
-     * @param searchUrl  base url for search api
-     * @return search api url
+     * 
+     * @param userSet
+     * @param apiKey
+     * @param searchUrl
+     * @param profile
+     * @return
      */
-    public String buildSearchApiPostUrl(UserSet userSet, String apiKey, String searchUrl) {
+    public String buildSearchApiPostUrl(UserSet userSet, String apiKey, String searchUrl, String profile) {
         StringBuilder url = new StringBuilder();
         if (!userSet.isOpenSet()) {
             url.append(getBaseSearchUrl(searchUrl));
@@ -35,6 +36,10 @@ public class UserSetSearchApiUtils {
         }
         // add apikey
         url.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+        // add profile
+        if(profile!=null) {
+          url.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=').append(profile);
+        }
         return url.toString();
     }
 
@@ -55,25 +60,34 @@ public class UserSetSearchApiUtils {
      * @param pageSize
      * @return
      */
-    public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String sort, String sortOrder, int pageNr, int pageSize) {
-        if (!userSet.isOpenSet()) {
-            return buildSearchApiPostBodyForClosedSets(userSet, pageSize, pageNr);
+    public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String itemDataEndpoint,String sort, String sortOrder, int pageNr, int pageSize, String profile) {
+        if (userSet.isOpenSet()) {
+          return buildSearchApiPostBodyForOpenSets(userSet, sort, sortOrder, pageNr, pageSize, profile);
+        } else {
+          return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageSize, pageNr, profile);
         }
-        SearchApiRequest searchApiRequest = new SearchApiRequest();
-        // remove pagination and ordering
-        Integer start = pageNr * pageSize + 1;
+    }
 
-        searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
-        searchApiRequest.setStart(start);
-        searchApiRequest.setRows(pageSize);
+    private SearchApiRequest buildSearchApiPostBodyForOpenSets(UserSet userSet, String sort,
+        String sortOrder, int pageNr, int pageSize, String profile) {
+      SearchApiRequest searchApiRequest = new SearchApiRequest();
+      
+      // remove pagination and ordering
+      Integer start = pageNr * pageSize + 1;
 
-        if(sort != null && sortOrder == null) {
-            searchApiRequest.setSort(new String[]{sort});
-        }
-        if (sort != null && sortOrder != null) {
-            searchApiRequest.setSort(new String[]{sort + " " + sortOrder});
-        }
-        return searchApiRequest;
+      searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
+      
+      if(sort != null && sortOrder == null) {
+          searchApiRequest.setSort(new String[]{sort});
+      }
+      if (sort != null && sortOrder != null) {
+          searchApiRequest.setSort(new String[]{sort + " " + sortOrder});
+      }
+      
+      searchApiRequest.setStart(start);
+      searchApiRequest.setRows(pageSize);
+      setProfile(searchApiRequest, profile);
+      return searchApiRequest;
     }
 
     /**
@@ -87,7 +101,7 @@ public class UserSetSearchApiUtils {
      * @return
      * @throws HttpException
      */
-    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, int pageSize, int pageNr) {
+    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, String itemDataEndpoint, int pageSize, int pageNr, String profile) {
         // use them to build the search query for retrieving item descriptions
         // europeana_id is in format /collectionId/recordId, this can be easily
         // extracted from the
@@ -108,14 +122,22 @@ public class UserSetSearchApiUtils {
             if (i != start) {
                 query.append(" OR ");
             }
-            id = fullId.replace(WebUserSetFields.BASE_ITEM_URL, ""); // replace "/" with "%2F"
+            id = fullId.replace(itemDataEndpoint, ""); // replace "/" with "%2F"
             query.append('"').append('/').append(id).append('"');
         }
         // close bracket
         query.append(')');
         searchApiRequest.setQuery(query.toString());
         searchApiRequest.setRows(pageSize);
+        setProfile(searchApiRequest, profile);
         return searchApiRequest;
+    }
+
+    private void setProfile(SearchApiRequest searchApiRequest, String profile) {
+      if(!StringUtils.isEmpty(profile)) {
+        String[] searchApiProfile = profile.split(","); 
+        searchApiRequest.setProfile(searchApiProfile);
+      }
     }
 
     /**

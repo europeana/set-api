@@ -9,10 +9,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -35,12 +38,8 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Collections;
 
 /**
  * Test class for UserSet controller.
@@ -65,6 +64,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     @BeforeAll
     public static void initTokens() {
 	initRegularUserToken();	
+	initPublisherUserToken();
     }
     
     @BeforeEach
@@ -72,6 +72,11 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	super.initApplication();
     }
 
+    @AfterEach
+    protected void deleteCreatedSets() {
+      super.deleteCreatedSets();
+    }
+    
     // Create User Set Tests
     @Test
     public void create_UserSet_201Created() throws Exception {
@@ -82,8 +87,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 			.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-	String identifier = getSetIdentifier(getConfiguration().getUserSetBaseUrl(), result);
-	getUserSetService().deleteUserSet(identifier);
+	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
     }
 
     @Test
@@ -91,6 +95,16 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	mockMvc.perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
 		.content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isBadRequest());
+    }
+    
+    @Test
+    public void create_published_UserSet_400_bad_request_InvalidInput() throws Exception {
+      String requestJson = getJsonStringInput(USER_SET_REGULAR_PUBLISHED);
+      mockMvc
+          .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+              .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+              .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+          .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -112,8 +126,6 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, "")
 		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
-
-	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
     @Test
@@ -136,162 +148,10 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	//the default minimal profile is used
 	assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 	//without page in request, it is not a collection page
-	assertFalse(containsKeyOrValue(result, CollectionPage.COLLECTION_PAGE));
+	assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
 	assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
-	
-	
-	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
-    @Test
-    public void getCloseUserSet_ItemDescriptions() throws Exception {
-	WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
-
-	// get the identifier
-	MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-		.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-		.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
-
-
-	String result = response.getContentAsString();
-	assertNotNull(result);
-	assertEquals(HttpStatus.OK.value(), response.getStatus());
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
-
-	int idCount = StringUtils.countMatches(result, "\"id\"");
-	// as pageSize is not passed in the request, only 10 items will be requested for dereference
-	// so "id" = 13 (10 + creator id + userset Identifier + multilingual lang "id" in one of item edmPlaceLabelLangAware)
-	assertEquals(13, idCount);
-	
-	JSONObject json = new JSONObject(result);
-	JSONArray itemDescriptions = json.getJSONArray("items");
-	// check 5 items
-	for (int i = 0; i < 5 ; i++) {
-		String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(i));
-		String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
-		assertEquals(itemIdentifier, itemDescriptionIdentifier);
-	}
-	
-	getUserSetService().deleteUserSet(userSet.getIdentifier());
-    }
-
-	@Test
-	public void getCloseUserSet_ItemDescriptionsWithPageValues() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
-
-		// get the identifier
-		MvcResult response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn();
-
-		String result = response.getResponse().getContentAsString();
-		//String request = response.getRequest();
-		assertNotNull(result);
-		assertEquals(HttpStatus.OK.value(), response.getResponse().getStatus());
-
-		// check the collection url
-		assertTrue(containsKeyOrValue(result, getUserSetService().buildCollectionUrl(null, response.getRequest().getRequestURL().toString(), "" )));
-
-		int idCount = StringUtils.countMatches(result, "\"id\"");
-		// as pageSize is 100,  only 10 items will be requested for dereference
-		// items returned by search api = 93
-		// other id : userset Identifier + partOf id + Creator id + one in edmPlaceLabelLangAware as a lang
-		// so "id" = 97
-		assertEquals(97, idCount);
-
-		JSONObject json = new JSONObject(result);
-		JSONArray itemDescriptions = json.getJSONArray("items");
-		int start = 1 * 100 ;
-		// check 5 items
-		for (int i = 0; i < 5 ; i++) {
-			String itemIdentifier = UserSetUtils.extractItemIdentifier(userSet.getItems().get(start));
-			String itemDescriptionIdentifier = getSetIdentifier("", itemDescriptions.get(i).toString());
-			assertEquals(itemIdentifier, itemDescriptionIdentifier);
-			start ++;
-		}
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-
-	@Test
-	public void getCloseUserSet_ItemDescriptionsWithLastPage() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
-
-		// set size = 249 items, request for more than lastPage
-		mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "3")
-				.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken))
-				.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-
-	@Test
-	public void getOpenUserSet_ItemDescriptions() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_OPEN, regularUserToken);
-
-		// get the identifier
-		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
-
-		//
-		String result = response.getContentAsString();
-		assertNotNull(result);
-		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
-
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-
-	// this test is to verify item search for large queries using POST Search API
-	@Test
-	public void getOpenUserSetLargeQuery_ItemDescriptions_DefaultPageSize() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE_QUERY_OPEN, regularUserToken);
-
-		String result = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).
-				andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse().getContentAsString();
-
-		assertNotNull(result);
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
-		assertEquals("69", getvalueOfkey(result, WebUserSetFields.TOTAL));
-		// one of set and one for creator and items = 10 (default pageSize)
-		assertEquals(2 + 10, noOfOccurance(result, WebUserSetFields.ID));
-
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-
-	// this test is fail-safe check for the open sets, if isdefinedBy has multiple query values
-	// to check if UriComponentsBuilder picks all the values from query param correctly
-	// See : buildSearchApiPostBody()
-	@Test
-	public void getOpenUserSetMultipleQuery_ItemDescriptions() throws Exception {
-		WebUserSetImpl userSet = createTestUserSet(USER_SET_MULTIPLE_QUERY_OPEN, regularUserToken);
-
-		// get the identifier
-		MockHttpServletResponse response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-				.queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-				.header(HttpHeaders.AUTHORIZATION, regularUserToken)
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
-
-		//
-		String result = response.getContentAsString();
-		assertNotNull(result);
-		assertEquals(HttpStatus.OK.value(), response.getStatus());
-		assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
-
-		getUserSetService().deleteUserSet(userSet.getIdentifier());
-	}
-    
     // Update user set Tests
 
     @Test
@@ -311,6 +171,19 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     }
 
     @Test
+    public void updateUserSet_PublishedBadRequest() throws Exception {
+      
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+     
+      String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_PUBLISHED);
+      mockMvc.perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()).content(updatedRequestJson)
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+          .andExpect(status().isBadRequest());
+    }
+    
+    @Test
     public void updateUserSet_Success() throws Exception {
 	WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -323,12 +196,75 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	String result = response.getContentAsString();
 	assertNotNull(result);
-	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getUserSetBaseUrl(), userSet.getIdentifier())));
+	assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
-
-	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
+    
+    //publish/unpublish user set tests
+    @Test
+    public void publishUnpublishUserSet_Success() throws Exception {
+      
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+      
+      MockHttpServletResponse response = mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andReturn().getResponse();
+  
+      String result = response.getContentAsString();
+      assertNotNull(result);
+      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+      assertTrue(containsKeyOrValue(result, "published"));
+      assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+      response = mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andReturn().getResponse();
+      
+      result = response.getContentAsString();
+      assertNotNull(result);
+      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+      assertTrue(containsKeyOrValue(result, "public"));
+      assertEquals(HttpStatus.OK.value(), response.getStatus());
+    }
+    
+    @Test
+    public void publishUnpublishUserSet_Exceptions() throws Exception {
+      
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+      
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+  
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andExpect(status().is(HttpStatus.FORBIDDEN.value()));    
+
+      getUserSetService().deleteUserSet(userSet.getIdentifier());
+      
+      userSet = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
+      
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    }
+
 
     // Delete User associated Tests
     @Test
@@ -344,7 +280,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 	// TODO: use search by user to verify that all usersets were deleted
 	String creator = (String) getAuthentication(regularUserToken).getPrincipal();
 	UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator, null, null, 0,
-		1);
+		1, getConfiguration());
 	ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null, Collections.singletonList(LdProfiles.MINIMAL),
 		getAuthentication(regularUserToken));
 	assertEquals(0, results.getResultSize());
@@ -396,7 +332,6 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isForbidden());
 //      .header(HttpHeaders.AUTHORIZATION, token2)
 //                .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
-	getUserSetService().deleteUserSet(userSet.getIdentifier());
     }
 
     @Test
