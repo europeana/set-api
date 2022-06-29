@@ -14,6 +14,7 @@ public class UserSetHttpHeaders {
     public static final String ALLOW_GPD   = "GET,PUT,DELETE";
     public static final String ALLOW_PPGHD = "POST,PUT,GET,HEAD,DELETE";
     public static final String ALLOW_PG    = "POST,GET";
+    public static final String ALLOW_PUT    = "PUT";
     public static final String ALLOW_PGD = "POST,GET,DELETE";
     
 
