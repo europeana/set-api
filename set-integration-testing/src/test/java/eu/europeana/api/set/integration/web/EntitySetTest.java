@@ -1,17 +1,15 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.Collections;
 import java.util.List;
-
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -27,10 +25,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
+import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
@@ -104,15 +105,53 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 		.andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
 
 	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+	//register set to be deleted at the end
+	PersistentUserSet createdSet = mongoPersistance.getByIdentifier(identifier);
+	createdUserSets.add(createdSet);
+		
 	assertNotNull(identifier);
-	String creator = getSetCreator(result);
+	String creator = getCreator(result);
 	assertNotNull(creator);
-	String provider = getSetCreator(result);
-	assertNotNull(provider);
 	assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
-	assertNotNull(getSetContributors(result));
-	//this set is not registered in the createdUserSets, delete it manually
-	getUserSetService().deleteUserSet(identifier);
+	String provider = getProvider(result);
+    assertNotNull(provider);
+    //check name
+    assertTrue(containsKeyOrValue(provider, "Europeana XX"));
+    //check id
+    assertTrue(containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
+    
+    assertNotNull(getSetContributors(result));
+    }
+    
+    
+ // create entity user set with editor token
+    @Test
+    void createEntityUserSetProviderId() throws Exception {
+    String requestJson = getJsonStringInput(ENTITY_USER_SET_PROVIDER_ID);
+
+    String result = mockMvc
+        .perform(post(BASE_URL).queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .content(requestJson).header(HttpHeaders.AUTHORIZATION, editorUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.CREATED.value())).andReturn().getResponse().getContentAsString();
+
+    String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+    //register set to be deleted at the end
+    PersistentUserSet createdSet = mongoPersistance.getByIdentifier(identifier);
+    createdUserSets.add(createdSet);
+        
+    assertNotNull(identifier);
+    String creator = getCreator(result);
+    assertNotNull(creator);
+    assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
+    String provider = getProvider(result);
+    assertNotNull(provider);
+    //check name - must not be present
+    assertFalse(containsKeyOrValue(provider, "Europeana XX"));
+    //check id
+    assertTrue(containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
+    
+    assertNotNull(getSetContributors(result));
     }
     
     @Test
@@ -260,7 +299,7 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     }
     
     @Test
-    void update_EntityUserSet_duplicate() throws Exception {
+    void updateEntityBestItemsSetDuplicate() throws Exception {
 
     WebUserSetImpl userSet1 = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
     String identifier1 = userSet1.getIdentifier();
@@ -587,14 +626,14 @@ public class EntitySetTest extends BaseUserSetTestUtils {
 
 	}
 
-    private String getSetCreator(String result) throws JSONException {
+    private String getCreator(String result) throws JSONException {
 	assertNotNull(result);
 	JSONObject json = new JSONObject(result);
 	String creator = json.getString(WebUserSetModelFields.CREATOR);
 	return creator;
     }
     
-    private String getSetProvider(String result) throws JSONException {
+    private String getProvider(String result) throws JSONException {
     assertNotNull(result);
     JSONObject json = new JSONObject(result);
     String provider = json.getString(WebUserSetModelFields.PROVIDER);

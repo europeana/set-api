@@ -4,6 +4,7 @@ public abstract class UserSetMongoConstants {
 
     // Mongo Constants
     public static final String MONGO_ID                   = "_id";
+    public static final String MONGO_IDENTIFIER           = "identifier";
     public static final String MONGO_MATCH                = "$match";
     public static final String MONGO_GROUP                = "$group";
     public static final String MONGO_TOTAL_LIKES          = "totalLikes";

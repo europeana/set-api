@@ -58,6 +58,7 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_BEST_ITEMS = "/content/userset_entity_best_items.json";
     public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
     public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
+    public static final String ENTITY_USER_SET_PROVIDER_ID = "/content/entity_userset_provider_id.json";
     public static final String ENTITY_USER_SET_REGULAR_2 = "/content/entity_userset_2.json";
     public static final String ENTITY_USER_SET_INVALID_SUBJECT = "/content/entity_userset_invalid_subject.json";
     public static final String ENTITY_USER_SET_INVALID_MULTIPLE_SUBJECTS = "/content/entity_userset_invalid_multiple_subjects.json";
@@ -182,8 +183,8 @@ public abstract class BaseUserSetTestUtils {
 	return null;
     }
 
-    protected boolean containsKeyOrValue(String jsonString, String property) {
-	return StringUtils.contains(jsonString, "\"" + property + "\"");
+    protected boolean containsKeyOrValue(String jsonString, String propertyOrValue) {
+	return StringUtils.contains(jsonString, "\"" + propertyOrValue + "\"");
     }
 
     protected int noOfOccurance(String jsonString, String property) {
