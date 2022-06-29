@@ -37,6 +37,9 @@ public class WebUserSetModelFields {
 	public static final String NICKNAME         = "nickname";
 	public static final String ENTITYUSER_NICKNAME = "entitygalleries";
 
+	//** provider fields **/
+	public static final String NAME             = "name";
+    
 	// Pinned items constants
 	public static final String PINNED_POSITION = "pin";
 

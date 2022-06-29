@@ -161,10 +161,15 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 * @see eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl#findByID(java.io.Serializable)
 	 */
 	@Override
+	@Deprecated
+	/**
+	 * @deprecated use the getByIdentifier method instead
+	 */
 	public PersistentUserSet findByID(String id) {
 		return getDao().findOne(UserSetMongoConstants.MONGO_ID, new ObjectId(id));
 	}
 
+	
 	@Override
 	public long getDistinctCreators(String type) {
 		// create query : { type: { $eq: <type> } }
@@ -423,6 +428,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	@Override
 	public void removeAll(List<PersistentUserSet> userSets) {
 		List<ObjectId> objectIds = new ArrayList<>();
+		//TODO: switch implementation to delete by identifier
 		if (!userSets.isEmpty()) {
 			for( PersistentUserSet userSet : userSets) {
 				objectIds.add(userSet.getObjectId());

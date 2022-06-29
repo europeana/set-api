@@ -379,7 +379,7 @@ public class WebUserSetRest extends BaseRest {
     
         // build response entity with headers
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-        headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+        headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PUT);
         headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
         headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
         headers.add(UserSetHttpHeaders.ETAG, etag);

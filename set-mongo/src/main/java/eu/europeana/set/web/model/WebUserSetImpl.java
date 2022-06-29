@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.impl.Provider;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -134,17 +135,16 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     }
     
     @Override
-    @JsonProperty(WebUserSetFields.PROVIDER)
+    @JsonGetter(WebUserSetFields.PROVIDER)
     public Provider getProvider() {
     return super.getProvider();
     }
 
-    @Override
-    @JsonProperty(WebUserSetFields.PROVIDER)
-    public void setProvider(Provider provider) {
-    super.setProvider(provider);
-    }  
-
+    @JsonSetter(WebUserSetFields.PROVIDER)
+    public void setProvider(WebProvider provider) {
+      super.setProvider(provider);
+    }
+    
     @JsonIgnore
     public boolean isUgc() {
 	return super.isUgc();

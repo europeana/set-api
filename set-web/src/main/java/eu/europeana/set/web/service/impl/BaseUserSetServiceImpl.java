@@ -698,7 +698,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
         // the items are not required for validation, hence pageSize =0
         // form the minimal post body
         SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet,
-            getConfiguration().getItemDataEndpoint(), null, null, 0, 0);
+            getConfiguration().getItemDataEndpoint(), null, null, 0, 0, null);
         String jsonBody = serializeSearchApiRequest(searchApiRequest);
 
         apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);

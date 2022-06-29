@@ -52,7 +52,6 @@ import eu.europeana.set.web.model.search.ItemIdsCollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
-import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
@@ -388,12 +387,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 		validateLastPage(userSet.getItems().size(), pageSize, pageNr);
 	}
 	String apiKey = getConfiguration().getSearchApiKey();
-	String profileParam = null;
-	if(LdProfiles.ITEMDESCRIPTIONS == profile) {
-	  profileParam = getConfiguration().getSearchApiProfileForItemDescriptions();
-	}
-	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl(), profileParam);
-	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize);
+	String searchApiProfile = null;
+	searchApiProfile = getConfiguration().getSearchApiProfileForItemDescriptions();
+	
+	String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey, getConfiguration().getSearchApiUrl(), searchApiProfile);
+	SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet, getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize, searchApiProfile);
 	try {
 		String jsonBody = serializeSearchApiRequest(searchApiRequest);
 		SearchApiResponse apiResult;

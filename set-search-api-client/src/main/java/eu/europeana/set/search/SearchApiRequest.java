@@ -8,6 +8,7 @@ public class SearchApiRequest {
     private int start = 1;
     private int rows ;
     private String[] sort;
+    private String[] profile;
 
 
     public String getQuery() {
@@ -48,5 +49,13 @@ public class SearchApiRequest {
 
     public void setStart(int start) {
         this.start = start;
+    }
+
+    public String[] getProfile() {
+      return profile;
+    }
+
+    public void setProfile(String[] profile) {
+      this.profile = profile;
     }
 }

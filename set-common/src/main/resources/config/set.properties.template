@@ -64,7 +64,7 @@ europeana.apikey.serviceurl=
 europeana.search.apikey=
 
 #API key used for invocation of search api
-europeana.search.url=https://api.europeana.eu/api/v2/search.json?profile=minimal&wskey=MY_KEY&query=
+europeana.search.url=https://api.europeana.eu/api/v2/search.json?wskey=MY_KEY&query=
 europeana.search.itemdescription.profile=minimal
 
 
