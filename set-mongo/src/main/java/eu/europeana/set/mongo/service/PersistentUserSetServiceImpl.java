@@ -172,14 +172,47 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	
 	@Override
 	public long getDistinctCreators(String type) {
-		// create query : { type: { $eq: <type> } }
-		if (type != null) {
-			DBObject match = new BasicDBObject(WebUserSetFields.TYPE,
-					new BasicDBObject(UserSetMongoConstants.MONGO_EQUALS, type));
-			return getDao().getCollection().distinct(WebUserSetFields.CREATOR, match).size();
-		} else {
-			return getDao().getCollection().distinct(WebUserSetFields.CREATOR).size();
+		int count = 0;
+		// Cursor is needed in aggregate command
+		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+		Cursor cursor =getDao().getCollection().aggregate(getDistinctCountPipeline(UserSetMongoConstants.MONGO_CREATOR_URL, type) , aggregationOptions);
+		if (cursor != null) {
+			while (cursor.hasNext()) {
+				DBObject object = cursor.next();
+				// ideally there should be only one value present.
+				count += Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_FIELD_COUNT)));
+			}
 		}
+		return count;
+	}
+
+	/**
+	 * Creates a aggregation pipeline to count distinct values of
+	 * the field provided.
+	 * 'type' of user-set value is optional. If passed match filter is added.
+	 * query :
+	 * [ {  $match: { type: <type> }},
+	 *   {  $group: { _id: <groupField> }},
+	 *   {  $count: <Field Name for the count> } ]
+	 *
+	 * @param type : Optional. type of user set - Collection or BookmarkFolder.
+	 * @param groupField : the field for which distinct count is calculated
+	 * @return
+	 */
+	private List<DBObject> getDistinctCountPipeline(String groupField, String type) {
+		List<DBObject> distinctCountPipeline = new ArrayList<>();
+		// add match filter if present
+		if (StringUtils.isNotEmpty(type)) {
+			distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
+		}
+        // add group field
+		distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
+				new BasicDBObject(UserSetMongoConstants.MONGO_ID, groupField)));
+		// add count
+		distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_COUNT,
+				UserSetMongoConstants.MONGO_FIELD_COUNT));
+
+		return distinctCountPipeline;
 	}
 
 	@Override
@@ -208,7 +241,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 				DBObject object = cursor.next();
 				List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
 				for (DBObject o: facet) {
-					valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)), Long.parseLong(String.valueOf(o.get(UserSetMongoConstants.MONGO_COUNT))));
+					valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)), Long.parseLong(String.valueOf(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT))));
 				}
 			}
 		}
@@ -243,8 +276,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	private DBObject getOutputFieldAndStages(UserSetFacetQuery facetQuery) {
 		List<DBObject> outputFieldAndStages = new ArrayList<>();
 		if (facetQuery.getMatchField() != null && facetQuery.getMatchValue() != null) {
-			outputFieldAndStages.add(new BasicDBObject(UserSetMongoConstants.MONGO_MATCH,
-					new BasicDBObject(facetQuery.getMatchField(), facetQuery.getMatchValue())));
+			outputFieldAndStages.add(getMatchFilter(facetQuery.getMatchField(), facetQuery.getMatchValue()));
 		}
 		if (facetQuery.isUnwind()) {
 			outputFieldAndStages.add(new BasicDBObject(UserSetMongoConstants.MONGO_UNWIND, facetQuery.getFacet()));
@@ -279,14 +311,22 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	// create $match and $group for mongo query
 	private List<DBObject> getAggregatePipeline() {
-
-		DBObject match = new BasicDBObject(UserSetMongoConstants.MONGO_MATCH,
-				new BasicDBObject(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+		DBObject match = getMatchFilter(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
 
 		DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
 		groupFields.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
 		DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
 		return Arrays.asList(match, group);
+	}
+
+	/**
+	 * Returns the match filter for the given field and field value
+	 * @param field the field for match filter
+	 * @param fieldValue field Value for the match filter
+	 * @return
+	 */
+	private DBObject getMatchFilter(String field, String fieldValue) {
+		return new BasicDBObject(UserSetMongoConstants.MONGO_MATCH, new BasicDBObject(field, fieldValue));
 	}
 
 	/**
