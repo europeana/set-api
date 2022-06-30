@@ -24,6 +24,7 @@ import com.mongodb.DBObject;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
@@ -170,21 +171,28 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	}
 
 	
-	@Override
-	public long getDistinctCreators(String type) {
-		int count = 0;
-		// Cursor is needed in aggregate command
-		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
-		Cursor cursor =getDao().getCollection().aggregate(getDistinctCountPipeline(UserSetMongoConstants.MONGO_CREATOR_URL, type) , aggregationOptions);
-		if (cursor != null) {
-			while (cursor.hasNext()) {
-				DBObject object = cursor.next();
-				// ideally there should be only one value present.
-				count += Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_FIELD_COUNT)));
-			}
-		}
-		return count;
-	}
+    @Override
+    public long getDistinctCreators(String type) throws UserSetServiceException {
+      long count = 0;
+      // Cursor is needed in aggregate command
+      AggregationOptions aggregationOptions =
+          AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+      Cursor cursor = getDao().getCollection().aggregate(
+          getDistinctCountPipeline(UserSetMongoConstants.MONGO_CREATOR_URL, type),
+          aggregationOptions);
+      if (cursor != null && cursor.hasNext()) {
+        // ideally there should be only one value present.
+        count = Long.valueOf(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+
+        // the aggregation must return only one value
+        if (cursor.hasNext()) {
+          throw new UserSetServiceException(
+              "Unexpected result of aggregation operation for distinct creators, the db request must return only one results but currently more resutls were retrieved");
+        }
+      }
+
+      return count;
+    }
 
 	/**
 	 * Creates a aggregation pipeline to count distinct values of

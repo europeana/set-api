@@ -6,6 +6,7 @@ import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.search.UserSetLdSerializer;
@@ -35,12 +36,13 @@ public class UsageStatsUserSetRest extends BaseRest {
      * @param wsKey
      * @param request
      * @return
+     * @throws UserSetServiceException 
      */
     @GetMapping(value = "/set/stats", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
     @ApiOperation(notes = SwaggerConstants.SET_USAGE_STATS, value = "Generate usage stats", nickname = "generateUserStats", response = java.lang.Void.class)
     public ResponseEntity<String> generateUsageStats(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
-            HttpServletRequest request) throws IOException, ApplicationAuthenticationException {
+            HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
         return getUsageStats(request);
     }
 
@@ -48,8 +50,9 @@ public class UsageStatsUserSetRest extends BaseRest {
      * Get the usage statistics for User Set API
      *
      * @return
+     * @throws UserSetServiceException 
      */
-    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws IOException, ApplicationAuthenticationException {
+    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
         // authenticate and generate the new statistics
         verifyReadAccess(request);
         // create metric
