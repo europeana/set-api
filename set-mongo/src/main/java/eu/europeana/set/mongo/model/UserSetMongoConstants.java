@@ -17,6 +17,10 @@ public abstract class UserSetMongoConstants {
     public static final String MONGO_SORTBYCOUNT          = "$sortByCount";
     public static final String MONGO_LIMIT                = "$limit";
     public static final String MONGO_FACET                = "$facet";
-    public static final String MONGO_COUNT                = "count";
+    public static final String MONGO_FIELD_COUNT          = "count";
+    public static final String MONGO_COUNT                = "$count";
+
     public static final String MONGO_VISIBILITY           = "$visibility";
+    public static final String MONGO_CREATOR_URL          = "$creator.httpUrl";
+
 }
