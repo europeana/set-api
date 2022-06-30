@@ -5,6 +5,7 @@ import java.util.Map;
 import org.mongodb.morphia.query.QueryResults;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
+import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
@@ -81,8 +82,9 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	/**
 	 * Retrieve distinct creators present in the DB
 	 * @return
+	 * @throws UserSetServiceException 
 	 */
-	long getDistinctCreators(String type);
+	long getDistinctCreators(String type) throws UserSetServiceException;
 
 	/**
 	 * Retrieve distinct creators present in the DB

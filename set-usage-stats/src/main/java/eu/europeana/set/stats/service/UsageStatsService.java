@@ -1,6 +1,7 @@
 package eu.europeana.set.stats.service;
 
 import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
+import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
@@ -53,8 +54,9 @@ public class UsageStatsService {
      * Gets the average user sets per user.
      * Also sets the NumberOfUsersWithGallery in the metric
      * @param metric
+     * @throws UserSetServiceException 
      */
-    public void getAverageSetsPerUser(SetMetric metric) {
+    public void getAverageSetsPerUser(SetMetric metric) throws UserSetServiceException {
       long averageUserSetsPerUser = 0;
       long distinctUsers = getMongoPersistance().getDistinctCreators(UserSetTypes.COLLECTION.getJsonValue());
       // set the number of user with gallery here.
@@ -69,7 +71,7 @@ public class UsageStatsService {
       metric.setAverageSetsPerUser(averageUserSetsPerUser);
     }
 
-    public void getNumberOfUsersWithLike(SetMetric metric){
+    public void getNumberOfUsersWithLike(SetMetric metric) throws UserSetServiceException{
         metric.setNumberOfUsersWithLike(getMongoPersistance().getDistinctCreators(UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
         metric.setNumberOfUsersWithLikeOrGallery(getMongoPersistance().getDistinctCreators(null));
 
