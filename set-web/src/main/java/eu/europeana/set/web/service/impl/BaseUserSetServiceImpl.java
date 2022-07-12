@@ -580,7 +580,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     //check if the provider is provided that it is not an empty object
     if(StringUtils.isBlank(webUserSet.getProvider().getId()) 
         && StringUtils.isBlank(webUserSet.getProvider().getName())) {
-      final String message = "Provider cannot be emtpy.";
+      final String message = "must contain either an id or a name.";
       throw new RequestBodyValidationException(
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           new String[] {WebUserSetModelFields.PROVIDER, message}); 
