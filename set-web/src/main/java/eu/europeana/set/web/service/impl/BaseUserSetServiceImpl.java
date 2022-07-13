@@ -566,9 +566,27 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
     }
 
+    validateProvider(webUserSet);
+    validateBookmarkFolder(webUserSet);
+    validateControlledValues(webUserSet);
+    validateIsDefinedBy(webUserSet);
+    validateEntityBestItemsSet(webUserSet);
+  }
+  
+  void validateProvider(UserSet webUserSet) throws RequestBodyValidationException {
+    if(webUserSet.getProvider() == null) {
+      return;
+    }
+    //check if the provider is provided that it is not an empty object
+    if(StringUtils.isBlank(webUserSet.getProvider().getId()) 
+        && StringUtils.isBlank(webUserSet.getProvider().getName())) {
+      final String message = "must contain either an id or a name.";
+      throw new RequestBodyValidationException(
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] {WebUserSetModelFields.PROVIDER, message}); 
+    }
     // check provider id if available
-    if (webUserSet.getProvider() != null
-        && !StringUtils.isBlank(webUserSet.getProvider().getId())) {
+    if (!StringUtils.isBlank(webUserSet.getProvider().getId())) {
       final String providerId = webUserSet.getProvider().getId();
       boolean isAllowedProviderId =
           (providerId.startsWith(WebUserSetFields.PROJECT_EUROPEANA_BASE_URL)
@@ -581,10 +599,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       }
     }
 
-    validateBookmarkFolder(webUserSet);
-    validateControlledValues(webUserSet);
-    validateIsDefinedBy(webUserSet);
-    validateEntityBestItemsSet(webUserSet);
   }
 
   /**
