@@ -22,7 +22,7 @@
 	</modules>
 
 	<properties>
-		<revision>0.8-SNAPSHOT</revision>
+		<revision>0.9-SNAPSHOT</revision>
 <!--
 		<version.setApi>0.8-SNAPSHOT</version.setApi>
 -->
