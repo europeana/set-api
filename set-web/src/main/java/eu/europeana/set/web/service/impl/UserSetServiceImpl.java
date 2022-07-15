@@ -601,7 +601,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String setId = buildSetIdUrl(userSet.getIdentifier());
 	// we don't want to add profile in partOf, hence profile is passed null
 	CollectionOverview partOf = buildCollectionOverview(setId, paginationBaseUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION, null);
+		CommonLdConstants.COLLECTION, profile);
 
 	//build Collection Page object
 	CollectionPage page = null;
