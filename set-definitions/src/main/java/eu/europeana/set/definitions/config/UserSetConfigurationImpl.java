@@ -45,6 +45,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String KEY_SEARCH_URL = "europeana.search.url";
   public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
   public static final String API_VERSION = "set.api.version";
+  public static final String API_BASE_PATH = "set.api.basePath";
 
   
   private Properties setProperties;
@@ -150,7 +151,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
   @Override
   public String getApiBasePath() {
-    return "/set/";
+    if(getSetProperties().containsKey(API_BASE_PATH)) {
+      return getSetProperties().getProperty(API_BASE_PATH);
+    } else {
+      return "/set/";  
+    }
   }
   
   @Override

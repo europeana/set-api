@@ -500,10 +500,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
 	String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search";
 	// 'id' field of the page Url
-	String resultsPageUrl = buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getRequestParamValue());
+	String resultsPageId = buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getRequestParamValue());
 
 	// we don't want to add profile in partOf, hence profile is passed null
-	CollectionOverview ResultList = buildCollectionOverview(resultsPageUrl, apiEndpointUrl, pageSize, totalInCollection, lastPage,
+	// pageId is the same as the baseUrl for pagination
+	CollectionOverview ResultList = buildCollectionOverview(resultsPageId, resultsPageId, pageSize, totalInCollection, lastPage,
 			CommonLdConstants.RESULT_LIST, null);
 
 	if (profiles.contains(LdProfiles.STANDARD) || profiles.contains(LdProfiles.ITEMDESCRIPTIONS)) {
@@ -520,7 +521,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	if (profiles.contains(LdProfiles.FACETS)) {
 		resPage.setFacetFields(results.getFacetFields());
 	}
-	addPagination(resPage, apiEndpointUrl, currentPage, pageSize, lastPage, profile);
+	addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
 	return resPage;
     }
 
@@ -597,10 +598,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     //build partOf
 	final String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + userSet.getIdentifier();
     String paginationBaseUrl = buildResultsPageUrl(apiEndpointUrl, request.getQueryString(), null);
-    String overviewId = buildSetIdUrl(userSet.getIdentifier());
+    String setId = buildSetIdUrl(userSet.getIdentifier());
 	// we don't want to add profile in partOf, hence profile is passed null
-	CollectionOverview partOf = buildCollectionOverview(overviewId, paginationBaseUrl, pageSize, totalInCollection, lastPage,
-		CommonLdConstants.COLLECTION, null);
+	CollectionOverview partOf = buildCollectionOverview(setId, paginationBaseUrl, pageSize, totalInCollection, lastPage,
+		CommonLdConstants.COLLECTION, profile);
 
 	//build Collection Page object
 	CollectionPage page = null;
@@ -651,8 +652,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	ItemIdsResultPage result = new ItemIdsResultPage();
 
 //	String requestURL = request.getUrl();
-	String baseUrl = getConfiguration().getSetApiEndpoint().replaceFirst(getConfiguration().getApiBasePath(), "");
-	String resultPageId = baseUrl + request.getPathInfo(); 
+	String baseUrl = getConfiguration().getSetApiEndpoint();
+	String relativePath = request.getRequestURI().replaceFirst(getConfiguration().getApiBasePath(), "");
+	String resultPageId = baseUrl + relativePath; 
 	String collectionUrl = buildResultsPageUrl(resultPageId, request.getQueryString(), null);
 
 	if (itemIds != null && !itemIds.isEmpty()) {
