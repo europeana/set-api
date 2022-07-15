@@ -16,6 +16,7 @@ set.environment.baseUrl.test=http://set-api-test.eanadev.org/set/
 set.environment.baseUrl.development=http://localhost:8080/set/
 
 #endpoint configurations, all must end with / 
+set.api.basePath=/set/
 set.api.endpoint.baseUrl=http://localhost:8080/set/
 set.data.endpoint.baseUrl=http://data.europeana.eu/set/
 user.data.endpoint.baseUrl=http://data.europeana.eu/user/

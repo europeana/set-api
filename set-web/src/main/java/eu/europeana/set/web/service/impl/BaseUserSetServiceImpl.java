@@ -265,7 +265,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   return tmp;
   }
 
-  protected CollectionOverview buildCollectionOverview(String id, String paginationBaseUrl,
+  protected CollectionOverview buildCollectionOverview(String pageId, String paginationBaseUrl,
       int pageSize, long totalInCollection, int lastPage, String type, LdProfiles profile) {
     String first = null;
     String last = null;
@@ -275,7 +275,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       first = buildPageUrl(paginationBaseUrl, 0, pageSize, profile);
       last = buildPageUrl(paginationBaseUrl, lastPage, pageSize, profile);
     }
-    return new CollectionOverview(id, totalInCollection, first, last, type);
+    return new CollectionOverview(pageId, totalInCollection, first, last, type);
   }
 
   /**
@@ -321,7 +321,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
         .append(pageSize);
     // add the profile param if profile is not null (search items in set doesn't use a profile)
-    if (profile != null) {
+    boolean hasProfileParam = StringUtils.contains(collectionUrl, CommonApiConstants.QUERY_PARAM_PROFILE+"=");
+    if (profile != null && !hasProfileParam) {
       builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
         .append(profile.getRequestParamValue());
     }

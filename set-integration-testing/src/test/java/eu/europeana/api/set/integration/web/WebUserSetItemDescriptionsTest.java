@@ -59,7 +59,7 @@ import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 @ContextConfiguration(locations = { "classpath:set-web-mvc.xml" })
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-public class WebUserSetItemDescriptions extends BaseUserSetTestUtils {
+public class WebUserSetItemDescriptionsTest extends BaseUserSetTestUtils {
 
     @BeforeAll
     public static void initTokens() {

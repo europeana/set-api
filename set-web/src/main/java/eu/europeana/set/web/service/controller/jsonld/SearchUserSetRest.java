@@ -123,7 +123,7 @@ public class SearchUserSetRest extends BaseRest {
     @GetMapping(value = { "/set/{identifier}/search", "/set/{identifier}/search.json",
 	    "/set/{identifier}/search.jsonld" }, produces = { HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
 		    HttpHeaders.CONTENT_TYPE_JSON_UTF8 })
-    @ApiOperation(notes = SwaggerConstants.SEARCH, value = "Search user sets", nickname = "searchUserSet", response = java.lang.Void.class)
+    @ApiOperation(notes = SwaggerConstants.SEARCH_ITEMS_IN_SET, value = "Search items in set", nickname = "searchItemsInSet", response = java.lang.Void.class)
     public ResponseEntity<String> searchItemsInSet(
 	    @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -164,12 +164,12 @@ public class SearchUserSetRest extends BaseRest {
 
 	    List<String> filtered;
 	    if(itemIds == null) {
-		filtered = existingUserSet.getItems();
+	      filtered = existingUserSet.getItems();
 	    }else {
-		filtered = new ArrayList<String>(existingUserSet.getItems());
-		filtered.retainAll(itemIds);
-		
+	      filtered = new ArrayList<String>(existingUserSet.getItems());
+	      filtered.retainAll(itemIds);	
 	    }
+	    
 	    ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(identifier, filtered, page, pageSize,
 		    request);
 
