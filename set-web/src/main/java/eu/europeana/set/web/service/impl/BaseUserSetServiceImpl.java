@@ -779,13 +779,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
     }
     // if present check of entity uri pattern
-    if (StringUtils.startsWith(subject.get(0), WebUserSetFields.DATA_EUROPEANA_BASE_URL) && StringUtils.contains(subject.get(0), "/base")) {
-      // http://data.europeana.eu/concept/base/114"
-      String clean = StringUtils.remove(subject.get(0), "/base");
+    if (StringUtils.startsWith(subject.get(0), WebUserSetFields.DATA_EUROPEANA_BASE_URL) && StringUtils.contains(subject.get(0), WebUserSetFields.ENTITY_URI_BASE)) {
+      String clean = StringUtils.remove(subject.get(0), WebUserSetFields.ENTITY_URI_BASE);
       subject.clear();
       subject.add(clean);
       webUserSet.setSubject(subject);
-
     }
 
     // entity user set is a close set
