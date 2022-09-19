@@ -765,7 +765,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
 
     // subject field must be present. Only one uri value should be present
     // if the value is an entity reference , make sure we don't save /base in the uri.
-    // we have recently chnged the syntax of entity uri so to remove the /base.
     final List<String> subject = webUserSet.getSubject();
     if (subject == null || subject.isEmpty()) {
       // subject must be present
@@ -780,10 +779,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     }
     // if present check of entity uri pattern
     if (StringUtils.startsWith(subject.get(0), WebUserSetFields.DATA_EUROPEANA_BASE_URL) && StringUtils.contains(subject.get(0), WebUserSetFields.ENTITY_URI_BASE)) {
-      String clean = StringUtils.remove(subject.get(0), WebUserSetFields.ENTITY_URI_BASE);
-      subject.clear();
-      subject.add(clean);
-      webUserSet.setSubject(subject);
+      // must include only one HTTP reference
+      throw new RequestBodyValidationException(
+              UserSetI18nConstants.USERSET_VALIDATION_ENTITY_URI,
+              new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
     }
 
     // entity user set is a close set
