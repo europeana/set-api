@@ -41,7 +41,6 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;

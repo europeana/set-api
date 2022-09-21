@@ -686,24 +686,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	return result;
     }
 
-    /**
-     * This method checks if user is an owner of the user set
-     * 
-     * @param userSet
-     * @param authentication
-     * @return true if user is owner of a user set
-     */
-    public boolean isOwner(UserSet userSet, Authentication authentication) {
-	if (authentication == null) {
-	    return false;
-	}
-
-	if (userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
-	    return false;
-	}
-	String userId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), (String) authentication.getPrincipal());
-	return userSet.getCreator().getHttpUrl().equals(userId);
-    }
 
     /**
      * This method checks admin role
@@ -869,7 +851,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 		}
        validateUserSetForPublishUnPublish(userSet, authentication);
       if (publish) {
-        return updateUserSetForPublish(userSet);
+        return updateUserSetForPublish(userSet, authentication);
       }
       else {
         return updateUserSetForUnpublish(userSet, authentication);
@@ -884,7 +866,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	 */
 	private void validateUserSetForPublishUnPublish (PersistentUserSet userSet, Authentication authentication)throws HttpException {
 		// Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond with 400;
-		if(userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet()) {
+		if(isPublishingPrevented(userSet)) {
 			throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
 					new String[] { "Publish/Unpublish user set ", userSet.getType() });
 		}
@@ -895,4 +877,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 					new String[] { "Only a publisher user or admin can perform this operation." }, HttpStatus.FORBIDDEN);
 		}
 	}
+
+  private boolean isPublishingPrevented(PersistentUserSet userSet) {
+    return userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet();
+  }
 }

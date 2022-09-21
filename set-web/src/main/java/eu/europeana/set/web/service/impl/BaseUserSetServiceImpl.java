@@ -808,13 +808,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     }
   }
     
-    protected PersistentUserSet updateUserSetForPublish (PersistentUserSet userSet) {
+    protected PersistentUserSet updateUserSetForPublish (PersistentUserSet userSet, Authentication authentication) {
       //update the visibility to publish
-      if(!userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
-        Agent creator = new WebUser();
-        creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEntityUserSetUserId()));
-        creator.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
-        userSet.setCreator(creator);
+      if(!userSet.isPublished() && isOwner(userSet, authentication)) {
+        //if the requesting user is the owner of the gallery, the ownership is reassigned to @europeana
+        Agent creator = buildEuropeanaPublisherUser();
+        userSet.setCreator(creator);         
         
         userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
         userSet.setModified(new Date());
@@ -823,15 +822,28 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
         return userSet;
       }
     }
+
+    private Agent buildEntityGalleriesUser() {
+      Agent creator = new WebUser();
+      creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEntityUserSetUserId()));
+      creator.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
+      return creator;
+    }
+
+    private Agent buildEuropeanaPublisherUser() {
+      Agent creator = new WebUser();
+      creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEuropeanaPublisherId()));
+      creator.setNickname(getConfiguration().getEuropeanaPublisherNickname());
+      return creator;
+    }
     
     protected PersistentUserSet updateUserSetForUnpublish (PersistentUserSet userSet, Authentication authentication) {
       //update the visibility to public
-      if(userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
-        Agent creator = new WebUser();
-        creator.setHttpUrl(getUserId(authentication));
-        creator.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+      if(userSet.isPublished() && isPublisherOwner(userSet)) {
+        //if the owner is @europeana, then the ownership is reassigned to the requesting user
+        Agent creator = buildUserFromAuthentication(authentication);
         userSet.setCreator(creator);
-      
+        
         userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
         userSet.setModified(new Date());
         return getMongoPersistence().update(userSet);
@@ -840,5 +852,39 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       }
 
     }
+
+    private boolean isPublisherOwner(PersistentUserSet userSet) {
+      return isOwner(userSet, getConfiguration().getEuropeanaPublisherId());
+    }
+
+    private Agent buildUserFromAuthentication(Authentication authentication) {
+      Agent creator = new WebUser();
+      creator.setHttpUrl(getUserId(authentication));
+      creator.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+      return creator;
+    }
     
+    /**
+     * This method checks if user is an owner of the user set
+     * 
+     * @param userSet
+     * @param authentication
+     * @return true if user is owner of a user set
+     */
+    public boolean isOwner(UserSet userSet, Authentication authentication) {
+      if (authentication == null) {
+        return false;
+      }
+      final String userIdentifier = (String) authentication.getPrincipal();
+      return isOwner(userSet, userIdentifier);
+    }
+
+    protected boolean isOwner(UserSet userSet, final String userIdentifier) {
+      if (userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
+        return false;
+      }
+      String userId = UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(),
+          userIdentifier);
+      return userSet.getCreator().getHttpUrl().equals(userId);
+    }
 }

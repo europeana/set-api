@@ -27,6 +27,9 @@ public interface UserSetConfiguration{
 
 	public String getEntityUserSetUserId();
 
+	public String getEuropeanaPublisherId();
+	public String getEuropeanaPublisherNickname();
+
 	public String getElevationFileLocation();
 	
 	/**
