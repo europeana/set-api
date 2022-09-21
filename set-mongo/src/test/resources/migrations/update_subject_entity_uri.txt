@@ -1,0 +1,37 @@
+db.getCollection('userset').updateMany({
+   type : "EntityBestItemsSet"
+},
+[
+  {
+    $set: {
+      subject: {
+        $map: {
+          input: {
+            $ifNull: [
+              "$subject",
+              []
+            ]
+          },
+          in: {
+            $cond: [
+              {
+                $regexMatch: {
+                  input: "$$this",
+                  regex: "^http://data.europeana.eu/.*base.*"
+                }
+              },
+              {
+                $replaceAll: {
+                  input: "$$this",
+                  find: "base/",
+                  replacement: ""
+                }
+              },
+              "$$this"
+            ]
+          }
+        }
+      }
+    }
+  }
+])
