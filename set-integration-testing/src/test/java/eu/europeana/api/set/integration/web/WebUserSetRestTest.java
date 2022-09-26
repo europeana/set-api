@@ -204,8 +204,8 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     //publish/unpublish user set tests
     @Test
     public void publishUnpublishUserSet_Success() throws Exception {
-      
-      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+      //TODO: 
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
       
       MockHttpServletResponse response = mockMvc.perform(
           MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
@@ -218,6 +218,8 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
       assertNotNull(result);
       assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
       assertTrue(containsKeyOrValue(result, "published"));
+      //published by owner, the ownership is changed
+      assertTrue(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
       assertEquals(HttpStatus.OK.value(), response.getStatus());
 
       response = mockMvc.perform(
@@ -231,6 +233,9 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
       assertNotNull(result);
       assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
       assertTrue(containsKeyOrValue(result, "public"));
+      //published by owner, the ownership is changed back to publisher
+      assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
+      assertTrue(containsKeyOrValue(result, "test_user_publisher"));
       assertEquals(HttpStatus.OK.value(), response.getStatus());
     }
     

@@ -45,7 +45,7 @@ import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
-public abstract class BaseUserSetServiceImpl implements UserSetService{
+public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   @Resource
   PersistentUserSetService mongoPersistance;
@@ -171,22 +171,25 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
    * europeana.UserSet.definitions.model.UserSet, boolean)
    */
   // @Override
-  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws SetUniquenessValidationException, RequestBodyValidationException, ParamValidationException, ApplicationAuthenticationException {
-    //###### FIRST Validate the input data, which is allowed to be partial ####/
+  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet,
+      LdProfiles profile) throws SetUniquenessValidationException, RequestBodyValidationException,
+      ParamValidationException, ApplicationAuthenticationException {
+    // ###### FIRST Validate the input data, which is allowed to be partial ####/
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
-    // TODO: reassess if the type should be kept muable 
+    // TODO: reassess if the type should be kept muable
     if (persistentUserSet.isOpenSet() && !webUserSet.isOpenSet()) {
-    // isDefinedBy is mandatory for open sets
-    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-        new String[] { WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)" });
+      // isDefinedBy is mandatory for open sets
+      throw new RequestBodyValidationException(
+          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+          new String[] {WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)"});
     }
-    //validate input 
+    // validate input
     validateWebUserSet(webUserSet);
-    
-    //merge properties into the persitentUserSet
+
+    // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
-    
+
     // validate items
     validateAndSetItems(persistentUserSet, webUserSet, profile);
     // remove duplicated items
@@ -206,7 +209,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     // set immutable fields before validation
     webUserSet.setCreator(persistentUserSet.getCreator());
     webUserSet.setIdentifier(persistentUserSet.getIdentifier());
-//  newUserSet.setSubject(existingUserSet.getSubject());
+    // newUserSet.setSubject(existingUserSet.getSubject());
     if (webUserSet.getVisibility() == null) {
       webUserSet.setVisibility(persistentUserSet.getVisibility());
     }
@@ -229,7 +232,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
 
     // add mandatory parameters
     if (StringUtils.isNotBlank(searchProfile)) {
-      if (StringUtils.isNotEmpty(queryString)){
+      if (StringUtils.isNotEmpty(queryString)) {
         queryString += "&";
       }
       queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
@@ -242,27 +245,27 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
   protected String removeParam(final String queryParam, String queryParams) {
-  String tmp;
-  // avoid name conflicts search "queryParam="
-  int startPos = queryParams.indexOf(queryParam + "=");
-  int startEndPos = queryParams.indexOf('&', startPos + 1);
+    String tmp;
+    // avoid name conflicts search "queryParam="
+    int startPos = queryParams.indexOf(queryParam + "=");
+    int startEndPos = queryParams.indexOf('&', startPos + 1);
 
-  if (startPos >= 0) {
+    if (startPos >= 0) {
       // make sure to remove the "&" if not the first param
       if (startPos > 0) {
-      startPos--;
+        startPos--;
       }
 
       tmp = queryParams.substring(0, startPos);
 
       if (startEndPos > 0) {
-      // tmp += queryParams.substring(startEndPos);
-      tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
+        // tmp += queryParams.substring(startEndPos);
+        tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
       }
-  } else {
+    } else {
       tmp = queryParams;
-  }
-  return tmp;
+    }
+    return tmp;
   }
 
   protected CollectionOverview buildCollectionOverview(String pageId, String paginationBaseUrl,
@@ -321,53 +324,54 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
         .append(pageSize);
     // add the profile param if profile is not null (search items in set doesn't use a profile)
-    boolean hasProfileParam = StringUtils.contains(collectionUrl, CommonApiConstants.QUERY_PARAM_PROFILE+"=");
+    boolean hasProfileParam =
+        StringUtils.contains(collectionUrl, CommonApiConstants.QUERY_PARAM_PROFILE + "=");
     if (profile != null && !hasProfileParam) {
       builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
-        .append(profile.getRequestParamValue());
+          .append(profile.getRequestParamValue());
     }
     return builder.toString();
   }
 
-    public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
-	// remove out of scope parameters
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
-	// facets are not part of items pagination. Facets are displayed separately
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_FACET, queryString);
+  public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
+    // remove out of scope parameters
+    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
+    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
+    // facets are not part of items pagination. Facets are displayed separately
+    queryString = removeParam(CommonApiConstants.QUERY_PARAM_FACET, queryString);
 
-	// avoid duplication of query parameters
-	queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
+    // avoid duplication of query parameters
+    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
 
-	// add mandatory parameters
-	if (StringUtils.isNotBlank(searchProfile)) {
-		if (!queryString.isEmpty()) {
-			queryString += "&";
-		}
-		queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
+    // add mandatory parameters
+    if (StringUtils.isNotBlank(searchProfile)) {
+      if (!queryString.isEmpty()) {
+        queryString += "&";
+      }
+      queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
 
-	}
-	
-	//TODO: verify if base URL should be used instead
-	if (!queryString.isEmpty()) {
-		return requestUrl+"?"+queryString;
-	}
-	return requestUrl;
     }
 
-
-
-    protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize, long totalInCollection,
-	    int lastPage, String type, LdProfiles profile) {
-	String first = null;
-	String last = null;
-	
-	if(totalInCollection > 0) {
-	    first = buildPageUrl(collectionUrl, 0, pageSize, profile);
-	    last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
-	}
-	return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
+    // TODO: verify if base URL should be used instead
+    if (!queryString.isEmpty()) {
+      return requestUrl + "?" + queryString;
     }
+    return requestUrl;
+  }
+
+
+
+  protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize,
+      long totalInCollection, int lastPage, String type, LdProfiles profile) {
+    String first = null;
+    String last = null;
+
+    if (totalInCollection > 0) {
+      first = buildPageUrl(collectionUrl, 0, pageSize, profile);
+      last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
+    }
+    return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
+  }
 
   protected void setDefaults(UserSet newUserSet, Authentication authentication) {
     Agent user = new WebUser();
@@ -437,12 +441,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
 
-  protected boolean hasPublisherRights(Authentication authentication) {
-        if (authentication == null) {
-            return false;
-        }
-        return hasRole(authentication, Roles.PUBLISHER.getName());
-    }
+  // protected boolean hasPublisherRights(Authentication authentication) {
+  // if (authentication == null) {
+  // return false;
+  // }
+  // return hasRole(authentication, Roles.PUBLISHER.getName());
+  // }
 
   void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
     if (apiResult.getItems() == null) {
@@ -480,15 +484,15 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
         profile = ldProfile;
       }
     }
-    
-    if(profile == null) {
+
+    if (profile == null) {
       profile = LdProfiles.STANDARD;
     }
     return profile;
   }
-  
-  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates, LdProfiles profile)
-      throws ApplicationAuthenticationException {
+
+  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates,
+      LdProfiles profile) throws ApplicationAuthenticationException {
     // no validation of items for open sets, they are retrieved dynamically
     if (storedUserSet.isOpenSet()) {
       return;
@@ -522,19 +526,16 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     // minimal,
     // respond with HTTP 412)
     if (LdProfiles.MINIMAL == profile) {
-      if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) { // new user set
-                                                                                     // contains
-        // items
+      if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) { 
+        // new user set contains items
         throw new ApplicationAuthenticationException(
             UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
             UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
             HttpStatus.PRECONDITION_FAILED, null);
       }
     } else { // it is a Standard profile
-      if (userSetUpdates.getItems() == null || userSetUpdates.getItems().size() == 0) { // new user
-                                                                                      // set
-                                                                                      // contains no
-                                                                                      // // items
+      if (userSetUpdates.getItems() == null || userSetUpdates.getItems().size() == 0) { 
+        // new user set contains no items
         throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS,
             UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS, new String[] {},
             HttpStatus.PRECONDITION_FAILED, null);
@@ -542,7 +543,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       storedUserSet.setItems(userSetUpdates.getItems());
     }
   }
-  
+
   public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException,
       ParamValidationException, SetUniquenessValidationException {
 
@@ -573,18 +574,18 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
     validateIsDefinedBy(webUserSet);
     validateEntityBestItemsSet(webUserSet);
   }
-  
+
   void validateProvider(UserSet webUserSet) throws RequestBodyValidationException {
-    if(webUserSet.getProvider() == null) {
+    if (webUserSet.getProvider() == null) {
       return;
     }
-    //check if the provider is provided that it is not an empty object
-    if(StringUtils.isBlank(webUserSet.getProvider().getId()) 
+    // check if the provider is provided that it is not an empty object
+    if (StringUtils.isBlank(webUserSet.getProvider().getId())
         && StringUtils.isBlank(webUserSet.getProvider().getName())) {
       final String message = "must contain either an id or a name.";
       throw new RequestBodyValidationException(
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.PROVIDER, message}); 
+          new String[] {WebUserSetModelFields.PROVIDER, message});
     }
     // check provider id if available
     if (!StringUtils.isBlank(webUserSet.getProvider().getId())) {
@@ -593,7 +594,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           (providerId.startsWith(WebUserSetFields.PROJECT_EUROPEANA_BASE_URL)
               || providerId.startsWith(WebUserSetFields.DATA_EUROPEANA_BASE_URL));
       if (!isAllowedProviderId) {
-        final String message = providerId + " - must be under one of the domains: " +WebUserSetFields.DATA_EUROPEANA_BASE_URL + ", " + WebUserSetFields.PROJECT_EUROPEANA_BASE_URL;
+        final String message = providerId + " - must be under one of the domains: "
+            + WebUserSetFields.DATA_EUROPEANA_BASE_URL + ", "
+            + WebUserSetFields.PROJECT_EUROPEANA_BASE_URL;
         throw new RequestBodyValidationException(
             UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
             new String[] {WebUserSetModelFields.PROVIDER, message});
@@ -737,24 +740,25 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
   }
 
 
-	String serializeSearchApiRequest(SearchApiRequest searchApiRequest) throws IOException {
-	UserSetLdSerializer serializer = new UserSetLdSerializer();
-	return serializer.serialize(searchApiRequest);
-	}
-	/**
-	 * validates the EntityBestItemsSet for entity user set subject field must have
-     * a entity reference.
-     * 
-	 * @param webUserSet the user set to verify
-	 * @throws ParamValidationException
-	 * @throws RequestBodyValidationException
-	 * @throws SetUniquenessValidationException
-	 */
-    void validateEntityBestItemsSet(UserSet webUserSet)
-	    throws ParamValidationException, RequestBodyValidationException, SetUniquenessValidationException {
-		if (!webUserSet.isEntityBestItemsSet()) {
-			return;
-		}
+  String serializeSearchApiRequest(SearchApiRequest searchApiRequest) throws IOException {
+    UserSetLdSerializer serializer = new UserSetLdSerializer();
+    return serializer.serialize(searchApiRequest);
+  }
+
+  /**
+   * validates the EntityBestItemsSet for entity user set subject field must have a entity
+   * reference.
+   * 
+   * @param webUserSet the user set to verify
+   * @throws ParamValidationException
+   * @throws RequestBodyValidationException
+   * @throws SetUniquenessValidationException
+   */
+  void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
+      RequestBodyValidationException, SetUniquenessValidationException {
+    if (!webUserSet.isEntityBestItemsSet()) {
+      return;
+    }
 
     // creator must be present
     if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
@@ -778,11 +782,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
     }
     // if present check of entity uri pattern
-    if (StringUtils.startsWith(subject.get(0), WebUserSetFields.DATA_EUROPEANA_BASE_URL) && StringUtils.contains(subject.get(0), WebUserSetFields.ENTITY_URI_BASE)) {
+    if (StringUtils.startsWith(subject.get(0), WebUserSetFields.DATA_EUROPEANA_BASE_URL)
+        && StringUtils.contains(subject.get(0), WebUserSetFields.ENTITY_URI_BASE)) {
       // must include only one HTTP reference
-      throw new RequestBodyValidationException(
-              UserSetI18nConstants.USERSET_VALIDATION_ENTITY_URI,
-              new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
+      throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_URI,
+          new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
     }
 
     // entity user set is a close set
@@ -792,22 +796,22 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
     }
-    
+
     checkDuplicateUserSets(webUserSet);
   }
-    
-    void checkDuplicateUserSets(UserSet userSet) throws SetUniquenessValidationException {
-      //check the set uniqueness only for the EntityBestItemsSet type
-      if(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(userSet.getType())) {
-        List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet);
-        if(duplicateSetsIds!=null) {
-            String [] i18nParamsSetDuplicates = new String [1];
-            i18nParamsSetDuplicates[0]=String.join(",", duplicateSetsIds);
-            throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
-                UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
-        }
+
+  void checkDuplicateUserSets(UserSet userSet) throws SetUniquenessValidationException {
+    // check the set uniqueness only for the EntityBestItemsSet type
+    if (UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(userSet.getType())) {
+      List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet);
+      if (duplicateSetsIds != null) {
+        String[] i18nParamsSetDuplicates = new String[1];
+        i18nParamsSetDuplicates[0] = String.join(",", duplicateSetsIds);
+        throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
+            UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
       }
     }
+  }
 
   void updateTotal(UserSet existingUserSet) {
     if (existingUserSet.getItems() != null) {
@@ -816,38 +820,84 @@ public abstract class BaseUserSetServiceImpl implements UserSetService{
       existingUserSet.setTotal(0);
     }
   }
-    
-    protected PersistentUserSet updateUserSetForPublish (PersistentUserSet userSet) {
-      //update the visibility to publish
-      if(!userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
-        Agent creator = new WebUser();
-        creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), getConfiguration().getEntityUserSetUserId()));
-        creator.setNickname(WebUserSetModelFields.ENTITYUSER_NICKNAME);
-        userSet.setCreator(creator);
-        
-        userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
-        userSet.setModified(new Date());
-        return getMongoPersistence().update(userSet);
-      } else {
-        return userSet;
-      }
-    }
-    
-    protected PersistentUserSet updateUserSetForUnpublish (PersistentUserSet userSet, Authentication authentication) {
-      //update the visibility to public
-      if(userSet.getVisibility().equalsIgnoreCase(VisibilityTypes.PUBLISHED.getJsonValue())) {
-        Agent creator = new WebUser();
-        creator.setHttpUrl(getUserId(authentication));
-        creator.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
-        userSet.setCreator(creator);
-      
-        userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
-        userSet.setModified(new Date());
-        return getMongoPersistence().update(userSet);
-      } else {
-        return userSet;
-      }
 
+  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet,
+      Authentication authentication) {
+    if (userSet.isPublished()) {
+      // just a second check to prevent updates for allready published sets
+      return userSet;
+    }
+    // update the visibility to publish
+    if (isOwner(userSet, authentication)) {
+      // if the requesting user is the owner of the gallery, the ownership is reassigned to
+      // @europeana
+      Agent creator = buildEuropeanaPublisherUser();
+      userSet.setCreator(creator);
+    }
+    userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
+    userSet.setModified(new Date());
+    return getMongoPersistence().update(userSet);
+  }
+
+  private Agent buildEuropeanaPublisherUser() {
+    Agent creator = new WebUser();
+    creator.setHttpUrl(UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(),
+        getConfiguration().getEuropeanaPublisherId()));
+    creator.setNickname(getConfiguration().getEuropeanaPublisherNickname());
+    return creator;
+  }
+
+  PersistentUserSet updateUserSetForUnpublish(PersistentUserSet userSet,
+      Authentication authentication) {
+    
+    if(!userSet.isPublished()){
+      // just a second check to prevent updates for not published sets
+      return userSet; 
+    }
+    // update the visibility to public
+    if (hasPublisherAsOwner(userSet)) {
+      // if the owner is @europeana, then the ownership is reassigned to the requesting user
+      Agent creator = buildUserFromAuthentication(authentication);
+      userSet.setCreator(creator);
     }
     
+    userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+    userSet.setModified(new Date());
+    return getMongoPersistence().update(userSet);
+  }
+
+  private boolean hasPublisherAsOwner(PersistentUserSet userSet) {
+    return isOwner(userSet, getConfiguration().getEuropeanaPublisherId());
+  }
+
+  private Agent buildUserFromAuthentication(Authentication authentication) {
+    Agent creator = new WebUser();
+    creator.setHttpUrl(getUserId(authentication));
+    creator.setNickname(((ApiCredentials) authentication.getCredentials()).getUserName());
+    return creator;
+  }
+
+  /**
+   * This method checks if user is an owner of the user set
+   * 
+   * @param userSet
+   * @param authentication
+   * @return true if user is owner of a user set
+   */
+  public boolean isOwner(UserSet userSet, Authentication authentication) {
+    if (authentication == null) {
+      return false;
+    }
+    final String userIdentifier = (String) authentication.getPrincipal();
+    return isOwner(userSet, userIdentifier);
+  }
+
+  protected boolean isOwner(UserSet userSet, final String userIdentifier) {
+    if (userSet.getCreator() == null || userSet.getCreator().getHttpUrl() == null) {
+      return false;
+    }
+    String userId =
+        UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), userIdentifier);
+    return userSet.getCreator().getHttpUrl().equals(userId);
+  }
 }

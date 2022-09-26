@@ -41,7 +41,6 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
@@ -49,6 +48,7 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
+import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -351,7 +351,7 @@ public class WebUserSetRest extends BaseRest {
         HttpServletRequest request) throws HttpException {
       // check user credentials, if invalid respond with HTTP 401,
       // or if unauthorized respond with HTTP 403
-      Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+      Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
       return publishUnpublishUserSet(identifier, authentication, true, profileStr, request);
     }
 
@@ -364,7 +364,7 @@ public class WebUserSetRest extends BaseRest {
         HttpServletRequest request) throws HttpException {
       // check user credentials, if invalid respond with HTTP 401,
       // or if unauthorized respond with HTTP 403
-      Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+      Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
       return publishUnpublishUserSet(identifier, authentication, false, profileStr, request);
     }
 
