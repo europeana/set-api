@@ -48,6 +48,7 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
+import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -350,7 +351,7 @@ public class WebUserSetRest extends BaseRest {
         HttpServletRequest request) throws HttpException {
       // check user credentials, if invalid respond with HTTP 401,
       // or if unauthorized respond with HTTP 403
-      Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+      Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
       return publishUnpublishUserSet(identifier, authentication, true, profileStr, request);
     }
 
@@ -363,7 +364,7 @@ public class WebUserSetRest extends BaseRest {
         HttpServletRequest request) throws HttpException {
       // check user credentials, if invalid respond with HTTP 401,
       // or if unauthorized respond with HTTP 403
-      Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+      Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
       return publishUnpublishUserSet(identifier, authentication, false, profileStr, request);
     }
 
