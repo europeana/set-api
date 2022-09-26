@@ -28,7 +28,7 @@ entity.userset.user.id=
 #configurable user id for europeana publisher  
 europeana.publisher.id=
 #configurable nickname for europeana publisher
-europeana.publisher.nickname=@europeana
+europeana.publisher.nickname=@editorial
 
 #max search results per page
 #set.search.maxpagesize.minimal=10000
