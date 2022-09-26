@@ -842,18 +842,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     @Override
-    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException {
-       PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
-		//if the user set does not exist, return 404
-		if (userSet == null) {
-			throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
-					UserSetI18nConstants.USERSET_NOT_FOUND, new String[] { userSetId });
-		}
-       validateUserSetForPublishUnPublish(userSet, authentication);
+    public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication,
+        boolean publish) throws HttpException {
+      PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
+      // if the user set does not exist, return 404
+      if (userSet == null) {
+        throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
+            UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
+      }
+      validateUserSetForPublishUnPublish(userSet, authentication, publish);
       if (publish) {
         return updateUserSetForPublish(userSet, authentication);
-      }
-      else {
+      } else {
         return updateUserSetForUnpublish(userSet, authentication);
       }
     }
@@ -864,17 +864,21 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 	 * @param authentication
 	 * @throws HttpException
 	 */
-	private void validateUserSetForPublishUnPublish (PersistentUserSet userSet, Authentication authentication)throws HttpException {
+	private void validateUserSetForPublishUnPublish (PersistentUserSet userSet, Authentication authentication, boolean publish)throws HttpException {
 		// Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond with 400;
 		if(isPublishingPrevented(userSet)) {
 			throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
 					new String[] { "Publish/Unpublish user set ", userSet.getType() });
 		}
-		//check if the user is authorized, otherwise return 403
-		if(!hasPublisherRights(authentication) && !hasAdminRights(authentication)) {
-			throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
-					UserSetI18nConstants.USER_NOT_AUTHORIZED,
-					new String[] { "Only a publisher user or admin can perform this operation." }, HttpStatus.FORBIDDEN);
+		//verify the state of the object
+		if(publish && userSet.isPublished()) {
+		  //if publishing
+		  throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+              new String[] { "Publish", "allready published" });
+		}else if(!publish && !userSet.isPublished()) {
+		  //if depublishing
+		  throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+              new String[] { "Unpublish", "not published" });
 		}
 	}
 
