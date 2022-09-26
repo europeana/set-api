@@ -119,7 +119,8 @@ public class EntitySetTest extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(provider, "Europeana XX"));
     //check id
     assertTrue(containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
-    
+    // check subject
+	assertEquals("http://data.europeana.eu/concept/114", createdSet.getSubject().get(0));
     assertNotNull(getSetContributors(result));
     }
     

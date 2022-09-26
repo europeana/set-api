@@ -8,7 +8,7 @@ public enum Roles implements Role {
 	ANONYMOUS(new String[]{Operations.RETRIEVE}),
 	USER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
 	EDITOR(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
-	PUBLISHER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
+	PUBLISHER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, SetOperations.PUBLISH}),
 	ADMIN(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, Operations.ADMIN_ALL});
 	
 	String[] operations;

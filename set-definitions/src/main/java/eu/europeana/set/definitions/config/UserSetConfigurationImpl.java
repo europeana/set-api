@@ -32,6 +32,8 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String BASEURL_PREFIX = USERSET_ENVIRONMENT + ".baseUrl.";
 
   public static final String ENTITY_USERSET_USERID = "entity.userset.user.id";
+  public static final String EUROPEANA_PUBLISHER_ID = "europeana.publisher.id";
+  public static final String EUROPEANA_PUBLISHER_NICKNAME = "europeana.publisher.nickname";
   public static final String ELEVATION_FILE_LOCATION = "elevation.file.folder";
 
   // TODO: move constants to api commons
@@ -162,5 +164,15 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public boolean isApiKeyValidationEnabled() {
     return getSetProperties().containsKey(KEY_APIKEY_SERVICE_URL) 
         && StringUtils.isNotBlank(getSetProperties().getProperty(KEY_APIKEY_SERVICE_URL));
+  }
+
+  @Override
+  public String getEuropeanaPublisherId() {
+    return getSetProperties().getProperty(EUROPEANA_PUBLISHER_ID);
+  }
+
+  @Override
+  public String getEuropeanaPublisherNickname() {
+    return getSetProperties().getProperty(EUROPEANA_PUBLISHER_NICKNAME);
   }
 }
