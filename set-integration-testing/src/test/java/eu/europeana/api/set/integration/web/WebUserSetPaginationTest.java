@@ -266,8 +266,8 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, "\\/22\\/_13784"));
 
 //    int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
-    //some items are not found, currently only 91 out of 200 are available
-    int secondPageSize = 91;
+    //some items are not found, currently only 52 out of 200 are dereferencible on the second page
+    int secondPageSize = 52;
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
     assertEquals(secondPageSize, pageSize);
   }
