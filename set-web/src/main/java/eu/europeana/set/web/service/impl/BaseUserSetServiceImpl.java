@@ -185,7 +185,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           new String[] {WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)"});
     }
     // validate input
-    validateWebUserSet(webUserSet);
+    validateWebUserSet(webUserSet, persistentUserSet.isPublished());
 
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
@@ -506,7 +506,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         throw new ApplicationAuthenticationException(
             UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED,
             UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED, new String[] {},
-            HttpStatus.PRECONDITION_FAILED, null);
+            HttpStatus.BAD_REQUEST, null);
       }
       if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) {
         throw new ApplicationAuthenticationException(
@@ -544,7 +544,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException,
+  public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException,
       ParamValidationException, SetUniquenessValidationException {
 
     // validate title
@@ -561,8 +561,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           new String[] {WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN});
     }
 
-    // check that the visibility cannot be set to published
-    if (webUserSet.isPublished()) {
+    // prevent updating the state to "published" (must use the publish method for that)
+    if (!isAlreadyPublished && webUserSet.isPublished()) {
       throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
