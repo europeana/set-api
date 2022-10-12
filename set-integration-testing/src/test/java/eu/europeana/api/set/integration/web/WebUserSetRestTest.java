@@ -200,77 +200,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 
 	assertEquals(HttpStatus.OK.value(), response.getStatus());
     }
-    
-    //publish/unpublish user set tests
-    @Test
-    public void publishUnpublishUserSet_Success() throws Exception {
-      //TODO: 
-      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
-      
-      MockHttpServletResponse response = mockMvc.perform(
-          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
-          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-          .andReturn().getResponse();
-  
-      String result = response.getContentAsString();
-      assertNotNull(result);
-      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
-      assertTrue(containsKeyOrValue(result, "published"));
-      //published by owner, the ownership is changed
-      assertTrue(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-      assertEquals(HttpStatus.OK.value(), response.getStatus());
-
-      response = mockMvc.perform(
-          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
-          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-          .andReturn().getResponse();
-      
-      result = response.getContentAsString();
-      assertNotNull(result);
-      assertTrue(containsKeyOrValue(result, UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
-      assertTrue(containsKeyOrValue(result, "public"));
-      //published by owner, the ownership is changed back to publisher
-      assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-      assertTrue(containsKeyOrValue(result, "test_user_publisher"));
-      assertEquals(HttpStatus.OK.value(), response.getStatus());
-    }
-    
-    @Test
-    public void publishUnpublishUserSet_Exceptions() throws Exception {
-      
-      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-      
-      mockMvc.perform(
-          MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
-          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-          .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
-  
-      mockMvc.perform(
-          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
-          .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-          .andExpect(status().is(HttpStatus.FORBIDDEN.value()));    
-
-      getUserSetService().deleteUserSet(userSet.getIdentifier());
-      
-      userSet = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
-      
-      mockMvc.perform(
-          MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
-          .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-          .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-    }
-
-
+   
     // Delete User associated Tests
     @Test
     public void deleteMysets_Success() throws Exception {

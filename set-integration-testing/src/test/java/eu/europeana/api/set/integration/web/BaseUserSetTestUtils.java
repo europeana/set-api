@@ -52,6 +52,7 @@ public abstract class BaseUserSetTestUtils {
     public static final String USER_SET_TATTOOS = "/content/userset_tattoos.json";
     public static final String USER_SET_REGULAR_PUBLIC = "/content/userset_regular_public.json";
     public static final String USER_SET_REGULAR_PUBLISHED = "/content/userset_regular_published.json";
+    public static final String USER_SET_REGULAR_UPDATED = "/content/userset_regular_updated.json";
     public static final String USER_SET_COMPLETE_PUBLIC = "/content/userset_complete.json";
     public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
     public static final String USER_SET_BOOKMARK_FOLDER_1 = "/content/userset_bookmark_folder_1.json";

@@ -2,19 +2,15 @@ package eu.europeana.set.web.service;
 
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
-import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.security.core.Authentication;
-
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -23,6 +19,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
@@ -89,11 +86,12 @@ public interface UserSetService {
      * mandatory fields if false responds with HTTP 400
      * 
      * @param webUserSet
+     * @param isAlreadyPublished indicates if the set is already in the published state (in the database) 
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
      * @throws SetUniquenessValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
+    public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -169,7 +167,8 @@ public interface UserSetService {
      * @throws HttpException
      */
     UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
-
+    
+ 
     /**
      * This method validates admin role
      *
@@ -199,7 +198,7 @@ public interface UserSetService {
      * @return true if the user has permission
      * @throws HttpException
      */
-    void checkPermissionToUpdate(UserSet userSet,Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
+    void verifyPermissionToUpdate(UserSet userSet,Authentication authentication, boolean includeEntitySetMsg) throws HttpException;
 
     /**
      * This method retrieves user id from authentication object
