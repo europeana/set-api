@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.UnsupportedEncodingException;
 import org.apache.commons.lang3.StringUtils;
@@ -219,6 +220,23 @@ public class WebUserSetPublishingTest extends BaseUserSetTestUtils {
       //check size of the items 
       int itemCount = StringUtils.countMatches(result, "data.europeana.eu/item/");
       assertEquals(6,  itemCount);
+    }
+    
+    
+    @Test
+    public void checkItemInSetFromPublishedSet() throws Exception {
+      //create userset
+      WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+      
+      //publish userset by other user, the ownership stays with the creator
+      publishUserSet(userSet, "test_userset_regular");
+      
+      //add item to userset as publisher
+      MockHttpServletResponse response = mockMvc.perform(head(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(), "2048128", "618580")
+          .header(HttpHeaders.AUTHORIZATION, publisherUserToken))
+          .andReturn().getResponse();
+      
+      assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatus());
     }
     
     private void publishUserSet(WebUserSetImpl userSet, String expectedOwner)
