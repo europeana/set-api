@@ -74,6 +74,8 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String ELEVATION_AGENT_QUERY     = "edm_agent:";
     public static final String ELEVATION_CONCEPT_QUERY   = "skos_concept:";
     public static final String ELEVATION_TIMESPAN_QUERY  = "edm_timespan:";
+    public static final String ELEVATION_ORGANIZATION_QUERY = "foaf_organization:";
+    public static final String ORGANIZATION              = "organization";
     public static final String AGENT                     = "agent";
     public static final String CONCEPT                   = "concept";
     public static final String TIMESPAN                  = "timespan";
