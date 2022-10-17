@@ -127,12 +127,12 @@ public class ElevationUserSetRest extends BaseRest {
       String s = subject.get(0);
           if (s.contains(WebUserSetFields.AGENT)) {
               text.append(WebUserSetFields.ELEVATION_AGENT_QUERY);
-          }
-          else if (s.contains(WebUserSetFields.CONCEPT)) {
+          } else if (s.contains(WebUserSetFields.CONCEPT)) {
               text.append(WebUserSetFields.ELEVATION_CONCEPT_QUERY);
-          }
-          else if(s.contains(WebUserSetFields.TIMESPAN)) {
+          } else if (s.contains(WebUserSetFields.TIMESPAN)) {
               text.append(WebUserSetFields.ELEVATION_TIMESPAN_QUERY);
+          } else if (s.contains(WebUserSetFields.ORGANIZATION)) {
+              text.append(WebUserSetFields.ELEVATION_ORGANIZATION_QUERY);
           } else {
               return ""; // return empty for any other case
           }
