@@ -17,6 +17,7 @@ import eu.europeana.set.web.utils.UserSetXMLSerializer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.FileUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +75,9 @@ public class ElevationUserSetRest extends BaseRest {
 //            writeElevation(getConfiguration().getElevationFileLocation(), xml);
             // returning the elevation response
             //TODO - remove the body, once we know how elevation file will be used
-            return new ResponseEntity<>(xml, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE +";charset=UTF-8")
+                    .body(xml);
         } else {
             throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED,
                     UserSetI18nConstants.ELEVATION_NOT_GENERATED,
