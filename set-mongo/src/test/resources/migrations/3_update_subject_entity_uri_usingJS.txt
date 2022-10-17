@@ -1,0 +1,17 @@
+db.getCollection('userset').find({type : "EntityBestItemsSet", subject : { $regex : "^http://data.europeana.eu/.*base.*"}}).count();
+
+db.getCollection('userset').find({type : "EntityBestItemsSet", subject : { $regex : "^http://data.europeana.eu/.*base.*"}}).forEach(
+    function (elem) {
+     var subjectnewValue = elem.subject.map(a => a.replace('/base', ''));
+     
+     db.getCollection('userset').updateOne(
+            {
+                _id: elem._id
+            },
+            {
+                $set: {
+                    subject:subjectnewValue }
+            }
+        );
+    }
+);
