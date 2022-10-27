@@ -144,7 +144,7 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetInstantiationException e) {
       throw new HttpException(null, UserSetI18nConstants.USERSET_INVALID_BODY, null,
           HttpStatus.BAD_REQUEST, e);
-    } catch (RuntimeException | IOException | JSONException e) {
+    } catch (IOException | JSONException e) {
       throw new InternalServerException(e);
     }
 
@@ -228,7 +228,7 @@ public class WebUserSetRest extends BaseRest {
       }
       return buildGetResponse(userSet, profile, pageNr, pageSize, request);
 
-    } catch (RuntimeException | IOException | JSONException e) {
+    } catch (IOException | JSONException e) {
       throw new InternalServerException(e);
     }
   }
@@ -324,7 +324,7 @@ public class WebUserSetRest extends BaseRest {
 	} catch (UserSetValidationException | UserSetInstantiationException e) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
 		    new String[] { e.getMessage() }, e);
-	} catch (RuntimeException | IOException | JSONException e) {
+	} catch (IOException | JSONException e) {
 	    throw new InternalServerException(e);
 	}
     }
@@ -404,7 +404,7 @@ public class WebUserSetRest extends BaseRest {
 
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
-    } catch (RuntimeException | IOException e) {
+    } catch (IOException e) {
       throw new InternalServerException(e);
     }
   }
@@ -497,7 +497,7 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetValidationException e) {
       throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION,
           new String[] {e.getMessage()}, e);
-    } catch (RuntimeException | IOException e) {
+    } catch (IOException e) {
       throw new InternalServerException(e);
     }
   }
@@ -577,8 +577,6 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           new String[] {e.getMessage()}, e);
-    } catch (RuntimeException e) {
-      throw new InternalServerException(e);
     }
   }
 
@@ -677,7 +675,7 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           new String[] {e.getMessage()}, e);
-    } catch (RuntimeException | IOException e) {
+    } catch (IOException e) {
       throw new InternalServerException(e);
     }
   }
@@ -706,8 +704,6 @@ public class WebUserSetRest extends BaseRest {
    */
   protected ResponseEntity<String> deleteUserSet(HttpServletRequest request, String identifier,
       Authentication authentication) throws HttpException {
-
-    try {
       // retrieve a user set based on its identifier
       // if the Set doesn’t exist, respond with HTTP 404
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -745,9 +741,6 @@ public class WebUserSetRest extends BaseRest {
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 
       return new ResponseEntity<>(identifier, headers, httpStatus);
-    } catch (RuntimeException e) {
-      throw new InternalServerException(e);
-    }
   }
 
   /**
@@ -816,7 +809,6 @@ public class WebUserSetRest extends BaseRest {
    * @throws HttpException
    */
   protected ResponseEntity<String> deleteUserAssociatedSets(String creatorId) throws HttpException {
-    try {
       List<PersistentUserSet> userSets = getUserSetService().getUserSetByCreatorId(creatorId);
 
       // verify if the user sets are associated with the creatorId
@@ -843,8 +835,5 @@ public class WebUserSetRest extends BaseRest {
           UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
 
       return new ResponseEntity<>(headers, httpStatus);
-    } catch (RuntimeException e) {
-      throw new InternalServerException(e);
-    }
   }
 }
