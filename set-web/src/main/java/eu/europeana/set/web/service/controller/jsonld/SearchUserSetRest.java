@@ -93,8 +93,6 @@ public class SearchUserSetRest extends BaseRest {
 	    String jsonLd = serializeResultsPage(resultsPage);
 	    return buildSearchResponse(jsonLd);
 
-	} catch (HttpException e) {
-	    throw e;
 	} catch (IOException | RuntimeException e) {
 	    throw new InternalServerException(e);
 	}
@@ -179,8 +177,6 @@ public class SearchUserSetRest extends BaseRest {
 	    headers.add(HttpHeaders.ALLOW,  HttpHeaders.ALLOW_GET);
 
 	    return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
-	} catch (HttpException e) {
-	    throw e;
 	} catch (IOException | RuntimeException e) {
 	    throw new InternalServerException(e);
 	}

@@ -144,9 +144,6 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetInstantiationException e) {
       throw new HttpException(null, UserSetI18nConstants.USERSET_INVALID_BODY, null,
           HttpStatus.BAD_REQUEST, e);
-    } catch (HttpException e) {
-      // avoid wrapping HttpExceptions
-      throw e;
     } catch (RuntimeException | IOException | JSONException e) {
       throw new InternalServerException(e);
     }
@@ -231,9 +228,6 @@ public class WebUserSetRest extends BaseRest {
       }
       return buildGetResponse(userSet, profile, pageNr, pageSize, request);
 
-    } catch (HttpException e) {
-      // avoid wrapping http exception
-      throw e;
     } catch (RuntimeException | IOException | JSONException e) {
       throw new InternalServerException(e);
     }
@@ -330,8 +324,6 @@ public class WebUserSetRest extends BaseRest {
 	} catch (UserSetValidationException | UserSetInstantiationException e) {
 	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
 		    new String[] { e.getMessage() }, e);
-	} catch (HttpException e) {
-	    throw e;
 	} catch (RuntimeException | IOException | JSONException e) {
 	    throw new InternalServerException(e);
 	}
@@ -412,8 +404,6 @@ public class WebUserSetRest extends BaseRest {
 
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
-    } catch (HttpException e) {
-      throw e;
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
     }
@@ -507,8 +497,6 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetValidationException e) {
       throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION,
           new String[] {e.getMessage()}, e);
-    } catch (HttpException e) {
-      throw e;
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
     }
@@ -589,10 +577,6 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           new String[] {e.getMessage()}, e);
-    } catch (HttpException e) {
-      // TODO: change this when OAUTH is implemented and the user information is
-      // available in service
-      throw e;
     } catch (RuntimeException e) {
       throw new InternalServerException(e);
     }
@@ -693,8 +677,6 @@ public class WebUserSetRest extends BaseRest {
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           new String[] {e.getMessage()}, e);
-    } catch (HttpException e) {
-      throw e;
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
     }
@@ -763,8 +745,6 @@ public class WebUserSetRest extends BaseRest {
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
 
       return new ResponseEntity<>(identifier, headers, httpStatus);
-    } catch (HttpException e) {
-      throw e;
     } catch (RuntimeException e) {
       throw new InternalServerException(e);
     }
@@ -863,8 +843,6 @@ public class WebUserSetRest extends BaseRest {
           UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
 
       return new ResponseEntity<>(headers, httpStatus);
-    } catch (HttpException e) {
-      throw e;
     } catch (RuntimeException e) {
       throw new InternalServerException(e);
     }
