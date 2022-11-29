@@ -15,6 +15,7 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     String setId;
     String text;
     String provider;
+    String titleLang;
     
     @Override
     public String getUser() {
@@ -114,5 +115,15 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     @Override
     public String getProvider() {
       return provider;
+    }
+
+    @Override
+    public void setTitleLang(String lang) {
+      this.titleLang = lang;
+    }
+
+    @Override
+    public String getTitleLang() {
+      return titleLang;
     }
 }

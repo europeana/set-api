@@ -434,11 +434,14 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	    if (query.getSetId() != null) {
 		mongoQuery.filter(WebUserSetModelFields.IDENTIFIER, query.getSetId());
 	    }
-	    
+	    	    
 	    if (query.getText() != null) {
 		mongoQuery.search(query.getText());
 	    }
 	    
+        if(query.getTitleLang() != null) {
+        mongoQuery.filter(WebUserSetModelFields.TITLE + "." + query.getTitleLang() + " exists", 1);       
+        }       
 
 	    if(query.getSortCriteria() == null) {
 		//default ordering if none is defined by the user

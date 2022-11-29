@@ -48,4 +48,8 @@ public interface UserSetQuery extends Query{
 
     String getProvider();
     
+    void setTitleLang(String lang);
+
+    String getTitleLang();
+    
 }
