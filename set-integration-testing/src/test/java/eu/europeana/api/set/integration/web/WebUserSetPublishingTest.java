@@ -105,7 +105,7 @@ public class WebUserSetPublishingTest extends BaseUserSetTestUtils {
       //publish userset by other user, the ownership stays with the creator
       publishUserSet(userSet, "test_userset_regular");
 
-      
+
       //update userset   
       String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_UPDATED);
      
@@ -256,7 +256,6 @@ public class WebUserSetPublishingTest extends BaseUserSetTestUtils {
       if(expectedOwner != null) {
         assertTrue(containsKeyOrValue(result, expectedOwner));
       }
-      assertTrue(containsKeyOrValue(result, expectedOwner));
       assertEquals(HttpStatus.OK.value(), response.getStatus());
     }
     
