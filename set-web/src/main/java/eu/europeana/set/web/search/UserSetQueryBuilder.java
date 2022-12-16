@@ -30,7 +30,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
   
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY, WebUserSetFields.TYPE, 
         WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT, 
-        WebUserSetFields.PROVIDER};
+        WebUserSetFields.PROVIDER, WebUserSetFields.LANG};
     String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
 
     Set<String> suportedFields = Set.of(fields);
@@ -58,11 +58,25 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
 	addFullTextCriterion(searchCriteria, searchQuery);
 	
+	addTitleLangCriterion(searchCriteria, searchQuery);
+	
 	searchQuery.setSortCriteria(toArray(sort));	
 	searchQuery.setPageSize(pageSize);
 	searchQuery.setPageNr(page);
 	
 	return searchQuery;
+    }
+
+    private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+        throws ParamValidationException {
+    if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
+        String lang = searchCriteria.get(WebUserSetFields.LANG);
+        if (!"en".equals(lang)) {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+              new String[] { "invalid value for search field, language must be 'en' " + WebUserSetFields.LANG, lang });
+        }
+        searchQuery.setTitleLang(lang);
+    }
     }
 
     private void addFullTextCriterion(Map<String, String> searchCriteria,

@@ -42,6 +42,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String DESCRIPTION                = "description";
     public static final String TYPE                       = "type";
     public static final String ITEMS                      = "items";
+    public static final String LANG                      = "lang";
 
     public static final String FIRST                     = "first";
     public static final String LAST                      = "last";

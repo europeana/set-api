@@ -54,9 +54,8 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     private static final String SEARCH_CREATOR = WebUserSetFields.CREATOR + ":";
     private static final String SEARCH_COLLECTION = WebUserSetFields.TYPE + ":" + UserSetTypes.COLLECTION;
     private static final String SEARCH_ENTITY_SET = WebUserSetFields.TYPE + ":" + UserSetTypes.ENTITYBESTITEMSSET;
-
+    private static final String SEARCH_TITLE_LANG_EN = WebUserSetFields.LANG + ":" + "en";
 //    private static final String SORT_MODIFIED_WebUserSetFields.MODIFIED
-    
     private static final String PAGE_SIZE = "100";
        
     @BeforeEach
@@ -128,6 +127,18 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
 		.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_INVALID_SET_ID)
 		.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
 		.andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @Test
+    public void searchTitleLang() throws Exception {
+    // create object in database
+    UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    mockMvc.perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+        .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_TITLE_LANG_EN)
+        .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+        .andExpect(status().is(HttpStatus.OK.value()));
     }
 
     @Test
