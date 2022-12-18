@@ -10,9 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Collections;
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,9 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.search.ResultSet;
+import eu.europeana.api.commons.definitions.statistics.UsageStatsFields;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.UserSet;
@@ -37,6 +33,7 @@ import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
@@ -65,6 +62,7 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
     public static void initTokens() {
 	initRegularUserToken();	
 	initPublisherUserToken();
+	initEntitySetTokens();
     }
     
     @BeforeEach
@@ -88,6 +86,9 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
 	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+    //register set to be deleted at the end
+    PersistentUserSet createdSet = mongoPersistance.getByIdentifier(identifier);
+    createdUserSets.add(createdSet);
     }
 
     @Test
@@ -286,5 +287,19 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 		delete(BASE_URL + "{identifier}", userSet.getIdentifier()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+    }
+    
+    @Test
+    public void usageStatsUserSet() throws Exception {
+      createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+      createTestUserSet(ENTITY_USER_SET_REGULAR_2, editorUserToken);
+      
+      MockHttpServletResponse responseUsageStats = mockMvc.perform(
+          get(BASE_URL + "stats")
+          .queryParam(CommonApiConstants.PARAM_WSKEY, WSKEY)
+          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+      JSONObject responseUsageStatsJson = new JSONObject(responseUsageStats.getContentAsString());
+      assertTrue(responseUsageStatsJson.getLong(UsageStatsFields.NUMBER_OF_ENTITY_SETS)>0);
+      assertTrue(responseUsageStatsJson.getLong(UsageStatsFields.NUMBER_OF_ITEMS_IN_ENTITY_SETS)>0);
     }
 }

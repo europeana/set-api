@@ -58,6 +58,7 @@ public class UsageStatsUserSetRest extends BaseRest {
         // create metric
         SetMetric metric = new SetMetric();
         metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
+        getUsageStatsService().getEntityGalleriesMetrics(metric);
         getUsageStatsService().getPublicPrivateSetsCount(metric);
         getUsageStatsService().getTotalItemsLiked(metric);
         getUsageStatsService().getAverageSetsPerUser(metric);

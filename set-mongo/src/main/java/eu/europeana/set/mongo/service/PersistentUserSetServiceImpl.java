@@ -222,6 +222,60 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 		return distinctCountPipeline;
 	}
+	
+    /**
+     * Creates an aggregation pipeline for 2 metrics on the Entity Galleries (Sets):
+     * NumberOfEntitySets and NumberOfItemsInEntitySets.     * 
+     * query :
+     * [ {  $match: { type: "EntityBestItemsSet" }},
+     *   {  $group: { 
+     *          _id: null,
+     *          totalEntityGalleries: { $sum: 1 },
+     *          totalItemsInEntityGalleries: { $sum: { $size:"$items" } }           
+     *      }
+     *   }]
+     * @return
+     */
+	@Override
+    public long[] getEntityGalleriesMetrics() {
+      List<DBObject> entityGalleriesPipeline = new ArrayList<>();
+      // add match filter if present
+      entityGalleriesPipeline.add(getMatchFilter(WebUserSetFields.TYPE, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()));
+      // add group field
+      entityGalleriesPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
+              new BasicDBObject(UserSetMongoConstants.MONGO_ID, null)
+                .append("totalEntityGalleries", new BasicDBObject(UserSetMongoConstants.MONGO_SUM, 1))
+                .append("totalItemsInEntityGalleries", new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)))
+              ));
+      
+      // Cursor is needed in aggregate command
+      AggregationOptions aggregationOptions =
+          AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+      Cursor cursor = getDao().getCollection().aggregate(entityGalleriesPipeline, aggregationOptions);
+      long[] result=new long[2];
+      if (cursor != null && cursor.hasNext()) {
+        DBObject cursorNext = cursor.next();
+        //according to the mongo db "$sum" aggregation, it may return also a double
+        Object totalEntityGalleries = cursorNext.get("totalEntityGalleries");
+        if(totalEntityGalleries instanceof Integer) {
+          result[0] = ((Integer)totalEntityGalleries).longValue();
+        }
+        else if(totalEntityGalleries instanceof Double) {
+          result[0] = ((Double)totalEntityGalleries).longValue();
+        }        
+        
+        Object totalItemsInEntityGalleries = cursorNext.get("totalItemsInEntityGalleries");
+        if(totalItemsInEntityGalleries instanceof Integer) {
+          result[1] = ((Integer)totalItemsInEntityGalleries).longValue();
+        }
+        else if(totalItemsInEntityGalleries instanceof Double) {
+          result[1] = ((Double)totalItemsInEntityGalleries).longValue();
+        }        
+        
+      }
+      return result;
+    }
+	
 
 	@Override
 	public long count(UserSetQuery query) {

@@ -1,5 +1,6 @@
 package eu.europeana.set.stats.service;
 
+import javax.annotation.Resource;
 import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
@@ -7,8 +8,6 @@ import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
-
-import javax.annotation.Resource;
 
 public class UsageStatsService {
 
@@ -76,6 +75,16 @@ public class UsageStatsService {
         metric.setNumberOfUsersWithLikeOrGallery(getMongoPersistance().getDistinctCreators(null));
 
     }
+    
+    /**
+     * Get Entity Galleries metrics.
+     */
+    public void getEntityGalleriesMetrics(SetMetric metric) {
+      long[] entityGalleriesMetrics = getMongoPersistance().getEntityGalleriesMetrics();
+      metric.setNumberOfEntitySets(entityGalleriesMetrics[0]);
+      metric.setNumberOfItemsInEntitySets(entityGalleriesMetrics[1]);
+    }
+    
     /**
      * Build the user set query
      * admin is set to 'true' to get all the results including private sets

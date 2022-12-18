@@ -119,5 +119,7 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 */
 	List<String> getDuplicateUserSetsIds(UserSet userSet);
 
+	long[] getEntityGalleriesMetrics();
+
 }
 

@@ -66,6 +66,7 @@ public abstract class BaseUserSetTestUtils {
     public static final String ENTITY_USER_SET_UPDATE = "/content/entity_userset_update.json";
     public static final String ENTITY_USER_SET_UPDATE_2 = "/content/entity_userset_update_2.json";
     public static final String ENTITY_USER_SET_NO_SUBJECT = "/content/entity_userset_invalid_subject.json";
+    public static final String WSKEY = "apidemo";
 
     protected MockMvc mockMvc;
 
