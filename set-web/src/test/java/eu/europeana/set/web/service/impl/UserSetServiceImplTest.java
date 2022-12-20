@@ -1,20 +1,19 @@
 package eu.europeana.set.web.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
@@ -23,9 +22,7 @@ import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@ContextConfiguration(locations = { "classpath:set-web-test.xml" })
+@ContextConfiguration(locations = { "classpath:set-web-context.xml" })
 //@ExtendWith(MockitoExtension.class)
 @ExtendWith(SpringExtension.class)
 public class UserSetServiceImplTest {
@@ -46,7 +43,7 @@ public class UserSetServiceImplTest {
 	}
 	resultSet = new ResultSet<>();
 	userSetQuery = new UserSetQueryImpl();
-	authentication = Mockito.mock(Authentication.class);
+//	authentication = Mockito.mock(Authentication.class);
 	REQUEST_URL = userSetService.getConfiguration().getSetApiEndpoint() + "search";
 	// userSetQuery.
 	userSetQuery.setPageSize(10);

@@ -20,7 +20,7 @@
 		location="classpath:config/set.properties" />
 	
     <!-- USING OTHER MODULES -->
-	<beans:import resource="set-web-beans.xml"/>
+	<beans:import resource="classpath:set-web-beans.xml"/>
 	
 	<beans:bean name="commons_oauth2_europeanaClientDetailsService" class="eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService">
 		<beans:property name="apiKeyServiceUrl" value="#{setProperties['europeana.apikey.serviceurl']}"/>

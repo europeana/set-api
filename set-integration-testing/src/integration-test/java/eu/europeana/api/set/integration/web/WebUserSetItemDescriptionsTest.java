@@ -4,12 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -28,17 +24,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
 /**
@@ -140,8 +130,8 @@ public class WebUserSetItemDescriptionsTest extends BaseUserSetTestUtils {
 		// check the collection url
 		String baseUrl = getConfiguration().getSetApiEndpoint().replaceFirst(getConfiguration().getApiBasePath(), "");
 	    String requestedPage = baseUrl + response.getRequest().getPathInfo();
-	    int pageSize = 100;
-	    int page = 1;
+//	    int pageSize = 100;
+//	    int page = 1;
 		final String collectionUrl = getUserSetService().buildResultsPageUrl(requestedPage, response.getRequest().getQueryString(), null);
 		final String resultPageId = getUserSetService().buildPageUrl(collectionUrl, 1, 100, LdProfiles.ITEMDESCRIPTIONS);
 		assertTrue(containsKeyOrValue(result, resultPageId));

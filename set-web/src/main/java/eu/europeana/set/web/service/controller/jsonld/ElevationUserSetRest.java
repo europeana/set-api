@@ -1,6 +1,5 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -9,6 +8,7 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.elevation.Doc;
 import eu.europeana.set.web.model.elevation.Elevation;

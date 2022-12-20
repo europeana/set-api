@@ -15,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.controller.BaseRestController;
@@ -28,6 +26,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;

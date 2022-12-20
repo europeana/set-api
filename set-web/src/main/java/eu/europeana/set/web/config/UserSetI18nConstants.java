@@ -1,4 +1,4 @@
-package eu.europeana.api.common.config;
+package eu.europeana.set.web.config;
 
 public class UserSetI18nConstants {
 

@@ -10,10 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Collections;
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +23,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -87,7 +81,8 @@ public class WebUserSetRestTest extends BaseUserSetTestUtils {
 			.content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-	String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+	    String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+	    assertNotNull(identifier);
     }
 
     @Test

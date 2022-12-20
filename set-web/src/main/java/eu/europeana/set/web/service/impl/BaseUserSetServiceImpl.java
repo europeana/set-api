@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.oauth2.model.ApiCredentials;
@@ -36,6 +35,7 @@ import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.search.service.impl.SearchApiClientImpl;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
@@ -47,7 +47,7 @@ import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
 public abstract class BaseUserSetServiceImpl implements UserSetService {
 
-  @Resource
+  @Resource(name = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
   @Resource
   I18nService i18nService;

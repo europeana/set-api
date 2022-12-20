@@ -16,12 +16,12 @@
 		location="classpath:config/set.properties" />
 	 -->
 		
-	<import resource="set-common-context.xml"/>
+	<import resource="classpath:set-common-context.xml"/>
 	
 	<!-- INTERNAL DEFINITIONS -->
-	<import resource="internal/set-mongo-datasource.xml"/>
-	<import resource="internal/set-mongo-beans.xml"/>
-	<import resource="internal/set-mongo-dao.xml"/>
+	<import resource="classpath:internal/set-mongo-datasource.xml"/>
+	<import resource="classpath:internal/set-mongo-beans.xml"/>
+	<import resource="classpath:internal/set-mongo-dao.xml"/>
 	
 	<context:annotation-config/>
 	

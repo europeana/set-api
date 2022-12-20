@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.io.IOException;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,7 +204,9 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
   public void removeAll() {
     // add two user sets
     UserSet collectionUserSet = createUserSet(true);
+    assertNotNull(collectionUserSet);
     UserSet bookmarkFolderUserSet = createUserSet(false);
+    assertNotNull(bookmarkFolderUserSet);
     // search all
     UserSetQuery query = new UserSetQueryImpl();
     query.setAdmin(true);

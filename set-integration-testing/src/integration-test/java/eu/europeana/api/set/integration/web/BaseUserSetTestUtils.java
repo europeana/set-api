@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,6 +40,7 @@ import eu.europeana.set.web.service.impl.UserSetServiceImpl;
  * 
  * @author Roman Graf on 23-09-2020.
  */
+@SuppressWarnings("deprecation")
 public abstract class BaseUserSetTestUtils {
 
     static final String BASE_URL = "/set/";
@@ -76,6 +78,7 @@ public abstract class BaseUserSetTestUtils {
     private UserSetService userSetService;
     
     @Autowired
+    @Qualifier(UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
     PersistentUserSetService mongoPersistance;
     
     @Autowired
@@ -169,6 +172,7 @@ public abstract class BaseUserSetTestUtils {
 
     }
 
+    
     protected Authentication getAuthentication(String token)
 	    throws ApiKeyExtractionException, AuthorizationExtractionException {
 	RsaVerifier signatureVerifier = new RsaVerifier(getConfiguration().getJwtTokenSignatureKey());

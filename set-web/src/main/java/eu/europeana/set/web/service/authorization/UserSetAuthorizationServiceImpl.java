@@ -11,6 +11,7 @@ import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
+@SuppressWarnings("deprecation")
 public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService implements UserSetAuthorizationService {
 
     protected final Logger logger = LogManager.getLogger(getClass());

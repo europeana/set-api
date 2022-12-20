@@ -19,7 +19,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
-import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {

@@ -1,44 +1,52 @@
 package eu.europeana.set.definitions.config;
 
-public interface UserSetConfiguration{
+public interface UserSetConfiguration {
 
-	public String getComponentName();
-	
-	/**
-	 * uses set.environment property
-	 */
-	public String getEnvironment();
-		
-	/**
-	 * uses annotation.environment.{$environment}.baseUrl property
-	 */
-	@Deprecated
-	public String getUserSetBaseUrl();
-	
-	public int getMaxPageSize(String profile);
-	
-	public int getMaxSearchDereferencedItems();
-	
-	public int getMaxRetrieveDereferencedItems();
-	
-	public String getSearchApiKey();
-	
-	public String getSearchApiProfileForItemDescriptions();
+  public static final String BEAN_SET_MONGO_STORE = "set_db_morphia_datastore_set";
+  public static final String BEAN_SET_PERSITENCE_SERVICE = "set_db_setService";
 
-	public String getEntityUserSetUserId();
 
-	public String getEuropeanaPublisherId();
-	public String getEuropeanaPublisherNickname();
+  public String getComponentName();
 
-	public String getElevationFileLocation();
-	
-	/**
-	 * authorization settings
-	 */
-	public String getJwtTokenSignatureKey();
-	public String getAuthorizationApiName();
-	public String getApiVersion();
-	public String getSearchApiUrl();
+  /**
+   * uses set.environment property
+   */
+  public String getEnvironment();
+
+  /**
+   * uses annotation.environment.{$environment}.baseUrl property
+   */
+  @Deprecated
+  public String getUserSetBaseUrl();
+
+  public int getMaxPageSize(String profile);
+
+  public int getMaxSearchDereferencedItems();
+
+  public int getMaxRetrieveDereferencedItems();
+
+  public String getSearchApiKey();
+
+  public String getSearchApiProfileForItemDescriptions();
+
+  public String getEntityUserSetUserId();
+
+  public String getEuropeanaPublisherId();
+
+  public String getEuropeanaPublisherNickname();
+
+  public String getElevationFileLocation();
+
+  /**
+   * authorization settings
+   */
+  public String getJwtTokenSignatureKey();
+
+  public String getAuthorizationApiName();
+
+  public String getApiVersion();
+
+  public String getSearchApiUrl();
 
   String getUserDataEndpoint();
 

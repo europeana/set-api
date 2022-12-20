@@ -18,14 +18,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
 
