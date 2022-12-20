@@ -172,13 +172,13 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	
     @Override
-    public long getDistinctCreators(String type) throws UserSetServiceException {
+    public long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException {
       long count = 0;
       // Cursor is needed in aggregate command
       AggregationOptions aggregationOptions =
           AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
       Cursor cursor = getDao().getCollection().aggregate(
-          getDistinctCountPipeline(UserSetMongoConstants.MONGO_CREATOR_URL, type),
+          getDistinctCountPipeline(field, fieldIsArray, collectionType),
           aggregationOptions);
       if (cursor != null && cursor.hasNext()) {
         // ideally there should be only one value present.
@@ -187,7 +187,7 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
         // the aggregation must return only one value
         if (cursor.hasNext()) {
           throw new UserSetServiceException(
-              "Unexpected result of aggregation operation for distinct creators, the db request must return only one results but currently more resutls were retrieved");
+              "Unexpected result of aggregation operation for distinct objects, the db request must return only one results but currently more resutls were retrieved");
         }
       }
 
@@ -196,10 +196,11 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 
 	/**
 	 * Creates a aggregation pipeline to count distinct values of
-	 * the field provided.
+	 * the field provided. If the field is of array type, we first need to unwind the array values.
 	 * 'type' of user-set value is optional. If passed match filter is added.
 	 * query :
 	 * [ {  $match: { type: <type> }},
+	 *   { $unwind : "$items"}, 
 	 *   {  $group: { _id: <groupField> }},
 	 *   {  $count: <Field Name for the count> } ]
 	 *
@@ -207,11 +208,14 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 	 * @param groupField : the field for which distinct count is calculated
 	 * @return
 	 */
-	private List<DBObject> getDistinctCountPipeline(String groupField, String type) {
+	private List<DBObject> getDistinctCountPipeline(String groupField, boolean groupFieldIsArray, String type) {
 		List<DBObject> distinctCountPipeline = new ArrayList<>();
 		// add match filter if present
 		if (StringUtils.isNotEmpty(type)) {
-			distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
+		  distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
+		}
+		if(groupFieldIsArray) {
+		  distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_UNWIND, groupField));
 		}
         // add group field
 		distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
@@ -223,60 +227,6 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		return distinctCountPipeline;
 	}
 	
-    /**
-     * Creates an aggregation pipeline for 2 metrics on the Entity Galleries (Sets):
-     * NumberOfEntitySets and NumberOfItemsInEntitySets.     * 
-     * query :
-     * [ {  $match: { type: "EntityBestItemsSet" }},
-     *   {  $group: { 
-     *          _id: null,
-     *          totalEntityGalleries: { $sum: 1 },
-     *          totalItemsInEntityGalleries: { $sum: { $size:"$items" } }           
-     *      }
-     *   }]
-     * @return
-     */
-	@Override
-    public long[] getEntityGalleriesMetrics() {
-      List<DBObject> entityGalleriesPipeline = new ArrayList<>();
-      // add match filter if present
-      entityGalleriesPipeline.add(getMatchFilter(WebUserSetFields.TYPE, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue()));
-      // add group field
-      entityGalleriesPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
-              new BasicDBObject(UserSetMongoConstants.MONGO_ID, null)
-                .append("totalEntityGalleries", new BasicDBObject(UserSetMongoConstants.MONGO_SUM, 1))
-                .append("totalItemsInEntityGalleries", new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)))
-              ));
-      
-      // Cursor is needed in aggregate command
-      AggregationOptions aggregationOptions =
-          AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
-      Cursor cursor = getDao().getCollection().aggregate(entityGalleriesPipeline, aggregationOptions);
-      long[] result=new long[2];
-      if (cursor != null && cursor.hasNext()) {
-        DBObject cursorNext = cursor.next();
-        //according to the mongo db "$sum" aggregation, it may return also a double
-        Object totalEntityGalleries = cursorNext.get("totalEntityGalleries");
-        if(totalEntityGalleries instanceof Integer) {
-          result[0] = ((Integer)totalEntityGalleries).longValue();
-        }
-        else if(totalEntityGalleries instanceof Double) {
-          result[0] = ((Double)totalEntityGalleries).longValue();
-        }        
-        
-        Object totalItemsInEntityGalleries = cursorNext.get("totalItemsInEntityGalleries");
-        if(totalItemsInEntityGalleries instanceof Integer) {
-          result[1] = ((Integer)totalItemsInEntityGalleries).longValue();
-        }
-        else if(totalItemsInEntityGalleries instanceof Double) {
-          result[1] = ((Double)totalItemsInEntityGalleries).longValue();
-        }        
-        
-      }
-      return result;
-    }
-	
-
 	@Override
 	public long count(UserSetQuery query) {
 		Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);

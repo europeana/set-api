@@ -9,7 +9,6 @@ public abstract class UserSetMongoConstants {
     public static final String MONGO_GROUP                = "$group";
     public static final String MONGO_TOTAL_LIKES          = "totalLikes";
     public static final String MONGO_SUM                  = "$sum";
-    public static final String MONGO_SIZE                 = "$size";
     public static final String MONGO_TOTAL                = "$total";
     public static final String MONGO_EQUALS               = "$eq";
     public static final String MONGO_PROJECT              = "$project";

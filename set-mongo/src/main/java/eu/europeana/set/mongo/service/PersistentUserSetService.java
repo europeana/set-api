@@ -80,11 +80,11 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	ResultSet<PersistentUserSet> find(UserSetQuery searchQuery);
 
 	/**
-	 * Retrieve distinct creators present in the DB
+	 * Retrieve distinct objects present in the DB.
 	 * @return
 	 * @throws UserSetServiceException 
 	 */
-	long getDistinctCreators(String type) throws UserSetServiceException;
+	public long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException;
 
 	/**
 	 * Retrieve distinct creators present in the DB
@@ -118,8 +118,6 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return list of existing duplicates
 	 */
 	List<String> getDuplicateUserSetsIds(UserSet userSet);
-
-	long[] getEntityGalleriesMetrics();
 
 }
 

@@ -7,6 +7,7 @@ import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import eu.europeana.set.mongo.model.UserSetMongoConstants;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
 public class UsageStatsService {
@@ -57,7 +58,7 @@ public class UsageStatsService {
      */
     public void getAverageSetsPerUser(SetMetric metric) throws UserSetServiceException {
       long averageUserSetsPerUser = 0;
-      long distinctUsers = getMongoPersistance().getDistinctCreators(UserSetTypes.COLLECTION.getJsonValue());
+      long distinctUsers = getMongoPersistance().getDistinct(UserSetMongoConstants.MONGO_CREATOR_URL, false, UserSetTypes.COLLECTION.getJsonValue());
       // set the number of user with gallery here.
       metric.setNumberOfUsersWithGallery(distinctUsers);
       long totalUserSets =  getMongoPersistance().count(
@@ -71,19 +72,22 @@ public class UsageStatsService {
     }
 
     public void getNumberOfUsersWithLike(SetMetric metric) throws UserSetServiceException{
-        metric.setNumberOfUsersWithLike(getMongoPersistance().getDistinctCreators(UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
-        metric.setNumberOfUsersWithLikeOrGallery(getMongoPersistance().getDistinctCreators(null));
+        metric.setNumberOfUsersWithLike(getMongoPersistance().getDistinct(UserSetMongoConstants.MONGO_CREATOR_URL, false, UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+        metric.setNumberOfUsersWithLikeOrGallery(getMongoPersistance().getDistinct(UserSetMongoConstants.MONGO_CREATOR_URL, false, null));
 
     }
     
-    /**
-     * Get Entity Galleries metrics.
-     */
-    public void getEntityGalleriesMetrics(SetMetric metric) {
-      long[] entityGalleriesMetrics = getMongoPersistance().getEntityGalleriesMetrics();
-      metric.setNumberOfEntitySets(entityGalleriesMetrics[0]);
-      metric.setNumberOfItemsInEntitySets(entityGalleriesMetrics[1]);
+    public void getNumberOfEntitySets(SetMetric metric) {
+      long numEntitySets =  getMongoPersistance().count(
+          buildUserSetQuery(null, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), null));
+      metric.setNumberOfEntitySets(numEntitySets);
     }
+    
+    public void getNumberOfItemsInEntitySets(SetMetric metric) throws UserSetServiceException {
+      long numItemsInEntitySets = getMongoPersistance().getDistinct(UserSetMongoConstants.MONGO_ITEMS, true, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue());
+      metric.setNumberOfItemsInEntitySets(numItemsInEntitySets);
+    }
+    
     
     /**
      * Build the user set query
