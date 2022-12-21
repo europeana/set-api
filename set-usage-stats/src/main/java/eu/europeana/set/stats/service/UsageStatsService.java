@@ -84,7 +84,7 @@ public class UsageStatsService {
     }
     
     public void getNumberOfItemsInEntitySets(SetMetric metric) throws UserSetServiceException {
-      long numItemsInEntitySets = getMongoPersistance().getDistinct(UserSetMongoConstants.MONGO_ITEMS, true, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue());
+      long numItemsInEntitySets = getMongoPersistance().countItemsInEntitySets();
       metric.setNumberOfItemsInEntitySets(numItemsInEntitySets);
     }
     

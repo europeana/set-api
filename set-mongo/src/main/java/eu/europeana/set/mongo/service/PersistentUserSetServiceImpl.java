@@ -3,6 +3,7 @@ package eu.europeana.set.mongo.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -311,7 +312,9 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 		AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
 
 		long totalLikes =0;
-		Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(), aggregationOptions);
+		Map<String,DBObject> groupFieldsAdditional = new HashMap<>();
+		groupFieldsAdditional.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+		Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
 		if (cursor != null) {
 			while(cursor.hasNext()) {
 				DBObject object = cursor.next();
@@ -319,14 +322,31 @@ public class PersistentUserSetServiceImpl extends AbstractNoSqlServiceImpl<Persi
 			}
 		}
 		return totalLikes;
-		}
+	}
+	
+    @Override
+    public long countItemsInEntitySets() {
+        // Cursor is needed in aggregate command
+        AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+        long totalItems =0;
+        Map<String,DBObject> groupFieldsAdditional = new HashMap<>();
+        groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)));
+        Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
+        if (cursor != null && cursor.hasNext()) {
+          totalItems = Long.valueOf(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+        }
+        return totalItems;
+    }
+	
 
 	// create $match and $group for mongo query
-	private List<DBObject> getAggregatePipeline() {
-		DBObject match = getMatchFilter(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
+	private List<DBObject> getAggregatePipeline(String collectionType, Map<String,DBObject> groupFieldsAdditional) {
+		DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
 		DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
-		groupFields.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+		for (Map.Entry<String,DBObject> field : groupFieldsAdditional.entrySet()) { 
+		  groupFields.put(field.getKey(), field.getValue());
+		}
 		DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
 		return Arrays.asList(match, group);
 	}
