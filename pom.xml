@@ -52,7 +52,7 @@
 		<version.jackson>2.9.4</version.jackson>
 		-->
 
-		<version.commonsApi>0.3.17-SNAPSHOT</version.commonsApi>
+		<version.commonsApi>0.3.17</version.commonsApi>
 		<version.springBoot>2.5.7</version.springBoot>
 		<version.springBootMongoStarter>2.0.3.RELEASE</version.springBootMongoStarter>
 		<version.swagger>3.0.0</version.swagger>
