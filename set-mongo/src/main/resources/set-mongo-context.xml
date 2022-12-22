@@ -11,11 +11,6 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 	
-	<!-- NEEDS TO BE SET IN THE UPPER CONTEXTS 
-	<util:properties id="setProperties" 
-		location="classpath:config/set.properties" />
-	 -->
-		
 	<import resource="classpath:set-common-context.xml"/>
 	
 	<!-- INTERNAL DEFINITIONS -->

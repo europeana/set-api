@@ -30,6 +30,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = {"classpath:set-mongo-test.xml"})
+@Disabled("needs configuration file")
 public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
 
   @Resource(name = "configuration")

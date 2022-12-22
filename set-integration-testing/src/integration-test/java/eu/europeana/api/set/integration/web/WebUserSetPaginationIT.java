@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -234,6 +235,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
 
 
   @Test
+  @Disabled("disabled for automatic testing, requires search api connection")
   public void getUserSetSecondPageItemDescriptions() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE2, regularUserToken);
 

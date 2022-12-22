@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 @ContextConfiguration(locations = { "classpath:set-web-context.xml" })
 //@ExtendWith(MockitoExtension.class)
 @ExtendWith(SpringExtension.class)
+@Disabled("needs configuration file")
 public class UserSetServiceImplTest {
 
 	private static String REQUEST_URL;

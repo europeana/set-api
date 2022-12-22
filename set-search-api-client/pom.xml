@@ -15,7 +15,10 @@
 
     <properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<!--
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		-->
+		<skipTests>true</skipTests>
 	</properties>
 
 	<dependencies>
