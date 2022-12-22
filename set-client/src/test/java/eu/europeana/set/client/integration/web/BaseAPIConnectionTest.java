@@ -3,10 +3,12 @@ package eu.europeana.set.client.integration.web;
 import eu.europeana.set.client.connection.BaseApiConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled("needs configuration file")
 public class BaseAPIConnectionTest {
 
 
