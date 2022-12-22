@@ -214,7 +214,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>${artifactId}-${version}</finalName>
+		<finalName>${artifactId}</finalName>
 		<!-- plugins -->
 		<plugins>
       		<plugin>
