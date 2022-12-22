@@ -14,6 +14,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.GeneratedUserSetIdImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
@@ -70,4 +71,11 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 	public void deleteByObjectId(List<ObjectId> objectIds) {
 		getDatastore().delete(WebUserSetImpl.class, objectIds);
 	}
+
+  @Override
+  public void deleteByIdentifier(List<String> setIds) {
+    Query<E> query = createQuery();
+    query.filter( WebUserSetModelFields.IDENTIFIER + " in", setIds);
+    getDatastore().delete(query); 
+  }
 }

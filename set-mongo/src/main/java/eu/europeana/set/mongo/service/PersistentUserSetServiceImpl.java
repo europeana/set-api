@@ -496,14 +496,13 @@ public class PersistentUserSetServiceImpl extends
 
   @Override
   public void removeAll(List<PersistentUserSet> userSets) {
-    List<ObjectId> objectIds = new ArrayList<>();
-    // TODO: switch implementation to delete by identifier
+    List<String> identifiers = new ArrayList<>();
     if (!userSets.isEmpty()) {
       for (PersistentUserSet userSet : userSets) {
-        objectIds.add(userSet.getObjectId());
+        identifiers.add(userSet.getIdentifier());
       }
     }
-    getUserSetDao().deleteByObjectId(objectIds);
+    getUserSetDao().deleteByIdentifier(identifiers);
   }
 
   /**

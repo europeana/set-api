@@ -59,4 +59,6 @@ public interface UserSetConfiguration {
   String getApiBasePath();
 
   boolean isApiKeyValidationEnabled();
+
+  boolean isAuthEnabled();
 }

@@ -80,6 +80,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+		<!-- test dependencies -->
+		<version.testcontainers>1.16.0</version.testcontainers>
+		
 		<!-- maven plugins -->
 		<version.maven-surfire-plugin>3.0.0-M6</version.maven-surfire-plugin>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
@@ -127,6 +130,7 @@
 				<directory>src/test/resources</directory>
 			</testResource>
 		</testResources>
+		
 
 		<!--  plugins to run on build time  -->
 		<plugins>

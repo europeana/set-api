@@ -12,24 +12,19 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
-import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
 
 /**
  * Test class for UserSet controller.
@@ -44,27 +39,23 @@ import eu.europeana.set.web.service.controller.jsonld.WebUserSetRest;
  *
  * @author Roman Graf on 10-09-2020.
  */
-@WebMvcTest(WebUserSetRest.class)
-@ContextConfiguration(locations = {"classpath:set-web-mvc.xml"})
-@ExtendWith(SpringExtension.class)
-@WebAppConfiguration
-public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
+@SpringBootTest
+public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
 
   @BeforeAll
   public static void initTokens() {
+    if (DISABLE_AUTH) {
+      return;
+    }
     initRegularUserToken();
   }
 
-  @BeforeEach
-  public void initApplication() {
-    super.initApplication();
-  }
 
   @AfterEach
   protected void deleteCreatedSets() {
     super.deleteCreatedSets();
   }
-  
+
   @Test
   public void getUserSetPagination() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
@@ -142,7 +133,7 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     // 1 total only for the set
     assertEquals(1, total);
 
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
+    // getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
   @Test
@@ -265,8 +256,8 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     // verify that ids are not escaped, use one item from second page
     assertTrue(containsKeyOrValue(result, "\\/22\\/_13784"));
 
-//    int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
-    //some items are not found, currently only 52 out of 200 are dereferencible on the second page
+    // int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
+    // some items are not found, currently only 52 out of 200 are dereferencible on the second page
     int secondPageSize = 52;
     int pageSize = StringUtils.countMatches(result, "\\/item\\/");
     assertEquals(secondPageSize, pageSize);
@@ -299,22 +290,23 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
     verifyItemOrder(userSet, result, missingItems);
     assertEquals(defaultPageSize, pageSize);
 
-//    getUserSetService().deleteUserSet(userSet.getIdentifier());
+    // getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
-  private void verifyItemOrder(WebUserSetImpl userSet, String result, String[] missingItems) throws JSONException {
+  private void verifyItemOrder(WebUserSetImpl userSet, String result, String[] missingItems)
+      throws JSONException {
     JSONObject itemPage = new JSONObject(result);
     JSONArray itemDescriptions = itemPage.getJSONArray("items");
     JSONObject itemDescription;
     String identifier, id;
     int pos;
-    
-    //remove missingItems
-    if(missingItems != null && missingItems.length > 0) {
+
+    // remove missingItems
+    if (missingItems != null && missingItems.length > 0) {
       userSet.getItems().removeAll(List.of(missingItems));
     }
-    
+
     for (int i = 0; i < itemDescriptions.length(); i++) {
       itemDescription = itemDescriptions.getJSONObject(i);
       identifier = itemDescription.getString("id");
@@ -322,13 +314,13 @@ public class WebUserSetPaginationTest extends BaseUserSetTestUtils {
       pos = userSet.getItems().indexOf(id);
       System.out.println(
           "verifying position for item with identifier: " + identifier + " (id: " + id + ")");
-     
-      if(pos >= 0) {
-        if(pos > i) {
-          System.out.println("Expected items order: \n" +  userSet.getItems());
+
+      if (pos >= 0) {
+        if (pos > i) {
+          System.out.println("Expected items order: \n" + userSet.getItems());
         }
         assertEquals(pos, i);
-      }else {
+      } else {
         System.out.println("skipped verification of position for missing item: " + id);
       }
     }

@@ -32,18 +32,7 @@ public class MongoConfig {
 
   private static final String MODEL_PACKAGE = "eu.europeana.set.definitions";
   
-  //
   private ApiMongoConnector mongoConnector;
-  
-  /**
-  <bean id="set_db_mongoConnector" class="eu.europeana.corelib.db.wrapper.ApiMongoConnector" destroy-method="close"/>
-  
-  <bean id="set_db_morphia_datastore_set" factory-bean="set_db_mongoConnector" factory-method="createDatastore">
-      <constructor-arg value="#{setProperties['mongodb.set.connectionUrl']}" type="java.lang.String" />
-      <constructor-arg value="#{setProperties['mongodb.set.truststore']}" type="java.lang.String" />
-      <constructor-arg value="#{setProperties['mongodb.set.truststorepass']}" type="java.lang.String" />
-  </bean>
-   **/
   
   @Bean(UserSetConfiguration.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {

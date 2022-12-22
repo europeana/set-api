@@ -34,9 +34,9 @@ import eu.europeana.set.web.config.SocksProxyActivator;
     // DataSources are manually configured (for EM and batch DBs)
     DataSourceAutoConfiguration.class})
 @ImportResource("classpath:set-web-context.xml")
-public class UsersetApp extends SpringBootServletInitializer {
+public class UserSetApp extends SpringBootServletInitializer {
 
-  private static final Logger logger = LogManager.getLogger(UsersetApp.class);
+  private static final Logger logger = LogManager.getLogger(UserSetApp.class);
   /**
    * Main entry point of this application
    *
@@ -52,7 +52,7 @@ public class UsersetApp extends SpringBootServletInitializer {
     // Activate socks proxy (if your application requires it)
     SocksProxyActivator.activate("config/set.properties");
 
-    ApplicationContext ctx = SpringApplication.run(UsersetApp.class, args);
+    ApplicationContext ctx = SpringApplication.run(UserSetApp.class, args);
 
     if (logger.isDebugEnabled()) {
       printRegisteredBeans(ctx);

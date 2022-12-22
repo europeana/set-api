@@ -11,19 +11,15 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -33,13 +29,9 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
-import eu.europeana.set.web.service.controller.jsonld.SearchUserSetRest;
 
-@WebMvcTest(SearchUserSetRest.class)
-@ExtendWith(SpringExtension.class)
-@WebAppConfiguration()
-@ContextConfiguration(locations = {"classpath:set-web-mvc.xml"})
-public class SearchUserSetRestTest extends BaseUserSetTestUtils {
+@SpringBootTest
+public class SearchUserSetRestIT extends BaseUserSetTestUtils {
 
   private static final String API_KEY = "api2demo";
   private static final String SEARCH_URL = "/set/search";
@@ -60,13 +52,12 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
   // private static final String SORT_MODIFIED_WebUserSetFields.MODIFIED
   private static final String PAGE_SIZE = "100";
 
-  @BeforeEach
-  public void initApplication() {
-    super.initApplication();
-  }
 
   @BeforeAll
   public static void initTokens() {
+    if (DISABLE_AUTH) {
+      return;
+    }
     initRegularUserToken();
     editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
     initPublisherUserToken();
@@ -716,7 +707,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_COLLECTION)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value()));
-    
+
     assertNotNull(set1);
     assertNotNull(set2);
   }
@@ -871,7 +862,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, WebUserSetFields.VALUES));
     // verify the facet values
     checkItemFacets(getFacetResultPage(result));
-    
+
     assertNotNull(set1);
     assertNotNull(set2);
   }
@@ -908,7 +899,7 @@ public class SearchUserSetRestTest extends BaseUserSetTestUtils {
     assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
     // verify the facet values
     checkItemFacets(getFacetResultPage(result));
-   
+
     assertNotNull(set1);
     assertNotNull(set2);
   }

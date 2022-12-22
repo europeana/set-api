@@ -1,13 +1,16 @@
 package eu.europeana.set.web.service.authorization;
 
+import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 
 import eu.europeana.api.commons.definitions.vocabulary.Role;
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
@@ -48,5 +51,10 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
     @Override
     protected String getApiName() {
 	return getConfiguration().getAuthorizationApiName();
+    }
+    
+    public Authentication checkPermissions(Authentication authentication,
+        String operation) throws ApplicationAuthenticationException{
+      return super.checkPermissions(List.of(authentication), getApiName(), operation);
     }
 }
