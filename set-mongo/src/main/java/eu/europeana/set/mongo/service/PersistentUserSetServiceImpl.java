@@ -16,8 +16,6 @@ import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.Sort;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Cursor;
@@ -197,7 +195,7 @@ public class PersistentUserSetServiceImpl extends
         aggregationOptions);
     if (cursor != null && cursor.hasNext()) {
       // ideally there should be only one value present.
-      count = Long.valueOf(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+      count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
 
       // the aggregation must return only one value
       if (cursor.hasNext()) {
@@ -262,7 +260,7 @@ public class PersistentUserSetServiceImpl extends
         List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
         for (DBObject o : facet) {
           valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)),
-              Long.parseLong(String.valueOf(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT))));
+              Long.parseLong(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
         }
       }
     }
@@ -521,7 +519,7 @@ public class PersistentUserSetServiceImpl extends
    * Getting the ids of the duplicate sets.
    */
   public List<String> getDuplicateUserSetsIds(UserSet userSet) {
-    if (userSet.getSubject() == null || userSet.getSubject().size() == 0)
+    if (userSet.getSubject() == null || userSet.getSubject().isEmpty())
       return null;
 
     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
@@ -534,8 +532,8 @@ public class PersistentUserSetServiceImpl extends
     query.project(WebUserSetModelFields.IDENTIFIER, true);
     List<PersistentUserSet> resultMongo = getUserSetDao().find(query).asList();
     List<String> result = null;
-    if (resultMongo != null && resultMongo.size() > 0) {
-      result = new ArrayList<String>();
+    if (resultMongo != null && !resultMongo.isEmpty()) {
+      result = new ArrayList<String>(resultMongo.size());
       for (PersistentUserSet set : resultMongo) {
         result.add(set.getIdentifier());
       }

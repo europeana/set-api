@@ -311,11 +311,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
     private UserSetFacetQuery buildFacetQuery(String facet, int facetLimit) {
     // For item facets - we get the most liked items. Hence, the match should be {type : 'BookmarkFolder'}
 	// also as items is an array unwind will be true
-    if(facet.equals(WebUserSetFields.ITEM)) {
+    if(WebUserSetFields.ITEM.equals(facet)) {
     	return new UserSetFacetQuery(facet, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
 				true, UserSetMongoConstants.MONGO_ITEMS, facetLimit);
 	}
-    if(facet.equals(WebUserSetFields.VISIBILITY)) {
+    if(WebUserSetFields.VISIBILITY.equals(facet)) {
 		return new UserSetFacetQuery(facet, null, null,
 				false, UserSetMongoConstants.MONGO_VISIBILITY, facetLimit);
 	}

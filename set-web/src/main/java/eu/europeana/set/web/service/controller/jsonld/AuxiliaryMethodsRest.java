@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -163,9 +164,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
           } else {
               return ""; // return empty for any other case
           }
-          text.append("\"");
-          text.append(s);
-          text.append("\"");
+          text.append('"').append(s).append('"');
       return text.toString();
     }
 
@@ -177,9 +176,9 @@ public class AuxiliaryMethodsRest extends BaseRest {
     public static void writeElevation(String directoryLocation, String xml) throws InternalServerException {
     if (!directoryLocation.isEmpty()) {
         try {
-            File file = new File(directoryLocation);
-            file.mkdirs();
-            FileUtils.write(new File(directoryLocation + WebUserSetFields.SLASH + WebUserSetFields.ELEVATION_FILENAME), xml, StandardCharsets.UTF_8);
+            File elevationFile = new File(directoryLocation,  FilenameUtils.getName(WebUserSetFields.ELEVATION_FILENAME));
+            elevationFile.mkdirs();
+            FileUtils.write(elevationFile, xml, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new InternalServerException("Error creating the " + WebUserSetFields.ELEVATION_FILENAME + " file", e);
         }

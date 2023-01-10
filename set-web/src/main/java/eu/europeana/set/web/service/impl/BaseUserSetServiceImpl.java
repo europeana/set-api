@@ -198,9 +198,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // update modified date
     persistentUserSet.setModified(new Date());
     updateTotal(persistentUserSet);
-    UserSet updatedUserSet = getMongoPersistence().update(persistentUserSet);
-    return updatedUserSet;
-
+    return getMongoPersistence().update(persistentUserSet);
   }
 
   private void resetImmutableFields(UserSet webUserSet, PersistentUserSet persistentUserSet) {
@@ -316,18 +314,18 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     StringBuilder builder = new StringBuilder(collectionUrl);
     // if collection url already has a query string, then append "&" or else "?"
     if (collectionUrl.contains("?")) {
-      builder.append("&");
+      builder.append('&');
     } else {
-      builder.append("?");
+      builder.append('?');
     }
     builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
-    builder.append("&").append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append("=")
+    builder.append('&').append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append('=')
         .append(pageSize);
     // add the profile param if profile is not null (search items in set doesn't use a profile)
     boolean hasProfileParam =
-        StringUtils.contains(collectionUrl, CommonApiConstants.QUERY_PARAM_PROFILE + "=");
+        StringUtils.contains(collectionUrl, CommonApiConstants.QUERY_PARAM_PROFILE + '=');
     if (profile != null && !hasProfileParam) {
-      builder.append("&").append(CommonApiConstants.QUERY_PARAM_PROFILE).append("=")
+      builder.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=')
           .append(profile.getRequestParamValue());
     }
     return builder.toString();
@@ -346,9 +344,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // add mandatory parameters
     if (StringUtils.isNotBlank(searchProfile)) {
       if (!queryString.isEmpty()) {
-        queryString += "&";
+        queryString += '&';
       }
-      queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + "=" + searchProfile);
+      queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + '=' + searchProfile);
 
     }
 
@@ -441,13 +439,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
 
-  // protected boolean hasPublisherRights(Authentication authentication) {
-  // if (authentication == null) {
-  // return false;
-  // }
-  // return hasRole(authentication, Roles.PUBLISHER.getName());
-  // }
-
   void setItemIds(UserSet userSet, SearchApiResponse apiResult) {
     if (apiResult.getItems() == null) {
       return;
@@ -534,7 +525,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
             HttpStatus.PRECONDITION_FAILED, null);
       }
     } else { // it is a Standard profile
-      if (userSetUpdates.getItems() == null || userSetUpdates.getItems().size() == 0) { 
+      if (userSetUpdates.getItems() == null || userSetUpdates.getItems().isEmpty()) { 
         // new user set contains no items
         throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS,
             UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS, new String[] {},

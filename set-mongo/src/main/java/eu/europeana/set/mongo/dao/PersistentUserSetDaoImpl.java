@@ -25,6 +25,7 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 
 	@Resource
 	private UserSetConfiguration configuration;
+	private Object syncObj= new Object();
 	
 	protected final Logger logger = LogManager.getLogger(this.getClass());
 	
@@ -46,7 +47,7 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 
 		GeneratedUserSetIdImpl nextUserSetId = null;
 
-		synchronized ((Object) provider) {
+		synchronized (syncObj) {
 
 			Query<GeneratedUserSetIdImpl> q = getDatastore().createQuery(GeneratedUserSetIdImpl.class);
 			q.filter("_id", provider);

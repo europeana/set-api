@@ -116,8 +116,9 @@ public class BaseRestTest {
         items.add("http://data.europeana.eu/item/000000/1");
         items.add("http://data.europeana.eu/item/000000/2");
         userSet.setItems(items);
-
-        Mockito.when(baseRest.getUserSetService().applyProfile(Mockito.any(), Mockito.any())).thenReturn(userSet);
+        
+        //Mockito.when(baseRest.getUserSetService().applyProfile(Mockito.any(), Mockito.any())).thenReturn(userSet);
+        baseRest.getUserSetService().applyProfile(userSet, Mockito.any());
 
         String serialisedUserSet = baseRest.serializeUserSet(LdProfiles.MINIMAL, userSet);
         assertNotNull(serialisedUserSet);

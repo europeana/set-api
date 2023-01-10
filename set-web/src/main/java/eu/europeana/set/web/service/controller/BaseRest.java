@@ -38,7 +38,7 @@ import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
-import eu.europeana.set.web.service.authorization.UserSetAutorizationUtils;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
 
 public class BaseRest extends BaseRestController {
@@ -223,10 +223,10 @@ public class BaseRest extends BaseRestController {
      */
     protected String serializeUserSet(LdProfiles profile, UserSet storedUserSet) throws IOException {
 	//prepare data for serialization according to the profile
-	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
+	getUserSetService().applyProfile(storedUserSet, profile);
 
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
-	return serializer.serialize(set);
+	return serializer.serialize(storedUserSet);
     }
     
     protected String serializeCollectionPage(CollectionPage itemPage) throws IOException {
@@ -239,10 +239,10 @@ public class BaseRest extends BaseRestController {
     
     protected String serializeResultPage(LdProfiles profile, UserSet storedUserSet) throws IOException {
 	//prepare data for serialization according to the profile
-	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
+	getUserSetService().applyProfile(storedUserSet, profile);
 
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
-	return serializer.serialize(set);
+	return serializer.serialize(storedUserSet);
     }
 
     /**
@@ -321,10 +321,10 @@ public class BaseRest extends BaseRestController {
       
       Authentication auth = null; 
       try {
-        auth = UserSetAutorizationUtils.createAuthentication(request.getHeader(HttpHeaders.AUTHORIZATION));
+        auth = UserSetAuthorizationUtils.createAuthentication(request.getHeader(HttpHeaders.AUTHORIZATION));
         auth = ((UserSetAuthorizationServiceImpl) getAuthorizationService()).checkPermissions(auth, operation);
       } catch (AuthorizationExtractionException e) {
-        throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(), I18nConstants.OPERATION_NOT_AUTHORIZED);
+        throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(), I18nConstants.OPERATION_NOT_AUTHORIZED, null, HttpStatus.UNAUTHORIZED, e);
       }
       return auth;
     }

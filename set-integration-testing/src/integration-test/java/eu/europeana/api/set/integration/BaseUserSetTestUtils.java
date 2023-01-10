@@ -44,7 +44,7 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.service.UserSetService;
-import eu.europeana.set.web.service.authorization.UserSetAutorizationUtils;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 
 /**
@@ -242,7 +242,7 @@ public abstract class BaseUserSetTestUtils {
       throws ApiKeyExtractionException, AuthorizationExtractionException {
 
     if (DISABLE_AUTH) {
-      return UserSetAutorizationUtils.createAuthentication(token);
+      return UserSetAuthorizationUtils.createAuthentication(token);
     }
 
     RsaVerifier signatureVerifier = new RsaVerifier(getConfiguration().getJwtTokenSignatureKey());

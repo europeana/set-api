@@ -66,8 +66,8 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   }
   
   public boolean isAuthDisabled() {
-    return Boolean.valueOf(
-        getSetProperties().getProperty(KEY_AUTH_DISABLED, Boolean.FALSE.toString()));
+    final String property = getSetProperties().getProperty(KEY_AUTH_DISABLED);
+    return Boolean.getBoolean(property);
   }
   
   @Override

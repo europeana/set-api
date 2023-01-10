@@ -214,7 +214,7 @@ public interface UserSetService {
      * @param profile Provided Linked Data profile
      * @return profiled user set value
      */
-    UserSet applyProfile(UserSet userSet, LdProfiles profile);
+    void applyProfile(UserSet userSet, LdProfiles profile);
 
     /**
      * Return the List of entity sets with
