@@ -118,7 +118,7 @@ public class BaseRestTest {
         userSet.setItems(items);
         
         //Mockito.when(baseRest.getUserSetService().applyProfile(Mockito.any(), Mockito.any())).thenReturn(userSet);
-        baseRest.getUserSetService().applyProfile(userSet, Mockito.any());
+        baseRest.getUserSetService().applyProfile(userSet, LdProfiles.STANDARD);
 
         String serialisedUserSet = baseRest.serializeUserSet(LdProfiles.MINIMAL, userSet);
         assertNotNull(serialisedUserSet);
