@@ -150,6 +150,21 @@ public class UserSetUtils {
             return false;
         }
     }
+ 
+    /**
+     * This method is to check if a string is a 2-letter string
+     *
+     * @param string
+     * @return true if 2-letter string
+     */
+    public static boolean is2Letter(String string) {
+      for (int i = 0; i < string.length(); i++) {
+        if (i>1 || !Character.isLetter(string.charAt(i))) {
+            return false;
+        }
+      }
+      return true;
+    }
     
     /**
      * extract item local id from data.europeana URI

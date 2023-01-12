@@ -70,10 +70,10 @@ public class UserSetQueryBuilder extends QueryBuilder {
     private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
         throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
-        String lang = searchCriteria.get(WebUserSetFields.LANG);
-        if (!"en".equals(lang)) {
+        String lang = searchCriteria.get(WebUserSetFields.LANG).toLowerCase();
+        if (! UserSetUtils.is2Letter(lang)) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-              new String[] { "invalid value for search field, language must be 'en' " + WebUserSetFields.LANG, lang });
+              new String[] { "invalid value for search field, language must be a 2-letter string, but it is: " + WebUserSetFields.LANG, lang });
         }
         searchQuery.setTitleLang(lang);
     }
