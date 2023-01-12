@@ -16,19 +16,17 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
         ">
     
-    <util:properties id="setProperties" 
-		location="classpath:config/set.common.properties" />
-	
-	<beans:bean id="setProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    
+   <beans:bean id="setProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
     	<beans:property name="locations">
     		<beans:list>
             	<beans:value>classpath:config/set.common.properties</beans:value>
+            	<beans:value>classpath:config/set.user.properties</beans:value>
             </beans:list>	
     	</beans:property>
+    	<beans:property name="ignoreResourceNotFound" value="true"/>
 	</beans:bean>
-	
-	<context:property-placeholder properties-ref="setProperties" ignore-resource-not-found="true" location="classpath:config/set.user.properties" />
-	
+    
 	
     <!-- USING OTHER MODULES -->
 	<beans:import resource="classpath:set-web-beans.xml"/>

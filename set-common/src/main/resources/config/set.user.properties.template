@@ -1,46 +1,17 @@
 ##common settings
 
 #string value indicating if the application runs in "production", "acceptance", "test", "development" environment 
-set.environment=development
-
-#used only in production environment
-set.environment.baseUrl.production=http://data.europeana.eu/set/
-
-#used only in acceptance environment
-set.environment.baseUrl.acceptance=http://set-api-acceptance.eanadev.org/set/
-
-#used only in test environment
-set.environment.baseUrl.test=http://set-api-test.eanadev.org/set/
-
-#used only in develop environment
-set.environment.baseUrl.development=http://localhost:8080/set/
+#set.environment=development
 
 #endpoint configurations, all must end with / 
-set.api.basePath=/set/
-set.api.endpoint.baseUrl=http://localhost:8080/set/
-set.data.endpoint.baseUrl=http://data.europeana.eu/set/
-user.data.endpoint.baseUrl=http://data.europeana.eu/user/
-item.data.endpoint.baseUrl=http://data.europeana.eu/item/
+#set.api.endpoint.baseUrl=http://localhost:8080/set/
+#set.data.endpoint.baseUrl=http://localhost:8080/set/
 
 #configurable user id for the entity user set
 entity.userset.user.id=
 
 #configurable user id for europeana publisher  
 europeana.publisher.id=
-#configurable nickname for europeana publisher
-europeana.publisher.nickname=@editorial
-
-#max search results per page
-#set.search.maxpagesize.minimal=10000
-#set.search.maxpagesize.standard=100
-
-#max nr of items dereferenced when searching sets
-set.search.dereference.items.max=10
-
-#max nr of items dereferenced when retrieving sets
-set.retrieve.dereference.items.max=100
-#max nr of items in a page, when retrieving sets with pagination
-set.retrieve.maxpagesize.standard=100
 
 # Profiling configurations (enabling/disabling through profiler.expression property)
 # disable profiling
@@ -53,6 +24,7 @@ set.retrieve.maxpagesize.standard=100
 #Format: "mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>"
 #USER, PASSWORD are optional (in local environment) 
 mongodb.set.connectionUrl=mongodb://127.0.0.1:27017/set_test
+
 #SSL truststore
 #the name of the truststore. Must be available in the classpath in the /config folder
 mongodb.set.truststore=
@@ -64,21 +36,13 @@ mongodb.set.truststorepass=
 europeana.apikey.jwttoken.siganturekey=
 
 #URL of the APIKEY service
-europeana.apikey.serviceurl=
+#europeana.apikey.serviceurl=
 
 #API key used for invocation of search api
-europeana.search.apikey=
+#europeana.search.apikey=
 
 #API key used for invocation of search api
-europeana.search.url=https://api.europeana.eu/api/v2/search.json?wskey=MY_KEY&query=
-europeana.search.itemdescription.profile=minimal
-
-
-#the name for annotation api resources in keykloack tokens
-authorization.api.name=usersets
-
-# User set API version
-set.api.version=
+#europeana.search.url=https://api.europeana.eu/api/v2/search.json?wskey=MY_KEY&query=
 
 # location for the elevation file
 elevation.file.folder=
