@@ -147,6 +147,9 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   }
 
   @Override
+  @Deprecated
+  /** @deprecated not used amynore, to be removed in the future versions 
+  */
   public String getElevationFileLocation() {
     return getSetProperties().getProperty(ELEVATION_FILE_LOCATION);
   }
