@@ -19,7 +19,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
-import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
@@ -215,7 +214,7 @@ public interface UserSetService {
      * @param profile Provided Linked Data profile
      * @return profiled user set value
      */
-    UserSet applyProfile(UserSet userSet, LdProfiles profile);
+    void applyProfile(UserSet userSet, LdProfiles profile);
 
     /**
      * Return the List of entity sets with

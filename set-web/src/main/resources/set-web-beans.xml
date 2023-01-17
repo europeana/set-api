@@ -17,8 +17,8 @@
         ">
     
     <!-- USING OTHER MODULES -->
-	<beans:import resource="set-definitions-context.xml"/>
-	<beans:import resource="set-mongo-context.xml"/>
+	<beans:import resource="classpath:set-definitions-context.xml"/>
+	<beans:import resource="classpath:set-mongo-context.xml"/>
 	
     
    	<!--  ApiKeyService -->

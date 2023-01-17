@@ -5,7 +5,7 @@
 
 	<artifactId>set-web</artifactId>
 	<name>Europeana (User) Sets - WEB API </name>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<description>The implementation of the User Sets REST service</description>
 
 	<parent>
@@ -20,21 +20,37 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-	<repositories>
-		<!-- jetty repos -->
-		<repository>
-			<id>repo1.maven.org</id>
-			<url>http://repo1.maven.org/maven2/</url>
-		</repository>
-
-		<repository>
-			<id>jcenter-release</id>
-			<name>jcenter</name>
-			<url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
-		</repository>
-	</repositories>
-
+	
 	<dependencies>
+	
+		<!-- LOG4J2 LOGGING NOTE: must be in sync with log4j-core version -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${version.log4j2}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${version.log4j2}</version>			
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>${version.log4j2}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<!-- set projects -->
 		<dependency>
@@ -66,19 +82,13 @@
 			<artifactId>commons-web</artifactId>
 			<version>${version.commonsApi}</version>
 			<exclusions>
-			<!-- 
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-core</artifactId>
-				</exclusion>
-			 -->
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.springfox</groupId>
+					<artifactId>springfox-swagger2</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -87,14 +97,6 @@
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-oauth</artifactId>
 			<version>${version.commonsApi}</version>
-			<!-- 
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-core</artifactId>
-				</exclusion>
-			</exclusions>
-			 -->
 		</dependency>
 
 		<dependency>
@@ -106,33 +108,57 @@
 					<groupId>org.apache.solr</groupId>
 					<artifactId>solr-solrj</artifactId>
 				</exclusion>
-				<!-- 
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-core</artifactId>
-				</exclusion>
-				 -->
+
 			</exclusions>
 		</dependency>
+
+		<!-- spring dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<!-- use log4j2 instead -->
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-actuator-autoconfigure</artifactId>
+		</dependency>
+
 
 		<!-- aspectj /profiling -->
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>${version.aspectj}</version>
 		</dependency>
 
+		<!-- swagger -->
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.0-m01</version>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-boot-starter</artifactId>
+			<version>${version.swagger}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
-
+		
+		<!-- javax servlet -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
-			<version>${version.servletJstl}</version>
 		</dependency>
 
 		<dependency>
@@ -142,58 +168,11 @@
 			<version>2.5</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-			<version>${version.spring}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${version.spring}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-			<version>${version.spring}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-oxm</artifactId>
-			<version>${version.spring}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot</artifactId>
-			<version>${version.springBoot}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		
-		<!-- swagger -->
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>2.4.0</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- fixes for JDK 11 -->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
-			<version>${version.jaxb}</version>
 		</dependency>
 
 		<dependency>
@@ -208,20 +187,19 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
-			<version>${version.junit}</version>
 		</dependency>
 		
+		<!-- TODO: SG remove and migrate to wpring web -->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>3.5.13</version>
 			<scope>test</scope>
 		</dependency>
+		
 		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>${version.spring}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -236,21 +214,34 @@
 	</dependencies>
 
 	<build>
+		<finalName>${artifactId}</finalName>
+		<!-- plugins -->
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.1</version>
-				<configuration>
-					<attachClasses>true</attachClasses>
-				</configuration>
-			</plugin>
-			<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
+      		<plugin>
+        		<groupId>org.springframework.boot</groupId>
+        		<artifactId>spring-boot-maven-plugin</artifactId>
+        		<!--
+        		<version></version>
+        		-->
+				<executions>
+          		<execution>
+		            <goals>
+		              <goal>repackage</goal>
+		            </goals>
+		            <configuration>
+		              <classifier>executable</classifier>
+		            </configuration>
+		        </execution>
+        		</executions>
+      		</plugin>
+    		<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${version.surefire}</version>
             </plugin>
+            -->
 		</plugins>
 	</build>
 

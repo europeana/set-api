@@ -12,4 +12,5 @@ public interface PersistentUserSetDao<E extends PersistentUserSet, T extends Ser
 	long generateNextUserSetId(String provider);
 
 	void deleteByObjectId(List<ObjectId> objectIds);
+	void deleteByIdentifier(List<String> setIds);
 }

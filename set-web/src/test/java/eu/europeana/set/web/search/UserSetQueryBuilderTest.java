@@ -32,7 +32,7 @@ public class UserSetQueryBuilderTest {
     static void setupConfig() throws IOException {
       config = new UserSetConfigurationImpl();
       Properties props = new Properties();
-      props.load(UserSetQueryBuilderTest.class.getResourceAsStream("classpath:/config/set.properties"));
+      props.load(UserSetQueryBuilderTest.class.getResourceAsStream("classpath:/config/set.common.properties"));
       config.setSetProperties(props);
     }
     

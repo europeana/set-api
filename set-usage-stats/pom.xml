@@ -40,7 +40,6 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
-            <version>${version.servletJstl}</version>
         </dependency>
     </dependencies>
 </project>

@@ -1,38 +1,45 @@
 package eu.europeana.set.web.service.controller;
 
 import java.io.IOException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.stats.service.UsageStatsService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.exception.AuthorizationExtractionException;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.definitions.WebFields;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.stats.service.UsageStatsService;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
 
 public class BaseRest extends BaseRestController {
 
@@ -216,10 +223,10 @@ public class BaseRest extends BaseRestController {
      */
     protected String serializeUserSet(LdProfiles profile, UserSet storedUserSet) throws IOException {
 	//prepare data for serialization according to the profile
-	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
+	getUserSetService().applyProfile(storedUserSet, profile);
 
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
-	return serializer.serialize(set);
+	return serializer.serialize(storedUserSet);
     }
     
     protected String serializeCollectionPage(CollectionPage itemPage) throws IOException {
@@ -232,10 +239,10 @@ public class BaseRest extends BaseRestController {
     
     protected String serializeResultPage(LdProfiles profile, UserSet storedUserSet) throws IOException {
 	//prepare data for serialization according to the profile
-	UserSet set = getUserSetService().applyProfile(storedUserSet, profile);
+	getUserSetService().applyProfile(storedUserSet, profile);
 
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
-	return serializer.serialize(set);
+	return serializer.serialize(storedUserSet);
     }
 
     /**
@@ -292,4 +299,49 @@ public class BaseRest extends BaseRestController {
 	return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
     }
 
+    @Override
+    public Authentication verifyWriteAccess(String operation, HttpServletRequest request)
+        throws ApplicationAuthenticationException {
+
+      Authentication auth = null;
+      //verify if auth is enabled
+      if (getConfiguration().isAuthEnabled()) {
+        auth = super.verifyWriteAccess(operation, request);
+      } else {
+        auth = authorizeByPlainTextToken(operation,request);
+      }
+
+      // prevent write when locked
+      //TODO: functionality to be implemented
+//      getAuthorizationService().checkWriteLockInEffect(operation);
+      return auth;
+    }
+
+    private Authentication authorizeByPlainTextToken(String operation, HttpServletRequest request) throws ApplicationAuthenticationException {
+      
+      Authentication auth = null; 
+      try {
+        auth = UserSetAuthorizationUtils.createAuthentication(request.getHeader(HttpHeaders.AUTHORIZATION));
+        auth = ((UserSetAuthorizationServiceImpl) getAuthorizationService()).checkPermissions(auth, operation);
+      } catch (AuthorizationExtractionException e) {
+        throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(), I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {operation}, HttpStatus.UNAUTHORIZED, e);
+      }
+      return auth;
+    }
+
+    @Override
+    public Authentication verifyReadAccess(HttpServletRequest request) throws ApplicationAuthenticationException {
+      final boolean hasToken = request.getHeader(HttpHeaders.AUTHORIZATION) != null;
+      //verify if auth is enabled
+      if(getConfiguration().isAuthEnabled() || !hasToken) {
+        //regular authorization procedure
+        return super.verifyReadAccess(request);
+      } else {
+          //authorize by plain text token
+          return authorizeByPlainTextToken(Operations.RETRIEVE, request); 
+      }
+    }
+
+    
+    
 }

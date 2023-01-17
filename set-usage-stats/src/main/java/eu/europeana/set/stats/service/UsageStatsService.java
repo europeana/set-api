@@ -1,6 +1,8 @@
 package eu.europeana.set.stats.service;
 
+import javax.annotation.Resource;
 import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
@@ -8,11 +10,9 @@ import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 
-import javax.annotation.Resource;
-
 public class UsageStatsService {
 
-    @Resource
+    @Resource(name = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
     PersistentUserSetService mongoPersistance;
 
     public PersistentUserSetService getMongoPersistance() {

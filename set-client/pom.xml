@@ -40,22 +40,21 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>${version.spring}</version>
+			<!--
+			<version>${spring-framework.version}</version>
+			-->
 		</dependency>
 
 		<!-- test dependencies --> 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${version.junit}</version>
 			<scope>test</scope>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>3.5.13</version>
-			
+			<artifactId>mockito-junit-jupiter</artifactId>			
 		</dependency>
 	</dependencies>
 	<build>
