@@ -324,7 +324,7 @@ public class BaseRest extends BaseRestController {
         auth = UserSetAuthorizationUtils.createAuthentication(request.getHeader(HttpHeaders.AUTHORIZATION));
         auth = ((UserSetAuthorizationServiceImpl) getAuthorizationService()).checkPermissions(auth, operation);
       } catch (AuthorizationExtractionException e) {
-        throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(), I18nConstants.OPERATION_NOT_AUTHORIZED, null, HttpStatus.UNAUTHORIZED, e);
+        throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(), I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {operation}, HttpStatus.UNAUTHORIZED, e);
       }
       return auth;
     }
