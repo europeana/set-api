@@ -125,7 +125,7 @@ public class PersistentUserSetServiceImpl extends
         aggregationOptions);
     if (cursor != null && cursor.hasNext()) {
       // ideally there should be only one value present.
-      count = Long.valueOf(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+      count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
 
       // the aggregation must return only one value
       if (cursor.hasNext()) {
@@ -146,7 +146,7 @@ public class PersistentUserSetServiceImpl extends
       groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)));
       Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
       if (cursor != null && cursor.hasNext()) {
-        totalItems = Long.valueOf(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+        totalItems = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
       }
       return totalItems;
   }
