@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.search.util.QueryBuilder;
@@ -19,6 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.UserSetMongoConstants;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 
 public class UserSetQueryBuilder extends QueryBuilder {
@@ -311,11 +311,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
     private UserSetFacetQuery buildFacetQuery(String facet, int facetLimit) {
     // For item facets - we get the most liked items. Hence, the match should be {type : 'BookmarkFolder'}
 	// also as items is an array unwind will be true
-    if(facet.equals(WebUserSetFields.ITEM)) {
+    if(WebUserSetFields.ITEM.equals(facet)) {
     	return new UserSetFacetQuery(facet, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
 				true, UserSetMongoConstants.MONGO_ITEMS, facetLimit);
 	}
-    if(facet.equals(WebUserSetFields.VISIBILITY)) {
+    if(WebUserSetFields.VISIBILITY.equals(facet)) {
 		return new UserSetFacetQuery(facet, null, null,
 				false, UserSetMongoConstants.MONGO_VISIBILITY, facetLimit);
 	}

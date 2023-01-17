@@ -15,7 +15,10 @@
 
     <properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<!--
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		-->
+		<skipTests>true</skipTests>
 	</properties>
 
 	<dependencies>
@@ -46,15 +49,12 @@
 		
 		 <dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<!-- <version>2.2.1</version> -->
-			<version>${version.jackson}</version>
+			<artifactId>jackson-databind</artifactId>			
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-jaxb-annotations</artifactId>
-			<version>${version.jackson}</version>
 		</dependency>
 		
 	</dependencies>

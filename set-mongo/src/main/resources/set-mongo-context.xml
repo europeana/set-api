@@ -11,17 +11,12 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	">
 	
-	<!-- NEEDS TO BE SET IN THE UPPER CONTEXTS 
-	<util:properties id="setProperties" 
-		location="classpath:config/set.properties" />
-	 -->
-		
-	<import resource="set-common-context.xml"/>
+	<import resource="classpath:set-common-context.xml"/>
 	
 	<!-- INTERNAL DEFINITIONS -->
-	<import resource="internal/set-mongo-datasource.xml"/>
-	<import resource="internal/set-mongo-beans.xml"/>
-	<import resource="internal/set-mongo-dao.xml"/>
+	<import resource="classpath:internal/set-mongo-datasource.xml"/>
+	<import resource="classpath:internal/set-mongo-beans.xml"/>
+	<import resource="classpath:internal/set-mongo-dao.xml"/>
 	
 	<context:annotation-config/>
 	

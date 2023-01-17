@@ -42,13 +42,13 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
       "europeana.apikey.jwttoken.siganturekey";
   public static final String KEY_APIKEY_SERVICE_URL = "europeana.apikey.serviceurl";  
   
-  
+  public static final String KEY_AUTH_DISABLED = "set.auth.disabled";
   public static final String KEY_SEARCH_APIKEY = "europeana.search.apikey";
   public static final String KEY_SEARCH_URL = "europeana.search.url";
   public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
   public static final String API_VERSION = "set.api.version";
   public static final String API_BASE_PATH = "set.api.basePath";
-
+  
   
   private Properties setProperties;
 
@@ -63,6 +63,16 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
   public void setSetProperties(Properties setProperties) {
     this.setProperties = setProperties;
+  }
+  
+  public boolean isAuthDisabled() {
+    final String property = getSetProperties().getProperty(KEY_AUTH_DISABLED);
+    return Boolean.valueOf(property);
+  }
+  
+  @Override
+  public boolean isAuthEnabled() {
+    return !isAuthDisabled();
   }
 
   @Override
@@ -137,6 +147,9 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   }
 
   @Override
+  @Deprecated
+  /** @deprecated not used amynore, to be removed in the future versions 
+  */
   public String getElevationFileLocation() {
     return getSetProperties().getProperty(ELEVATION_FILE_LOCATION);
   }
