@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -113,6 +114,43 @@ public class PersistentUserSetServiceImpl extends
     return getUserSetDao().findOne(query);
   }
 
+  @Override
+  public long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException {
+    long count = 0;
+    // Cursor is needed in aggregate command
+    AggregationOptions aggregationOptions =
+        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+    Cursor cursor = getDao().getCollection().aggregate(
+        getDistinctCountPipeline(field, fieldIsArray, collectionType),
+        aggregationOptions);
+    if (cursor != null && cursor.hasNext()) {
+      // ideally there should be only one value present.
+      count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+
+      // the aggregation must return only one value
+      if (cursor.hasNext()) {
+        throw new UserSetServiceException(
+            "Unexpected result of aggregation operation for distinct objects, the db request must return only one results but currently more resutls were retrieved");
+      }
+    }
+
+    return count;
+  }
+  
+  @Override
+  public long countItemsInEntitySets() {
+      // Cursor is needed in aggregate command
+      AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+      long totalItems =0;
+      Map<String,DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
+      groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)));
+      Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
+      if (cursor != null && cursor.hasNext()) {
+        totalItems = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+      }
+      return totalItems;
+  }
+  
   /*
    * (non-Javadoc)
    * 
@@ -121,7 +159,6 @@ public class PersistentUserSetServiceImpl extends
   public QueryResults<PersistentUserSet> getByCreator(String creatorId) {
     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
     query.filter(FIELD_CREATOR, creatorId);
-
     return getUserSetDao().find(query);
   }
 
@@ -135,7 +172,6 @@ public class PersistentUserSetServiceImpl extends
     Query<PersistentUserSet> query = getUserSetDao().createQuery().disableValidation();
     query.filter(FIELD_TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
     query.filter(FIELD_CREATOR, creatorId);
-
     return getUserSetDao().findOne(query);
   }
 
@@ -183,53 +219,37 @@ public class PersistentUserSetServiceImpl extends
     return getDao().findOne(UserSetMongoConstants.MONGO_ID, new ObjectId(id));
   }
 
-
-  @Override
-  public long getDistinctCreators(String type) throws UserSetServiceException {
-    long count = 0;
-    // Cursor is needed in aggregate command
-    AggregationOptions aggregationOptions =
-        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
-    Cursor cursor = getDao().getCollection().aggregate(
-        getDistinctCountPipeline(UserSetMongoConstants.MONGO_CREATOR_URL, type),
-        aggregationOptions);
-    if (cursor != null && cursor.hasNext()) {
-      // ideally there should be only one value present.
-      count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
-
-      // the aggregation must return only one value
-      if (cursor.hasNext()) {
-        throw new UserSetServiceException(
-            "Unexpected result of aggregation operation for distinct creators, the db request must return only one results but currently more resutls were retrieved");
-      }
-    }
-
-    return count;
-  }
-
   /**
-   * Creates a aggregation pipeline to count distinct values of the field provided. 'type' of
-   * user-set value is optional. If passed match filter is added. query : [ { $match: { type: <type>
-   * }}, { $group: { _id: <groupField> }}, { $count: <Field Name for the count> } ]
+   * Creates a aggregation pipeline to count distinct values of
+   * the field provided. If the field is of array type, we first need to unwind the array values.
+   * 'type' of user-set value is optional. If passed match filter is added.
+   * query :
+   * [ {  $match: { type: <type> }},
+   *   { $unwind : "$items"}, 
+   *   {  $group: { _id: <groupField> }},
+   *   {  $count: <Field Name for the count> } ]
    *
    * @param type : Optional. type of user set - Collection or BookmarkFolder.
    * @param groupField : the field for which distinct count is calculated
    * @return
    */
-  private List<DBObject> getDistinctCountPipeline(String groupField, String type) {
-    List<DBObject> distinctCountPipeline = new ArrayList<>();
-    // add match filter if present
-    if (StringUtils.isNotEmpty(type)) {
-      distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
-    }
-    // add group field
-    distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
-        new BasicDBObject(UserSetMongoConstants.MONGO_ID, groupField)));
-    // add count
-    distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_COUNT,
-        UserSetMongoConstants.MONGO_FIELD_COUNT));
+  private List<DBObject> getDistinctCountPipeline(String groupField, boolean groupFieldIsArray, String type) {
+      List<DBObject> distinctCountPipeline = new ArrayList<>();
+      // add match filter if present
+      if (StringUtils.isNotEmpty(type)) {
+        distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
+      }
+      if(groupFieldIsArray) {
+        distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_UNWIND, groupField));
+      }
+      // add group field
+      distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
+              new BasicDBObject(UserSetMongoConstants.MONGO_ID, groupField)));
+      // add count
+      distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_COUNT,
+              UserSetMongoConstants.MONGO_FIELD_COUNT));
 
-    return distinctCountPipeline;
+      return distinctCountPipeline;
   }
 
   @Override
@@ -306,40 +326,40 @@ public class PersistentUserSetServiceImpl extends
   }
 
   /**
-   * creates a mongo query to count the total item present in BookmarkFolder Mongo Query :
-   * db.getCollection('userset').aggregate([ {$match:{"type":"BookmarkFolder"}},{$group: {_id:null,
-   * totalLikes: {$sum: "$total"}}} ])
-   * 
+   *  creates a mongo query to count the total item present in BookmarkFolder
+   *  Mongo Query : db.getCollection('userset').aggregate([
+   *  {$match:{"type":"BookmarkFolder"}},{$group: {_id:null, totalLikes: {$sum: "$total"}}}
+   *  ])
    * @return
    */
   @Override
   public long countTotalLikes() {
-    // Cursor is needed in aggregate command
-    AggregationOptions aggregationOptions =
-        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+      // Cursor is needed in aggregate command
+      AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
 
-    long totalLikes = 0;
-    Cursor cursor = getDao().getCollection().aggregate(getAggregatePipeline(), aggregationOptions);
-    if (cursor != null) {
-      while (cursor.hasNext()) {
-        DBObject object = cursor.next();
-        totalLikes +=
-            Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
+      long totalLikes =0;
+      Map<String,DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
+      groupFieldsAdditional.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+      Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
+      if (cursor != null) {
+          while(cursor.hasNext()) {
+              DBObject object = cursor.next();
+              totalLikes += Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
+          }
       }
-    }
-    return totalLikes;
+      return totalLikes;
   }
 
   // create $match and $group for mongo query
-  private List<DBObject> getAggregatePipeline() {
-    DBObject match =
-        getMatchFilter(WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
+  private List<DBObject> getAggregatePipeline(String collectionType, Map<String,DBObject> groupFieldsAdditional) {
+      DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
-    DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
-    groupFields.put(UserSetMongoConstants.MONGO_TOTAL_LIKES,
-        new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
-    DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
-    return Arrays.asList(match, group);
+      DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
+      for (Map.Entry<String,DBObject> field : groupFieldsAdditional.entrySet()) { 
+        groupFields.put(field.getKey(), field.getValue());
+      }
+      DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
+      return Arrays.asList(match, group);
   }
 
   /**

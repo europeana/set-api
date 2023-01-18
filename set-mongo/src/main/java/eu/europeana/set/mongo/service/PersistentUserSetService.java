@@ -80,11 +80,11 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	ResultSet<PersistentUserSet> find(UserSetQuery searchQuery);
 
 	/**
-	 * Retrieve distinct creators present in the DB
+	 * Retrieve distinct objects present in the DB.
 	 * @return
 	 * @throws UserSetServiceException 
 	 */
-	long getDistinctCreators(String type) throws UserSetServiceException;
+	long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException;
 
 	/**
 	 * Retrieve distinct creators present in the DB
@@ -97,7 +97,12 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 */
 	long countTotalLikes();
-
+	
+	/**
+	 * counts the number of items in all entity sets
+	 * @return
+	 */
+	long countItemsInEntitySets();
 
 	/**
 	 *  creates a mongo query to get the items and entity reference for the entity sets
