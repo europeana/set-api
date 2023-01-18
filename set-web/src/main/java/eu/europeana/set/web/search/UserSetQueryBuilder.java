@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.api.commons.definitions.utils.LanguageUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.search.util.QueryBuilder;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -71,7 +72,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
         throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
         String lang = searchCriteria.get(WebUserSetFields.LANG).toLowerCase();
-        if (! UserSetUtils.is2Letter(lang)) {
+        if (! LanguageUtils.ISO_LANGUAGES.contains(lang)) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
               new String[] { "invalid value for search field, language must be a 2-letter string, but it is: " + WebUserSetFields.LANG, lang });
         }
