@@ -72,7 +72,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
         throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
         String lang = searchCriteria.get(WebUserSetFields.LANG).toLowerCase();
-        if (! LanguageUtils.ISO_LANGUAGES.contains(lang)) {
+        if (! LanguageUtils.isIsoLanguage(lang)) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
               new String[] { "invalid value for search field, language must be a 2-letter string, but it is: " + WebUserSetFields.LANG, lang });
         }
