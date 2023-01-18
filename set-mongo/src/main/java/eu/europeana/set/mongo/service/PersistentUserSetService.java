@@ -84,7 +84,7 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
 	 * @return
 	 * @throws UserSetServiceException 
 	 */
-	public long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException;
+	long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException;
 
 	/**
 	 * Retrieve distinct creators present in the DB

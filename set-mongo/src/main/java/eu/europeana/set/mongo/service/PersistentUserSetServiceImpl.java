@@ -3,10 +3,10 @@ package eu.europeana.set.mongo.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -142,7 +142,7 @@ public class PersistentUserSetServiceImpl extends
       // Cursor is needed in aggregate command
       AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
       long totalItems =0;
-      Map<String,DBObject> groupFieldsAdditional = new HashMap<>();
+      Map<String,DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
       groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)));
       Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
       if (cursor != null && cursor.hasNext()) {
@@ -338,7 +338,7 @@ public class PersistentUserSetServiceImpl extends
       AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
 
       long totalLikes =0;
-      Map<String,DBObject> groupFieldsAdditional = new HashMap<>();
+      Map<String,DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
       groupFieldsAdditional.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
       Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
       if (cursor != null) {

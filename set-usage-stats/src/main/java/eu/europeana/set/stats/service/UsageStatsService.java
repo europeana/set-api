@@ -78,17 +78,16 @@ public class UsageStatsService {
 
     }
     
-//    public void getNumberOfEntitySets(SetMetric metric) {
-//      long numEntitySets =  getMongoPersistance().count(
-//          buildUserSetQuery(null, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), null));
-//      metric.setNumberOfEntitySets(numEntitySets);
-//    }
-//    
-//    public void getNumberOfItemsInEntitySets(SetMetric metric) throws UserSetServiceException {
-//      long numItemsInEntitySets = getMongoPersistance().countItemsInEntitySets();
-//      metric.setNumberOfItemsInEntitySets(numItemsInEntitySets);
-//    }
+    public void getNumberOfEntitySets(SetMetric metric) {
+      long numEntitySets =  getMongoPersistance().count(
+          buildUserSetQuery(null, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), null));
+      metric.setNumberOfEntitySets(numEntitySets);
+    }
     
+    public void getNumberOfItemsInEntitySets(SetMetric metric) throws UserSetServiceException {
+      long numItemsInEntitySets = getMongoPersistance().countItemsInEntitySets();
+      metric.setNumberOfItemsInEntitySets(numItemsInEntitySets);
+    }
     
     /**
      * Build the user set query

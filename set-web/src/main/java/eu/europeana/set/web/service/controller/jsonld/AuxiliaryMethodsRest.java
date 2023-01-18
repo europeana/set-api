@@ -202,8 +202,8 @@ public class AuxiliaryMethodsRest extends BaseRest {
         getUsageStatsService().getTotalItemsLiked(metric);
         getUsageStatsService().getAverageSetsPerUser(metric);
         getUsageStatsService().getNumberOfUsersWithLike(metric);
-//      getUsageStatsService().getNumberOfEntitySets(metric);
-//      getUsageStatsService().getNumberOfItemsInEntitySets(metric);
+        getUsageStatsService().getNumberOfEntitySets(metric);
+        getUsageStatsService().getNumberOfItemsInEntitySets(metric);
 
         metric.setTimestamp(new Date());
 
