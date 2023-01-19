@@ -16,9 +16,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
+import eu.europeana.api.commons.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -39,6 +39,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -436,37 +437,43 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions,
       int pageNr, int pageSize) {
-    List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
-    String localId;
+    
     if (userSet.getItems() != null) {
-
-      // calculate the index of from and until to get the right page of items
-      Integer start = pageNr * pageSize;
-      Integer till = Math.min((start + pageSize), userSet.getItems().size()); // should not exceed
-                                                                              // the size of item
-                                                                              // list
-      for (int i = start; i < till; i++) {
-        String itemUri = userSet.getItems().get(i);
-        boolean found = false;
-        localId =
-            UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
-        // escape "/" to "\/" to match json string
-        localId = StringUtils.replace(localId, "/", "\\/");
-        for (String description : itemDescriptions) {
-          if (description.contains(localId)) {
-            orderedItemDescriptions.add(description);
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          orderedItemDescriptions.add("{\"id\":\"" + localId + "\"}");
-        }
-      }
-      return orderedItemDescriptions;
+      return reorderItemDescriptions(userSet, itemDescriptions, pageNr, pageSize);
     }
     // if open set OR userSet.getItems == null , return the same order as retrieved
     return itemDescriptions;
+  }
+
+  private List<String> reorderItemDescriptions(UserSet userSet, List<String> itemDescriptions,
+      int pageNr, int pageSize) {
+    List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
+    String localId;
+    
+    // calculate the index of from and until to get the right page of items
+    Integer start = pageNr * pageSize;
+    Integer till = Math.min((start + pageSize), userSet.getItems().size()); // should not exceed
+                                                                            // the size of item
+                                                                            // list
+    for (int i = start; i < till; i++) {
+      String itemUri = userSet.getItems().get(i);
+      boolean found = false;
+      localId =
+          UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
+      // escape "/" to "\/" to match json string
+      localId = StringUtils.replace(localId, "/", "\\/");
+      for (String description : itemDescriptions) {
+        if (description.contains(localId)) {
+          orderedItemDescriptions.add(description);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        orderedItemDescriptions.add("{\"id\":\"" + localId + "\"}");
+      }
+    }
+    return orderedItemDescriptions;
   }
 
   private int validateLastPage(long totalInCollection, int pageSize, int pageNr)
@@ -529,8 +536,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
     } else {
       // LdProfiles.MINIMAL.equals(profile) - default
-      resPage = new UserSetIdsResultPage();
-      setPageItems(results, (UserSetIdsResultPage) resPage, resultPageSize);
+      resPage = setPageItemsAsSetIds(results, resultPageSize);
     }
 
     resPage.setPartOf(ResultList);
@@ -541,8 +547,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return resPage;
   }
 
-  void setPageItems(ResultSet<? extends UserSet> results, UserSetIdsResultPage resPage,
+  UserSetIdsResultPage setPageItemsAsSetIds(ResultSet<? extends UserSet> results,
       int resultPageSize) {
+    
+    UserSetIdsResultPage resPage = new UserSetIdsResultPage();
     List<String> items = new ArrayList<>(resultPageSize);
     for (UserSet set : results.getResults()) {
       items.add(UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(),
@@ -550,6 +558,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     resPage.setItems(items);
     resPage.setTotalInPage(items.size());
+    return resPage;
   }
 
   void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage,
@@ -587,7 +596,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     resPage.setTotalInPage(items.size());
   }
 
-  private void addPagination(BaseUserSetResultPage<?> resPage, String collectionUrl, int page,
+  private void addPagination(ResultsPage<?> resPage, String collectionUrl, int page,
       int pageSize, int lastPage, LdProfiles profile) {
     String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
     resPage.setCurrentPageUri(currentPageUrl);
@@ -741,7 +750,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication,
       boolean includeEntitySetMsg) throws HttpException {
 
-    return verifyOwnerOrAdminOrRole(userSet, authentication, (Roles) null, includeEntitySetMsg);
+    return verifyOwnerOrAdminOrRole(userSet, authentication, null, includeEntitySetMsg);
   }
 
   /**
@@ -753,7 +762,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @return the userset if the access is granted
    * @throws HttpException if hte access is not granted
    */
-  UserSet verifyOwnerOrAdminOrRole(UserSet userSet, Authentication authentication, Roles role,
+  UserSet verifyOwnerOrAdminOrRole(UserSet userSet, Authentication authentication, String role,
       boolean includeEntitySetMsg) throws HttpException {
 
     if (authentication == null) {
@@ -770,7 +779,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // approve owner or admin
       return userSet;
     }
-    if (role != null && hasRole(authentication, role.getName())) {
+    if (role != null && hasRole(authentication, role)) {
       // approve usr with role if provided
       return userSet;
     } else {
@@ -805,7 +814,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     // verifyOwnerOrAdmin(existingUserSet, authentication, includeEntitySetMsg);
     if (existingUserSet.isPublished()) {
-      verifyOwnerOrAdminOrRole(existingUserSet, authentication, Roles.PUBLISHER, false);
+      verifyOwnerOrAdminOrRole(existingUserSet, authentication, Roles.PUBLISHER.getName(), false);
     } else {
       verifyOwnerOrAdmin(existingUserSet, authentication, false);
     }
@@ -819,7 +828,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @param profile Provided Linked Data profile
    * @return profiled user set value
    */
-  public UserSet applyProfile(UserSet userSet, LdProfiles profile) {
+  public void applyProfile(UserSet userSet, LdProfiles profile) {
     // update
     userSet.setBaseUrl(getConfiguration().getSetDataEndpoint());
 
@@ -859,8 +868,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         userSet.setItems(null);
         break;
     }
-
-    return userSet;
   }
 
   /**
@@ -895,7 +902,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
           UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
     }
-    validateUserSetForPublishUnPublish(userSet, authentication, publish);
+    validateUserSetForPublishUnPublish(userSet, publish);
     if (publish) {
       return updateUserSetForPublish(userSet, authentication);
     } else {
@@ -910,8 +917,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @param authentication
    * @throws HttpException
    */
-  private void validateUserSetForPublishUnPublish(PersistentUserSet userSet,
-      Authentication authentication, boolean publish) throws HttpException {
+  private void validateUserSetForPublishUnPublish(PersistentUserSet userSet, boolean publish) throws HttpException {
     // Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond
     // with 400;
     if (isPublishingPrevented(userSet)) {

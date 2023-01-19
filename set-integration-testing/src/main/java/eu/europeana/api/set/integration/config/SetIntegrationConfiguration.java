@@ -8,7 +8,7 @@ import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
 
 public class SetIntegrationConfiguration {
 
-    protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "/set-integration-testing.properties";
+    protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "/set-integration-testing.user.properties";
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_REGULAR = "oauth.token.request.params.regular";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR = "oauth.token.request.params.editor";

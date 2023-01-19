@@ -6,19 +6,4 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	">
 
-<!-- 
-	<bean name="set_mongo_contextcontainer" class="eu.europeana.api.commons.nosql.context.ApplicationContextContainer"/>
-	 -->
-
-	<!-- simple cache manager -->
-	<!--
-	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
-	    <property name="caches">
-	        <set>
-	            <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" name="client"/>
-	        </set>
-	    </property>
-	</bean>
-	-->
-
 </beans>

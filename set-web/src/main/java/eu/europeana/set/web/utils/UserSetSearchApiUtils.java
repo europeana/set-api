@@ -1,15 +1,13 @@
 package eu.europeana.set.web.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.search.SearchApiRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 /**
  * Creates the Serach api urls and request body

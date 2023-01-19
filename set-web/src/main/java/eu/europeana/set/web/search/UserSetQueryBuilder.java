@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import eu.europeana.api.common.config.UserSetI18nConstants;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.api.commons.definitions.utils.LanguageUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.search.util.QueryBuilder;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -19,6 +19,7 @@ import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.UserSetMongoConstants;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 
 public class UserSetQueryBuilder extends QueryBuilder {
@@ -30,7 +31,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
   
     String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY, WebUserSetFields.TYPE, 
         WebUserSetFields.ITEM, WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT, 
-        WebUserSetFields.PROVIDER};
+        WebUserSetFields.PROVIDER, WebUserSetFields.LANG};
     String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
 
     Set<String> suportedFields = Set.of(fields);
@@ -58,11 +59,25 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
 	addFullTextCriterion(searchCriteria, searchQuery);
 	
+	addTitleLangCriterion(searchCriteria, searchQuery);
+	
 	searchQuery.setSortCriteria(toArray(sort));	
 	searchQuery.setPageSize(pageSize);
 	searchQuery.setPageNr(page);
 	
 	return searchQuery;
+    }
+
+    private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+        throws ParamValidationException {
+    if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
+        String lang = searchCriteria.get(WebUserSetFields.LANG).toLowerCase();
+        if (! LanguageUtils.isIsoLanguage(lang)) {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+              new String[] { "invalid value for search value for lang: field, language must be a 2-letter ISO Code", lang });
+        }
+        searchQuery.setTitleLang(lang);
+    }
     }
 
     private void addFullTextCriterion(Map<String, String> searchCriteria,
@@ -297,11 +312,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
     private UserSetFacetQuery buildFacetQuery(String facet, int facetLimit) {
     // For item facets - we get the most liked items. Hence, the match should be {type : 'BookmarkFolder'}
 	// also as items is an array unwind will be true
-    if(facet.equals(WebUserSetFields.ITEM)) {
+    if(WebUserSetFields.ITEM.equals(facet)) {
     	return new UserSetFacetQuery(facet, WebUserSetFields.TYPE, UserSetTypes.BOOKMARKSFOLDER.getJsonValue(),
 				true, UserSetMongoConstants.MONGO_ITEMS, facetLimit);
 	}
-    if(facet.equals(WebUserSetFields.VISIBILITY)) {
+    if(WebUserSetFields.VISIBILITY.equals(facet)) {
 		return new UserSetFacetQuery(facet, null, null,
 				false, UserSetMongoConstants.MONGO_VISIBILITY, facetLimit);
 	}
