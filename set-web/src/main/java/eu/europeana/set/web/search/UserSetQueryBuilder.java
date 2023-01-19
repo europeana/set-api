@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.api.commons.definitions.utils.LanguageUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.search.util.QueryBuilder;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
@@ -70,10 +71,10 @@ public class UserSetQueryBuilder extends QueryBuilder {
     private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
         throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
-        String lang = searchCriteria.get(WebUserSetFields.LANG);
-        if (!"en".equals(lang)) {
+        String lang = searchCriteria.get(WebUserSetFields.LANG).toLowerCase();
+        if (! LanguageUtils.isIsoLanguage(lang)) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-              new String[] { "invalid value for search field, language must be 'en' " + WebUserSetFields.LANG, lang });
+              new String[] { "invalid value for search value for lang: field, language must be a 2-letter ISO Code", lang });
         }
         searchQuery.setTitleLang(lang);
     }
