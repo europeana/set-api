@@ -139,16 +139,20 @@ public class PersistentUserSetServiceImpl extends
   
   @Override
   public long countItemsInEntitySets() {
-      // Cursor is needed in aggregate command
-      AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
-      long totalItems =0;
-      Map<String,DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
-      groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, new BasicDBObject(UserSetMongoConstants.MONGO_SIZE, UserSetMongoConstants.MONGO_ITEMS)));
-      Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
-      if (cursor != null && cursor.hasNext()) {
-        totalItems = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
-      }
-      return totalItems;
+    // Cursor is needed in aggregate command
+    AggregationOptions aggregationOptions =
+        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+    long totalItems = 0;
+    Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
+    groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+    Cursor cursor = getDao().getCollection().aggregate(
+        getAggregatePipeline(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), groupFieldsAdditional),
+        aggregationOptions);
+    if (cursor != null && cursor.hasNext()) {
+      totalItems =
+          Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
+    }
+    return totalItems;
   }
   
   /*
