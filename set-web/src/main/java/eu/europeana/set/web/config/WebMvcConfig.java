@@ -44,7 +44,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // get, delete, update
-    registry.addMapping("/set/*").allowedOrigins("*").allowedMethods("GET,PUT,DELETE")
+    registry.addMapping("/set/*").allowedOrigins("*").allowedMethods("GET", "PUT", "DELETE")
         .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW,
             HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
@@ -57,7 +57,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .allowCredentials(false).maxAge(600L); // in seconds
 
     //add,remove,exists item in set
-    registry.addMapping("/set/*/*/*").allowedOrigins("*").allowedMethods("GET,HEAD,PUT,DELETE")
+    registry.addMapping("/set/*/*/*").allowedOrigins("*").allowedMethods("GET", "HEAD", "PUT", "DELETE")
     .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.PREFERENCE_APPLIED)
     .allowCredentials(false).maxAge(600L); // in seconds
   }
