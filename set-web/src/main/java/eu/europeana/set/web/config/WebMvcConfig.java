@@ -30,35 +30,35 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/v2/api-docs").allowedOrigins("*").allowedMethods("GET")
-        .exposedHeaders("Access-Control-Allow-Origin", HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     registry.addMapping("/v2/api-docs/**").allowedOrigins("*").allowedMethods("GET")
-        .exposedHeaders("Access-Control-Allow-Origin", HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // create method
     registry.addMapping("/set/").allowedOrigins("*").allowedMethods("POST")
-        .exposedHeaders("Access-Control-Allow-Origin", HttpHeaders.ALLOW, HttpHeaders.VARY,
-            HttpHeaders.LINK, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Preference-Applied")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ALLOW, HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY,
+            HttpHeaders.CACHE_CONTROL, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // get, delete, update
     registry.addMapping("/set/*").allowedOrigins("*").allowedMethods("GET,PUT,DELETE")
-        .exposedHeaders("Access-Control-Allow-Origin", HttpHeaders.ALLOW, HttpHeaders.VARY,
-            HttpHeaders.LINK, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Preference-Applied")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW,
+            HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
 
     // publish/unpublish
     registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
-        .exposedHeaders("Access-Control-Allow-Origin", HttpHeaders.ALLOW, HttpHeaders.VARY,
-            HttpHeaders.ETAG, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Preference-Applied")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, 
+            HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     //add,remove,exists item in set
     registry.addMapping("/set/*/*/*").allowedOrigins("*").allowedMethods("GET,HEAD,PUT,DELETE")
-    .exposedHeaders("Access-Control-Allow-Origin", HttpHeaders.ALLOW, "Preference-Applied")
+    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.PREFERENCE_APPLIED)
     .allowCredentials(false).maxAge(600L); // in seconds
   }
 
