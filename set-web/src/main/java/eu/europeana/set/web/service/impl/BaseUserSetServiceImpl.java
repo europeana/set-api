@@ -36,6 +36,7 @@ import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.config.UserSetI18nConstants;
+import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
@@ -173,7 +174,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   // @Override
   public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet,
       LdProfiles profile) throws SetUniquenessValidationException, RequestBodyValidationException,
-      ParamValidationException, ApplicationAuthenticationException {
+      ParamValidationException, ApplicationAuthenticationException, ItemValidationException {
     // ###### FIRST Validate the input data, which is allowed to be partial ####/
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
@@ -190,10 +191,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
-    // validate items
-    validateAndSetItems(persistentUserSet, webUserSet, profile);
+    // validate items-profile conformance
+    validateItemsProfileConformanceAndSetItems(persistentUserSet, webUserSet, profile);
     // remove duplicated items
-    removeItemDuplicates(webUserSet);
+    removeItemDuplicates(persistentUserSet);
 
     // update modified date
     persistentUserSet.setModified(new Date());
@@ -482,7 +483,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return profile;
   }
 
-  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates,
+  private void validateItemsProfileConformanceAndSetItems(UserSet storedUserSet, UserSet userSetUpdates,
       LdProfiles profile) throws ApplicationAuthenticationException {
     // no validation of items for open sets, they are retrieved dynamically
     if (storedUserSet.isOpenSet()) {
@@ -535,8 +536,18 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
+  protected void validateItems(List<String> items) throws ItemValidationException {
+    if(items==null) return;
+    for(String item : items) {
+      if(!item.startsWith(getConfiguration().getItemDataEndpoint()) ) {
+        throw new ItemValidationException(
+            UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+      }
+    }
+  }
+  
   public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException,
-      ParamValidationException, SetUniquenessValidationException {
+      ParamValidationException, SetUniquenessValidationException, ItemValidationException {
 
     // validate title
     if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -564,6 +575,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateControlledValues(webUserSet);
     validateIsDefinedBy(webUserSet);
     validateEntityBestItemsSet(webUserSet);
+    validateItems(webUserSet.getItems());
   }
 
   void validateProvider(UserSet webUserSet) throws RequestBodyValidationException {

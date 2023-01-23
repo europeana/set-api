@@ -417,7 +417,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           total = userSet.getItems().size();
         }
         List<String> sortedItemDescriptions =
-            sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);
+            sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);        
         setItems(userSet, sortedItemDescriptions, total);
       }
       return userSet;

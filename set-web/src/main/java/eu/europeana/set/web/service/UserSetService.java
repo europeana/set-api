@@ -14,6 +14,7 @@ import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
@@ -89,8 +90,9 @@ public interface UserSetService {
      * @throws RequestBodyValidationException
      * @throws ParamValidationException
      * @throws SetUniquenessValidationException 
+     * @throws ItemValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException;
+    public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException, ItemValidationException;
 
     /**
      * This method deletes user set by user set Id value.
