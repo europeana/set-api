@@ -38,7 +38,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // create method
-    registry.addMapping("/set/").allowedOrigins("*").allowedMethods("POST")
+    // delete user's sets by admin, delete by user's sets by 
+    registry.addMapping("/set/").allowedOrigins("*").allowedMethods("POST", "DELETE")
         .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ALLOW, HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY,
             HttpHeaders.CACHE_CONTROL, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
