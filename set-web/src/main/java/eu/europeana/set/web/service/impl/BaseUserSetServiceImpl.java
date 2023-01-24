@@ -540,13 +540,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   protected void validateItems(List<String> items) throws ItemValidationException {
     if(items==null) return;
-    boolean valid = true;
-    String invalidItem = null;
     for(String item : items) {
       if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
-        valid=false;
-        invalidItem=item;
-        break;
+        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
       }
       else {
         String withoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
@@ -554,28 +550,17 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           Path pathWithoutBase = Path.of(withoutBase);
           int nameCount = pathWithoutBase.getNameCount();
           if(nameCount!=2) {
-            valid=false;
-            invalidItem=item;
-            break;            
+            throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
           }
-          String datasetId = pathWithoutBase.getName(0).toString().toLowerCase();
-          if(! StringUtils.isAlphanumeric(datasetId)) {
-            valid=false;
-            invalidItem=item;
-            break;                        
+          String datasetId = pathWithoutBase.getName(0).toString();
+          if(! datasetId.matches("^[a-z0-9]+$")) {
+            throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
           }
         }
         catch (InvalidPathException ex) {
-          valid=false;
-          invalidItem=item;
-          break;
+          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
         }
       }
-    }
-    
-    if(! valid) {
-      throw new ItemValidationException(
-          UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItem});
     }
   }
   
