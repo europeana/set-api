@@ -1,6 +1,8 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -538,11 +540,42 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   protected void validateItems(List<String> items) throws ItemValidationException {
     if(items==null) return;
+    boolean valid = true;
+    String invalidItem = null;
     for(String item : items) {
-      if(!item.startsWith(getConfiguration().getItemDataEndpoint()) ) {
-        throw new ItemValidationException(
-            UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+      if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
+        valid=false;
+        invalidItem=item;
+        break;
       }
+      else {
+        String withoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
+        try {
+          Path pathWithoutBase = Path.of(withoutBase);
+          int nameCount = pathWithoutBase.getNameCount();
+          if(nameCount!=2) {
+            valid=false;
+            invalidItem=item;
+            break;            
+          }
+          String datasetId = pathWithoutBase.getName(0).toString().toLowerCase();
+          if(! StringUtils.isAlphanumeric(datasetId)) {
+            valid=false;
+            invalidItem=item;
+            break;                        
+          }
+        }
+        catch (InvalidPathException ex) {
+          valid=false;
+          invalidItem=item;
+          break;
+        }
+      }
+    }
+    
+    if(! valid) {
+      throw new ItemValidationException(
+          UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItem});
     }
   }
   
