@@ -558,7 +558,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           }
         }
         catch (InvalidPathException ex) {
-          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item}, ex);
         }
       }
     }

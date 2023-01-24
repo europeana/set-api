@@ -31,7 +31,7 @@ public interface UserSetService {
      * @return UserSet object
      * @throws HttpException
      */
-    public UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException, IOException;
+    UserSet storeUserSet(UserSet userSet, Authentication authentication) throws HttpException, IOException;
 
     /**
      * This method converts close set to open set by updating respective items
@@ -46,7 +46,7 @@ public interface UserSetService {
      * @throws HttpException
      * @throws JSONException
      */
-    public UserSet fetchItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr, int pageSize,
+    UserSet fetchItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr, int pageSize,
 	    LdProfiles profile) throws HttpException, JSONException;
 
     /**
@@ -59,7 +59,7 @@ public interface UserSetService {
      * @return
      * @throws HttpException 
      */
-    public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws HttpException;
+    UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws HttpException;
 
     /**
      * This method returns UserSet object for given user set identifier.
@@ -67,9 +67,9 @@ public interface UserSetService {
      * @param
      * @return UserSet object
      */
-    public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
+    UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
 
-    public List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
+    List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
 
     /**
      * This methods converts user set object from JsonLd string format to a UserSet
@@ -79,7 +79,7 @@ public interface UserSetService {
      * @return a UserSet object
      * @throws HttpException
      */
-    public UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException;
+    UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException;
 
     /**
      * This method validates and processes the Set description for format and
@@ -92,7 +92,7 @@ public interface UserSetService {
      * @throws SetUniquenessValidationException 
      * @throws ItemValidationException 
      */
-    public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException, ItemValidationException;
+    void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException, ParamValidationException, SetUniquenessValidationException, ItemValidationException;
 
     /**
      * This method deletes user set by user set Id value.
@@ -100,7 +100,7 @@ public interface UserSetService {
      * @param userSetId The id of the user set
      * @throws UserSetNotFoundException
      */
-    public void deleteUserSet(String userSetId) throws UserSetNotFoundException;
+    void deleteUserSet(String userSetId) throws UserSetNotFoundException;
 
     /**
      * This method deletes list of user set.
@@ -108,14 +108,14 @@ public interface UserSetService {
      * @param userSets  The list of user sets.
      * @param creatorId Creator of the user Sets
      */
-    public void deleteUserSets(String creatorId, List<PersistentUserSet> userSets);
+    void deleteUserSets(String creatorId, List<PersistentUserSet> userSets);
 
     /**
      * remove duplicate items in the user set by preserving the order of items
      * 
      * @param userSet
      */
-    public void removeItemDuplicates(UserSet userSet);
+    void removeItemDuplicates(UserSet userSet);
 
     /**
      * This method enriches user set by provided item
@@ -127,7 +127,7 @@ public interface UserSetService {
      * @return user set enriched by new item
      * @throws ApplicationAuthenticationException
      */
-    public UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
+    UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 	    throws ApplicationAuthenticationException;
 
     /**
@@ -136,7 +136,7 @@ public interface UserSetService {
      * @param existingUserSet
      * @return updated user set
      */
-    public UserSet updateItemList(UserSet existingUserSet);
+    UserSet updateItemList(UserSet existingUserSet);
 
     /**
      * search user sets using the given query and profile
@@ -146,17 +146,17 @@ public interface UserSetService {
      * @param authentication
      * @return
      */
-    public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
+    ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
                                                Authentication authentication);
 
-    public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
+    BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
 	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
             throws HttpException;
     
-    public ItemIdsResultPage buildItemIdsResultsPage(String setId, List<String> itemIds, int page, int pageSize,
+    ItemIdsResultPage buildItemIdsResultsPage(String setId, List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
     
-    public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
+    CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
 
     /**
      * This method validates input if the user is the owner/creator of the user set or is admin
