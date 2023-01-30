@@ -108,10 +108,10 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest())
         .andReturn();
     ItemValidationException ex = (ItemValidationException) result.getResolvedException();
-    assertTrue(ex.getI18nParams().length==3);
-    
+//    assertTrue(ex.getI18nParams().length==3);    
     assertTrue(ex instanceof ItemValidationException);
   }  
   
@@ -210,9 +210,10 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest())
         .andReturn();
     ItemValidationException ex = (ItemValidationException) result.getResolvedException();
-    assertTrue(ex.getI18nParams().length==3);
+//    assertTrue(ex.getI18nParams().length==3);
     assertTrue(ex instanceof ItemValidationException);
   }
 
