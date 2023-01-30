@@ -126,9 +126,10 @@ public interface UserSetService {
      * @param existingUserSet
      * @return user set enriched by new item
      * @throws ApplicationAuthenticationException
+     * @throws ItemValidationException 
      */
     UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
-	    throws ApplicationAuthenticationException;
+	    throws ApplicationAuthenticationException, ItemValidationException;
 
     /**
      * This method updates existing item list

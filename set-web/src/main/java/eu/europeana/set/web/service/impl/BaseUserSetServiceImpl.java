@@ -539,27 +539,43 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   protected void validateItems(List<String> items) throws ItemValidationException {
-    if(items==null) return;
+    if(items==null || items.isEmpty()) {
+      return;
+    }
+    List<String> invalidItems = new ArrayList<>();
     for(String item : items) {
-      if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
-        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+      try {
+        validateItem(item);
       }
-      else {
-        String withoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
-        try {
-          Path pathWithoutBase = Path.of(withoutBase);
-          int nameCount = pathWithoutBase.getNameCount();
-          if(nameCount!=2) {
-            throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
-          }
-          String datasetId = pathWithoutBase.getName(0).toString();
-          if(! datasetId.matches("^[a-z0-9]+$")) {
-            throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
-          }
+      catch (ItemValidationException ex) {
+        invalidItems.add(item);
+      }
+    }
+    if(invalidItems.size()>0) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, invalidItems.toArray(new String[0]));
+    }
+  }
+  
+  protected void validateItem(String item) throws ItemValidationException {
+    if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+    }
+    else {
+      String itemWithoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
+      try {
+        Path pathWithoutBase = Path.of(itemWithoutBase);
+        int nameCount = pathWithoutBase.getNameCount();
+        if(nameCount!=2) {
+          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
         }
-        catch (InvalidPathException ex) {
-          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item}, ex);
+        String datasetId = pathWithoutBase.getName(0).toString();
+        if(! datasetId.matches("^[a-z0-9]+$")) {
+          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
         }
+      }
+      catch (InvalidPathException ex) {
+        //this is used for the validation of the item localId part (baseUrl/datasetId/localId)
+        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item}, ex);
       }
     }
   }

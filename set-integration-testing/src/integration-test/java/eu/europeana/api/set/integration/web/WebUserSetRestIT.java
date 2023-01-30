@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.MvcResult;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -102,12 +103,15 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
   @Test
   public void create_UserSet_InvalidItems() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
-    mockMvc
+    MvcResult result = mockMvc
         .perform(
             post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(result -> assertTrue(result.getResolvedException() instanceof ItemValidationException));
+        .andReturn();
+    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
+    assertTrue(ex.getI18nParams().length==3);
+    assertTrue(ex instanceof ItemValidationException);
   }  
   
   @Test
@@ -200,12 +204,15 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
 
     String updatedRequestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
     // update the userset
-    mockMvc
+    MvcResult result = mockMvc
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(result -> assertTrue(result.getResolvedException() instanceof ItemValidationException));
+        .andReturn();
+    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
+    assertTrue(ex.getI18nParams().length==3);
+    assertTrue(ex instanceof ItemValidationException);
   }
 
   @Test
