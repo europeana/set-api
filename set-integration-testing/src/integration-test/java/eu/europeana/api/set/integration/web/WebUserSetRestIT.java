@@ -103,16 +103,16 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
   @Test
   public void create_UserSet_InvalidItems() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
-    MvcResult result = mockMvc
+    mockMvc
         .perform(
             post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andReturn();
-    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
+        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==3));
+//    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
 //    assertTrue(ex.getI18nParams().length==3);    
-    assertTrue(ex instanceof ItemValidationException);
+//    assertTrue(ex instanceof ItemValidationException);
   }  
   
   @Test
@@ -205,16 +205,16 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
 
     String updatedRequestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
     // update the userset
-    MvcResult result = mockMvc
+    mockMvc
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andReturn();
-    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
+        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==3));
+//    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
 //    assertTrue(ex.getI18nParams().length==3);
-    assertTrue(ex instanceof ItemValidationException);
+//    assertTrue(ex instanceof ItemValidationException);
   }
 
   @Test
