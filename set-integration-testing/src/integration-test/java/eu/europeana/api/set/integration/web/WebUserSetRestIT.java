@@ -109,7 +109,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length!=0));
+        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==2));
 //    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
 //    assertTrue(ex.getI18nParams().length==3);    
 //    assertTrue(ex instanceof ItemValidationException);
@@ -211,7 +211,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length!=0));
+        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==2));
 //    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
 //    assertTrue(ex.getI18nParams().length==3);
 //    assertTrue(ex instanceof ItemValidationException);
