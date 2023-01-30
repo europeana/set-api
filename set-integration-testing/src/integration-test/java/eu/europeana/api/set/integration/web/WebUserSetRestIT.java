@@ -110,9 +110,6 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
         .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==2));
-//    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
-//    assertTrue(ex.getI18nParams().length==3);    
-//    assertTrue(ex instanceof ItemValidationException);
   }  
   
   @Test
@@ -212,9 +209,6 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
         .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==2));
-//    ItemValidationException ex = (ItemValidationException) result.getResolvedException();
-//    assertTrue(ex.getI18nParams().length==3);
-//    assertTrue(ex instanceof ItemValidationException);
   }
 
   @Test
