@@ -111,6 +111,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
         .andReturn();
     ItemValidationException ex = (ItemValidationException) result.getResolvedException();
     assertTrue(ex.getI18nParams().length==3);
+    
     assertTrue(ex instanceof ItemValidationException);
   }  
   
