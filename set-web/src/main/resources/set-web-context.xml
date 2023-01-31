@@ -20,8 +20,8 @@
    <beans:bean id="setProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
     	<beans:property name="locations">
     		<beans:list>
-            	<beans:value>classpath:config/set.common.properties</beans:value>
-            	<beans:value>classpath:config/set.user.properties</beans:value>
+            	<beans:value>classpath:set.common.properties</beans:value>
+            	<beans:value>classpath:set.user.properties</beans:value>
             </beans:list>	
     	</beans:property>
     	<beans:property name="ignoreResourceNotFound" value="true"/>

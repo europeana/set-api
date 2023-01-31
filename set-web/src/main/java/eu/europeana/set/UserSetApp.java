@@ -17,7 +17,6 @@ import org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFact
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ImportResource;
-import eu.europeana.set.web.config.SocksProxyActivator;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -49,8 +48,9 @@ public class UserSetApp extends SpringBootServletInitializer {
         System.getenv("CF_INSTANCE_INDEX"), System.getenv("CF_INSTANCE_GUID"),
         System.getenv("CF_INSTANCE_IP"));
 
-    // Activate socks proxy (if your application requires it)
-    SocksProxyActivator.activate("config/set.properties");
+    /* Activate socks proxy (if your application requires it) - currently not needed/not working
+    SocksProxyActivator.activate("config/set.user.properties");
+    */
 
     ApplicationContext ctx = SpringApplication.run(UserSetApp.class, args);
 

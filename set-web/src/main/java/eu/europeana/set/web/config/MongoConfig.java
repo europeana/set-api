@@ -17,7 +17,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
  */
 @Configuration
 @PropertySource(
-    value = {"classpath:config/set.common.properties", "classpath:config/set.user.properties"},
+    value = {"classpath:set.common.properties", "classpath:set.user.properties"},
     ignoreResourceNotFound = true)
 public class MongoConfig {
 
