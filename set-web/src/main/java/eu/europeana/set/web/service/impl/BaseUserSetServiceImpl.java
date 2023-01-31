@@ -1,6 +1,8 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -36,6 +38,7 @@ import eu.europeana.set.search.service.SearchApiClient;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.config.UserSetI18nConstants;
+import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
@@ -173,7 +176,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   // @Override
   public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet,
       LdProfiles profile) throws SetUniquenessValidationException, RequestBodyValidationException,
-      ParamValidationException, ApplicationAuthenticationException {
+      ParamValidationException, ApplicationAuthenticationException, ItemValidationException {
     // ###### FIRST Validate the input data, which is allowed to be partial ####/
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
@@ -190,10 +193,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
-    // validate items
-    validateAndSetItems(persistentUserSet, webUserSet, profile);
+    // validate items-profile conformance
+    validateSetAndSetItems(persistentUserSet, webUserSet, profile);
     // remove duplicated items
-    removeItemDuplicates(webUserSet);
+    removeItemDuplicates(persistentUserSet);
 
     // update modified date
     persistentUserSet.setModified(new Date());
@@ -482,7 +485,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return profile;
   }
 
-  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates,
+  private void validateSetAndSetItems(UserSet storedUserSet, UserSet userSetUpdates,
       LdProfiles profile) throws ApplicationAuthenticationException {
     // no validation of items for open sets, they are retrieved dynamically
     if (storedUserSet.isOpenSet()) {
@@ -535,8 +538,50 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
+  protected void validateItems(List<String> items) throws ItemValidationException {
+    if(items==null || items.isEmpty()) {
+      return;
+    }
+    List<String> invalidItems = new ArrayList<>();
+    for(String item : items) {
+      try {
+        validateItem(item);
+      }
+      catch (ItemValidationException ex) {
+        invalidItems.add(item);
+      }
+    }
+    if(invalidItems.size()>0) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, invalidItems.toArray(new String[0]));
+    }
+  }
+  
+  protected void validateItem(String item) throws ItemValidationException {
+    if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+    }
+    else {
+      String itemWithoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
+      try {
+        Path pathWithoutBase = Path.of(itemWithoutBase);
+        int nameCount = pathWithoutBase.getNameCount();
+        if(nameCount!=2) {
+          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+        }
+        String datasetId = pathWithoutBase.getName(0).toString();
+        if(! datasetId.matches("^[a-z0-9]+$")) {
+          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+        }
+      }
+      catch (InvalidPathException ex) {
+        //this is used for the validation of the item localId part (baseUrl/datasetId/localId)
+        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item}, ex);
+      }
+    }
+  }
+  
   public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException,
-      ParamValidationException, SetUniquenessValidationException {
+      ParamValidationException, SetUniquenessValidationException, ItemValidationException {
 
     // validate title
     if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -564,6 +609,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateControlledValues(webUserSet);
     validateIsDefinedBy(webUserSet);
     validateEntityBestItemsSet(webUserSet);
+    validateItems(webUserSet.getItems());
   }
 
   void validateProvider(UserSet webUserSet) throws RequestBodyValidationException {
