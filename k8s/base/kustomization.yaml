@@ -1,0 +1,11 @@
+resources:
+  - deployment.yaml
+
+commonLabels:
+  app: set-api
+
+# expects files to be in the same directory
+secretGenerator:
+  - name: set-api-secret
+    files:
+      - set.user.properties
