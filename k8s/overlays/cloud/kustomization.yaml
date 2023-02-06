@@ -5,4 +5,4 @@ resources:
   - hpa.properties.yaml
 
 patchesStrategicMerge:
-  - deployment_patch.properties.yaml
+  - deployment_patch.yaml

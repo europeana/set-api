@@ -54,7 +54,7 @@ For both environments:
 - Copy valid api configration properties file into k8s base folder (e.g. set-api/k8s/set.user.properties)
 - To build the customised Kubernetes manifests run from the k8s folder (e.g. set-api/k8s) `kustomize build ./overlays/dev`
 - Apply the manifests to the cluster run from the k8s folder: `kubectl apply -k ./overlays/dev`
-- Export the api to host run (from any folder): `kubectl port-forward --address localhost deployment/set-api-deployment 8080:8080`
+- Export the api to host run (from any folder, requires to be run after each pod start): `kubectl port-forward --address localhost deployment/set-api-deployment 8080:8080`
 - verify if the application is running, by opening the following URL in the browser on the host: http://localhost:8080/
 
 Run `kubectl get deployment/set-api-deployment` to view the deployment's status. 
