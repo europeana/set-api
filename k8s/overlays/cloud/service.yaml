@@ -3,8 +3,10 @@ kind: Service
 metadata:
   name: set-api-service
 spec:
-  selector:
-    app: set-api
+  ## selector provided via kustomize
+  #selector:
+  #  app: set-api
   ports:
     - name: http
-      port: 8080
+      port: 80
+      targetPort: 8080
