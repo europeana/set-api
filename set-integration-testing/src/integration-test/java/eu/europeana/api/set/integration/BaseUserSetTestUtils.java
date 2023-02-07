@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Resource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -39,6 +40,7 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.mongo.service.PersistentApiWriteLockService;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -104,7 +106,7 @@ public abstract class BaseUserSetTestUtils {
   @Autowired
   @Qualifier(UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
-
+  
   @Autowired
   private UserSetConfiguration configuration;
   // format: user
@@ -114,6 +116,7 @@ public abstract class BaseUserSetTestUtils {
   public static final String USER_ENTITY_GALLERIES =
       "entity-galleries-userid:entity-galleries-userid:PUBLISHER";
   public static final String USER_PUBLISHER = "publisher-userid:publisher-username:PUBLISHER";
+  public static final String USER_ADMIN = "admin-userid1:admin-username1:ADMIN";
 
   protected static String regularUserToken = OAuthUtils.TYPE_BEARER + " " + USER_REGULAR;
   protected static String editorUserToken = OAuthUtils.TYPE_BEARER + " " + USER_EDITOR;
@@ -121,6 +124,7 @@ public abstract class BaseUserSetTestUtils {
   protected static String creatorEntitySetUserToken =
       OAuthUtils.TYPE_BEARER + " " + USER_ENTITY_GALLERIES;
   protected static String publisherUserToken = USER_PUBLISHER;
+  protected static String adminUserToken = OAuthUtils.TYPE_BEARER + " " + USER_ADMIN;
   protected static List<PersistentUserSet> createdUserSets = new ArrayList<>();
   /**
    * can be used to enable AUTH for local environment
@@ -178,6 +182,13 @@ public abstract class BaseUserSetTestUtils {
     editor2UserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
     creatorEntitySetUserToken = retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
   }
+  
+  public static void initAdminUserToken() {
+    if (DISABLE_AUTH) {
+      return;
+    }
+    adminUserToken = retrieveOatuhToken(EuropeanaOauthClient.ADMIN_USER);
+  }  
 
   protected void deleteCreatedSets() {
     getMongoPersistance().removeAll(createdUserSets);

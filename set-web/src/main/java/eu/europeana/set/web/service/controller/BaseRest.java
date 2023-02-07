@@ -38,8 +38,8 @@ import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
-import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 
 public class BaseRest extends BaseRestController {
 
@@ -310,6 +310,9 @@ public class BaseRest extends BaseRestController {
       } else {
         auth = authorizeByPlainTextToken(operation,request);
       }
+      
+      // prevent write when locked
+      getAuthorizationService().checkWriteLockInEffect(operation);
 
       // prevent write when locked
       //TODO: functionality to be implemented
@@ -341,7 +344,16 @@ public class BaseRest extends BaseRestController {
           return authorizeByPlainTextToken(Operations.RETRIEVE, request); 
       }
     }
+    
+    protected ResponseEntity<String> buildResponse(String jsonStr, HttpStatus httpStatus) {
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+      headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+      headers.add(HttpHeaders.ETAG, Integer.toString(hashCode()));
+      headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
 
+      ResponseEntity<String> response = new ResponseEntity<String>(jsonStr, headers, httpStatus);
+      return response;
+    }
     
     
 }

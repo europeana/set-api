@@ -22,6 +22,7 @@ public class EuropeanaOauthClient {
     public static final String EDITOR2_USER = "EDITOR2";
     public static final String CREATOR_ENTITYSETS = "CREATOR_ES";
     public static final String PUBLISHER_USER = "PUBLISHER";
+    public static final String ADMIN_USER = "ADMIN";
 
     public EuropeanaOauthClient() {
 	//

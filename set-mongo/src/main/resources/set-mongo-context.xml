@@ -23,5 +23,9 @@
 	<bean name="set_db_setService" class="eu.europeana.set.mongo.service.PersistentUserSetServiceImpl"
 		p:dao-ref="set_db_setDao">
 	</bean>
+	
+	<bean name="set_db_apilockService" class="eu.europeana.set.mongo.service.PersistentApiWriteLockServiceImpl"
+		p:dao-ref="set_db_lockDao"/>
+	
 					
 </beans>
