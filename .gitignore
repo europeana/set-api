@@ -18,7 +18,7 @@ hs_err_pid*
 **/log4j2.xml
 **/*.bk
 **/*.user.properties
-**/mongo_keystore.jks
+**/*.jks
 
 #IntelliJ project files
 .idea
