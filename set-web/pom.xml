@@ -219,12 +219,12 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-            		<include>*/*.properties</include>
-            		<include>*/*.info</include>
-            		<include>*.xml</include>
+            		<include>**.properties</include>
+            		<include>**.info</include>
+            		<include>**.xml</include>
         		</includes>
                 <excludes>
-               		<exclude>*/*.jks</exclude>
+               		<exclude>**.jks</exclude>
         		</excludes>
     		</resource>
     		<resource>
