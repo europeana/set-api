@@ -117,7 +117,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertEquals(((ItemValidationException)result.getResolvedException()).getI18nParams().length, 2));
+        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
   }  
   
   @Test
@@ -216,7 +216,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertEquals(((ItemValidationException)result.getResolvedException()).getI18nParams().length, 2));
+        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
   }
 
   @Test

@@ -79,6 +79,7 @@ public class PersistentApiWriteLockImpl implements PersistentObject, PersistentA
 
   @Override
   public void setCreated(Date creationDate) {
+    //emtpy but it must be overriden
   }
 
   @Override
@@ -88,6 +89,7 @@ public class PersistentApiWriteLockImpl implements PersistentObject, PersistentA
 
   @Override
   public void setLastUpdate(Date lastUpdate) {
+    //emtpy but it must be overriden
   }
 
 }
