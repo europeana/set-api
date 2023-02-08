@@ -74,24 +74,20 @@ public class PersistentApiWriteLockImpl implements PersistentObject, PersistentA
 
   @Override
   public Date getCreated() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public void setCreated(Date creationDate) {
-    // TODO Auto-generated method stub
   }
 
   @Override
   public Date getLastUpdate() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public void setLastUpdate(Date lastUpdate) {
-    // TODO Auto-generated method stub
   }
 
 }

@@ -8,5 +8,5 @@ public interface UserSetAuthorizationService extends AuthorizationService {
 
 	UserSetConfiguration getConfiguration();
 	
-	public void checkWriteLockInEffect(String operationName) throws ApplicationAuthenticationException;
+	void checkWriteLockInEffect(String operationName) throws ApplicationAuthenticationException;
 }

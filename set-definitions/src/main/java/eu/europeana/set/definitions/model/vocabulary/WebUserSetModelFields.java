@@ -45,4 +45,7 @@ public class WebUserSetModelFields {
 
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
+
+	//lock object name
+	public static final String LOCK_WRITE_NAME="lockWriteOperations";
 }

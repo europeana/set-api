@@ -6,16 +6,16 @@ import eu.europeana.set.mongo.model.internal.PersistentApiWriteLock;
 
 public interface PersistentApiWriteLockService extends AbstractNoSqlService<PersistentApiWriteLock, String> {
 
-	public PersistentApiWriteLock lock(String action) throws ApiWriteLockException;
+	PersistentApiWriteLock lock(String action) throws ApiWriteLockException;
 	
-	public void unlock(PersistentApiWriteLock pij) throws ApiWriteLockException;
+	void unlock(PersistentApiWriteLock pij) throws ApiWriteLockException;
 	
-	public PersistentApiWriteLock getLastActiveLock(String name) throws ApiWriteLockException;
+	PersistentApiWriteLock getLastActiveLock(String name) throws ApiWriteLockException;
 	
-	public PersistentApiWriteLock getLockById(String id) throws ApiWriteLockException;
+	PersistentApiWriteLock getLockById(String id) throws ApiWriteLockException;
 
-	public PersistentApiWriteLock getLastActiveLock() throws ApiWriteLockException;
+	PersistentApiWriteLock getLastActiveLock() throws ApiWriteLockException;
 	
-	public void deleteAllLocks() throws ApiWriteLockException;
+	void deleteAllLocks() throws ApiWriteLockException;
 	
 }

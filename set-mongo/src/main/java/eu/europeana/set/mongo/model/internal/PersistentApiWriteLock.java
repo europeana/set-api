@@ -6,20 +6,20 @@ import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
 
 public interface PersistentApiWriteLock extends NoSqlEntity {	
 	
-	public ObjectId getId();
+	ObjectId getId();
 
-	public String getName();
+	String getName();
 
-	public void setName(String name);
+	void setName(String name);
 	
-	public void setId(ObjectId id);
+	void setId(ObjectId id);
 
-	public void setStarted(Date started);
+	void setStarted(Date started);
 
-	public Date getStarted();
+	Date getStarted();
 
-	public Date getEnded();
+	Date getEnded();
 
-	public void setEnded(Date ended);
+	void setEnded(Date ended);
 
 }

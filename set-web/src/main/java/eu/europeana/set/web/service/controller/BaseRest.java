@@ -346,13 +346,12 @@ public class BaseRest extends BaseRestController {
     }
     
     protected ResponseEntity<String> buildResponse(String jsonStr, HttpStatus httpStatus) {
-      MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
       headers.add(HttpHeaders.ETAG, Integer.toString(hashCode()));
       headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
 
-      ResponseEntity<String> response = new ResponseEntity<String>(jsonStr, headers, httpStatus);
-      return response;
+      return new ResponseEntity<>(jsonStr, headers, httpStatus);
     }
     
     

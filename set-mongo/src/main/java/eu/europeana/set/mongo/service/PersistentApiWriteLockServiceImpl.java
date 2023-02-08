@@ -37,8 +37,7 @@ public class PersistentApiWriteLockServiceImpl extends
 			query.criteria("name").contains(name);
 			query.criteria("ended").doesNotExist();
 			query.order("-started");
-			PersistentApiWriteLock pij = getDao().findOne(query);
-			return pij;
+			return getDao().findOne(query);
 		} catch(Exception e) {
 			throw new ApiWriteLockException("Unable to get last lock.", e);
 		}
@@ -51,8 +50,7 @@ public class PersistentApiWriteLockServiceImpl extends
 			Query<PersistentApiWriteLock> query = getDao().createQuery();
 			query.criteria("ended").doesNotExist();
 			query.order("-started");
-			PersistentApiWriteLock pij = getDao().findOne(query);
-			return pij;
+			return getDao().findOne(query);
 		} catch(Exception e) {
 			throw new ApiWriteLockException("Unable to get last lock.", e);
 		}
@@ -63,8 +61,7 @@ public class PersistentApiWriteLockServiceImpl extends
 		try {
 			Query<PersistentApiWriteLock> query = getDao().createQuery();
 			query.criteria("_id").equal(new ObjectId(id));
-			PersistentApiWriteLock pij = getDao().findOne(query);
-			return pij;
+			return getDao().findOne(query);
 		} catch(Exception e) {
 			throw new ApiWriteLockException("Unable to get lock by id.", e);
 		}

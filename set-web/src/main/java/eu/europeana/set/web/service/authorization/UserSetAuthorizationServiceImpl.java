@@ -12,6 +12,7 @@ import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.ApiWriteLockException;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentApiWriteLock;
 import eu.europeana.set.mongo.service.PersistentApiWriteLockService;
 import eu.europeana.set.web.config.UserSetI18nConstants;
@@ -81,13 +82,13 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
     public void checkWriteLockInEffect(String operationName) throws ApplicationAuthenticationException {
       PersistentApiWriteLock runningJob;
       try {
-          runningJob = getPersistentIndexingJobService().getLastActiveLock("lockWriteOperations");
+          runningJob = getPersistentIndexingJobService().getLastActiveLock(WebUserSetModelFields.LOCK_WRITE_NAME);
           // refuse operation if a write lock is effective (allow only unlock and retrieve
           // operations)
-          if (!(operationName.equals(SetOperations.WRITE_UNLOCK) || operationName.equals(SetOperations.ADMIN_REINDEX)
-              || operationName.endsWith(SetOperations.RETRIEVE)) && runningJob != null
-              && runningJob.getName().equals("lockWriteOperations") && runningJob.getEnded() == null) {
-          throw new ApplicationAuthenticationException(UserSetI18nConstants.LOCKED_MAINTENANCE, UserSetI18nConstants.LOCKED_MAINTENANCE, null, HttpStatus.LOCKED, null);
+          if (runningJob!=null && runningJob.getEnded()==null
+              && WebUserSetModelFields.LOCK_WRITE_NAME.equals(runningJob.getName())
+              && !(SetOperations.WRITE_UNLOCK.equals(operationName) || SetOperations.ADMIN_REINDEX.equals(operationName) || SetOperations.RETRIEVE.endsWith(operationName))) {
+            throw new ApplicationAuthenticationException(UserSetI18nConstants.LOCKED_MAINTENANCE, UserSetI18nConstants.LOCKED_MAINTENANCE, null, HttpStatus.LOCKED, null);
           }
       } catch (ApiWriteLockException e) {
           throw new ApplicationAuthenticationException(UserSetI18nConstants.LOCKED_MAINTENANCE, UserSetI18nConstants.LOCKED_MAINTENANCE, null,
