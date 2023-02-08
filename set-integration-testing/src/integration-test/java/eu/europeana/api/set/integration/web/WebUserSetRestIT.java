@@ -13,6 +13,7 @@ import java.util.Collections;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -342,9 +343,12 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
   }
-  
+
+  @Disabled("This test tests the lock/unlock api by checking all locked api methods one by one."
+      + "Currently the lock api locks all write methods and the check for locked is added to the verifyWriteAccess"
+      + "which is called upon authorization for all write methods.")
   @Test
-  public void lockUnlockServices() throws Exception {
+  public void lockUnlockServices2() throws Exception {
     //lock the methods
     mockMvc
       .perform(post("/admin/lock")
@@ -491,4 +495,42 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     
     writeLockService.deleteAllLocks();
   }
+  
+  //here we test only the create method (see the comment on the above, disabled, lock test)
+  @Test
+  public void lockUnlockServices() throws Exception {
+    //lock the methods
+    mockMvc
+      .perform(post("/admin/lock")
+        .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isOk());
+    
+    //test create to be locked
+    mockMvc
+      .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        .content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().is(HttpStatus.LOCKED.value()));
+    
+    //unlock the methods
+    mockMvc
+      .perform(post("/admin/unlock")
+        .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isOk()); 
+
+    //test create after unlock
+    String requestJson = getJsonStringInput(USER_SET_REGULAR);
+    mockMvc
+      .perform(
+        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+          .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isCreated());
+    
+    //to leave the clean state in the db since the lock objects are created
+    writeLockService.deleteAllLocks();
+  }
+  
 }
