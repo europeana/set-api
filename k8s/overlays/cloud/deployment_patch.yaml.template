@@ -14,12 +14,16 @@ spec:
         - name: set-api
           imagePullPolicy: Always
           env:
-            - name: CATALINA_OPTS
-              value: "-javaagent:/usr/local/elastic-apm-agent.jar
-                      -Delastic.apm.application_packages=${ELASTIC_APP_PACKAGES}
-                      -Delastic.apm.server_urls=${ELASTIC_APM_SERVERS}
-                      -Delastic.apm.service_name=${APP_NAME}
-                      -Delastic.apm.environment=${K8S_NAMESPACE}"
+            - name: ENV ELASTIC_APM_ENABLED
+              value: '${COLLECT_LOGS}'
+            - name: ELASTIC_APM_APPLICATION_PACKAGES
+              value: '${ELASTIC_APP_PACKAGES}'
+            - name: ELASTIC_APM_SERVER_URLS
+              value: '${ELASTIC_APM_SERVERS}'
+            - name: ELASTIC_APM_SERVICE_NAME
+              value: '${APP_NAME}'
+            - name: ELASTIC_APM_ENVIRONMENT
+              value: '${K8S_NAMESPACE}'
           resources:
             requests:
               memory: "${MEMORY_REQUEST}M"
