@@ -14,7 +14,7 @@ spec:
         - name: set-api
           imagePullPolicy: Always
           env:
-            - name: ENV ELASTIC_APM_ENABLED
+            - name: ELASTIC_APM_ENABLED
               value: '${COLLECT_LOGS}'
             - name: ELASTIC_APM_APPLICATION_PACKAGES
               value: '${ELASTIC_APP_PACKAGES}'
