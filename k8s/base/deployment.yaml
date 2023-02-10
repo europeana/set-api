@@ -28,6 +28,7 @@ spec:
           periodSeconds: 30
         env:
           - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+            #spring searches automatically in config subfolders
             value: "file:/opt/app/"
         volumeMounts:
           - name: app-properties
