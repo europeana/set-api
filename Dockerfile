@@ -1,5 +1,7 @@
 # Builds a docker image from a locally built Maven war. Requires 'mvn package' to have been run beforehand
-FROM openjdk:11-jre-slim
+# when needed the image can be switched from jre to jdk, but the jdk has about 200MB
+#FROM eclipse-temurin:11-jdk-alpine
+FROM eclipse-temurin:11-jre-alpine
 LABEL Author="Europeana Foundation <development@europeana.eu>"
 
 # Configure APM and add APM agent
