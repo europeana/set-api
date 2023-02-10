@@ -12,4 +12,4 @@ ADD https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/$ELASTIC_APM
 
 COPY ./set-web/target/set-web-executable.jar /opt/app/set-web-executable.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-cp", "/opt/app/config", "-jar", "/opt/app/set-web-executable.jar", "--spring.config.name=set.common,set.user"]
+ENTRYPOINT ["java", "-cp", "/opt/app/config/", "-jar", "/opt/app/set-web-executable.jar", "--spring.config.name=set.common,set.user" , "--spring.config.additional-location=file:/opt/app/config/"]
