@@ -29,11 +29,11 @@ spec:
               memory: "${MEMORY_LIMIT}M"
               cpu: "${CPU_LIMIT}m"
           volumeMounts:
-            - name: ibm-certficate
+            - name: ibm-certificate
               mountPath: "/opt/app/config/ibm-databases-truststore.jks"
               readOnly: true
               subPath: ibm-databases-truststore.jks
       volumes:
-      - name: ibm-certficate
+      - name: ibm-certificate
         secret:
-          secretName: set-api-properties              
+          secretName: ibm-secret              
