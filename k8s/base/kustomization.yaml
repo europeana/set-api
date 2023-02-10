@@ -6,6 +6,6 @@ commonLabels:
 
 # expects files to be in the same directory
 secretGenerator:
-  - name: set-api-secret
+  - name: set-api-properties
     files:
       - set.user.properties
