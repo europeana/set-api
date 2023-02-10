@@ -26,12 +26,15 @@ spec:
             path: /actuator/health/readiness
           initialDelaySeconds: 30
           periodSeconds: 30
+        env:
+          - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+            value: "file:/opt/app/config/"
         volumeMounts:
-          - name: secret
-            mountPath: "/config/set.user.properties"
+          - name: app-properties
+            mountPath: "/opt/app/config/set.user.properties"
             readOnly: true
             subPath: set.user.properties
       volumes:
-      - name: secret
+      - name: app-properties
         secret:
-          secretName: set-api-secret
+          secretName: set-api-properties

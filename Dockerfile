@@ -6,8 +6,8 @@ LABEL Author="Europeana Foundation <development@europeana.eu>"
 ENV ELASTIC_APM_VERSION 1.34.1
 #disabled by default, to be enabled by kustomize/build params for specific servers only
 ENV ELASTIC_APM_ENABLED false
-ADD https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/$ELASTIC_APM_VERSION/elastic-apm-agent-$ELASTIC_APM_VERSION.jar  /app/elastic-apm-agent.jar
+ADD https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/$ELASTIC_APM_VERSION/elastic-apm-agent-$ELASTIC_APM_VERSION.jar  /opt/app/elastic-apm-agent.jar
 
-COPY ./set-web/target/set-web-executable.jar /app/set-web-executable.jar
+COPY ./set-web/target/set-web-executable.jar /opt/app/set-web-executable.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-javaagent:/app/elastic-apm-agent.jar", "-jar", "/app/set-web-executable.jar", "--spring.config.name=set.common,set.user", "--spring.config.additional-location=./config/"]
+ENTRYPOINT ["java", "-jar", "/opt/app/set-web-executable.jar", "--spring.config.name=set.common,set.user"]
