@@ -33,7 +33,4 @@ spec:
               mountPath: "/opt/app/config/ibm-databases-truststore.jks"
               readOnly: true
               subPath: ibm-databases-truststore.jks
-      volumes:
-        - name: ibm-certificate
-          secret:
-            secretName: ibm-secret   
+ 
