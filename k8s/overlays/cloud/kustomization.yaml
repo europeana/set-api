@@ -4,6 +4,9 @@ resources:
   - ingress.yaml
   - hpa.yaml
 
+commonLabels:
+  app: set-api
+
 patchesStrategicMerge:
   - deployment_patch.yaml
   
