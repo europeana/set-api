@@ -40,6 +40,3 @@ spec:
         - name: app-properties
           secret:
             secretName: set-api-properties
-#        - name: ibm-certificate
-#          secret:
-#            secretName: ibm-secret      
