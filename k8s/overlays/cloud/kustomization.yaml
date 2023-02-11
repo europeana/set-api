@@ -6,8 +6,3 @@ resources:
 
 patchesStrategicMerge:
   - deployment_patch.yaml
-
-secretGenerator:
-  - name: ibm-secret
-    files:
-      - ibm-databases-truststore.jks
