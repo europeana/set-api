@@ -36,14 +36,7 @@ spec:
             mountPath: "/opt/app/config/set.user.properties"
             readOnly: true
             subPath: set.user.properties
-          - name: ibm-certificate
-            mountPath: "/opt/app/config/ibm-databases-truststore.jks"
-            readOnly: true
-            subPath: ibm-databases-truststore.jks
       volumes:
         - name: app-properties
           secret:
             secretName: set-api-properties
-        - name: ibm-certificate
-          secret:
-            secretName: ibm-secret   

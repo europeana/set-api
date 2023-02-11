@@ -9,6 +9,3 @@ secretGenerator:
   - name: set-api-properties
     files:
       - set.user.properties
-  - name: ibm-secret
-    files:
-      - ibm-databases-truststore.jks
