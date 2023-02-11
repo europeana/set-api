@@ -4,9 +4,9 @@ metadata:
   name: set-api-deployment
 spec:
   # selector.matchLabels is provided via Kustomize
-  selector:
-    matchLabels:
-      app: set-api
+  #selector:
+  #  matchLabels:
+  #    app: set-api
   template:
     spec:
       containers:
