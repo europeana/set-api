@@ -8,8 +8,7 @@ public interface SetOperations extends Operations {
   String PUBLISH = "publish";
   
   //admin
-  String WRITE_LOCK = "write_lock";
-  String WRITE_UNLOCK = "write_unlock";
-  String ADMIN_REINDEX = "admin_reindex"; 
+//  String WRITE_UNLOCK = "write_unlock";
+//  String ADMIN_REINDEX = "admin_reindex"; 
 
 }

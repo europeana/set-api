@@ -303,6 +303,9 @@ public class BaseRest extends BaseRestController {
     public Authentication verifyWriteAccess(String operation, HttpServletRequest request)
         throws ApplicationAuthenticationException {
 
+      // prevent write operations when the application is locked
+      getAuthorizationService().checkWriteLockInEffect(operation);
+
       Authentication auth = null;
       //verify if auth is enabled
       if (getConfiguration().isAuthEnabled()) {
@@ -311,12 +314,6 @@ public class BaseRest extends BaseRestController {
         auth = authorizeByPlainTextToken(operation,request);
       }
       
-      // prevent write when locked
-      getAuthorizationService().checkWriteLockInEffect(operation);
-
-      // prevent write when locked
-      //TODO: functionality to be implemented
-//      getAuthorizationService().checkWriteLockInEffect(operation);
       return auth;
     }
 

@@ -9,7 +9,7 @@ public enum Roles implements Role {
 	USER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
 	EDITOR(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
 	PUBLISHER(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, SetOperations.PUBLISH}),
-	ADMIN(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, SetOperations.PUBLISH, Operations.ADMIN_ALL, SetOperations.ADMIN_REINDEX, SetOperations.WRITE_LOCK, SetOperations.WRITE_UNLOCK});
+	ADMIN(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, SetOperations.PUBLISH, Operations.ADMIN_ALL, Operations.WRITE_LOCK});
 	
 	String[] operations;
 	

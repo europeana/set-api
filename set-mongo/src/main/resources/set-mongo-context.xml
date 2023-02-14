@@ -14,8 +14,6 @@
 	<import resource="classpath:set-common-context.xml"/>
 	
 	<!-- INTERNAL DEFINITIONS -->
-	<import resource="classpath:internal/set-mongo-datasource.xml"/>
-	<import resource="classpath:internal/set-mongo-beans.xml"/>
 	<import resource="classpath:internal/set-mongo-dao.xml"/>
 	
 	<context:annotation-config/>
@@ -24,7 +22,7 @@
 		p:dao-ref="set_db_setDao">
 	</bean>
 	
-	<bean name="set_db_apilockService" class="eu.europeana.set.mongo.service.PersistentApiWriteLockServiceImpl"
+	<bean name="set_db_apilockService" class="eu.europeana.api.commons.nosql.service.impl.ApiWriteLockServiceImpl"
 		p:dao-ref="set_db_lockDao"/>
 	
 					

@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
+import eu.europeana.api.commons.nosql.entity.ApiWriteLock;
+import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api2.utils.JsonWebUtils;
-import eu.europeana.set.definitions.exception.ApiWriteLockException;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
-import eu.europeana.set.mongo.model.internal.PersistentApiWriteLock;
-import eu.europeana.set.mongo.service.PersistentApiWriteLockService;
 import eu.europeana.set.web.model.SetOperationResponse;
 import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
@@ -28,9 +28,9 @@ public class AdminRest extends BaseRest {
   Logger adminLogger = LogManager.getLogger(getClass());
   
   @Resource(name = "set_db_apilockService")
-  private PersistentApiWriteLockService writeLockService; 
+  private ApiWriteLockService writeLockService; 
   
-  public PersistentApiWriteLockService getApiWriteLockService() {
+  public ApiWriteLockService getApiWriteLockService() {
   return writeLockService;
   }
   
@@ -44,11 +44,11 @@ public class AdminRest extends BaseRest {
   
     // get last active lock check if start date is correct and end date does
     // not exist
-    PersistentApiWriteLock activeLock = getApiWriteLockService().getLastActiveLock(WebUserSetModelFields.LOCK_WRITE_NAME);
+    ApiWriteLock activeLock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
     //if already locked, an exception is thrown in verifyWriteAccess
     boolean isLocked = false;
     if(activeLock == null) {
-        activeLock = getApiWriteLockService().lock(WebUserSetModelFields.LOCK_WRITE_NAME);
+        activeLock = getApiWriteLockService().lock(ApiWriteLock.LOCK_WRITE_TYPE);
     } 
     
     isLocked = isLocked(activeLock);
@@ -65,7 +65,7 @@ public class AdminRest extends BaseRest {
     return buildResponse(jsonStr, httpStatus);
   }
 
-  private boolean isLocked(PersistentApiWriteLock activeLock) {
+  private boolean isLocked(ApiWriteLock activeLock) {
     return activeLock != null && activeLock.getStarted() != null && activeLock.getEnded() == null;
   }
 
@@ -80,10 +80,10 @@ public class AdminRest extends BaseRest {
     SetOperationResponse response;
     response = new SetOperationResponse("admin", "/admin/unlock");
   
-    PersistentApiWriteLock activeLock = getApiWriteLockService().getLastActiveLock(WebUserSetModelFields.LOCK_WRITE_NAME);
-    if (activeLock != null && activeLock.getEnded() == null && WebUserSetModelFields.LOCK_WRITE_NAME.equals(activeLock.getName())) {
+    ApiWriteLock activeLock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
+    if (activeLock != null && activeLock.getEnded() == null && ApiWriteLock.LOCK_WRITE_TYPE.equals(activeLock.getName())) {
         getApiWriteLockService().unlock(activeLock);
-        PersistentApiWriteLock lock = getApiWriteLockService().getLastActiveLock(WebUserSetModelFields.LOCK_WRITE_NAME);
+        ApiWriteLock lock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
         if (lock == null) {
         response.setStatus("Server is now unlocked for changes");
         response.success = true;

@@ -7,14 +7,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
 import eu.europeana.api.commons.definitions.vocabulary.Role;
+import eu.europeana.api.commons.nosql.entity.ApiWriteLock;
+import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
-import eu.europeana.set.definitions.exception.ApiWriteLockException;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
-import eu.europeana.set.mongo.model.internal.PersistentApiWriteLock;
-import eu.europeana.set.mongo.service.PersistentApiWriteLockService;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.set.web.model.vocabulary.Roles;
@@ -32,9 +31,9 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
     ClientDetailsService clientDetailsService;
 
     @Resource(name = "set_db_apilockService")
-    private PersistentApiWriteLockService apiWriteLockService;
+    private ApiWriteLockService apiWriteLockService;
 
-    public PersistentApiWriteLockService getPersistentIndexingJobService() {
+    public ApiWriteLockService getApiWriteLockService() {
     return apiWriteLockService;
     }
     
@@ -72,22 +71,27 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
     }
    
     /**
-     * Check if a write lock is in effect. Returns HttpStatus.LOCKED for change
-     * operations in case the write lock is active.
+     * Check if a write lock is in effect. Returns HttpStatus.LOCKED in case the write lock is active.
+     * To be used for preventing access to the write operations when the application is locked
      * 
      * @param userToken
      * @param operationName
      * @throws UserAuthorizationException
      */
     public void checkWriteLockInEffect(String operationName) throws ApplicationAuthenticationException {
-      PersistentApiWriteLock runningJob;
+      ApiWriteLock activeWriteLock;
       try {
-          runningJob = getPersistentIndexingJobService().getLastActiveLock(WebUserSetModelFields.LOCK_WRITE_NAME);
+          activeWriteLock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
           // refuse operation if a write lock is effective (allow only unlock and retrieve
           // operations)
-          if (runningJob!=null && runningJob.getEnded()==null
-              && WebUserSetModelFields.LOCK_WRITE_NAME.equals(runningJob.getName())
-              && !(SetOperations.WRITE_UNLOCK.equals(operationName) || SetOperations.ADMIN_REINDEX.equals(operationName) || SetOperations.RETRIEVE.endsWith(operationName))) {
+          if (activeWriteLock == null){
+            //the application is not locked
+            return;
+          }
+          
+          if(!SetOperations.WRITE_UNLOCK.equals(operationName)) {
+            // unlock operation should be permitted when the application is locked
+            //activeWriteLock.getEnded()==null
             throw new ApplicationAuthenticationException(UserSetI18nConstants.LOCKED_MAINTENANCE, UserSetI18nConstants.LOCKED_MAINTENANCE, null, HttpStatus.LOCKED, null);
           }
       } catch (ApiWriteLockException e) {
