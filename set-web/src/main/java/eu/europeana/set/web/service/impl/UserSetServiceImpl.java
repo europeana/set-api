@@ -40,6 +40,7 @@ import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.config.UserSetI18nConstants;
+import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -229,9 +230,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * java.lang.String, eu.europeana.set.definitions.model.UserSet)
    */
   public UserSet insertItem(String datasetId, String localId, String position,
-      UserSet existingUserSet) throws ApplicationAuthenticationException {
+      UserSet existingUserSet) throws ApplicationAuthenticationException, ItemValidationException {
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
+    validateItem(newItem);
     // check if the position is "pin" and is a EntityBestItem set then
     // insert the item at the 0 positio
     UserSet userSet;
@@ -417,7 +419,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           total = userSet.getItems().size();
         }
         List<String> sortedItemDescriptions =
-            sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);
+            sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);        
         setItems(userSet, sortedItemDescriptions, total);
       }
       return userSet;

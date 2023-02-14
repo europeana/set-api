@@ -78,6 +78,7 @@ public abstract class BaseUserSetTestUtils {
   public static final String USER_SET_BOOKMARK_FOLDER = "/content/userset_bookmark_folder.json";
   public static final String USER_SET_BOOKMARK_FOLDER_1 = "/content/userset_bookmark_folder_1.json";
   public static final String USER_SET_BEST_ITEMS = "/content/userset_entity_best_items.json";
+  public static final String USER_SET_INVALID_ITEMS = "/content/userset_invalid_items.json";
   public static final String UPDATED_USER_SET_CONTENT = "/content/updated_regular.json";
   public static final String ENTITY_USER_SET_REGULAR = "/content/entity_userset.json";
   public static final String ENTITY_USER_SET_PROVIDER_ID =
