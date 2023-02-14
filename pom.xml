@@ -6,7 +6,7 @@
 	<artifactId>set-api</artifactId>
 	<version>${revision}</version>
 	<packaging>pom</packaging>
-	<name>Europeana  (User) Sets API parent</name>
+	<name>User sets API</name>
 	<description>User Sets API - API for curating collections by end users</description>
 
 	<modules>

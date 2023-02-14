@@ -1,0 +1,5 @@
+# Send only unzipped war directory to Docker
+**
+!/set-web/target/
+*.user.properties
+*.properties
