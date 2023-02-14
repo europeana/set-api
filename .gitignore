@@ -18,6 +18,7 @@ hs_err_pid*
 **/log4j2.xml
 **/*.bk
 **/*.user.properties
+**/*.jks
 
 #IntelliJ project files
 .idea
