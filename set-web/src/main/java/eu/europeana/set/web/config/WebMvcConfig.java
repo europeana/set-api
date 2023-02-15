@@ -50,7 +50,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
             HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
+    //lock/unlock
+    registry.addMapping("/set/admin/lock").allowedOrigins("*").allowedMethods("POST", "DELETE")
+    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW)
+    .allowCredentials(false).maxAge(600L); // in seconds
 
+    
     // publish/unpublish
     registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
         .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, 

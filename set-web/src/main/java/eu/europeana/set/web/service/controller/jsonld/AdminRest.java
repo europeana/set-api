@@ -76,7 +76,7 @@ public class AdminRest extends BaseRest {
     verifyWriteAccess(Operations.WRITE_UNLOCK, request);
   
     SetOperationResponse response;
-    response = new SetOperationResponse("admin", "/set/admin/unlock");
+    response = new SetOperationResponse("admin", "/set/admin/lock");
   
     ApiWriteLock activeLock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
     if (activeLock != null && activeLock.getEnded() == null && ApiWriteLock.LOCK_WRITE_TYPE.equals(activeLock.getName())) {
