@@ -65,39 +65,4 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
 	return getConfiguration().getAuthorizationApiName();
     }
     
-    public Authentication checkPermissions(Authentication authentication,
-        String operation) throws ApplicationAuthenticationException{
-      return super.checkPermissions(List.of(authentication), getApiName(), operation);
-    }
-   
-    /**
-     * Check if a write lock is in effect. Returns HttpStatus.LOCKED in case the write lock is active.
-     * To be used for preventing access to the write operations when the application is locked
-     * 
-     * @param userToken
-     * @param operationName
-     * @throws UserAuthorizationException
-     */
-    public void checkWriteLockInEffect(String operationName) throws ApplicationAuthenticationException {
-      ApiWriteLock activeWriteLock;
-      try {
-          activeWriteLock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
-          // refuse operation if a write lock is effective (allow only unlock and retrieve
-          // operations)
-          if (activeWriteLock == null){
-            //the application is not locked
-            return;
-          }
-          
-          if(!SetOperations.WRITE_UNLOCK.equals(operationName)) {
-            // unlock operation should be permitted when the application is locked
-            //activeWriteLock.getEnded()==null
-            throw new ApplicationAuthenticationException(UserSetI18nConstants.LOCKED_MAINTENANCE, UserSetI18nConstants.LOCKED_MAINTENANCE, null, HttpStatus.LOCKED, null);
-          }
-      } catch (ApiWriteLockException e) {
-          throw new ApplicationAuthenticationException(UserSetI18nConstants.LOCKED_MAINTENANCE, UserSetI18nConstants.LOCKED_MAINTENANCE, null,
-              HttpStatus.LOCKED, e);
-      }
-    }
-    
 }
