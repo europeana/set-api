@@ -2,4 +2,5 @@
 **
 !/set-web/target/
 **/*.user.properties
-*.properties
+**/*.properties
+**/*.jks
