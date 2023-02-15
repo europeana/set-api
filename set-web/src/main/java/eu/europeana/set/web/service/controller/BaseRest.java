@@ -25,6 +25,8 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import static eu.europeana.api.commons.web.http.HttpHeaders.*;
+
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
@@ -186,7 +188,7 @@ public class BaseRest extends BaseRestController {
     public LdProfiles getHeaderProfile(HttpServletRequest request) throws HttpException {
 
         LdProfiles profile = null;
-        String preferHeader = request.getHeader(HttpHeaders.PREFER);
+        String preferHeader = request.getHeader(PREFER);
         if (preferHeader != null) {
             // identify profile by prefer header
             // retrieve profile if provided within the "If-Match" HTTP
@@ -201,10 +203,10 @@ public class BaseRest extends BaseRestController {
                     profile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
                 } catch (UserSetProfileValidationException e) {
                     throw new HttpException(UserSetI18nConstants.INVALID_HEADER_VALUE, UserSetI18nConstants.INVALID_HEADER_VALUE,
-                            new String[]{HttpHeaders.PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
+                            new String[]{PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
                 } catch (RuntimeException e) {
                     throw new HttpException(UserSetI18nConstants.INVALID_HEADER_FORMAT, UserSetI18nConstants.INVALID_HEADER_FORMAT,
-                            new String[]{HttpHeaders.PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
+                            new String[]{PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
                 }
             }
             getLogger().debug("Profile identified by prefer header: {} ", profile);
@@ -288,13 +290,13 @@ public class BaseRest extends BaseRestController {
 
 	// build response
 	MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-	headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-	headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
+	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+	headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
+	headers.add(VARY, PREFER);
 	headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
 	// generate “ETag”;
-	headers.add(UserSetHttpHeaders.ETAG, etag);
+	headers.add(ETAG, etag);
 
 	return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
     }
@@ -321,7 +323,7 @@ public class BaseRest extends BaseRestController {
       
       Authentication auth = null; 
       try {
-        auth = UserSetAuthorizationUtils.createAuthentication(request.getHeader(HttpHeaders.AUTHORIZATION));
+        auth = UserSetAuthorizationUtils.createAuthentication(request.getHeader(AUTHORIZATION));
         auth = ((UserSetAuthorizationServiceImpl) getAuthorizationService()).checkPermissions(auth, operation);
       } catch (AuthorizationExtractionException e) {
         throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(), I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {operation}, HttpStatus.UNAUTHORIZED, e);
@@ -331,7 +333,7 @@ public class BaseRest extends BaseRestController {
 
     @Override
     public Authentication verifyReadAccess(HttpServletRequest request) throws ApplicationAuthenticationException {
-      final boolean hasToken = request.getHeader(HttpHeaders.AUTHORIZATION) != null;
+      final boolean hasToken = request.getHeader(AUTHORIZATION) != null;
       //verify if auth is enabled
       if(getConfiguration().isAuthEnabled() || !hasToken) {
         //regular authorization procedure
@@ -344,9 +346,9 @@ public class BaseRest extends BaseRestController {
     
     protected ResponseEntity<String> buildResponse(String jsonStr, HttpStatus httpStatus) {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-      headers.add(HttpHeaders.ETAG, Integer.toString(hashCode()));
-      headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+      headers.add(VARY, ACCEPT);
+      headers.add(ETAG, Integer.toString(hashCode()));
+      headers.add(ALLOW, ALLOW_GET);
 
       return new ResponseEntity<>(jsonStr, headers, httpStatus);
     }

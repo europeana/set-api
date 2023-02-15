@@ -1,23 +1,14 @@
 package eu.europeana.set.web.service.authorization;
 
-import java.util.List;
 import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
 import eu.europeana.api.commons.definitions.vocabulary.Role;
-import eu.europeana.api.commons.nosql.entity.ApiWriteLock;
 import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
-import eu.europeana.set.web.config.UserSetI18nConstants;
-import eu.europeana.set.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.set.web.model.vocabulary.Roles;
-import eu.europeana.set.web.model.vocabulary.SetOperations;
 
 @SuppressWarnings("deprecation")
 public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService implements UserSetAuthorizationService {

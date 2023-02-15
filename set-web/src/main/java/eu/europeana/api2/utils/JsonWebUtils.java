@@ -14,8 +14,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JsonWebUtils {
 	
-	private static final Logger log = LogManager.getLogger(JsonWebUtils.class);
+	private static final String SEE_ERROR_LOGS = " See error logs!";
+  private static final Logger log = LogManager.getLogger(JsonWebUtils.class);
 	private static ObjectMapper objectMapper = new ObjectMapper();	
+	
+	/**
+	 * Hide default contructor
+	 */
+	private JsonWebUtils() {}
 	
 	public static String toJson(Object object) {
 		return toJson(object, false, -1);
@@ -35,14 +41,14 @@ public class JsonWebUtils {
 			}
 			return jsonStr;
 		} catch (JsonGenerationException e) {
-			log.error("Json Generation Exception: " + e.getMessage(),e);
-			errorMessage = "Json Generation Exception: " + e.getMessage() + " See error logs!";
+			errorMessage = "Json Generation Exception: " + e.getMessage() + SEE_ERROR_LOGS;
+			log.warn(errorMessage,e);
 		} catch (JsonMappingException e) {
-			log.error("Json Mapping Exception: " + e.getMessage(),e);
-			errorMessage = "Json Mapping Exception: " + e.getMessage() + " See error logs!";
+			errorMessage = "Json Mapping Exception: " + e.getMessage() + SEE_ERROR_LOGS;
+			log.warn(errorMessage,e);
 		} catch (IOException e) {
-			log.error("I/O Exception: " + e.getMessage(),e);
-			errorMessage = "I/O Exception: " + e.getMessage() + " See error logs!";
+			errorMessage = "I/O Exception: " + e.getMessage() + SEE_ERROR_LOGS;
+			log.warn(errorMessage,e);
 		}
 		return errorMessage;
 	}
