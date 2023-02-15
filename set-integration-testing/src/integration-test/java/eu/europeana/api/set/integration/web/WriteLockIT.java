@@ -1,5 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -55,12 +56,16 @@ public class WriteLockIT extends BaseUserSetTestUtils {
    * remove locks after each test to avoid cascading effect for test failures
    * @throws ApiWriteLockException
    */
-  void removeAllLocks() throws ApiWriteLockException {
+  protected void removeAllLocks() throws ApiWriteLockException {
     writeLockService.deleteAllLocks();
+  }
+  
+  @AfterEach
+  protected void deleteCreatedSets() {
+    super.deleteCreatedSets();
   }
 
   // Update user set Tests
-
 //  @Disabled("This test is checking the locking for all write operations, but it is too expensive, can be manually enabled to test releases")
   @Test
   /**
@@ -76,14 +81,14 @@ public class WriteLockIT extends BaseUserSetTestUtils {
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk());
     
-    //test create to be locked
+    //test create should fail with status locked
     mockMvc
       .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
         .content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
 
-    //test update to be locked
+    //test update should fail with status locked
     mockMvc
       .perform(put(BASE_URL + "{identifier}", "1")
         .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -91,20 +96,20 @@ public class WriteLockIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
 
-    //test delete single set to be locked
+    //test delete single should fail with status locked
     mockMvc
       .perform(delete(BASE_URL + "{identifier}", "1")
         .header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
     
-    //test delete all to be locked
+    //test delete all should fail with status locked
     mockMvc
       .perform(delete(BASE_URL).header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
     
-    //test insert item to be locked
+    //test insert item should fail with status locked
     mockMvc
       .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", "1", "01", "123_test")
         .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
@@ -112,7 +117,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
 
-    //test delete item to be locked
+    //test delete item should fail with status locked
     mockMvc
     .perform(
         delete(BASE_URL + "{identifier}/{datasetId}/{localId}", "1", "01", "123_test")
@@ -121,7 +126,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
     .andExpect(status().is(HttpStatus.LOCKED.value()));
 
-    //test publish set to be locked
+    //test publish should fail with status locked
     mockMvc
       .perform(MockMvcRequestBuilders.put(BASE_URL + "1" + "/publish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -129,7 +134,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
         .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
 
-    //test unpublish set to be locked
+    //test unpublish should fail with status locked
     mockMvc
       .perform(MockMvcRequestBuilders.put(BASE_URL + "1" + "/unpublish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -137,7 +142,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
         .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
     
-    //unlock the methods
+    //unlock write operations methods
     mockMvc
       .perform(post("/admin/unlock")
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
@@ -146,12 +151,15 @@ public class WriteLockIT extends BaseUserSetTestUtils {
 
     //test create after unlock
     String requestJson = getJsonStringInput(USER_SET_REGULAR);
-    mockMvc
+    String result = mockMvc
       .perform(
         post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
           .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-      .andExpect(status().isCreated());
+      .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+    String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+    assertNotNull(identifier);
+    addToCreatedSets(identifier);
     
     //test update after unlock
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
