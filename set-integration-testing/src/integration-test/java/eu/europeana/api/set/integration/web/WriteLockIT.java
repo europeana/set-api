@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import javax.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -52,13 +53,20 @@ public class WriteLockIT extends BaseUserSetTestUtils {
   }
 
   
-  
-  @AfterEach
   /**
    * remove locks after each test to avoid cascading effect for test failures
    * @throws ApiWriteLockException
    */
+  @BeforeEach
+  protected void removeLock() throws ApiWriteLockException{
+    writeLockService.deleteAllLocks();
+  }
   
+  /**
+   * remove locks after each test to avoid cascading effect for test failures
+   * @throws ApiWriteLockException
+   */
+  @AfterEach
   protected void removeLockAndSets() throws ApiWriteLockException{
     writeLockService.deleteAllLocks();
     super.deleteCreatedSets();
