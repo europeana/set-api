@@ -1,5 +1,13 @@
 package eu.europeana.set.web.service.controller;
 
+import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW;
+import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_GET;
+import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
+import static eu.europeana.api.commons.web.http.HttpHeaders.PREFER;
+import static javax.ws.rs.core.HttpHeaders.ACCEPT;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static javax.ws.rs.core.HttpHeaders.ETAG;
+import static javax.ws.rs.core.HttpHeaders.VARY;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +32,6 @@ import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import static eu.europeana.api.commons.web.http.HttpHeaders.*;
-
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;

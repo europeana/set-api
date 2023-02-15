@@ -13,9 +13,9 @@ import eu.europeana.api.commons.nosql.entity.ApiWriteLock;
 import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.api2.utils.JsonWebUtils;
 import eu.europeana.set.web.model.SetOperationResponse;
-import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,7 +39,7 @@ public class AdminRest extends BaseRest {
   public ResponseEntity<String> lockWriteOperations(
       HttpServletRequest request) throws HttpException, ApiWriteLockException {
 
-    verifyWriteAccess(SetOperations.WRITE_LOCK, request);
+    verifyWriteAccess(Operations.WRITE_LOCK, request);
   
     // get last active lock check if start date is correct and end date does
     // not exist
@@ -57,10 +57,14 @@ public class AdminRest extends BaseRest {
   
     response.setStatus(isLocked ? "Server is now locked for changes" : "Unable to set lock");
     response.success = isLocked;
+    
+    if(adminLogger.isInfoEnabled()) {
+      adminLogger.info("Lock write operations result: {}", response.getStatus());
+    }
   
     String jsonStr = JsonWebUtils.toJson(response);
     HttpStatus httpStatus = response.success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
-    adminLogger.info("Lock write operations result: " + jsonStr + "(HTTP status: " + httpStatus.toString() + ")");
+    
     return buildResponse(jsonStr, httpStatus);
   }
 
@@ -74,7 +78,7 @@ public class AdminRest extends BaseRest {
   public ResponseEntity<String> unlockWriteOperations(
       HttpServletRequest request) throws HttpException, ApiWriteLockException {
 
-    verifyWriteAccess(SetOperations.WRITE_UNLOCK, request);
+    verifyWriteAccess(Operations.WRITE_UNLOCK, request);
   
     SetOperationResponse response;
     response = new SetOperationResponse("admin", "/admin/unlock");
@@ -84,20 +88,23 @@ public class AdminRest extends BaseRest {
         getApiWriteLockService().unlock(activeLock);
         ApiWriteLock lock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
         if (lock == null) {
-        response.setStatus("Server is now unlocked for changes");
-        response.success = true;
+          response.setStatus("Server is now unlocked for changes");
+          response.success = true;
         } else {
-        response.setStatus("Unlocking write operations failed");
-        response.success = false;
+          response.setStatus("Unlocking write operations failed");
+          response.success = false;
         }
     } else {
         response.setStatus("No write lock in effect (remains unlocked)");
         response.success = true;
     }
+    
+    if(adminLogger.isInfoEnabled()) {
+      adminLogger.info("Unlock write operations result: {}", response.getStatus());
+    }
   
     String jsonStr = JsonWebUtils.toJson(response);
     HttpStatus httpStatus = response.success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
-    adminLogger.info("Unlock write operations result: " + jsonStr + "(HTTP status: " + httpStatus.toString() + ")");
     return buildResponse(jsonStr, httpStatus);
   }
 
