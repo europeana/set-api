@@ -259,4 +259,21 @@ public class WriteLockIT extends BaseUserSetTestUtils {
     addToCreatedSets(identifier);
   }
   
+  @Test
+  void testlockApiWriteResponse() throws Exception {
+    //lock the methods
+    mockMvc
+      .perform(post(BASE_URL + "admin/lock")
+        .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isOk());
+    
+    mockMvc
+    .perform(post(BASE_URL + "admin/lock")
+      .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+      .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+    .andExpect(status().isLocked());
+  }
+ 
+  
 }
