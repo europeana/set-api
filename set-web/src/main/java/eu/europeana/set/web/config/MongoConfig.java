@@ -30,13 +30,13 @@ public class MongoConfig {
   @Value("${mongodb.set.truststorepass:}")
   private String mongoTrustStorePass;
 
-  private static final String MODEL_PACKAGE = "eu.europeana.set.definitions";
+  private static final String[] MODEL_PACKAGES = new String[]{"eu.europeana.set.definitions", "eu.europeana.api.commons.nosql.entity"};
   
   private ApiMongoConnector mongoConnector;
   
   @Bean(UserSetConfiguration.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {
-    return getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGE );
+    return getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
   }
 
   @Bean("annotationMongoConnector")

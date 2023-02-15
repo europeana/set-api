@@ -200,7 +200,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @param position The given position
    * @param items The item list
    * @return position The validated position in list to insert
-   * @throws ApplicationAuthenticationException
+   * @throws ApplicationAuthorizationException
    */
   int validatePosition(String position, List<String> items, int pinnedItems) {
     int positionInt = -1;

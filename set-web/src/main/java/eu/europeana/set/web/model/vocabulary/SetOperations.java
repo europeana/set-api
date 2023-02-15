@@ -5,5 +5,8 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 public interface SetOperations extends Operations {
 
   //publisher
-  public static final String PUBLISH = "publish";
+  String PUBLISH = "publish";
+  
+  //admin
+
 }

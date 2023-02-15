@@ -213,20 +213,20 @@
             		<include>**.properties</include>
             		<include>**.info</include>
             		<include>**.xml</include>
-        </includes>
-        <excludes>
-               		<exclude>**.jks</exclude>
-        </excludes>
-    </resource>
+        		</includes>
+                <excludes>
+               		<exclude>**/*.jks</exclude>
+        		</excludes>
+    		</resource>
     		<resource>
         		<directory>src/main/resources</directory>
         			<filtering>false</filtering>
         		<includes>
-            		<include>*/*.jks</include>
+            		<include>**/*.jks</include>
             		<include>public/**</include>
         		</includes>
     		</resource>
-    </resources>	
+        </resources>	
 		<finalName>${artifactId}</finalName>
 		<!-- plugins -->
 		<plugins>

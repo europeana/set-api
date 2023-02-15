@@ -18,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MvcResult;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -55,6 +54,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     }
     initRegularUserToken();
     initPublisherUserToken();
+    initAdminUserToken();
   }
 
 
@@ -109,7 +109,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==2));
+        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
   }  
   
   @Test
@@ -208,7 +208,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertTrue(((ItemValidationException)result.getResolvedException()).getI18nParams().length==2));
+        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
   }
 
   @Test
@@ -335,4 +335,5 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
   }
+
 }

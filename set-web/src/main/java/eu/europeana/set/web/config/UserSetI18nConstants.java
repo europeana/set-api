@@ -47,4 +47,6 @@ public class UserSetI18nConstants {
     public static final String ENTITY_USER_SET_NOT_FOUND = "error.no_entity_userset_found";
     public static final String ELEVATION_NOT_GENERATED = "error.no_elevation_generated";
     public static final String SEARCH_API_REQUEST_INVALID = "error.userset_validation_search_request_not_valid";
+    
+
 }
