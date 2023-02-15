@@ -75,7 +75,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
   void testLockInEffectForAllWriteMethods() throws Exception {
     //lock the methods
     mockMvc
-      .perform(post("/admin/lock")
+      .perform(post(BASE_URL + "admin/lock")
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk());
@@ -143,7 +143,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
     
     //unlock write operations methods
     mockMvc
-      .perform(post("/admin/unlock")
+      .perform(delete(BASE_URL + "admin/lock")
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk()); 
@@ -227,7 +227,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
   void lockUnlockApiWriteOperations() throws Exception {
     //lock the methods
     mockMvc
-      .perform(post("/admin/lock")
+      .perform(post(BASE_URL + "admin/lock")
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk());
@@ -241,20 +241,22 @@ public class WriteLockIT extends BaseUserSetTestUtils {
     
     //unlock the methods
     mockMvc
-      .perform(post("/admin/unlock")
+      .perform(delete(BASE_URL + "admin/lock")
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk()); 
 
     //test create after unlock
     String requestJson = getJsonStringInput(USER_SET_REGULAR);
-    mockMvc
+    String result = mockMvc
       .perform(
         post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
           .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-      .andExpect(status().isCreated());
-    
+      .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+    String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+    assertNotNull(identifier);
+    addToCreatedSets(identifier);
   }
   
 }
