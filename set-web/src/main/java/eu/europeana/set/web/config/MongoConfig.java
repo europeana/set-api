@@ -2,6 +2,7 @@ package eu.europeana.set.web.config;
 
 import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -16,6 +17,7 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
  * @author StevaneticS
  */
 @Configuration
+@EnableCaching
 @PropertySource(
     value = {"classpath:set.common.properties", "classpath:set.user.properties"},
     ignoreResourceNotFound = true)
