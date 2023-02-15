@@ -51,17 +51,16 @@ public class WriteLockIT extends BaseUserSetTestUtils {
     initAdminUserToken();
   }
 
+  
+  
   @AfterEach
   /**
    * remove locks after each test to avoid cascading effect for test failures
    * @throws ApiWriteLockException
    */
-  protected void removeAllLocks() throws ApiWriteLockException {
-    writeLockService.deleteAllLocks();
-  }
   
-  @AfterEach
-  protected void deleteCreatedSets() {
+  protected void removeLockAndSets() throws ApiWriteLockException{
+    writeLockService.deleteAllLocks();
     super.deleteCreatedSets();
   }
 
@@ -73,7 +72,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
    * Currently the lock api locks all write methods and the check for locked is added to the verifyWriteAccess which is called upon authorization for all write methods.
    * @throws Exception
    */
-  public void lockUnlockServices2() throws Exception {
+  public void testLockInEffectForAllWriteMethods() throws Exception {
     //lock the methods
     mockMvc
       .perform(post("/admin/lock")
@@ -225,7 +224,7 @@ public class WriteLockIT extends BaseUserSetTestUtils {
   
   //here we test only the create method (see the comment on the above, disabled, lock test)
   @Test
-  public void lockUnlockServices() throws Exception {
+  public void lockUnlockApiWriteOperations() throws Exception {
     //lock the methods
     mockMvc
       .perform(post("/admin/lock")
