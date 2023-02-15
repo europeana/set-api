@@ -33,7 +33,7 @@ public class AdminRest extends BaseRest {
   return writeLockService;
   }
   
-  @PostMapping(value = "/admin/lock", produces = { HttpHeaders.CONTENT_TYPE_JSON_UTF8,
+  @PostMapping(value = "/set/admin/lock", produces = { HttpHeaders.CONTENT_TYPE_JSON_UTF8,
       HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
   @ApiOperation(value = "Lock write operations. Authorization required.", nickname = "lockWriteOperations", response = Void.class)
   public ResponseEntity<String> lockWriteOperations(
@@ -72,7 +72,7 @@ public class AdminRest extends BaseRest {
     return activeLock != null && activeLock.getStarted() != null && activeLock.getEnded() == null;
   }
 
-  @PostMapping(value = "/admin/unlock", produces = {
+  @PostMapping(value = "/set/admin/unlock", produces = {
       HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
   @ApiOperation(value = "Unlock write operations", nickname = "unlockWriteOperations", response = Void.class)
   public ResponseEntity<String> unlockWriteOperations(
