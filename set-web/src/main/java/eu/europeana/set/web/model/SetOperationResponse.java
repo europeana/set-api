@@ -11,10 +11,10 @@ import eu.europeana.api.commons.web.model.ApiResponse;
 public class SetOperationResponse extends ApiResponse{
   
     @JsonProperty("since")
-    public Date since;
+    private Date since;
     
     @JsonProperty("end")
-    public Date end;
+    private Date end;
 	
 	public static final String ERROR_NO_OBJECT_FOUND = "No Object Found!";
 	public static final String ERROR_VISIBILITY_CHECK = "This annotation object is marked as not visible!";
@@ -42,5 +42,21 @@ public class SetOperationResponse extends ApiResponse{
 	public String getStatus() {
 	  return super.getStatus();
 	}
+
+    public Date getSince() {
+      return since;
+    }
+
+    public void setSince(Date since) {
+      this.since = since;
+    }
+
+    public Date getEnd() {
+      return end;
+    }
+
+    public void setEnd(Date end) {
+      this.end = end;
+    }
 	
 }
