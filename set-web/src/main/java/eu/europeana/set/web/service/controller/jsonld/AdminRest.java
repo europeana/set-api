@@ -51,6 +51,7 @@ public class AdminRest extends BaseRest {
     response = new SetOperationResponse("admin", "/set/admin/lock");
     response.setStatus(isLocked ? "Server is now locked for changes" : "Unable to set lock");
     response.success = isLocked;
+    response.since=activeLock.getStarted();
     
     if(adminLogger.isInfoEnabled()) {
       adminLogger.info("Lock write operations result: {}", response.getStatus());
@@ -85,6 +86,8 @@ public class AdminRest extends BaseRest {
         if (lock == null) {
           response.setStatus("Server is now unlocked for changes");
           response.success = true;
+          response.since=activeLock.getStarted();
+          response.end=activeLock.getEnded();
         } else {
           response.setStatus("Unlocking write operations failed");
           response.success = false;

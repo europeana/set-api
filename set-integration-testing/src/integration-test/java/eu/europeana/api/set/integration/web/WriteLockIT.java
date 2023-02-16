@@ -1,6 +1,7 @@
 package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -270,17 +271,35 @@ public class WriteLockIT extends BaseUserSetTestUtils {
   @Test
   void testlockApiWriteResponse() throws Exception {
     //lock the methods
-    mockMvc
+    String result = mockMvc
       .perform(post(BASE_URL + "admin/lock")
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-      .andExpect(status().isOk());
+      .andExpect(status().isOk())
+      .andReturn().getResponse().getContentAsString();
+    assertTrue(containsKeyOrValue(result, "action"));
+    assertTrue(containsKeyOrValue(result, "success"));
+    assertTrue(containsKeyOrValue(result, "message"));
+    assertTrue(containsKeyOrValue(result, "since"));
     
     mockMvc
     .perform(post(BASE_URL + "admin/lock")
       .header(HttpHeaders.AUTHORIZATION, adminUserToken)
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
     .andExpect(status().isLocked());
+    
+    //unlock the methods
+    result = mockMvc
+      .perform(delete(BASE_URL + "admin/lock")
+        .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isOk())
+      .andReturn().getResponse().getContentAsString();
+    assertTrue(containsKeyOrValue(result, "action"));
+    assertTrue(containsKeyOrValue(result, "success"));
+    assertTrue(containsKeyOrValue(result, "message"));
+    assertTrue(containsKeyOrValue(result, "since"));
+    assertTrue(containsKeyOrValue(result, "end"));
   }
  
   
