@@ -18,11 +18,10 @@ public class JsonWebUtils {
 	
 	private static final String SEE_ERROR_LOGS = " See error logs!";
     private static final Logger log = LogManager.getLogger(JsonWebUtils.class);
-    private static final String DATE_FORMAT="yyyy-MM-dd'T'HH:mm:ss.SSS";
 	private static ObjectMapper objectMapper;
 	static {
 	  objectMapper = new ObjectMapper();
-      SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+      SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
       objectMapper.setDateFormat(df);	  
 	}
 		
