@@ -27,6 +27,7 @@ import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 
@@ -53,6 +54,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     }
     initRegularUserToken();
     initPublisherUserToken();
+    initAdminUserToken();
   }
 
 
@@ -98,6 +100,18 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
         .andExpect(status().isBadRequest());
   }
 
+  @Test
+  public void create_UserSet_InvalidItems() throws Exception {
+    String requestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
+    mockMvc
+        .perform(
+            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+                .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
+  }  
+  
   @Test
   public void create_UserSet_400_unauthorized_InvalidJWTToken() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_REGULAR);
@@ -180,6 +194,21 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
+  }
+  
+  @Test
+  public void updateUserSet_InvalidItems() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+    String updatedRequestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
+    // update the userset
+    mockMvc
+        .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
   }
 
   @Test
@@ -306,4 +335,5 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
   }
+
 }

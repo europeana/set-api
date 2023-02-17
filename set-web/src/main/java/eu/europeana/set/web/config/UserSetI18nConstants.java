@@ -10,6 +10,7 @@ public class UserSetI18nConstants {
     public static final String USERSET_CANT_PARSE_BODY = "error.userset_cant_parse_body";
     public static final String USERSET_NOT_FOUND      = "error.userset_not_found";
     public static final String USERSET_ITEM_NOT_FOUND = "error.userset_item_not_found";
+    public static final String USERSET_ITEM_INVALID_FORMAT = "error.userset_item_invalid_format";
     public static final String BASE64_DECODING_FAIL   = "error.userset_base64_encoding_fail";
     public static final String UNSUPPORTED_TOKEN_TYPE = "error.userset_unsupported_token_type";
     public static final String INVALID_HEADER_FORMAT  = "error.userset_invalid_header_format";
@@ -46,4 +47,6 @@ public class UserSetI18nConstants {
     public static final String ENTITY_USER_SET_NOT_FOUND = "error.no_entity_userset_found";
     public static final String ELEVATION_NOT_GENERATED = "error.no_elevation_generated";
     public static final String SEARCH_API_REQUEST_INVALID = "error.userset_validation_search_request_not_valid";
+    
+
 }

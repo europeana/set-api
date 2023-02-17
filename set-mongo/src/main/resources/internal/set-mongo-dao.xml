@@ -18,5 +18,9 @@
 		<constructor-arg type="java.lang.Class" value="eu.europeana.set.web.model.WebUserSetImpl" />
 		<constructor-arg ref="set_db_morphia_datastore_set" name="datastore"/>
 	</bean>
+	
+	<bean id="set_db_lockDao" parent="db_nosql_set_dao" class="eu.europeana.api.commons.nosql.dao.impl.ApiWriteLockDaoImpl">
+		<constructor-arg type="java.lang.Class" value="eu.europeana.api.commons.nosql.entity.ApiWriteLockImpl" />
+	</bean>
 			
 </beans>

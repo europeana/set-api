@@ -15,6 +15,7 @@ public class SetIntegrationConfiguration {
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR2 = "oauth.token.request.params.editor2";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET = "oauth.token.request.params.creator.entityset";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_PUBLISHER = "oauth.token.request.params.publisher";
+    protected static final String PROP_OAUTH_REQUEST_PARAMS_ADMIN = "oauth.token.request.params.admin";
 
     private static Properties properties = null;
     private static SetIntegrationConfiguration singleton;
@@ -128,4 +129,9 @@ public class SetIntegrationConfiguration {
     public String getOauthRequestParamsPublisher() {
         return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_PUBLISHER);
     }
+    
+    public String getOauthRequestParamsAdmin() {
+      return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_ADMIN);
+    }
+
 }

@@ -6,11 +6,10 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-
+import eu.europeana.api.commons.nosql.entity.PersistentObject;
 import eu.europeana.set.definitions.model.authentication.Application;
 import eu.europeana.set.definitions.model.authentication.impl.BaseClientImpl;
 import eu.europeana.set.mongo.model.internal.PersistentClient;
-import eu.europeana.set.mongo.model.internal.PersistentObject;
 
 @Entity("client")
 public class PersistentClientImpl extends BaseClientImpl implements PersistentClient, PersistentObject {

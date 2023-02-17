@@ -2,6 +2,7 @@ package eu.europeana.set.web.config;
 
 import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -16,8 +17,9 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
  * @author StevaneticS
  */
 @Configuration
+@EnableCaching
 @PropertySource(
-    value = {"classpath:config/set.common.properties", "classpath:config/set.user.properties"},
+    value = {"classpath:set.common.properties", "classpath:set.user.properties"},
     ignoreResourceNotFound = true)
 public class MongoConfig {
 
@@ -30,13 +32,13 @@ public class MongoConfig {
   @Value("${mongodb.set.truststorepass:}")
   private String mongoTrustStorePass;
 
-  private static final String MODEL_PACKAGE = "eu.europeana.set.definitions";
+  private static final String[] MODEL_PACKAGES = new String[]{"eu.europeana.set.definitions", "eu.europeana.api.commons.nosql.entity"};
   
   private ApiMongoConnector mongoConnector;
   
   @Bean(UserSetConfiguration.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {
-    return getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGE );
+    return getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
   }
 
   @Bean("annotationMongoConnector")
