@@ -552,7 +552,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       }
     }
     if(invalidItems.size()>0) {
-      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, invalidItems.toArray(new String[0]));
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
     }
   }
   

@@ -9,7 +9,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Arrays;
 import java.util.Collections;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -109,7 +111,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
+        .andExpect(result -> assertEquals(2, StringUtils.countMatches(Arrays.toString(((ItemValidationException)result.getResolvedException()).getI18nParams()),"http")));        
   }  
   
   @Test
@@ -208,7 +210,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertEquals(2, ((ItemValidationException)result.getResolvedException()).getI18nParams().length));
+        .andExpect(result -> assertEquals(2, StringUtils.countMatches(Arrays.toString(((ItemValidationException)result.getResolvedException()).getI18nParams()),"http")));
   }
 
   @Test
