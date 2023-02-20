@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,8 @@ import io.swagger.annotations.ApiOperation;
 @SwaggerSelect
 @Api(tags = "Web User Set API")
 public class WebUserSetRest extends BaseRest {
+  
+  private static final String INVALID_RECORD_ID_MESSAGE = "Invalid record identifier. Only alpha-numeric characters and underscore are allowed";
 
   public WebUserSetRest() {
     super();
@@ -425,8 +428,10 @@ public class WebUserSetRest extends BaseRest {
       response = java.lang.Void.class)
   public ResponseEntity<String> insertItemIntoUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
+        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String datasetId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) 
+        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String localId,
       @RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required = false) String position,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
@@ -521,8 +526,10 @@ public class WebUserSetRest extends BaseRest {
   public ResponseEntity<String> isItemInUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
+        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String datasetId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) 
+      @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String localId,
       HttpServletRequest request) throws HttpException {
 
     // check user credentials, if invalid respond with HTTP 401,
@@ -604,8 +611,10 @@ public class WebUserSetRest extends BaseRest {
       nickname = "delete item", response = java.lang.Void.class)
   public ResponseEntity<String> deleteItemFromUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) String datasetId,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) String localId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
+        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String datasetId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) 
+       @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String localId,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
       HttpServletRequest request) throws HttpException {

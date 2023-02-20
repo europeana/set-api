@@ -16,6 +16,8 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.api2.utils.JsonWebUtils;
+import eu.europeana.set.web.config.UserSetI18nConstants;
+import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.model.SetOperationResponse;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.annotations.Api;
@@ -95,8 +97,7 @@ public class AdminRest extends BaseRest {
           response.success = false;
         }
     } else {
-        response.setStatus("No write lock in effect (remains unlocked)");
-        response.success = true;
+      throw new RequestValidationException(UserSetI18nConstants.LOCK_NOT_IN_EFFECT, new String[] {});
     }
     
     if(adminLogger.isInfoEnabled()) {

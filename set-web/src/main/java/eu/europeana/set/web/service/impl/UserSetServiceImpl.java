@@ -231,9 +231,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    */
   public UserSet insertItem(String datasetId, String localId, String position,
       UserSet existingUserSet) throws ApplicationAuthenticationException, ItemValidationException {
+    String itemForPartialValidation = "/" + datasetId + "/" + localId;
+    validateItemPartial(itemForPartialValidation);
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
-    validateItem(newItem);
+
     // check if the position is "pin" and is a EntityBestItem set then
     // insert the item at the 0 positio
     UserSet userSet;

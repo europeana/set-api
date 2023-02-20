@@ -254,6 +254,13 @@ public class WriteLockIT extends BaseUserSetTestUtils {
         .header(HttpHeaders.AUTHORIZATION, adminUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk()); 
+    
+    //unlock already unlocked service
+    mockMvc
+      .perform(delete(BASE_URL + "admin/lock")
+        .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isBadRequest());     
 
     //test create after unlock
     String requestJson = getJsonStringInput(USER_SET_REGULAR);

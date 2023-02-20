@@ -1,7 +1,8 @@
 package eu.europeana.set.web.service.controller;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW;
-import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_GET;
+import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_DELETE;
+import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_POST;
 import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
 import static eu.europeana.api.commons.web.http.HttpHeaders.PREFER;
 import static javax.ws.rs.core.HttpHeaders.ACCEPT;
@@ -353,7 +354,7 @@ public class BaseRest extends BaseRestController {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(VARY, ACCEPT);
       headers.add(ETAG, Integer.toString(hashCode()));
-      headers.add(ALLOW, ALLOW_GET);
+      headers.add(ALLOW, ALLOW_POST + "," + ALLOW_DELETE);
 
       return new ResponseEntity<>(jsonStr, headers, httpStatus);
     }
