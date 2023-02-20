@@ -1,8 +1,6 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -545,7 +543,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     List<String> invalidItems = new ArrayList<>();
     for(String item : items) {
       try {
-        validateItem(item);
+        validateItemWhole(item);
       }
       catch (ItemValidationException ex) {
         invalidItems.add(item);
@@ -556,28 +554,26 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
   
-  protected void validateItem(String item) throws ItemValidationException {
+  protected void validateItemWhole(String item) throws ItemValidationException {
     if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
     }
     else {
       String itemWithoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
-      try {
-        Path pathWithoutBase = Path.of(itemWithoutBase);
-        int nameCount = pathWithoutBase.getNameCount();
-        if(nameCount!=2) {
-          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
-        }
-        String datasetId = pathWithoutBase.getName(0).toString();
-        if(! datasetId.matches("^[a-z0-9]+$")) {
-          throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
-        }
+      if(!itemWithoutBase.startsWith("/")) {
+        itemWithoutBase = "/" + itemWithoutBase;
       }
-      catch (InvalidPathException ex) {
-        //this is used for the validation of the item localId part (baseUrl/datasetId/localId)
-        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item}, ex);
-      }
+      validateItemPartial(itemWithoutBase);
     }
+  }
+  
+  /*
+   * item validation is also implemented in the recommendation-api and can be moved to api-commons
+   */
+  protected void validateItemPartial(String item) throws ItemValidationException {
+     if(! UserSetUtils.EUROPEANA_ID.matcher(item).matches()) {
+       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+     }
   }
   
   public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException,

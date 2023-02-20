@@ -2,6 +2,7 @@ package eu.europeana.set.definitions.model.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -16,6 +17,8 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
  */
 public class UserSetUtils {
 
+    public static final String EUROPEANA_ID_FIELD_REGEX = "^[a-zA-Z0-9_]*$";
+    public static final Pattern EUROPEANA_ID = Pattern.compile("^/[a-zA-Z0-9_]*/[a-zA-Z0-9_]*$");
     /**
      * This method converts string value to Map<String,String> values for given key - language.
      *
