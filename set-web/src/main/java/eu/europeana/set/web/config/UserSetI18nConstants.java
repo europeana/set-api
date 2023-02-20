@@ -48,5 +48,6 @@ public class UserSetI18nConstants {
     public static final String ELEVATION_NOT_GENERATED = "error.no_elevation_generated";
     public static final String SEARCH_API_REQUEST_INVALID = "error.userset_validation_search_request_not_valid";
     
+    public static final String LOCK_NOT_IN_EFFECT = "error.userset_lock_not_in_effect";
 
 }
