@@ -23,6 +23,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
   Map<String, MediaType> mediaTypesMaping = new HashMap<String, MediaType>();
+  
+  private static final MediaType APPLICATION_JSONLD = new MediaType("application", "ld+json");
+  private static final String EXTENSION_JSONLD = "jsonld";
 
   /**
    * Setup CORS for all GET, HEAD and OPTIONS, requests.
@@ -80,9 +83,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // work in future
     // releases
     configurer.favorPathExtension(true);
-
+    
     // use application/ld+json if no Content-Type is specified
-    configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    configurer.defaultContentType(MediaType.valueOf(HttpHeaders.CONTENT_TYPE_JSONLD));
 
     configurer.mediaTypes(getMediaTypesMapping());
   }
@@ -90,6 +93,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
   private Map<String, MediaType> getMediaTypesMapping() {
     if (mediaTypesMaping.isEmpty()) {
       for (MediaType mediaType : supportedMediaTypes) {
+        if(APPLICATION_JSONLD.equals(mediaType)){
+          mediaTypesMaping.put(EXTENSION_JSONLD, mediaType);
+        }
         mediaTypesMaping.put(mediaType.getSubtype(), mediaType);
       }
     }
@@ -108,7 +114,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   private List<MediaType> getSupportedMediaTypes() {
     if (supportedMediaTypes.isEmpty()) {
-      supportedMediaTypes.add(new MediaType("application", "ld+json"));
+      supportedMediaTypes.add(APPLICATION_JSONLD);
       supportedMediaTypes.add(MediaType.APPLICATION_JSON);
       supportedMediaTypes.add(MediaType.APPLICATION_XML);
       supportedMediaTypes.add(MediaType.TEXT_PLAIN);
