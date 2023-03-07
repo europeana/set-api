@@ -2,11 +2,13 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -370,11 +372,13 @@ public class WebUserSetRest extends BaseRest {
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+      @RequestParam(value = WebUserSetFields.REQUEST_PARAM_ISSUED, required = false) 
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date issued,
       HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
-    return publishUnpublishUserSet(identifier, authentication, true, profileStr, request);
+    return publishUnpublishUserSet(identifier, authentication, true, profileStr, issued, request);
   }
 
   @PutMapping(value = {"/set/{identifier}/unpublish"},
@@ -389,15 +393,15 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
-    return publishUnpublishUserSet(identifier, authentication, false, profileStr, request);
+    return publishUnpublishUserSet(identifier, authentication, false, profileStr, null, request);
   }
 
   protected ResponseEntity<String> publishUnpublishUserSet(String identifier,
-      Authentication authentication, boolean publish, String profileStr, HttpServletRequest request)
+      Authentication authentication, boolean publish, String profileStr, Date issued, HttpServletRequest request)
       throws HttpException {
     try {
       UserSet updatedUserSet =
-          getUserSetService().publishUnpublishUserSet(identifier, authentication, publish);
+          getUserSetService().publishUnpublishUserSet(identifier, issued, authentication, publish);
 
       // serialize to JsonLd
       LdProfiles profile = getProfile(profileStr, request);

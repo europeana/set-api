@@ -3,7 +3,6 @@ package eu.europeana.set.definitions.model.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
@@ -79,6 +78,12 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
      * literal expressed as xsd:dateTime with the UTC timezone expressed as "Z".
      */
     private Date modified;
+    
+    /**
+     * The time at which the Set was published, after creation. The value must be a
+     * literal expressed as xsd:dateTime with the UTC timezone expressed as "Z".
+     */
+    private Date issued;    
 
     /**
      * Ordered Collections from Activity Streams For EDM Collection class
@@ -196,6 +201,16 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     @Override
     public void setModified(Date modified) {
 	this.modified = modified;
+    }
+
+    @Override
+    public Date getIssued() {
+    return issued;
+    }
+
+    @Override
+    public void setIssued(Date issued) {
+    this.issued = issued;
     }
 
     @Override

@@ -25,6 +25,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String PATH_PARAM_CREATOR_ID      = "creator";
     public static final String PATH_PARAM_LOCAL_ID        = "localId";
     public static final String PATH_PARAM_POSITION        = "position";
+    public static final String REQUEST_PARAM_ISSUED       = "issued";
 
     /**
      * sort order should be included in the sort param

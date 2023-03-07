@@ -854,8 +854,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet,
-      Authentication authentication) {
+  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication) {
     if (userSet.isPublished()) {
       // just a second check to prevent updates for allready published sets
       return userSet;
@@ -868,6 +867,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       userSet.setCreator(creator);
     }
     userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
+    if(issued==null) {
+      issued = new Date();
+    }
+    userSet.setIssued(issued);
     userSet.setModified(new Date());
     return getMongoPersistence().update(userSet);
   }
@@ -895,6 +898,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     
     userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+    userSet.setIssued(null);
     userSet.setModified(new Date());
     return getMongoPersistence().update(userSet);
   }

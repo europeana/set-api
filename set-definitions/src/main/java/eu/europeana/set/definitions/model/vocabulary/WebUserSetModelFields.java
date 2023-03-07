@@ -22,6 +22,7 @@ public class WebUserSetModelFields {
 	public static final String CONTRIBUTOR      = "contributor";
 	public static final String CREATED          = "created";
 	public static final String MODIFIED         = "modified";
+	public static final String ISSUED           = "issued";
 	public static final String IS_DEFINED_BY    = "isDefinedBy";
 	public static final String SUBJECT          = "subject";
 	public static final String ITEMS            = "items";

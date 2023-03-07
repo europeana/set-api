@@ -898,7 +898,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication,
+  public UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication,
       boolean publish) throws HttpException {
     PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
     // if the user set does not exist, return 404
@@ -908,7 +908,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     validateUserSetForPublishUnPublish(userSet, publish);
     if (publish) {
-      return updateUserSetForPublish(userSet, authentication);
+      return updateUserSetForPublish(userSet, issued, authentication);
     } else {
       return updateUserSetForUnpublish(userSet, authentication);
     }

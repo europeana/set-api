@@ -1,6 +1,7 @@
 package eu.europeana.set.web.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.codehaus.jettison.json.JSONException;
@@ -244,6 +245,6 @@ public interface UserSetService {
      * @return
      * @throws HttpException
      */
-    UserSet publishUnpublishUserSet(String userSetId, Authentication authentication, boolean publish) throws HttpException;
+    UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication, boolean publish) throws HttpException;
 
 }

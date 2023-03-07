@@ -23,6 +23,8 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 /**
@@ -70,12 +72,13 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     // publish set by publisher
     // expected change of ownership to editorial team
-    publishUserSet(userSet, getConfiguration().getEuropeanaPublisherNickname());
+    String issued = "2018-10-31T01:30:00.000Z";
+    publishUserSet(userSet, issued, getConfiguration().getEuropeanaPublisherNickname());
 
     MockHttpServletResponse response;
     String result;
 
-    // depublish set
+    // unpublish set
     response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -88,10 +91,14 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "public"));
+    assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     // unpublished set, the ownership is changed back to current user
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
     assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
+    publishUserSet(userSet, null, getConfiguration().getEuropeanaPublisherNickname());
+
   }
 
   @Test
@@ -100,8 +107,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
-
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
     // update userset
     String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_UPDATED);
@@ -135,7 +141,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
 
     // update userset
@@ -170,7 +176,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
 
     // add item to userset as publisher
@@ -203,7 +209,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
@@ -235,7 +241,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
@@ -246,14 +252,15 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatus());
   }
 
-  private void publishUserSet(WebUserSetImpl userSet, String expectedOwner)
+  private void publishUserSet(WebUserSetImpl userSet, String issued, String expectedOwner)
       throws Exception, UnsupportedEncodingException {
 
     MockHttpServletResponse response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .param(WebUserSetFields.REQUEST_PARAM_ISSUED, issued))        
         .andReturn().getResponse();
 
     String result = response.getContentAsString();
@@ -261,6 +268,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
+    assertTrue(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     if (expectedOwner != null) {
       assertTrue(containsKeyOrValue(result, expectedOwner));
     }
