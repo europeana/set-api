@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +64,11 @@ public class BaseRest extends BaseRestController {
 
     @Resource
     UsageStatsService usageStatsService;
+    
+    @PostConstruct
+    void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Etc/UTC"));
+    }
 
     Logger logger = LogManager.getLogger(getClass());
 

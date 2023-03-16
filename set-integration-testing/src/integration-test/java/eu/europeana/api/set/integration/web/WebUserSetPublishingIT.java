@@ -269,6 +269,9 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
     assertTrue(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
+    if(issued!=null) {
+      assertTrue(containsKeyOrValue(result, issued));
+    }
     if (expectedOwner != null) {
       assertTrue(containsKeyOrValue(result, expectedOwner));
     }
@@ -279,8 +282,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   @Test
   public void publishUnpublishUserSet_Exceptions() throws Exception {
 
-    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
+    //wrong user set identifier
+    WebUserSetImpl userSet1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -288,22 +291,45 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
 
+    //wrong authorization token
     mockMvc
-        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
-
-    userSet = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
-
+    //wrong user set type (bookmark folder)
+    WebUserSetImpl userSet2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
     mockMvc
-        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet2.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    
+    //publish published user set
+    publishUserSet(userSet1, null, USERNAME_REGULAR);
+    mockMvc
+    .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/publish")
+        .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+    .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+    
+    //unpublish unpublished user set
+    mockMvc
+    .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/unpublish")
+        .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+    .andExpect(status().is(HttpStatus.OK.value()));
+    mockMvc
+    .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/unpublish")
+        .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+    .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+
   }
 }

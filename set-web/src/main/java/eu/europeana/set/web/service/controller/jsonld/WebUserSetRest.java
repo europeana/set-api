@@ -1,6 +1,9 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -373,12 +376,20 @@ public class WebUserSetRest extends BaseRest {
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
       @RequestParam(value = WebUserSetFields.REQUEST_PARAM_ISSUED, required = false) 
-          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date issued,
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime issued,
       HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
-    return publishUnpublishUserSet(identifier, authentication, true, profileStr, issued, request);
+    Date issuedDate=null;
+    if(issued==null) {
+      issuedDate=new Date();
+    }
+    else {
+      Timestamp timestamp = Timestamp.valueOf(issued.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+      issuedDate = new Date(timestamp.getTime());
+    }
+    return publishUnpublishUserSet(identifier, authentication, true, profileStr, issuedDate, request);
   }
 
   @PutMapping(value = {"/set/{identifier}/unpublish"},

@@ -854,11 +854,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication) {
-    if (userSet.isPublished()) {
-      // just a second check to prevent updates for allready published sets
-      return userSet;
-    }
+  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication) throws ParamValidationException {
     // update the visibility to publish
     if (isOwner(userSet, authentication)) {
       // if the requesting user is the owner of the gallery, the ownership is reassigned to
@@ -868,7 +864,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
     if(issued==null) {
-      issued = new Date();
+      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+          new String[] {WebUserSetModelFields.ISSUED});
     }
     userSet.setIssued(issued);
     userSet.setModified(new Date());
@@ -885,11 +883,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   PersistentUserSet updateUserSetForUnpublish(PersistentUserSet userSet,
       Authentication authentication) {
-    
-    if(!userSet.isPublished()){
-      // just a second check to prevent updates for not published sets
-      return userSet; 
-    }
     // update the visibility to public
     if (hasPublisherAsOwner(userSet)) {
       // if the owner is @europeana, then the ownership is reassigned to the requesting user
