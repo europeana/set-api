@@ -72,7 +72,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     // publish set by publisher
     // expected change of ownership to editorial team
-    String issued = "2018-10-31T01:30:00.000Z";
+    String issued = "2018-10-31T01:30:00.001Z";
     publishUserSet(userSet, issued, getConfiguration().getEuropeanaPublisherNickname());
 
     MockHttpServletResponse response;

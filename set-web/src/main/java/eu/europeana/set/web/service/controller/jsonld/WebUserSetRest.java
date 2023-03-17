@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.fasterxml.jackson.core.JsonParseException;
 import eu.europeana.api.common.config.swagger.SwaggerSelect;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.api.commons.definitions.exception.DateParsingException;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -375,8 +377,7 @@ public class WebUserSetRest extends BaseRest {
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
-      @RequestParam(value = WebUserSetFields.REQUEST_PARAM_ISSUED, required = false) 
-          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime issued,
+      @RequestParam(value = WebUserSetFields.REQUEST_PARAM_ISSUED, required = false) String issued,
       HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
@@ -386,9 +387,14 @@ public class WebUserSetRest extends BaseRest {
       issuedDate=new Date();
     }
     else {
-      Timestamp timestamp = Timestamp.valueOf(issued.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
-      issuedDate = new Date(timestamp.getTime());
+      try {
+        issuedDate = DateUtils.parseToDate(issued);
+      } catch (DateParsingException e) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.REQUEST_PARAM_ISSUED, issued});
+      }
     }
+        
     return publishUnpublishUserSet(identifier, authentication, true, profileStr, issuedDate, request);
   }
 
