@@ -1,9 +1,6 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -391,7 +387,7 @@ public class WebUserSetRest extends BaseRest {
         issuedDate = DateUtils.parseToDate(issued);
       } catch (DateParsingException e) {
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.REQUEST_PARAM_ISSUED, issued});
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.REQUEST_PARAM_ISSUED, issued}, e);
       }
     }
         
