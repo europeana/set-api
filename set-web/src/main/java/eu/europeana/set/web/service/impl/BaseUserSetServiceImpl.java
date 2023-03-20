@@ -854,12 +854,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet,
-      Authentication authentication) {
-    if (userSet.isPublished()) {
-      // just a second check to prevent updates for allready published sets
-      return userSet;
-    }
+  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication){
     // update the visibility to publish
     if (isOwner(userSet, authentication)) {
       // if the requesting user is the owner of the gallery, the ownership is reassigned to
@@ -868,7 +863,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       userSet.setCreator(creator);
     }
     userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
-    userSet.setModified(new Date());
+    Date now = new Date();
+    if(issued==null) {
+      issued=now;
+    }
+    userSet.setIssued(issued);
+    userSet.setModified(now);
     return getMongoPersistence().update(userSet);
   }
 
@@ -882,11 +882,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   PersistentUserSet updateUserSetForUnpublish(PersistentUserSet userSet,
       Authentication authentication) {
-    
-    if(!userSet.isPublished()){
-      // just a second check to prevent updates for not published sets
-      return userSet; 
-    }
     // update the visibility to public
     if (hasPublisherAsOwner(userSet)) {
       // if the owner is @europeana, then the ownership is reassigned to the requesting user
@@ -895,6 +890,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     
     userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
+    userSet.setIssued(null);
     userSet.setModified(new Date());
     return getMongoPersistence().update(userSet);
   }

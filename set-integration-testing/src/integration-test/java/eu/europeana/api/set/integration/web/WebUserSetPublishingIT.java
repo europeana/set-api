@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,10 +20,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 /**
@@ -43,7 +47,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
   @BeforeAll
   public static void initTokens() {
-    if(DISABLE_AUTH) {
+    if (DISABLE_AUTH) {
       return;
     }
     initRegularUserToken();
@@ -62,20 +66,61 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     super.deleteCreatedSets();
   }
 
-  // publish/unpublish user set tests
+  // publish and validate user set tests
   @Test
-  public void publishUnpublishUserSet_Success() throws Exception {
+  void publishUserSet_Success() throws Exception {
     // create set by publisher
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
 
     // publish set by publisher
     // expected change of ownership to editorial team
-    publishUserSet(userSet, getConfiguration().getEuropeanaPublisherNickname());
+    String issued = DateUtils.convertDateToStr(new Date());
+    MockHttpServletResponse response =
+        publishUserSet(userSet, issued, getConfiguration().getEuropeanaPublisherNickname());
+    assertNotNull(response);
+  }
+
+  @Test
+  void publishPreviouslyPublishedUserSet() throws Exception {
+
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+    // publish published user set
+    publishUserSet(userSet, null, USERNAME_REGULAR);
+    //Date is set in seconds, ensure 1 second before method execution
+    final int oneSecondInMilis = 1000;
+    Date beforeCallDate = new Date(System.currentTimeMillis()  - oneSecondInMilis);
+    
+    MockHttpServletResponse response = mockMvc
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+        .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())).andReturn().getResponse();
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    String result = response.getContentAsString();
+    
+    Date issued = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.ISSUED));
+    Date modified = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.MODIFIED));
+    assertEquals(issued, modified);
+    //issued should be after the call date
+    assertTrue(issued.compareTo(beforeCallDate)>=0);
+  }
+
+  // unpublish user set tests
+  @Test
+  void unpublishUserSet_Success() throws Exception {
+    // create set by publisher
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
+
+    // publish set by publisher
+    // expected change of ownership to editorial team
+    String issued = DateUtils.convertDateToStr(new Date());
+    publishUserSet(userSet, issued, getConfiguration().getEuropeanaPublisherNickname());
 
     MockHttpServletResponse response;
     String result;
-
-    // depublish set
+    // unpublish set
     response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -88,20 +133,70 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "public"));
+    assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     // unpublished set, the ownership is changed back to current user
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
     assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
+  
+  // unpublish user set tests
+  @Test
+  void unpublishUserSet_NoOwnerTransfer() throws Exception {
+    // create set by publisher
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+    // publish set by publisher
+    // expected change of ownership to editorial team
+    String issued = DateUtils.convertDateToStr(new Date());
+    MockHttpServletResponse response = publishUserSet(userSet, issued, USERNAME_REGULAR);
+
+    String result;
+    // unpublish set
+    response = mockMvc
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
+            .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .andReturn().getResponse();
+
+    result = response.getContentAsString();
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    //assert user name not changed
+    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    
+    assertTrue(containsKeyOrValue(result, UserSetUtils
+        .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+    assertTrue(containsKeyOrValue(result, "public"));
+    assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
+    // unpublished set, the ownership is changed back to current user
+    assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
+    
+  }
 
   @Test
-  public void updatePublishedUserSet_Success() throws Exception {
+  void unpublishNotPublishedUserSet() throws Exception {
+    // create set by publisher
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
+
+    // unpublish unpublished user set
+    // must return 400
+    mockMvc
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
+            .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+  }
+
+
+  @Test
+  void updatePublishedUserSet_Success() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
-
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
     // update userset
     String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_UPDATED);
@@ -130,12 +225,12 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void updatePublishedUserSetWithVisibility_Success() throws Exception {
+  void updatePublishedUserSetWithVisibility_Success() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
 
     // update userset
@@ -165,12 +260,12 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void addItemToPublishedSet() throws Exception {
+  void addItemToPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
 
     // add item to userset as publisher
@@ -198,12 +293,12 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void removeItemFromPublishedSet() throws Exception {
+  void removeItemFromPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
@@ -230,12 +325,12 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
 
   @Test
-  public void checkItemInSetFromPublishedSet() throws Exception {
+  void checkItemInSetFromPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, USERNAME_REGULAR);
+    publishUserSet(userSet, null, USERNAME_REGULAR);
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
@@ -246,56 +341,67 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatus());
   }
 
-  private void publishUserSet(WebUserSetImpl userSet, String expectedOwner)
-      throws Exception, UnsupportedEncodingException {
+  private MockHttpServletResponse publishUserSet(WebUserSetImpl userSet, String issued,
+      String expectedOwner) throws Exception, UnsupportedEncodingException {
 
-    MockHttpServletResponse response = mockMvc
-        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+    MockHttpServletResponse response =
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-        .andReturn().getResponse();
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .param(WebUserSetFields.REQUEST_PARAM_ISSUED, issued)).andReturn().getResponse();
 
     String result = response.getContentAsString();
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
+    assertTrue(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
+    if (issued != null) {
+      assertTrue(containsKeyOrValue(result, issued));
+    }
     if (expectedOwner != null) {
       assertTrue(containsKeyOrValue(result, expectedOwner));
     }
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    return response;
   }
 
-
+    
   @Test
-  public void publishUnpublishUserSet_Exceptions() throws Exception {
-
-    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
+  void publishNonExistingUserSet() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
-
+  }
+  
+  @Test
+  void publishWrongSetType() throws Exception {
+    // wrong user set type (bookmark folder)
+    WebUserSetImpl userSet2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
     mockMvc
-        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
-            .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
-
-    getUserSetService().deleteUserSet(userSet.getIdentifier());
-
-    userSet = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
-
-    mockMvc
-        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet2.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+
   }
+  
+  @Test
+  void publishWithoutPermission() throws Exception {
+    // wrong user set identifier
+    WebUserSetImpl userSet1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+    //publish without publish permission 
+    mockMvc
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/publish")
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+  }
+   
 }
