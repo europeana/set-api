@@ -87,7 +87,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     // publish published user set
     publishUserSet(userSet, null, USERNAME_REGULAR);
-    Date beforeCallDate = new Date();
+    //Date is set in seconds, ensure 1 second before method execution
+    final int oneSecondInMilis = 1000;
+    Date beforeCallDate = new Date(System.currentTimeMillis()  - oneSecondInMilis);
+    
     MockHttpServletResponse response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -100,9 +103,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     Date issued = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.ISSUED));
     Date modified = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.MODIFIED));
     assertEquals(issued, modified);
-    //the value set in the issued field must be higher or equal (if the test executes fast and no milliseconds are recorded in the date) than the time when the method was called
-    Date beforeCallDateFormatAdjusted = DateUtils.parseToDate(DateUtils.convertDateToStr(beforeCallDate));
-    assertTrue(issued.equals(beforeCallDateFormatAdjusted) || issued.compareTo(beforeCallDateFormatAdjusted)>0);
+    //issued should be after the call date
+    assertTrue(issued.compareTo(beforeCallDate)>=0);
   }
 
   // unpublish user set tests
@@ -136,6 +138,40 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
     assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+  }
+  
+  // unpublish user set tests
+  @Test
+  public void unpublishUserSet_NoOwnerTransfer() throws Exception {
+    // create set by publisher
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+    // publish set by publisher
+    // expected change of ownership to editorial team
+    String issued = DateUtils.convertDateToStr(new Date());
+    MockHttpServletResponse response = publishUserSet(userSet, issued, USERNAME_REGULAR);
+
+    String result;
+    // unpublish set
+    response = mockMvc
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
+            .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .andReturn().getResponse();
+
+    result = response.getContentAsString();
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    //assert user name not changed
+    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    
+    assertTrue(containsKeyOrValue(result, UserSetUtils
+        .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+    assertTrue(containsKeyOrValue(result, "public"));
+    assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
+    // unpublished set, the ownership is changed back to current user
+    assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
+    
   }
 
   @Test
