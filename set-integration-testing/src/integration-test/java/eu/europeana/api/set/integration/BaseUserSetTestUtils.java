@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -316,4 +317,17 @@ public abstract class BaseUserSetTestUtils {
     userSet.setIdentifier(identifier);
     createdUserSets.add(userSet);
   }
+  
+  protected String getStringValue(String jsonBody, String fieldName) throws JSONException {
+    JSONObject json = new JSONObject(jsonBody);
+    return json.getString(fieldName);
+  }
+  
+  protected List<String> getStringListValues(String jsonBody, String fieldName) throws JSONException {
+    assertNotNull(jsonBody);
+    JSONObject json = new JSONObject(jsonBody);
+    return Collections.singletonList(json.getString(fieldName));
+  }
+
+
 }
