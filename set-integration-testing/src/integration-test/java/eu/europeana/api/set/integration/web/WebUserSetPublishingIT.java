@@ -68,7 +68,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
   // publish and validate user set tests
   @Test
-  public void publishUserSet_Success() throws Exception {
+  void publishUserSet_Success() throws Exception {
     // create set by publisher
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
 
@@ -81,7 +81,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void publishPreviouslyPublishedUserSet() throws Exception {
+  void publishPreviouslyPublishedUserSet() throws Exception {
 
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -109,7 +109,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
   // unpublish user set tests
   @Test
-  public void unpublishUserSet_Success() throws Exception {
+  void unpublishUserSet_Success() throws Exception {
     // create set by publisher
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
 
@@ -142,7 +142,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   
   // unpublish user set tests
   @Test
-  public void unpublishUserSet_NoOwnerTransfer() throws Exception {
+  void unpublishUserSet_NoOwnerTransfer() throws Exception {
     // create set by publisher
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -175,7 +175,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void unpublishNotPublishedUserSet() throws Exception {
+  void unpublishNotPublishedUserSet() throws Exception {
     // create set by publisher
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, publisherUserToken);
 
@@ -191,7 +191,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
 
   @Test
-  public void updatePublishedUserSet_Success() throws Exception {
+  void updatePublishedUserSet_Success() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -225,7 +225,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void updatePublishedUserSetWithVisibility_Success() throws Exception {
+  void updatePublishedUserSetWithVisibility_Success() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -260,7 +260,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void addItemToPublishedSet() throws Exception {
+  void addItemToPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -293,7 +293,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
 
   @Test
-  public void removeItemFromPublishedSet() throws Exception {
+  void removeItemFromPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -325,7 +325,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
 
   @Test
-  public void checkItemInSetFromPublishedSet() throws Exception {
+  void checkItemInSetFromPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -369,7 +369,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     
   @Test
-  public void publishNonExistingUserSet() throws Exception {
+  void publishNonExistingUserSet() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
@@ -379,7 +379,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
   
   @Test
-  public void publishWrongSetType() throws Exception {
+  void publishWrongSetType() throws Exception {
     // wrong user set type (bookmark folder)
     WebUserSetImpl userSet2 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
     mockMvc
@@ -392,7 +392,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
   }
   
   @Test
-  public void publishWithoutPermission() throws Exception {
+  void publishWithoutPermission() throws Exception {
     // wrong user set identifier
     WebUserSetImpl userSet1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     //publish without publish permission 

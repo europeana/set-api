@@ -854,7 +854,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication) throws ParamValidationException {
+  PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication){
     // update the visibility to publish
     if (isOwner(userSet, authentication)) {
       // if the requesting user is the owner of the gallery, the ownership is reassigned to
