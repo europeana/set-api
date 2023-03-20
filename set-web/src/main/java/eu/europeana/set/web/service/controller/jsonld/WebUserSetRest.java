@@ -379,10 +379,7 @@ public class WebUserSetRest extends BaseRest {
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
     Date issuedDate=null;
-    if(issued==null) {
-      issuedDate=new Date();
-    }
-    else {
+    if(issued!=null) {
       try {
         issuedDate = DateUtils.parseToDate(issued);
       } catch (DateParsingException e) {

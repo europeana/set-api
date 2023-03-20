@@ -74,7 +74,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     // publish set by publisher
     // expected change of ownership to editorial team
-    String issued = "2018-10-31T01:30:00.01Z";
+    String issued = DateUtils.convertDateToStr(new Date());
     MockHttpServletResponse response =
         publishUserSet(userSet, issued, getConfiguration().getEuropeanaPublisherNickname());
     assertNotNull(response);
@@ -87,10 +87,9 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     // publish published user set
     publishUserSet(userSet, null, USERNAME_REGULAR);
-    Date beforeCallingUpdate = new Date();
-    MockHttpServletResponse response = 
-    mockMvc
-    .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+    Date beforeCallDate = new Date();
+    MockHttpServletResponse response = mockMvc
+        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())).andReturn().getResponse();
@@ -101,8 +100,9 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     Date issued = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.ISSUED));
     Date modified = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.MODIFIED));
     assertEquals(issued, modified);
-    //the value set in the issued field must be higher than the time when the method was called
-    assertTrue(issued.after(beforeCallingUpdate));
+    //the value set in the issued field must be higher or equal (if the test executes fast and no milliseconds are recorded in the date) than the time when the method was called
+    Date beforeCallDateFormatAdjusted = DateUtils.parseToDate(DateUtils.convertDateToStr(beforeCallDate));
+    assertTrue(issued.equals(beforeCallDateFormatAdjusted) || issued.compareTo(beforeCallDateFormatAdjusted)>0);
   }
 
   // unpublish user set tests
@@ -113,7 +113,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     // publish set by publisher
     // expected change of ownership to editorial team
-    String issued = "2018-10-31T01:30:00.01Z";
+    String issued = DateUtils.convertDateToStr(new Date());
     publishUserSet(userSet, issued, getConfiguration().getEuropeanaPublisherNickname());
 
     MockHttpServletResponse response;

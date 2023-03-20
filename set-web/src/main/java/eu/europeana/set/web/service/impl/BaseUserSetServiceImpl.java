@@ -863,13 +863,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       userSet.setCreator(creator);
     }
     userSet.setVisibility(VisibilityTypes.PUBLISHED.getJsonValue());
+    Date now = new Date();
     if(issued==null) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          new String[] {WebUserSetModelFields.ISSUED});
+      issued=now;
     }
     userSet.setIssued(issued);
-    userSet.setModified(new Date());
+    userSet.setModified(now);
     return getMongoPersistence().update(userSet);
   }
 
