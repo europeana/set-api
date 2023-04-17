@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import com.mongodb.WriteConcern;
 import eu.europeana.corelib.db.wrapper.ApiMongoConnector;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 
@@ -38,7 +39,10 @@ public class MongoConfig {
   
   @Bean(UserSetConfiguration.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {
-    return getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
+    Datastore ds = getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
+    //Ensures consistency when Mongo is deployed in a replica-set
+    ds.setDefaultWriteConcern(WriteConcern.MAJORITY);
+    return ds;
   }
 
   @Bean("annotationMongoConnector")

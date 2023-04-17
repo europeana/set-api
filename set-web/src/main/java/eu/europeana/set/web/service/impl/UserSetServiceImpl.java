@@ -209,7 +209,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         positionInt = Integer.parseInt(position);
         // if position less than pinned items
         // change the position from the initial start of Entity sets items
-        if (positionInt <= pinnedItems) {
+        if (positionInt < pinnedItems) {
           positionInt = pinnedItems + positionInt;
         }
         if (positionInt > items.size()) {
@@ -252,7 +252,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     getUserSetUtils().updatePagination(userSet, getConfiguration());
     return userSet;
-  }
+  }  
 
   /**
    * check if item already exists in the Set, if so remove it insert item to Set in the indicated
@@ -297,7 +297,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     return extUserSet;
   }
-
+  
   private void updatePinCount(UserSet existingUserSet, boolean pinnedItem, int oldPosition) {
     boolean mustHandlePinCount = existingUserSet.isEntityBestItemsSet();
     if (!mustHandlePinCount) {

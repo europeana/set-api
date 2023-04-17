@@ -83,18 +83,17 @@ public class UserSetUtils {
            int total = userSet.getItems().size();
            userSet.setTotal(total);
            //NOTE: the first and last properties are not used now and might be deprecated, they should not be stored in the database
-           if (total > 0) {
-               
+           if (total > 0) {      
                int first = 0;
                String firstPageStr = fillPage(userSet, config, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setFirst(firstPageStr);
                int last = (int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE); 
                if(last > 0) {
-        	last = last - 1; // we start counting by 0    
+                 last = last - 1; // we start counting by 0    
                }
                String lastPageStr = fillPage(userSet, config, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setLast(lastPageStr);
-	   } 
+           } 
            
        } else if (userSet != null && userSet.getTotal() == 0) {
 	   // no items
