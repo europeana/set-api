@@ -42,7 +42,7 @@
 		<version.java>11</version.java>
 		<version.javac.release>11</version.javac.release>
 		<version.log4j2>2.17.2</version.log4j2>
-		<version.commonsApi>0.3.19</version.commonsApi>
+		<version.commonsApi>0.3.21-SNAPSHOT</version.commonsApi>
 		<version.springBoot>2.5.7</version.springBoot>
 		<version.springBootMongoStarter>2.0.3.RELEASE</version.springBootMongoStarter>
 		<version.swagger>3.0.0</version.swagger>
