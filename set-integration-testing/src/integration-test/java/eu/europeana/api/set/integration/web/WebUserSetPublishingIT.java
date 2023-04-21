@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -45,6 +47,9 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 @SpringBootTest
 public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
+  Logger logger = LogManager.getLogger(getClass());
+  
+  
   @BeforeAll
   public static void initTokens() {
     if (DISABLE_AUTH) {
@@ -130,8 +135,13 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     result = response.getContentAsString();
     assertNotNull(result);
-    assertTrue(containsKeyOrValue(result, UserSetUtils
-        .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+    
+    final String id = UserSetUtils
+        .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier());
+    logger.info("ExpectedId:" + id);
+    logger.info("Unpublishing Response:" + response);
+    
+    assertTrue(containsKeyOrValue(result, id));
     assertTrue(containsKeyOrValue(result, "public"));
     assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     // unpublished set, the ownership is changed back to current user
@@ -353,6 +363,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     String result = response.getContentAsString();
     assertNotNull(result);
+    logger.info("Publishing response: " + result);
+    
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
