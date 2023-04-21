@@ -44,8 +44,6 @@ public interface UserSetConfiguration {
 
   public String getAuthorizationApiName();
 
-  public String getApiVersion();
-
   public String getSearchApiUrl();
 
   String getUserDataEndpoint();
