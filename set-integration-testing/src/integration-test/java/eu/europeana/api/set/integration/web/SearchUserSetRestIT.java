@@ -299,7 +299,8 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+            .queryParam(CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
         .getContentAsString();
 

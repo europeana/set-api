@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.FindOptions;
+import org.mongodb.morphia.query.Meta;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.Sort;
@@ -496,7 +497,13 @@ public class PersistentUserSetServiceImpl extends
   private void buildSortCriteria(UserSetQuery query, Query<PersistentUserSet> mongoQuery) {
     for (String sortField : query.getSortCriteria()) {
       if (!sortField.contains(" ")) {
-        mongoQuery.order(Sort.ascending(sortField));
+        //check the text search score
+        if(query.getText()!=null && sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
+          mongoQuery.order(Meta.textScore());
+        }
+        else {
+          mongoQuery.order(Sort.ascending(sortField));
+        }
       } else {
         String[] sortParts = sortField.split(" ", 2);
         if (!"desc".contentEquals(sortParts[1])) {
