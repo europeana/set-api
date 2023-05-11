@@ -287,6 +287,20 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
   }
 
   @Test
+  public void searchSetWithoutTextQueryWithScoreSort() throws Exception {
+    // subject in json file: http://data.europeana.eu/concept/base/114
+    String query = "visibility:public";
+    mockMvc
+        .perform(get(SEARCH_URL)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+            .queryParam(CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+  }
+  
+  @Test
   public void searchSetByTextQueryDefault() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);

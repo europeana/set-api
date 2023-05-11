@@ -61,11 +61,20 @@ public class UserSetQueryBuilder extends QueryBuilder {
 	
 	addTitleLangCriterion(searchCriteria, searchQuery);
 	
-	searchQuery.setSortCriteria(toArray(sort));	
+	addSortCriterion(searchCriteria, searchQuery, sort);
+	
 	searchQuery.setPageSize(pageSize);
 	searchQuery.setPageNr(page);
 	
 	return searchQuery;
+    }
+
+    private void addSortCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery, String sort) throws ParamValidationException {
+      if (sort!=null && sort.contains(WebUserSetFields.TEXT_SCORE_SORT) && !searchCriteria.containsKey(WebUserSetFields.TEXT)) {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+              new String[] { "invalid value for the sort field, it cannot contain 'score' if the search is not on the text field", sort });
+      }
+      searchQuery.setSortCriteria(toArray(sort));
     }
 
     private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
@@ -214,58 +223,57 @@ public class UserSetQueryBuilder extends QueryBuilder {
     }
 
     private void parseCriterion(Map<String, String> criteria, String criterion) throws ParamValidationException {
-	String toParse = criterion;
-	String separator = WebUserSetFields.SEPARATOR_SEMICOLON;
-	String space = " ";
-	String field;
-	String value;
-
-	// if query field is not empty, default to text-title search
-	// Multiple criteria are not supported with text-title search
-	if (!toParse.isEmpty() && !toParse.contains(separator)) {
-		criteria.put(WebUserSetFields.TEXT, toParse);
-	}
-
-	while (toParse.contains(separator)) {
-	    field = StringUtils.substringBefore(toParse, separator).trim();
-	    
-	    toParse = StringUtils.substringAfter(toParse, separator).trim();
-	    if (!suportedFields.contains(field)) {
-		// invalid field name
-		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-			new String[] { "invalid field name in search query", field });
-	    }
-
-//	    value = StringUtils.substringBefore(toParse, space);
-//	    toParse = StringUtils.substringAfter(toParse, space);
-	    if(!toParse.contains(separator) || toParse.startsWith("http")) {
-		//allow separator for URIs
-		//TODO: for the time being we assume that queries with URIs do not use multiple criterions
-		value = toParse;
-		toParse="";
-	    }else {
-		//multiple search criteria, extract value and remove processed criterion
-		value = StringUtils.substringBefore(toParse, separator).trim();
-		//remove next field name
-		if(!value.contains(space)) {
-		    //invalid query format, there must be a space before next field in the query
-		    throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-				new String[] { "invalid formatting of search query for field " + field, value });
-		}
-		//extract correct search value for current field
-		value = StringUtils.substringBeforeLast(toParse, space);
-		//remove processed value from query string
-		toParse = StringUtils.removeStart(toParse, value);
-		
-	    }
-	    
-	    if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
-		// invalid seearch value
-		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-			new String[] { "invalid formatting of search query for field " + field, value });
-	    }
-	    criteria.put(field, value);
-	}
+    	String toParse = criterion;
+    	String separator = WebUserSetFields.SEPARATOR_SEMICOLON;
+    	String space = " ";
+    	String field;
+    	String value;
+    
+    	// if query field is not empty, default to text-title search
+    	// Multiple criteria are not supported with text-title search
+    	if (!toParse.isEmpty() && !toParse.contains(separator)) {
+    		criteria.put(WebUserSetFields.TEXT, toParse);
+    	}
+    
+    	while (toParse.contains(separator)) {
+    	    field = StringUtils.substringBefore(toParse, separator).trim();
+    	    
+    	    toParse = StringUtils.substringAfter(toParse, separator).trim();
+    	    if (!suportedFields.contains(field)) {
+    		// invalid field name
+    		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+    			new String[] { "invalid field name in search query", field });
+    	    }
+    
+    //	    value = StringUtils.substringBefore(toParse, space);
+    //	    toParse = StringUtils.substringAfter(toParse, space);
+    	    if(!toParse.contains(separator) || toParse.startsWith("http")) {
+        		//allow separator for URIs
+        		//TODO: for the time being we assume that queries with URIs do not use multiple criterions
+        		value = toParse;
+        		toParse="";
+    	    }else {
+        		//multiple search criteria, extract value and remove processed criterion
+        		value = StringUtils.substringBefore(toParse, separator).trim();
+        		//remove next field name
+        		if(!value.contains(space)) {
+        		    //invalid query format, there must be a space before next field in the query
+        		    throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+        				new String[] { "invalid formatting of search query for field " + field, value });
+        		}
+        		//extract correct search value for current field
+        		value = StringUtils.substringBeforeLast(toParse, space);
+        		//remove processed value from query string
+        		toParse = StringUtils.removeStart(toParse, value);		
+    	    }
+    	    
+    	    if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
+    		// invalid seearch value
+    		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+    			new String[] { "invalid formatting of search query for field " + field, value });
+    	    }
+    	    criteria.put(field, value);
+    	}
     }
 
     public UserSetFacetQuery buildUserSetFacetQuery(String facet, int facetLimit) throws RequestValidationException, ParamValidationException {

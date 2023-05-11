@@ -498,7 +498,7 @@ public class PersistentUserSetServiceImpl extends
     for (String sortField : query.getSortCriteria()) {
       if (!sortField.contains(" ")) {
         //check the text search score
-        if(query.getText()!=null && sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
+        if(sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
           mongoQuery.order(Meta.textScore());
         }
         else {
