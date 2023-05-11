@@ -496,22 +496,22 @@ public class PersistentUserSetServiceImpl extends
 
   private void buildSortCriteria(UserSetQuery query, Query<PersistentUserSet> mongoQuery) {
     for (String sortField : query.getSortCriteria()) {
-      if (!sortField.contains(" ")) {
-        //check the text search score
-        if(sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
-          mongoQuery.order(Meta.textScore());
-        }
-        else {
+      //check the score sort first (it can only be in desc order)
+      if(sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
+        mongoQuery.order(Meta.textScore());
+      }
+      else {
+        if (!sortField.contains(" ")) {
           mongoQuery.order(Sort.ascending(sortField));
-        }
-      } else {
-        String[] sortParts = sortField.split(" ", 2);
-        if (!"desc".contentEquals(sortParts[1])) {
-          mongoQuery.order(Sort.ascending(sortParts[0]));
         } else {
-          mongoQuery.order(Sort.descending(sortParts[0]));
+          String[] sortParts = sortField.split(" ", 2);
+          if (!"desc".contentEquals(sortParts[1])) {
+            mongoQuery.order(Sort.ascending(sortParts[0]));
+          } else {
+            mongoQuery.order(Sort.descending(sortParts[0]));
+          }
+  
         }
-
       }
     }
   }
