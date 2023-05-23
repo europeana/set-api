@@ -83,8 +83,8 @@ public class UserSetQueryBuilder extends QueryBuilder {
                 new String[] { "invalid value for the sort field, it cannot contain 'score asc' since only the descending order is supported", sort });
           }
         }
-        searchQuery.setSortCriteria(sortCriteria);
       }
+      searchQuery.setSortCriteria(sortCriteria);
     }
 
     private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
