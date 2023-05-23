@@ -70,11 +70,21 @@ public class UserSetQueryBuilder extends QueryBuilder {
     }
 
     private void addSortCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery, String sort) throws ParamValidationException {
-      if (sort!=null && sort.contains(WebUserSetFields.TEXT_SCORE_SORT) && !searchCriteria.containsKey(WebUserSetFields.TEXT)) {
-          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-              new String[] { "invalid value for the sort field, it cannot contain 'score' if the search is not on the text field", sort });
+      //validate sorting based on score (can be only in the descending order)
+      if(sort!=null && sort.contains(WebUserSetFields.TEXT_SCORE_SORT) && !searchCriteria.containsKey(WebUserSetFields.TEXT)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+            new String[] { "invalid value for the sort field, it cannot contain 'score' if the search is not on the text field", sort });
       }
-      searchQuery.setSortCriteria(toArray(sort));
+      String[] sortCriteria = toArray(sort);
+      if(sortCriteria!=null) {
+        for(String sortCriterion : sortCriteria) {
+          if(sortCriterion.contains(WebUserSetFields.TEXT_SCORE_SORT) && sortCriterion.contains("asc")) {
+            throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
+                new String[] { "invalid value for the sort field, it cannot contain 'score asc' since only the descending order is supported", sort });
+          }
+        }
+        searchQuery.setSortCriteria(sortCriteria);
+      }
     }
 
     private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
@@ -232,7 +242,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
     	// if query field is not empty, default to text-title search
     	// Multiple criteria are not supported with text-title search
     	if (!toParse.isEmpty() && !toParse.contains(separator)) {
-    		criteria.put(WebUserSetFields.TEXT, toParse);
+    	  criteria.put(WebUserSetFields.TEXT, toParse);
     	}
     
     	while (toParse.contains(separator)) {

@@ -332,6 +332,24 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
   }
 
   @Test
+  public void searchWithScoreSortInAscOrder() throws Exception {
+    // create object in database
+    UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
+    // subject in json file: http://data.europeana.eu/concept/base/114
+    final String title = set.getTitle().get("en");
+    // String query = "sportswear golf";
+    String query = title;
+    mockMvc
+        .perform(get(SEARCH_URL)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+            .queryParam(CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT + " asc"))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+  }
+
+  @Test
   public void searchSetByTextQueryWithMultipleCriteria1() throws Exception {
     String query = "sportswear golf visibility:public";
     mockMvc
