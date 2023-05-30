@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.FindOptions;
+import org.mongodb.morphia.query.Meta;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.Sort;
@@ -495,16 +496,22 @@ public class PersistentUserSetServiceImpl extends
 
   private void buildSortCriteria(UserSetQuery query, Query<PersistentUserSet> mongoQuery) {
     for (String sortField : query.getSortCriteria()) {
-      if (!sortField.contains(" ")) {
-        mongoQuery.order(Sort.ascending(sortField));
-      } else {
-        String[] sortParts = sortField.split(" ", 2);
-        if (!"desc".contentEquals(sortParts[1])) {
-          mongoQuery.order(Sort.ascending(sortParts[0]));
+      //check the score sort first (it can only be in desc order)
+      if(sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
+        mongoQuery.order(Meta.textScore());
+      }
+      else {
+        if (!sortField.contains(" ")) {
+          mongoQuery.order(Sort.ascending(sortField));
         } else {
-          mongoQuery.order(Sort.descending(sortParts[0]));
+          String[] sortParts = sortField.split(" ", 2);
+          if (!"desc".contentEquals(sortParts[1])) {
+            mongoQuery.order(Sort.ascending(sortParts[0]));
+          } else {
+            mongoQuery.order(Sort.descending(sortParts[0]));
+          }
+  
         }
-
       }
     }
   }

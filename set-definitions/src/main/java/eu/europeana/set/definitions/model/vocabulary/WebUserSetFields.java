@@ -34,6 +34,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
      */
     @Deprecated(since = "")
     public static final String PARAM_SORT_ORDER           = "sortOrder";
+    public static final String TEXT_SCORE_SORT            = "score";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
