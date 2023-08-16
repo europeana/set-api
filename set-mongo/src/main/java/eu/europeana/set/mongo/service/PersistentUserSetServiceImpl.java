@@ -504,6 +504,8 @@ public class PersistentUserSetServiceImpl extends
       // check the score sort first (it can only be in desc order)
       if (sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
         mongoQuery.order(Meta.textScore());
+        mongoQuery.order(Sort.ascending(UserSetMongoConstants.MONGO_ID));
+        
       } else {
         if (!sortField.contains(" ")) {
           mongoQuery.order(Sort.ascending(sortField));
