@@ -78,7 +78,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
       String[] sortCriteria = toArray(sort);
       if(sortCriteria!=null) {
         for(String sortCriterion : sortCriteria) {
-          if(sortCriterion.contains(WebUserSetFields.TEXT_SCORE_SORT) && sortCriterion.contains("asc")) {
+          if(sortCriterion.contains(WebUserSetFields.TEXT_SCORE_SORT) && sortCriterion.contains(WebUserSetFields.SORT_ORDER_ASC)) {
             throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
                 new String[] { "invalid value for the sort field, it cannot contain 'score asc' since only the descending order is supported", sort });
           }

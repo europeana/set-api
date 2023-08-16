@@ -28,7 +28,10 @@
 	</logger>
 
         <!-- To suppress Mongo opened/closed connection messages -->	
-        <Logger name="org.mongodb.driver.connection" level="WARN"/> 
+        <logger name="org.mongodb.driver.connection" level="WARN"/>
+        
+        <!-- To enable logging of Mongo queries, set log level to debug -->	
+        <logger name="org.mongodb.morphia" level="WARN"/> 
   </Loggers>
 </Configuration> 
 
