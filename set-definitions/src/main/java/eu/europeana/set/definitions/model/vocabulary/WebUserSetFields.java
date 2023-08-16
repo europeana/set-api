@@ -34,6 +34,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
      */
     @Deprecated(since = "")
     public static final String PARAM_SORT_ORDER           = "sortOrder";
+    public static final String SORT_ORDER_DESC = "desc";
+    public static final String SORT_ORDER_ASC = "asc";
+
     public static final String TEXT_SCORE_SORT            = "score";
 
     // JsonLd Constants
