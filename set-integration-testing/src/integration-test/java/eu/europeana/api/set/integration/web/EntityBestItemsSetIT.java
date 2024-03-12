@@ -8,11 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.util.Collections;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -105,10 +101,10 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
     createdUserSets.add(createdSet);
 
     assertNotNull(identifier);
-    String creator = getCreator(result);
+    String creator = getStringValue(result, WebUserSetModelFields.CREATOR);
     assertNotNull(creator);
     assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
-    String provider = getProvider(result);
+    String provider = getStringValue(result, WebUserSetModelFields.PROVIDER);
     assertNotNull(provider);
     // check name
     assertTrue(containsKeyOrValue(provider, "Europeana XX"));
@@ -117,7 +113,7 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
         containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
     // check subject
     assertEquals("http://data.europeana.eu/concept/114", createdSet.getSubject().get(0));
-    assertNotNull(getSetContributors(result));
+    assertNotNull(getStringListValues(result, WebUserSetModelFields.CONTRIBUTOR));
   }
 
 
@@ -140,10 +136,10 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
     createdUserSets.add(createdSet);
 
     assertNotNull(identifier);
-    String creator = getCreator(result);
+    String creator = getStringValue(result, WebUserSetModelFields.CREATOR);
     assertNotNull(creator);
     assertTrue(StringUtils.contains(creator, getConfiguration().getEntityUserSetUserId()));
-    String provider = getProvider(result);
+    String provider = getStringValue(result, WebUserSetModelFields.PROVIDER);
     assertNotNull(provider);
     // check name - must not be present
     assertFalse(containsKeyOrValue(provider, "Europeana XX"));
@@ -151,7 +147,7 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
     assertTrue(
         containsKeyOrValue(provider, "https:\\/\\/pro.europeana.eu\\/project\\/europeana-xx"));
 
-    assertNotNull(getSetContributors(result));
+    assertNotNull(getStringListValues(result, WebUserSetModelFields.CONTRIBUTOR));
   }
 
   @Test
@@ -682,26 +678,6 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
 
     // getUserSetService().deleteUserSet(identifier);
 
-  }
-
-  private String getCreator(String result) throws JSONException {
-    assertNotNull(result);
-    JSONObject json = new JSONObject(result);
-    String creator = json.getString(WebUserSetModelFields.CREATOR);
-    return creator;
-  }
-
-  private String getProvider(String result) throws JSONException {
-    assertNotNull(result);
-    JSONObject json = new JSONObject(result);
-    String provider = json.getString(WebUserSetModelFields.PROVIDER);
-    return provider;
-  }
-
-  private List<String> getSetContributors(String result) throws JSONException {
-    assertNotNull(result);
-    JSONObject json = new JSONObject(result);
-    return Collections.singletonList(json.getString(WebUserSetModelFields.CONTRIBUTOR));
   }
 
   private void checkItemCountAndPosition(UserSet existingUserSet, String newItem,

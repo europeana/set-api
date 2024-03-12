@@ -209,7 +209,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         positionInt = Integer.parseInt(position);
         // if position less than pinned items
         // change the position from the initial start of Entity sets items
-        if (positionInt <= pinnedItems) {
+        if (positionInt < pinnedItems) {
           positionInt = pinnedItems + positionInt;
         }
         if (positionInt > items.size()) {
@@ -252,7 +252,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     getUserSetUtils().updatePagination(userSet, getConfiguration());
     return userSet;
-  }
+  }  
 
   /**
    * check if item already exists in the Set, if so remove it insert item to Set in the indicated
@@ -297,7 +297,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     return extUserSet;
   }
-
+  
   private void updatePinCount(UserSet existingUserSet, boolean pinnedItem, int oldPosition) {
     boolean mustHandlePinCount = existingUserSet.isEntityBestItemsSet();
     if (!mustHandlePinCount) {
@@ -898,7 +898,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public UserSet publishUnpublishUserSet(String userSetId, Authentication authentication,
+  public UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication,
       boolean publish) throws HttpException {
     PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
     // if the user set does not exist, return 404
@@ -908,7 +908,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     validateUserSetForPublishUnPublish(userSet, publish);
     if (publish) {
-      return updateUserSetForPublish(userSet, authentication);
+      return updateUserSetForPublish(userSet, issued, authentication);
     } else {
       return updateUserSetForUnpublish(userSet, authentication);
     }
@@ -929,11 +929,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           new String[] {"Publish/Unpublish user set ", userSet.getType()});
     }
     // verify the state of the object
-    if (publish && userSet.isPublished()) {
-      // if publishing
-      throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
-          new String[] {"Publish", "allready published"});
-    } else if (!publish && !userSet.isPublished()) {
+    if (!publish && !userSet.isPublished()) {
       // if depublishing
       throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
           new String[] {"Unpublish", "not published"});

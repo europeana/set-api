@@ -38,11 +38,11 @@
 	</repositories>
 
 	<properties>
-		<revision>0.11.2</revision>
+		<revision>0.12-SNAPSHOT</revision>
 		<version.java>11</version.java>
 		<version.javac.release>11</version.javac.release>
 		<version.log4j2>2.17.2</version.log4j2>
-		<version.commonsApi>0.3.19</version.commonsApi>
+		<version.commonsApi>0.3.22-SNAPSHOT</version.commonsApi>
 		<version.springBoot>2.5.7</version.springBoot>
 		<version.springBootMongoStarter>2.0.3.RELEASE</version.springBootMongoStarter>
 		<version.swagger>3.0.0</version.swagger>
@@ -76,6 +76,9 @@
 		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
 		<sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
 		<sonar.organization>europeana</sonar.organization>
+		<!--
+		<sonar.projectKey>europeana_set-api</sonar.projectKey>
+		-->
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>

@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.FindOptions;
+import org.mongodb.morphia.query.Meta;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.Sort;
@@ -43,7 +43,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
  * @author GrafR
  *
  */
-//@Component(value = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
+// @Component(value = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
 public class PersistentUserSetServiceImpl extends
     AbstractNoSqlServiceImpl<PersistentUserSet, String> implements PersistentUserSetService {
 
@@ -115,14 +115,14 @@ public class PersistentUserSetServiceImpl extends
   }
 
   @Override
-  public long getDistinct(String field, boolean fieldIsArray, String collectionType) throws UserSetServiceException {
+  public long getDistinct(String field, boolean fieldIsArray, String collectionType)
+      throws UserSetServiceException {
     long count = 0;
     // Cursor is needed in aggregate command
     AggregationOptions aggregationOptions =
         AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
     Cursor cursor = getDao().getCollection().aggregate(
-        getDistinctCountPipeline(field, fieldIsArray, collectionType),
-        aggregationOptions);
+        getDistinctCountPipeline(field, fieldIsArray, collectionType), aggregationOptions);
     if (cursor != null && cursor.hasNext()) {
       // ideally there should be only one value present.
       count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
@@ -136,7 +136,7 @@ public class PersistentUserSetServiceImpl extends
 
     return count;
   }
-  
+
   @Override
   public long countItemsInEntitySets() {
     // Cursor is needed in aggregate command
@@ -144,7 +144,8 @@ public class PersistentUserSetServiceImpl extends
         AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
     long totalItems = 0;
     Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
-    groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+    groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT,
+        new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
     Cursor cursor = getDao().getCollection().aggregate(
         getAggregatePipeline(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), groupFieldsAdditional),
         aggregationOptions);
@@ -154,7 +155,7 @@ public class PersistentUserSetServiceImpl extends
     }
     return totalItems;
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -224,36 +225,33 @@ public class PersistentUserSetServiceImpl extends
   }
 
   /**
-   * Creates a aggregation pipeline to count distinct values of
-   * the field provided. If the field is of array type, we first need to unwind the array values.
-   * 'type' of user-set value is optional. If passed match filter is added.
-   * query :
-   * [ {  $match: { type: <type> }},
-   *   { $unwind : "$items"}, 
-   *   {  $group: { _id: <groupField> }},
-   *   {  $count: <Field Name for the count> } ]
+   * Creates a aggregation pipeline to count distinct values of the field provided. If the field is
+   * of array type, we first need to unwind the array values. 'type' of user-set value is optional.
+   * If passed match filter is added. query : [ { $match: { type: <type> }}, { $unwind : "$items"},
+   * { $group: { _id: <groupField> }}, { $count: <Field Name for the count> } ]
    *
    * @param type : Optional. type of user set - Collection or BookmarkFolder.
    * @param groupField : the field for which distinct count is calculated
    * @return
    */
-  private List<DBObject> getDistinctCountPipeline(String groupField, boolean groupFieldIsArray, String type) {
-      List<DBObject> distinctCountPipeline = new ArrayList<>();
-      // add match filter if present
-      if (StringUtils.isNotEmpty(type)) {
-        distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
-      }
-      if(groupFieldIsArray) {
-        distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_UNWIND, groupField));
-      }
-      // add group field
-      distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
-              new BasicDBObject(UserSetMongoConstants.MONGO_ID, groupField)));
-      // add count
-      distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_COUNT,
-              UserSetMongoConstants.MONGO_FIELD_COUNT));
+  private List<DBObject> getDistinctCountPipeline(String groupField, boolean groupFieldIsArray,
+      String type) {
+    List<DBObject> distinctCountPipeline = new ArrayList<>();
+    // add match filter if present
+    if (StringUtils.isNotEmpty(type)) {
+      distinctCountPipeline.add(getMatchFilter(WebUserSetFields.TYPE, type));
+    }
+    if (groupFieldIsArray) {
+      distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_UNWIND, groupField));
+    }
+    // add group field
+    distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_GROUP,
+        new BasicDBObject(UserSetMongoConstants.MONGO_ID, groupField)));
+    // add count
+    distinctCountPipeline.add(new BasicDBObject(UserSetMongoConstants.MONGO_COUNT,
+        UserSetMongoConstants.MONGO_FIELD_COUNT));
 
-      return distinctCountPipeline;
+    return distinctCountPipeline;
   }
 
   @Override
@@ -330,40 +328,46 @@ public class PersistentUserSetServiceImpl extends
   }
 
   /**
-   *  creates a mongo query to count the total item present in BookmarkFolder
-   *  Mongo Query : db.getCollection('userset').aggregate([
-   *  {$match:{"type":"BookmarkFolder"}},{$group: {_id:null, totalLikes: {$sum: "$total"}}}
-   *  ])
+   * creates a mongo query to count the total item present in BookmarkFolder Mongo Query :
+   * db.getCollection('userset').aggregate([ {$match:{"type":"BookmarkFolder"}},{$group: {_id:null,
+   * totalLikes: {$sum: "$total"}}} ])
+   * 
    * @return
    */
   @Override
   public long countTotalLikes() {
-      // Cursor is needed in aggregate command
-      AggregationOptions aggregationOptions = AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+    // Cursor is needed in aggregate command
+    AggregationOptions aggregationOptions =
+        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
 
-      long totalLikes =0;
-      Map<String,DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
-      groupFieldsAdditional.put(UserSetMongoConstants.MONGO_TOTAL_LIKES, new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
-      Cursor cursor =getDao().getCollection().aggregate(getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional), aggregationOptions);
-      if (cursor != null) {
-          while(cursor.hasNext()) {
-              DBObject object = cursor.next();
-              totalLikes += Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
-          }
+    long totalLikes = 0;
+    Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
+    groupFieldsAdditional.put(UserSetMongoConstants.MONGO_TOTAL_LIKES,
+        new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
+    Cursor cursor = getDao().getCollection().aggregate(
+        getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional),
+        aggregationOptions);
+    if (cursor != null) {
+      while (cursor.hasNext()) {
+        DBObject object = cursor.next();
+        totalLikes +=
+            Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
       }
-      return totalLikes;
+    }
+    return totalLikes;
   }
 
   // create $match and $group for mongo query
-  private List<DBObject> getAggregatePipeline(String collectionType, Map<String,DBObject> groupFieldsAdditional) {
-      DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
+  private List<DBObject> getAggregatePipeline(String collectionType,
+      Map<String, DBObject> groupFieldsAdditional) {
+    DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
-      DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
-      for (Map.Entry<String,DBObject> field : groupFieldsAdditional.entrySet()) { 
-        groupFields.put(field.getKey(), field.getValue());
-      }
-      DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
-      return Arrays.asList(match, group);
+    DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
+    for (Map.Entry<String, DBObject> field : groupFieldsAdditional.entrySet()) {
+      groupFields.put(field.getKey(), field.getValue());
+    }
+    DBObject group = new BasicDBObject(UserSetMongoConstants.MONGO_GROUP, groupFields);
+    return Arrays.asList(match, group);
   }
 
   /**
@@ -389,16 +393,16 @@ public class PersistentUserSetServiceImpl extends
         .project(WebUserSetFields.TYPE, true).project(WebUserSetModelFields.SUBJECT, true).asList();
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public ResultSet<PersistentUserSet> find(UserSetQuery query) {
     Query<PersistentUserSet> mongoQuery = buildMongoQuery(query);
     long totalInCollection = mongoQuery.count();
 
-    FindOptions options = buildMongoPaginationOptions(query);
     List<PersistentUserSet> userSets = new ArrayList<PersistentUserSet>();
     // workaround as limit=0 still returns all results
-    if (options.getLimit() > 0) {
-      userSets = mongoQuery.asList(options);
+    if (mongoQuery.getLimit() > 0) {
+      userSets = mongoQuery.asList();
     }
     ResultSet<PersistentUserSet> res = new ResultSet<>();
 
@@ -407,16 +411,19 @@ public class PersistentUserSetServiceImpl extends
     return res;
   }
 
-  private FindOptions buildMongoPaginationOptions(UserSetQuery query) {
-    FindOptions options = new FindOptions();
-    options.skip(query.getPageNr() * query.getPageSize());
-    options.limit(query.getPageSize());
-    return options;
+  @SuppressWarnings("deprecation")
+  private void setPaginationOptions(Query<PersistentUserSet> mongoQuery, UserSetQuery query) {
+    mongoQuery.offset(query.getPageNr() * query.getPageSize());
+    mongoQuery.limit(query.getPageSize());
   }
 
   private Query<PersistentUserSet> buildMongoQuery(UserSetQuery query) {
 
     Query<PersistentUserSet> searchQuery = buildUserConditionsQuery(query);
+    
+    setPaginationOptions(searchQuery, query);
+    setOrder(searchQuery, query);
+    
     if (query.isAdmin()) {
       // admin can see all
       return searchQuery;
@@ -435,7 +442,7 @@ public class PersistentUserSetServiceImpl extends
       // private only, user can see only his private sets
       searchQuery.filter(FIELD_CREATOR, query.getUser());
     }
-
+   
     return searchQuery;
   }
 
@@ -483,28 +490,33 @@ public class PersistentUserSetServiceImpl extends
       mongoQuery.filter(WebUserSetModelFields.TITLE + "." + query.getTitleLang() + " exists", 1);
     }
 
-    if (query.getSortCriteria() == null) {
-      // default ordering if none is defined by the user
-      mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));
-    } else {
-      buildSortCriteria(query, mongoQuery);
-    }
-
     return mongoQuery;
   }
 
-  private void buildSortCriteria(UserSetQuery query, Query<PersistentUserSet> mongoQuery) {
+  private void setOrder(Query<PersistentUserSet> mongoQuery, UserSetQuery query) {
+    // default ordering if none is defined by the user
+    if (query.getSortCriteria() == null) {
+      mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));
+      return;
+    }
+      
     for (String sortField : query.getSortCriteria()) {
-      if (!sortField.contains(" ")) {
-        mongoQuery.order(Sort.ascending(sortField));
+      // check the score sort first (it can only be in desc order)
+      if (sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
+        mongoQuery.order(Meta.textScore());
+        mongoQuery.order(Sort.ascending(UserSetMongoConstants.MONGO_ID));
+        
       } else {
-        String[] sortParts = sortField.split(" ", 2);
-        if (!"desc".contentEquals(sortParts[1])) {
-          mongoQuery.order(Sort.ascending(sortParts[0]));
+        if (!sortField.contains(" ")) {
+          mongoQuery.order(Sort.ascending(sortField));
         } else {
-          mongoQuery.order(Sort.descending(sortParts[0]));
+          String[] sortParts = sortField.split(" ", 2);
+          if (WebUserSetFields.SORT_ORDER_DESC.equals(sortParts[1])) {
+            mongoQuery.order(Sort.descending(sortParts[0]));
+          } else {
+            mongoQuery.order(Sort.ascending(sortParts[0]));
+          }
         }
-
       }
     }
   }

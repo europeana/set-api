@@ -15,11 +15,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -62,6 +65,14 @@ public class BaseRest extends BaseRestController {
 
     @Resource
     UsageStatsService usageStatsService;
+    
+    @Resource
+    protected BuildProperties buildInfo;
+    
+    @PostConstruct
+    void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Etc/UTC"));
+    }
 
     Logger logger = LogManager.getLogger(getClass());
 
@@ -279,7 +290,7 @@ public class BaseRest extends BaseRestController {
     }
 
     public String getApiVersion() {
-        return getConfiguration().getApiVersion();
+        return buildInfo.getVersion();
     }
     
     protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, Integer pageNr, int pageSize, HttpServletRequest request) throws IOException, HttpException {

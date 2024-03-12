@@ -18,6 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.GeneratedUserSetIdImpl;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
+import eu.europeana.set.mongo.model.UserSetMongoConstants;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Serializable>
@@ -50,7 +51,7 @@ public class PersistentUserSetDaoImpl <E extends PersistentUserSet, T extends Se
 		synchronized (syncObj) {
 
 			Query<GeneratedUserSetIdImpl> q = getDatastore().createQuery(GeneratedUserSetIdImpl.class);
-			q.filter("_id", provider);
+			q.filter(UserSetMongoConstants.MONGO_ID, provider);
 			
 			UpdateOperations<GeneratedUserSetIdImpl> uOps = getDatastore()
 					.createUpdateOperations(GeneratedUserSetIdImpl.class)

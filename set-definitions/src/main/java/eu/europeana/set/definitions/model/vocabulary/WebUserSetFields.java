@@ -25,6 +25,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String PATH_PARAM_CREATOR_ID      = "creator";
     public static final String PATH_PARAM_LOCAL_ID        = "localId";
     public static final String PATH_PARAM_POSITION        = "position";
+    public static final String REQUEST_PARAM_ISSUED       = "issued";
 
     /**
      * sort order should be included in the sort param
@@ -33,6 +34,10 @@ public class WebUserSetFields extends WebUserSetModelFields {
      */
     @Deprecated(since = "")
     public static final String PARAM_SORT_ORDER           = "sortOrder";
+    public static final String SORT_ORDER_DESC = "desc";
+    public static final String SORT_ORDER_ASC = "asc";
+
+    public static final String TEXT_SCORE_SORT            = "score";
 
     // JsonLd Constants
     public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
@@ -67,8 +72,6 @@ public class WebUserSetFields extends WebUserSetModelFields {
    
     // Serialization Constants
     public static final String SEPARATOR_SEMICOLON        = ":";
-    public static final String SET_DATE_FORMAT            = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-//    public static final String DEFAULT_USER_BASE_URL        = "http://data.europeana.eu/user/";
 
     // Entity user set and Elevation Constants
     public static final String ELEVATION_FILENAME        = "elevate.xml";

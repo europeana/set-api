@@ -42,16 +42,6 @@ public class UserSetApp extends SpringBootServletInitializer {
    * @param args command-line arguments
    */
   public static void main(String[] args) {
-    // When deploying to Cloud Foundry, this will log the instance index number, IP and GUID
-    
-    logger.info("CF_INSTANCE_INDEX  = {}, CF_INSTANCE_GUID = {}, CF_INSTANCE_IP  = {}",
-        System.getenv("CF_INSTANCE_INDEX"), System.getenv("CF_INSTANCE_GUID"),
-        System.getenv("CF_INSTANCE_IP"));
-
-    /* Activate socks proxy (if your application requires it) - currently not needed/not working
-    SocksProxyActivator.activate("config/set.user.properties");
-    */
-
     ApplicationContext ctx = SpringApplication.run(UserSetApp.class, args);
 
     if (logger.isDebugEnabled()) {

@@ -3,7 +3,6 @@ package eu.europeana.set.definitions.model;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.impl.Provider;
 
@@ -48,6 +47,10 @@ public interface UserSet extends PageInfo {
     Date getModified();
 
     void setModified(Date modified);
+
+    Date getIssued();
+
+    void setIssued(Date issued);
 
     List<String> getItems();
 

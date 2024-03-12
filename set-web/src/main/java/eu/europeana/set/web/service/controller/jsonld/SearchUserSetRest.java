@@ -84,6 +84,7 @@ public class SearchUserSetRest extends BaseRest {
       if (profiles.contains(LdProfiles.FACETS)) {
         facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
       }
+      //validate the search params and build the search query
       UserSetQuery searchQuery =
           getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize, getConfiguration());
       ResultSet<? extends UserSet> results =
