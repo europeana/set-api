@@ -135,10 +135,10 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-actuator-autoconfigure</artifactId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-
-
+		
+		
 		<!-- aspectj /profiling -->
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -146,19 +146,6 @@
 		</dependency>
 
 		<!-- swagger -->
-		<!--
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-boot-starter</artifactId>
-			<version>${version.swagger}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		-->
 		<!-- spring doc dependencies -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
