@@ -1,7 +1,7 @@
 package eu.europeana.set.mongo.model.internal;
 
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
 
 /**
  * This class is used to generate the UserSet IDs in form of europeanaId/UserSetId, where the 

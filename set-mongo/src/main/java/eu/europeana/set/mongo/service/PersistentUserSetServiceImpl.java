@@ -12,15 +12,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.Meta;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryResults;
-import org.mongodb.morphia.query.Sort;
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Cursor;
 import com.mongodb.DBObject;
+import dev.morphia.query.Criteria;
+import dev.morphia.query.Meta;
+import dev.morphia.query.Query;
+import dev.morphia.query.QueryResults;
+import dev.morphia.query.Sort;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -119,8 +119,10 @@ public class PersistentUserSetServiceImpl extends
       throws UserSetServiceException {
     long count = 0;
     // Cursor is needed in aggregate command
+//    AggregationOptions aggregationOptions =
+//        AggregationOptions.builder().outputMode(AggregationOptions. OutputMode.CURSOR).build();
     AggregationOptions aggregationOptions =
-        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+      AggregationOptions.builder().allowDiskUse(true).build();
     Cursor cursor = getDao().getCollection().aggregate(
         getDistinctCountPipeline(field, fieldIsArray, collectionType), aggregationOptions);
     if (cursor != null && cursor.hasNext()) {
@@ -140,15 +142,16 @@ public class PersistentUserSetServiceImpl extends
   @Override
   public long countItemsInEntitySets() {
     // Cursor is needed in aggregate command
+//    AggregationOptions aggregationOptions =
+//        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
     AggregationOptions aggregationOptions =
-        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+      AggregationOptions.builder().allowDiskUse(true).build();
     long totalItems = 0;
     Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
     groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT,
         new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
     Cursor cursor = getDao().getCollection().aggregate(
-        getAggregatePipeline(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), groupFieldsAdditional),
-        aggregationOptions);
+        getAggregatePipeline(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), groupFieldsAdditional), aggregationOptions);
     if (cursor != null && cursor.hasNext()) {
       totalItems =
           Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
@@ -272,7 +275,7 @@ public class PersistentUserSetServiceImpl extends
     Map<String, Long> valueCountMap = new LinkedHashMap<>();
     // Cursor is needed in aggregate command
     AggregationOptions aggregationOptions =
-        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+        AggregationOptions.builder().allowDiskUse(null).build();
     Cursor cursor =
         getDao().getCollection().aggregate(getFacetPipeline(facetQuery), aggregationOptions);
     if (cursor != null) {
@@ -338,7 +341,7 @@ public class PersistentUserSetServiceImpl extends
   public long countTotalLikes() {
     // Cursor is needed in aggregate command
     AggregationOptions aggregationOptions =
-        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
+        AggregationOptions.builder().allowDiskUse(true).build();
 
     long totalLikes = 0;
     Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();

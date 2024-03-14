@@ -36,12 +36,11 @@ import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Controller
 @SwaggerSelect
-@Api(tags = "User Set Discovery API")
+@Tag(name = "User Set Discovery API")
 public class SearchUserSetRest extends BaseRest {
 
   UserSetQueryBuilder queryBuilder;
@@ -55,8 +54,7 @@ public class SearchUserSetRest extends BaseRest {
 
   @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @ApiOperation(notes = SwaggerConstants.SEARCH, value = "Search user sets",
-      nickname = "searchUserSet", response = java.lang.Void.class)
+  @Tag(description = SwaggerConstants.SEARCH, name = "Search user sets")
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
@@ -126,8 +124,7 @@ public class SearchUserSetRest extends BaseRest {
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @ApiOperation(notes = SwaggerConstants.SEARCH_ITEMS_IN_SET, value = "Search items in set",
-      nickname = "searchItemsInSet", response = java.lang.Void.class)
+  @Tag(description = SwaggerConstants.SEARCH_ITEMS_IN_SET, name = "Search items in set")
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,

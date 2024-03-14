@@ -1,11 +1,10 @@
 package eu.europeana.set.mongo.model;
 
 import java.util.Date;
-
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
+import dev.morphia.annotations.Embedded;
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
 import eu.europeana.api.commons.nosql.entity.PersistentObject;
 import eu.europeana.set.definitions.model.authentication.Application;
 import eu.europeana.set.definitions.model.authentication.impl.BaseClientImpl;

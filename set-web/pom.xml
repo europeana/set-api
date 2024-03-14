@@ -15,31 +15,29 @@
 		<version>${revision}</version>
 	</parent>
 
-    <properties>
+	<properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-	
+
 	<dependencies>
-	
+
 		<!-- LOG4J2 LOGGING NOTE: must be in sync with log4j-core version -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>${version.log4j2}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>${version.log4j2}</version>			
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>${version.log4j2}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.logging.log4j</groupId>
@@ -63,19 +61,19 @@
 			<artifactId>set-mongo</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-search-api-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
-        <dependency>
-            <groupId>eu.europeana.set</groupId>
-            <artifactId>set-usage-stats</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-	
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-usage-stats</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- europeana api commons -->
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
@@ -89,6 +87,11 @@
 				<exclusion>
 					<groupId>io.springfox</groupId>
 					<artifactId>springfox-swagger2</artifactId>
+				</exclusion>
+				<!-- Explicitly exclude test dependencies for Eclipse, transitive dependency for groovy generates runtime errors --> 
+				<exclusion>
+					<groupId>io.rest-assured</groupId>
+					<artifactId>*</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -143,6 +146,7 @@
 		</dependency>
 
 		<!-- swagger -->
+		<!--
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-boot-starter</artifactId>
@@ -154,7 +158,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+		-->
+		<!-- spring doc dependencies -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>${springdoc.version}</version>
+		</dependency>
+
 		<!-- javax servlet -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -181,33 +192,33 @@
 			<version>${version.commonsIO}</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- TODO: SG remove and migrate to wpring web -->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-		
+
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
 		<dependency>
-		    <groupId>javax.validation</groupId>
-		    <artifactId>validation-api</artifactId>
-		</dependency>		
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -216,43 +227,43 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-            		<include>**.properties</include>
-            		<include>**.info</include>
-            		<include>**.xml</include>
-        		</includes>
-                <excludes>
-               		<exclude>**/*.jks</exclude>
-        		</excludes>
-    		</resource>
-    		<resource>
-        		<directory>src/main/resources</directory>
-        			<filtering>false</filtering>
-        		<includes>
-            		<include>**/*.jks</include>
-            		<include>public/**</include>
-        		</includes>
-    		</resource>
-        </resources>	
+					<include>**.properties</include>
+					<include>**.info</include>
+					<include>**.xml</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.jks</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*.jks</include>
+					<include>public/**</include>
+				</includes>
+			</resource>
+		</resources>
 		<finalName>${artifactId}</finalName>
 		<!-- plugins -->
 		<plugins>
-      		<plugin>
-        		<groupId>org.springframework.boot</groupId>
-        		<artifactId>spring-boot-maven-plugin</artifactId>
-        		<!--
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!--
         		<version></version>
         		-->
 				<executions>
-          		<execution>
-		            <goals>
-		              <goal>repackage</goal>
-		            </goals>
-		            <configuration>
-		              <classifier>executable</classifier>
-		            </configuration>
-		        </execution>
-        		</executions>
-      		</plugin>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<classifier>executable</classifier>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
