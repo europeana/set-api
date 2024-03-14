@@ -96,9 +96,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     
     // use application/ld+json if no Content-Type is specified
-    //configurer.defaultContentType(MediaType.valueOf(HttpHeaders.CONTENT_TYPE_JSONLD));
-    configurer.defaultContentType(MediaType.valueOf(HttpHeaders.CONTENT_TYPE_JSON_UTF8),
-        MediaType.valueOf(HttpHeaders.CONTENT_TYPE_JSONLD));
+    configurer.defaultContentType(APPLICATION_JSONLD, MediaType.APPLICATION_JSON);
 
     configurer.mediaTypes(getMediaTypesMapping());
   }
