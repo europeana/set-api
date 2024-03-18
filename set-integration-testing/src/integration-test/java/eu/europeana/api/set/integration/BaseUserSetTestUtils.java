@@ -133,7 +133,8 @@ public abstract class BaseUserSetTestUtils {
 
   static {
 //    MONGO_CONTAINER = new MongoDBContainer("mongo:6.0.14-jammy")
-    MONGO_CONTAINER = new MongoContainer("set-api-test")
+    final String serviceDB = "admin";   // to change to "set-api-test"
+    MONGO_CONTAINER = new MongoContainer(serviceDB)
         .withLogConsumer(new WaitingConsumer()
         .andThen(new ToStringConsumer()));
 
