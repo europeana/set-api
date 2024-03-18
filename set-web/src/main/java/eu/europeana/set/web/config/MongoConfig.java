@@ -37,7 +37,7 @@ public class MongoConfig {
   
   private ApiMongoConnector mongoConnector;
   
-  @Bean(UserSetConfiguration.BEAN_SET_MONGO_STORE)
+  @Bean(BeanNames.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {
     Datastore ds = getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
     //Ensures consistency when Mongo is deployed in a replica-set
