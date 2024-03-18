@@ -21,6 +21,11 @@ public class UserSetErrorController extends AbstractErrorController {
     }
 
 
+    /**
+     * handle /error requests
+     * @param request the request object
+     * @return ,app with default error attributes
+     */
     @GetMapping(value = "/error", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD})
     @ResponseBody
     public Map<String, Object> error(final HttpServletRequest request) {

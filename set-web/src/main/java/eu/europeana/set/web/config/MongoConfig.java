@@ -24,13 +24,13 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
     ignoreResourceNotFound = true)
 public class MongoConfig {
 
-  @Value("${mongodb.set.connectionUrl:}")
+  @Value("${mongodb.set.connectionUrl:''}")
   private String mongoConnectionUrl;
 
-  @Value("${mongodb.set.truststore:}")
+  @Value("${mongodb.set.truststore:''}")
   private String mongoTrustStore;
 
-  @Value("${mongodb.set.truststorepass:}")
+  @Value("${mongodb.set.truststorepass:''}")
   private String mongoTrustStorePass;
 
   private static final String[] MODEL_PACKAGES = new String[]{"eu.europeana.set.definitions", "eu.europeana.api.commons.nosql.entity"};

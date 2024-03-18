@@ -14,11 +14,15 @@ import eu.europeana.api.commons.web.exception.EuropeanaGlobalExceptionHandler;
 import eu.europeana.set.web.config.BeanNames;
 import eu.europeana.set.web.service.RequestPathMethodService;
 
+/**
+ * Controller for handling application exceptions
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler extends EuropeanaGlobalExceptionHandler {
 
 	I18nService i18nService;
 
+	@Override
 	protected I18nService getI18nService() {
 		return i18nService;
 	}

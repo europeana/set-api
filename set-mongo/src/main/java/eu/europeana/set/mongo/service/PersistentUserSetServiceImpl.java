@@ -118,14 +118,11 @@ public class PersistentUserSetServiceImpl extends
   public long getDistinct(String field, boolean fieldIsArray, String collectionType)
       throws UserSetServiceException {
     long count = 0;
-    // Cursor is needed in aggregate command
-//    AggregationOptions aggregationOptions =
-//        AggregationOptions.builder().outputMode(AggregationOptions. OutputMode.CURSOR).build();
     AggregationOptions aggregationOptions =
-      AggregationOptions.builder().allowDiskUse(true).build();
+        AggregationOptions.builder().allowDiskUse(Boolean.TRUE).build();
     Cursor cursor = getDao().getCollection().aggregate(
         getDistinctCountPipeline(field, fieldIsArray, collectionType), aggregationOptions);
-    if (cursor != null && cursor.hasNext()) {
+    if (cursor.hasNext()) {
       // ideally there should be only one value present.
       count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
 
@@ -141,18 +138,16 @@ public class PersistentUserSetServiceImpl extends
 
   @Override
   public long countItemsInEntitySets() {
-    // Cursor is needed in aggregate command
-//    AggregationOptions aggregationOptions =
-//        AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build();
     AggregationOptions aggregationOptions =
-      AggregationOptions.builder().allowDiskUse(true).build();
+        AggregationOptions.builder().allowDiskUse(Boolean.TRUE).build();
     long totalItems = 0;
     Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
     groupFieldsAdditional.put(UserSetMongoConstants.MONGO_FIELD_COUNT,
         new BasicDBObject(UserSetMongoConstants.MONGO_SUM, UserSetMongoConstants.MONGO_TOTAL));
     Cursor cursor = getDao().getCollection().aggregate(
-        getAggregatePipeline(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), groupFieldsAdditional), aggregationOptions);
-    if (cursor != null && cursor.hasNext()) {
+        getAggregatePipeline(UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), groupFieldsAdditional),
+        aggregationOptions);
+    if (cursor.hasNext()) {
       totalItems =
           Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
     }
@@ -274,21 +269,19 @@ public class PersistentUserSetServiceImpl extends
   public Map<String, Long> getFacets(UserSetFacetQuery facetQuery) {
     Map<String, Long> valueCountMap = new LinkedHashMap<>();
     // Cursor is needed in aggregate command
-    AggregationOptions aggregationOptions =
-        AggregationOptions.builder().allowDiskUse(null).build();
+    AggregationOptions aggregationOptions = AggregationOptions.builder().allowDiskUse(null).build();
     Cursor cursor =
         getDao().getCollection().aggregate(getFacetPipeline(facetQuery), aggregationOptions);
-    if (cursor != null) {
-      while (cursor.hasNext()) {
-        DBObject object = cursor.next();
-        @SuppressWarnings("unchecked")
-        List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
-        for (DBObject o : facet) {
-          valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)),
-              Long.parseLong(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
-        }
+    while (cursor.hasNext()) {
+      DBObject object = cursor.next();
+      @SuppressWarnings("unchecked")
+      List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
+      for (DBObject o : facet) {
+        valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)),
+            Long.parseLong(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
       }
     }
+
     return valueCountMap;
   }
 
@@ -341,7 +334,7 @@ public class PersistentUserSetServiceImpl extends
   public long countTotalLikes() {
     // Cursor is needed in aggregate command
     AggregationOptions aggregationOptions =
-        AggregationOptions.builder().allowDiskUse(true).build();
+        AggregationOptions.builder().allowDiskUse(Boolean.TRUE).build();
 
     long totalLikes = 0;
     Map<String, DBObject> groupFieldsAdditional = new ConcurrentHashMap<>();
@@ -350,13 +343,12 @@ public class PersistentUserSetServiceImpl extends
     Cursor cursor = getDao().getCollection().aggregate(
         getAggregatePipeline(UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), groupFieldsAdditional),
         aggregationOptions);
-    if (cursor != null) {
-      while (cursor.hasNext()) {
-        DBObject object = cursor.next();
-        totalLikes +=
-            Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
-      }
+    while (cursor.hasNext()) {
+      DBObject object = cursor.next();
+      totalLikes +=
+          Long.parseLong(String.valueOf(object.get(UserSetMongoConstants.MONGO_TOTAL_LIKES)));
     }
+
     return totalLikes;
   }
 
@@ -423,10 +415,10 @@ public class PersistentUserSetServiceImpl extends
   private Query<PersistentUserSet> buildMongoQuery(UserSetQuery query) {
 
     Query<PersistentUserSet> searchQuery = buildUserConditionsQuery(query);
-    
+
     setPaginationOptions(searchQuery, query);
     setOrder(searchQuery, query);
-    
+
     if (query.isAdmin()) {
       // admin can see all
       return searchQuery;
@@ -445,7 +437,7 @@ public class PersistentUserSetServiceImpl extends
       // private only, user can see only his private sets
       searchQuery.filter(FIELD_CREATOR, query.getUser());
     }
-   
+
     return searchQuery;
   }
 
@@ -502,13 +494,13 @@ public class PersistentUserSetServiceImpl extends
       mongoQuery.order(Sort.descending(WebUserSetModelFields.MODIFIED));
       return;
     }
-      
+
     for (String sortField : query.getSortCriteria()) {
       // check the score sort first (it can only be in desc order)
       if (sortField.contains(WebUserSetFields.TEXT_SCORE_SORT)) {
         mongoQuery.order(Meta.textScore());
         mongoQuery.order(Sort.ascending(UserSetMongoConstants.MONGO_ID));
-        
+
       } else {
         if (!sortField.contains(" ")) {
           mongoQuery.order(Sort.ascending(sortField));

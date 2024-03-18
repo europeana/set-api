@@ -10,22 +10,27 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
+/**
+ * Class for configuration of SpringDoc 
+ */
 @Configuration
 @OpenAPIDefinition
 public class SpringDocConfig {
 
     private final BuildProperties buildProperties;
-    
-//    private final BuildProperties buildInfo;
 
     /**
      * Initialize SpringDoc with API build information
-     * @param buildInfo object for retrieving build information
+     * @param buildProperties object for retrieving build information
      */
     public SpringDocConfig(BuildProperties buildProperties) {
         this.buildProperties = buildProperties;
     }
 
+    /**
+     * create OpenAPI bean with required information
+     * @return the opeApi bean
+     */
     @Bean
     public OpenAPI userServiceOpenAPI() {
         return new OpenAPI().info(new Info().title(buildProperties.getName())
