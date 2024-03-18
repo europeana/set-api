@@ -231,7 +231,7 @@
 				</includes>
 			</resource>
 		</resources>
-		<finalName>${artifactId}</finalName>
+		<finalName>${project.artifactId}</finalName>
 		<!-- plugins -->
 		<plugins>
 			<plugin>
