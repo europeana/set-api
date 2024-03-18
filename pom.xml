@@ -92,7 +92,8 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
-		<aggregate.report.xml>build/reports/jacoco/test/jacocoTestReport.xml</aggregate.report.xml>
+		<!-- see https://github.com/SaurabhDev/Demo-Java-Sonar-Maven/tree/master -->
+		<aggregate.report.xml>reports/jacoco/test/jacocoTestReport.xml</aggregate.report.xml>
 		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 
 
