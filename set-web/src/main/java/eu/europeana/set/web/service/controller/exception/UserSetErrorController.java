@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorCon
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 
@@ -27,7 +26,6 @@ public class UserSetErrorController extends AbstractErrorController {
      * @return ,app with default error attributes
      */
     @GetMapping(value = "/error", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD})
-    @ResponseBody
     public Map<String, Object> error(final HttpServletRequest request) {
         return this.getErrorAttributes(request, ErrorAttributeOptions.defaults());
     }
