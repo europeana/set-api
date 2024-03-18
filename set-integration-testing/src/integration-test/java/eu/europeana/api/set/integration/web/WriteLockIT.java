@@ -10,7 +10,6 @@ import javax.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -39,7 +38,6 @@ import eu.europeana.set.web.model.WebUserSetImpl;
  * @author Roman Graf on 10-09-2020.
  */
 @SpringBootTest
-@Disabled("SG: Temporary disabled as tests are failing in github")
 public class WriteLockIT extends BaseUserSetTestUtils {
 
   @Resource(name = "set_db_apilockService")
