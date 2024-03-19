@@ -21,6 +21,7 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.model.SetOperationResponse;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -39,7 +40,7 @@ public class AdminRest extends BaseRest {
   
   @PostMapping(value = "/set/admin/lock", produces = { HttpHeaders.CONTENT_TYPE_JSON_UTF8,
       HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
-  @Tag(description = "Lock write operations. Authorization required.", name = "Lock Write Operations")
+  @Operation(description = "Lock write operations. Authorization required.", summary = "Lock Write Operations")
   public ResponseEntity<String> lockWriteOperations(
       HttpServletRequest request) throws HttpException, ApiWriteLockException {
 
@@ -74,7 +75,7 @@ public class AdminRest extends BaseRest {
 
   @DeleteMapping(value = "/set/admin/lock", produces = {
       HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
-  @Tag(name = "Unlock write operations")
+  @Operation(summary = "Unlock write operations")
   public ResponseEntity<String> unlockWriteOperations(
       HttpServletRequest request) throws HttpException, ApiWriteLockException {
     

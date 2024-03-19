@@ -40,6 +40,7 @@ import eu.europeana.set.web.model.elevation.Query;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -55,7 +56,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @throws HttpException
      */
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
-    @Tag(description = "Generate Elevation file for best bets", name = "Generate elevation file")
+    @Operation(description = "Generate Elevation file for best bets", summary = "Generate elevation file")
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
             HttpServletRequest request) throws HttpException {
@@ -72,7 +73,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @throws UserSetServiceException 
      */
     @GetMapping(value = "/set/stats", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-    @Tag(description = SwaggerConstants.SET_USAGE_STATS, name = "Generate usage statistics")
+    @Operation(description = SwaggerConstants.SET_USAGE_STATS, summary = "Generate usage statistics")
     public ResponseEntity<String> generateUsageStats(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
             HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {

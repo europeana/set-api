@@ -35,6 +35,7 @@ import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -52,7 +53,7 @@ public class SearchUserSetRest extends BaseRest {
 
   @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.SEARCH, name = "Search user sets")
+  @Operation(description = SwaggerConstants.SEARCH, summary = "Search user sets")
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
@@ -122,7 +123,7 @@ public class SearchUserSetRest extends BaseRest {
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.SEARCH_ITEMS_IN_SET, name = "Search items in set")
+  @Operation(description = SwaggerConstants.SEARCH_ITEMS_IN_SET, summary = "Search items in set")
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,

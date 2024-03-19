@@ -8,11 +8,13 @@ import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import io.swagger.v3.oas.annotations.Hidden;
 
 /**
  * Created by luthien on 2019-08-13.
  */
 @RestController
+@Hidden
 public class UserSetErrorController extends AbstractErrorController {
 
     public UserSetErrorController(ErrorAttributes errorAttributes) {

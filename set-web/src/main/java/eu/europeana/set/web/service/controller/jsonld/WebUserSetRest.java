@@ -53,6 +53,7 @@ import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -71,7 +72,7 @@ public class WebUserSetRest extends BaseRest {
 
   @PostMapping(value = "/set/",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(name="Create user set", description = SwaggerConstants.SAMPLES_JSONLD)
+  @Operation(summary="Create user set", description = SwaggerConstants.SAMPLES_JSONLD)
   public ResponseEntity<String> createUserSet(@RequestBody String userSet,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
@@ -156,7 +157,7 @@ public class WebUserSetRest extends BaseRest {
 
   @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.jsonld"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.SEARCH_HELP_NOTE, name = "Retrieve a user set")
+  @Operation(description = SwaggerConstants.SEARCH_HELP_NOTE, summary = "Retrieve a user set")
   public ResponseEntity<String> getUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -258,8 +259,8 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.UPDATE_SAMPLES_JSONLD,
-      name = "Update an existing user set")
+  @Operation(description = SwaggerConstants.UPDATE_SAMPLES_JSONLD,
+      summary = "Update an existing user set")
   public ResponseEntity<String> updateUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestBody String userSet,
@@ -362,7 +363,7 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/publish"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.PUBLISH_SET_NOTE, name = "Publish an existing user set")
+  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE, summary = "Publish an existing user set")
   public ResponseEntity<String> publishUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
@@ -387,7 +388,7 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/unpublish"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.PUBLISH_SET_NOTE, name = "Unpublish an existing user set")
+  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE, summary = "Unpublish an existing user set")
   public ResponseEntity<String> unpublishUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
@@ -430,8 +431,8 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.INSERT_ITEM_NOTE,
-      name = "Insert item to an existing user set")
+  @Operation(description = SwaggerConstants.INSERT_ITEM_NOTE,
+      summary = "Insert item to an existing user set")
   public ResponseEntity<String> insertItemIntoUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
@@ -526,8 +527,8 @@ public class WebUserSetRest extends BaseRest {
 
   @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.CHECK_ITEM_NOTE,
-      name = "Check if item is member of the Set")
+  @Operation(description = SwaggerConstants.CHECK_ITEM_NOTE,
+      summary = "Check if item is member of the Set")
   public ResponseEntity<String> isItemInUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -612,7 +613,7 @@ public class WebUserSetRest extends BaseRest {
 
   @DeleteMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Tag(description = SwaggerConstants.DELETE_ITEM_NOTE, name = "Delete a item from the set")
+  @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE, summary = "Delete a item from the set")
   public ResponseEntity<String> deleteItemFromUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
@@ -713,7 +714,7 @@ public class WebUserSetRest extends BaseRest {
   }
 
   @DeleteMapping(value = {"/set/{identifier}"})
-  @Tag(name= "Delete Set", description = "Delete an existing user set")
+  @Operation(summary= "Delete Set", description = "Delete an existing user set")
   public ResponseEntity<String> deleteUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       HttpServletRequest request) throws HttpException {
@@ -791,7 +792,7 @@ public class WebUserSetRest extends BaseRest {
    * @throws HttpException
    */
   @DeleteMapping(value = {"/set/"})
-  @Tag(name="Delete Sets", description = "Delete sets associated with user")
+  @Operation(summary="Delete Sets", description = "Delete sets associated with user")
   public ResponseEntity<String> deleteUserAssociatedSet(
       @RequestParam(value = WebUserSetFields.PATH_PARAM_CREATOR_ID,
           required = false) String creator,
