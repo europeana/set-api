@@ -86,14 +86,12 @@
 		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
 		<sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
 		<sonar.organization>europeana</sonar.organization>
-		<!--
 		<sonar.projectKey>europeana_set-api</sonar.projectKey>
-		-->
+		
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
-		<!-- see https://github.com/SaurabhDev/Demo-Java-Sonar-Maven/tree/master -->
-		<aggregate.report.xml>reports/jacoco/test/jacocoTestReport.xml</aggregate.report.xml>
+		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
 		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 
 

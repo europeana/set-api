@@ -116,16 +116,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<!--
 				<configuration>
 					<reportsDirectory>${sonar.coverage.jacoco.xmlReportPaths}</reportsDirectory>
 				</configuration>
+				-->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<!--
 				<configuration>
 					<reportsDirectory>${sonar.coverage.jacoco.xmlReportPaths}</reportsDirectory>
 				</configuration>
+				-->
 			</plugin>
 
 			<!--  sonar coverage report aggregation -->
