@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>set-api</artifactId>
@@ -11,19 +13,21 @@
 	<artifactId>set-integration-testing</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Europeana (User) Sets  - Integration Testing</name>
+	<name>Europeana (User) Sets - Integration Testing</name>
 	<description>Module containing integration tests</description>
 
 	<properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<!-- Import dependency management from Spring Boot (because we don't use Spring-Boot as parent pom)-->
+				<!-- Import dependency management from Spring Boot (because we
+				don't use Spring-Boot as parent pom)-->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
 				<version>${version.springBoot}</version>
@@ -59,14 +63,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
@@ -93,9 +89,17 @@
 			<artifactId>spring-boot-test-autoconfigure</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers</artifactId>
+			<artifactId>mongodb</artifactId>
+			<version>${version.testcontainers}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
 			<version>${version.testcontainers}</version>
 			<scope>test</scope>
 		</dependency>
@@ -112,6 +116,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<!--
+				<configuration>
+					<reportsDirectory>${sonar.coverage.jacoco.xmlReportPaths}</reportsDirectory>
+				</configuration>
+				-->
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<!--
+				<configuration>
+					<reportsDirectory>${sonar.coverage.jacoco.xmlReportPaths}</reportsDirectory>
+				</configuration>
+				-->
 			</plugin>
 
 			<!--  sonar coverage report aggregation -->

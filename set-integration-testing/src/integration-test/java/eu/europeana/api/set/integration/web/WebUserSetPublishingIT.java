@@ -128,6 +128,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andReturn().getResponse();
 
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
     result = response.getContentAsString();
     assertNotNull(result);
     
@@ -140,7 +142,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     // unpublished set, the ownership is changed back to current user
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
     assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
   }
   
   // unpublish user set tests
@@ -163,8 +165,9 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
         .andReturn().getResponse();
 
-    result = response.getContentAsString();
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
+    result = response.getContentAsString();
     //assert user name not changed
     assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
     
@@ -211,9 +214,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
@@ -246,9 +250,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
@@ -280,9 +285,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
@@ -312,9 +318,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
@@ -359,6 +366,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     
     final String userSetId = UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier());
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, userSetId));
     assertTrue(containsKeyOrValue(result, "published"));
     assertTrue(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
@@ -368,7 +376,6 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     if (expectedOwner != null) {
       assertTrue(containsKeyOrValue(result, expectedOwner));
     }
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
     return response;
   }
 

@@ -1,12 +1,12 @@
 package eu.europeana.set.web.config;
 
-import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import com.mongodb.WriteConcern;
+import dev.morphia.Datastore;
 import eu.europeana.corelib.db.wrapper.ApiMongoConnector;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 
@@ -24,20 +24,20 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
     ignoreResourceNotFound = true)
 public class MongoConfig {
 
-  @Value("${mongodb.set.connectionUrl:}")
+  @Value("${mongodb.set.connectionUrl:''}")
   private String mongoConnectionUrl;
 
-  @Value("${mongodb.set.truststore:}")
+  @Value("${mongodb.set.truststore:''}")
   private String mongoTrustStore;
 
-  @Value("${mongodb.set.truststorepass:}")
+  @Value("${mongodb.set.truststorepass:''}")
   private String mongoTrustStorePass;
 
   private static final String[] MODEL_PACKAGES = new String[]{"eu.europeana.set.definitions", "eu.europeana.api.commons.nosql.entity"};
   
   private ApiMongoConnector mongoConnector;
   
-  @Bean(UserSetConfiguration.BEAN_SET_MONGO_STORE)
+  @Bean(BeanNames.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {
     Datastore ds = getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
     //Ensures consistency when Mongo is deployed in a replica-set

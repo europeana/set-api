@@ -41,12 +41,11 @@ import eu.europeana.set.web.model.elevation.Query;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Controller
 @SwaggerSelect
-@Api(tags = "Auxiliary Methods")
+@Tag(name = "Auxiliary Methods")
 public class AuxiliaryMethodsRest extends BaseRest {
 
     /**
@@ -58,7 +57,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @throws HttpException
      */
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
-    @ApiOperation(value = "Generate Elevation file for best bets", nickname = "generate elevation file", response = java.lang.Void.class)
+    @Tag(description = "Generate Elevation file for best bets", name = "Generate elevation file")
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
             HttpServletRequest request) throws HttpException {
@@ -75,7 +74,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @throws UserSetServiceException 
      */
     @GetMapping(value = "/set/stats", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-    @ApiOperation(notes = SwaggerConstants.SET_USAGE_STATS, value = "Generate usage statistics", nickname = "generateUserStats", response = java.lang.Void.class)
+    @Tag(description = SwaggerConstants.SET_USAGE_STATS, name = "Generate usage statistics")
     public ResponseEntity<String> generateUsageStats(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
             HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {

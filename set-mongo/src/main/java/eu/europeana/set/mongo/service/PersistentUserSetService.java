@@ -2,7 +2,7 @@ package eu.europeana.set.mongo.service;
 
 import java.util.List;
 import java.util.Map;
-import org.mongodb.morphia.query.QueryResults;
+import dev.morphia.query.QueryResults;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetServiceException;

@@ -2,9 +2,7 @@ package eu.europeana.set.definitions.config;
 
 public interface UserSetConfiguration {
 
-  public static final String BEAN_SET_MONGO_STORE = "set_db_morphia_datastore_set";
   public static final String BEAN_SET_PERSITENCE_SERVICE = "set_db_setService";
-
 
   public String getComponentName();
 

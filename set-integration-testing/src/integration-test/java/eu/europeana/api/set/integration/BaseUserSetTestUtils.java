@@ -58,8 +58,8 @@ import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 @AutoConfigureMockMvc
 @DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(locations = {"classpath:set-web-context.xml"})
 @ComponentScan(basePackageClasses = UserSetApp.class)
+@ContextConfiguration(locations = {"classpath:set-web-context.xml"})
 public abstract class BaseUserSetTestUtils {
 
   protected static final String BASE_URL = "/set/";
@@ -132,8 +132,11 @@ public abstract class BaseUserSetTestUtils {
   private static final MongoContainer MONGO_CONTAINER;
 
   static {
-    MONGO_CONTAINER = new MongoContainer("admin")
-        .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
+//    MONGO_CONTAINER = new MongoDBContainer("mongo:6.0.14-jammy")
+    final String serviceDB = "admin";   // to change to "set-api-test"
+    MONGO_CONTAINER = new MongoContainer(serviceDB)
+        .withLogConsumer(new WaitingConsumer()
+        .andThen(new ToStringConsumer()));
 
     MONGO_CONTAINER.start();
   }

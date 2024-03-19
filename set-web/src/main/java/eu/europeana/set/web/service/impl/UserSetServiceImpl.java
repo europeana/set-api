@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -97,7 +98,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   @Override
   public List<PersistentUserSet> getUserSetByCreatorId(String creatorId)
       throws UserSetNotFoundException {
-    return getMongoPersistence().getByCreator(creatorId).asList();
+    ArrayList<PersistentUserSet> result = new ArrayList<>();
+    Iterator<PersistentUserSet> iter = getMongoPersistence().getByCreator(creatorId).iterator();
+    iter.forEachRemaining(result::add);
+    
+    return result;
   }
 
   /**

@@ -10,9 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mongodb.morphia.query.QueryResults;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import dev.morphia.query.QueryResults;
 import eu.europeana.api.commons.nosql.dao.NosqlDao;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
@@ -127,8 +127,8 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     QueryResults<PersistentUserSet> foundUserSet = userSetService.getByCreator(creatorId);
 
     assertNotNull(foundUserSet);
-    assertTrue(foundUserSet.asList().size() > 0);
-    assertEquals(creatorId, foundUserSet.get().getCreator().getHttpUrl());
+    assertTrue(foundUserSet.iterator().hasNext());
+    assertEquals(creatorId, foundUserSet.iterator().next().getCreator().getHttpUrl());
 
     // delete test object
     userSetService.remove(storedUserSet.getIdentifier());

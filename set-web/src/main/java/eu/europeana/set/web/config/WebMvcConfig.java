@@ -32,13 +32,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
    */
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/v2/api-docs").allowedOrigins("*").allowedMethods("GET")
-        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
-        .allowCredentials(false).maxAge(600L); // in seconds
+    registry.addMapping("/v3/api-docs").allowedOrigins("*").allowedMethods("GET")
+    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+    .allowCredentials(false).maxAge(600L); // in seconds
 
-    registry.addMapping("/v2/api-docs/**").allowedOrigins("*").allowedMethods("GET")
-        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
-        .allowCredentials(false).maxAge(600L); // in seconds
+    registry.addMapping("/v3/api-docs/**").allowedOrigins("*").allowedMethods("GET")
+    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+    .allowCredentials(false).maxAge(600L); // in seconds
+
 
     registry.addMapping("/actuator/**").allowedOrigins("*").allowedMethods("GET")
     .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
@@ -88,8 +89,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // releases
     configurer.favorPathExtension(true);
     
+    // use registered extensions instead of defaults
+    configurer.useRegisteredExtensionsOnly(true);
+
+    configurer.mediaTypes(getMediaTypesMapping());
+
+    
     // use application/ld+json if no Content-Type is specified
-    configurer.defaultContentType(MediaType.valueOf(HttpHeaders.CONTENT_TYPE_JSONLD));
+    configurer.defaultContentType(APPLICATION_JSONLD, MediaType.APPLICATION_JSON);
 
     configurer.mediaTypes(getMediaTypesMapping());
   }

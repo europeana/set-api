@@ -39,21 +39,30 @@
 
 	<properties>
 		<revision>0.12-SNAPSHOT</revision>
-		<version.java>11</version.java>
-		<version.javac.release>11</version.javac.release>
-		<version.log4j2>2.17.2</version.log4j2>
-		<version.commonsApi>0.3.22-SNAPSHOT</version.commonsApi>
-		<version.springBoot>2.5.7</version.springBoot>
-		<version.springBootMongoStarter>2.0.3.RELEASE</version.springBootMongoStarter>
-		<version.swagger>3.0.0</version.swagger>
+		<java.version>17</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
+		
+		<!-- property to be used for add opens jvm arguments in plugins -->
+		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
+        	--add-opens java.base/java.lang=ALL-UNNAMED
+		</java.17.addopens>
+		<version.commonsApi>0.3.24-SNAPSHOT</version.commonsApi>
+		<version.springBoot>2.5.14</version.springBoot>
+		
+		<!-- overwrite version defined in spring boot parent pom -->
+		<mongodb.version>4.7.2</mongodb.version>
+		<version.morphia>1.6.1</version.morphia>
+		
+		<springdoc.version>1.6.14</springdoc.version>
+		
 		<version.httpClient>3.1</version.httpClient>
 		<version.javax.annotation>1.3.2</version.javax.annotation>
 		<version.jettison>1.3</version.jettison>
 		<version.jaxb>2.3.1</version.jaxb>
 		<version.junit>5.7.2</version.junit>
 		<version.commonsIO>2.8.0</version.commonsIO>
-		<version.surefire>3.0.0-M7</version.surefire>
-		<version.failsafe>3.0.0-M7</version.failsafe>
 		
 		<!-- java version properties -->
 		<maven.compiler.source>${version.java}</maven.compiler.source>
@@ -62,10 +71,11 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<!-- test dependencies -->
-		<version.testcontainers>1.16.0</version.testcontainers>
+		<version.testcontainers>1.19.7</version.testcontainers>
 		
 		<!-- maven plugins -->
-		<version.maven-surfire-plugin>3.0.0-M6</version.maven-surfire-plugin>
+		<version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
+		<version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
 		<!-- sonar - jacoco properties -->
@@ -76,6 +86,7 @@
 		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
 		<sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
 		<sonar.organization>europeana</sonar.organization>
+		<!-- project key cannot be sent both as property and in command line (check github action) -->
 		<!--
 		<sonar.projectKey>europeana_set-api</sonar.projectKey>
 		-->
@@ -98,15 +109,87 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+		
+			<!-- upgrade mongo driver and morphia to support mongo V6-->
+			<!-- SG: for some reason, the versions from spring boot take precedence over the versions from api-commons depencies, therefore we need to replicate here the configs from api-commons -->
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongodb-driver-legacy</artifactId>
+				<version>${mongodb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongodb-driver-sync</artifactId>
+				<version>${mongodb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mongodb</groupId>
+  				<artifactId>bson</artifactId>
+  				<version>${mongodb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-core</artifactId>
+  				<version>${mongodb.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>dev.morphia.morphia</groupId>
+				<artifactId>core</artifactId>
+				<version>${version.morphia}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.mongodb</groupId>
+						<artifactId>mongodb-driver-sync</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.mongodb</groupId>
+						<artifactId>mongodb-driver-legacy</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+
+
+			<!-- excude conflicting dependecies for mongo and logging-->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-mongodb</artifactId>
+				<version>${version.springBoot}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-starter-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.mongodb</groupId>
+						<artifactId>mongodb-driver-sync</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.mongodb</groupId>
+						<artifactId>mongodb-driver-core</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			
 		</dependencies>
 	</dependencyManagement>
-
 
 	<build>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+				<includes>
+					<include>**</include>
+				</includes>
+				<excludes>
+					<exclude>*.bk</exclude>
+			    </excludes>
 			</resource>
 		</resources>
 		<testResources>
@@ -139,6 +222,7 @@
 					<includeOnlyProperties>
 						<includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
 						<includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+						<includeOnlyProperty>git.branch</includeOnlyProperty>
 					</includeOnlyProperties>
 					<commitIdGenerationMode>full</commitIdGenerationMode>
 				</configuration>
@@ -146,9 +230,10 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<!--
-                  <version>${version.spring.boot}</version>
-                  -->
+				<configuration>
+        				<jvmArguments>${java.17.addopens}</jvmArguments>
+        		</configuration>		
+				
 				<executions>
 					<execution>
 						<goals>
@@ -160,6 +245,9 @@
 								<!-- For some reason BuildProperties.getName() doesn't return the correct value,
                            so we set the name under a different property                      -->
 								<project.name>${project.name}</project.name>
+								<!--
+								<custom.value>123</custom.value>
+								-->
 							</additionalProperties>
 						</configuration>
 					</execution>
@@ -168,7 +256,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>${version.failsafe}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -216,6 +303,9 @@
 								<resource>
 									<filtering>true</filtering>
 									<directory>src/integration-test/resources</directory>
+									<excludes>
+										<exclude>*.bk</exclude>
+									</excludes>
 								</resource>
 							</resources>
 						</configuration>
@@ -242,16 +332,25 @@
 					<inherited>true</inherited>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<source>${version.java}</source>
-						<target>${version.java}</target>
-					</configuration>
+					<version>3.10.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${version.maven-surfire-plugin}</version>
+					<version>${version.maven-surefire-plugin}</version>
+					<configuration>
+        				<argLine>${java.17.addopens}</argLine>
+    				</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${version.maven-failsafe-plugin}</version>
+					<configuration>
+        				<argLine>${java.17.addopens}</argLine>
+    				</configuration>
+				</plugin>
+				
 				<!--  sonar plugings -->
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
