@@ -7,13 +7,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -38,8 +37,7 @@ import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Controller
-@SwaggerSelect
+@RestController
 @Tag(name = "User Set Discovery API")
 public class SearchUserSetRest extends BaseRest {
 

@@ -12,12 +12,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import eu.europeana.api.common.config.swagger.SwaggerSelect;
+import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.definitions.statistics.UsageStatsFields;
 import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
@@ -43,8 +42,7 @@ import eu.europeana.set.web.service.controller.BaseRest;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Controller
-@SwaggerSelect
+@RestController
 @Tag(name = "Auxiliary Methods")
 public class AuxiliaryMethodsRest extends BaseRest {
 
