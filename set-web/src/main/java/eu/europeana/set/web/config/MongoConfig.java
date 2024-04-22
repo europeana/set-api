@@ -40,8 +40,12 @@ public class MongoConfig {
   @Bean(BeanNames.BEAN_SET_MONGO_STORE)
   public Datastore createDataStore() {
     Datastore ds = getMongoConnector().createDatastore(mongoConnectionUrl, mongoTrustStore, mongoTrustStorePass, -1, MODEL_PACKAGES );
+    
     //Ensures consistency when Mongo is deployed in a replica-set
-    ds.setDefaultWriteConcern(WriteConcern.MAJORITY);
+    if(WriteConcern.MAJORITY != ds.getDefaultWriteConcern()) {
+      //since 0.3.25 version of api commns the following is redundant, as the write concern must be written using the mongo client builder 
+      ds.setDefaultWriteConcern(WriteConcern.MAJORITY);
+    }
     return ds;
   }
 
