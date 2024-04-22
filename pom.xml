@@ -48,7 +48,7 @@
 		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
         	--add-opens java.base/java.lang=ALL-UNNAMED
 		</java.17.addopens>
-		<version.commonsApi>0.3.24-SNAPSHOT</version.commonsApi>
+		<version.commonsApi>0.3.25-SNAPSHOT</version.commonsApi>
 		<version.springBoot>2.5.14</version.springBoot>
 		
 		<!-- overwrite version defined in spring boot parent pom -->
