@@ -56,8 +56,4 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
 	return getConfiguration().getAuthorizationApiName();
     }
     
-    @Override
-    protected  boolean mustVerifyResourceAccessForRead() {
-      return true;
-    }
 }
