@@ -11,3 +11,9 @@ secretGenerator:
   - name: set-api-properties
     files:
       - set.user.properties
+
+#generate config mapping for log4j2.xml file
+configMapGenerator:
+  - name: log4j2-properties
+    files:
+      - log4j2-spring.xml

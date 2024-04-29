@@ -46,3 +46,6 @@ spec:
         - name: app-properties
           secret:
             secretName: set-api-properties
+        - name: log4j-config
+          configMap:
+            name: log4j2-properties
