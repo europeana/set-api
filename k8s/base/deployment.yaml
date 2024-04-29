@@ -42,7 +42,14 @@ spec:
             mountPath: "/opt/app/config/set.user.properties"
             readOnly: true
             subPath: set.user.properties
+          - name: log4j-config
+            mountPath: "/opt/app/config/log4j2-spring.xml"
+            readOnly: true
+            subPath: log4j2-spring.xml
       volumes:
         - name: app-properties
           secret:
             secretName: set-api-properties
+        - name: log4j-config
+          configMap:
+            name: log4j2-properties
