@@ -219,6 +219,15 @@ public interface UserSetService {
      * @return profiled user set value
      */
     void applyProfile(UserSet userSet, LdProfiles profile);
+    
+    /**
+     * Gets the profile for pagination urls and item page. Basically gets the profile valid for
+     * collection page from the list of profiles passed during search request
+     *
+     * @param profiles
+     * @return
+     */
+    LdProfiles getProfileForPagination(List<LdProfiles> profiles);
 
     /**
      * Return the List of entity sets with

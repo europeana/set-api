@@ -462,13 +462,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return value.startsWith("http://") || value.startsWith("https://");
   }
 
-  /**
-   * Gets the profile for pagination urls and item page. Basically gets the profile valid for
-   * collection page from the list of profiles passed during search request
-   *
-   * @param profiles
-   * @return
-   */
+  @Override
   public LdProfiles getProfileForPagination(List<LdProfiles> profiles) {
     LdProfiles profile = null;
     for (LdProfiles ldProfile : profiles) {

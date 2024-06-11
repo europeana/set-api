@@ -99,7 +99,10 @@ public class WebUserSetRest extends BaseRest {
       throws HttpException {
     try {
 
-      LdProfiles profile = getProfile(profileStr, request);
+      // validate params - profile
+      List<LdProfiles> profiles = getProfiles(profileStr, request);
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
 
       // parse user set
       UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
@@ -213,7 +216,10 @@ public class WebUserSetRest extends BaseRest {
       HttpServletRequest request, String sort, String sortOrder, Integer pageNr, int pageSize,
       Authentication authentication) throws HttpException {
     try {
-      LdProfiles profile = getProfile(profileStr, request);
+      // validate params - profile
+      List<LdProfiles> profiles = getProfiles(profileStr, request);
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
 
       // retrieve a Set based on its identifier - process query
       // if the Set doesn’t exist, respond with HTTP 404
@@ -289,7 +295,10 @@ public class WebUserSetRest extends BaseRest {
 	    String identifier, String userSetJsonLdStr, String profileStr) throws HttpException {
 
 	try {
-	    LdProfiles profile = getProfile(profileStr, request);
+        // validate params - profile
+        List<LdProfiles> profiles = getProfiles(profileStr, request);
+        // get profile for pagination urls and item Page
+        LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
 
 	    // check if the Set exists, if not respond with HTTP 404
 	    // retrieve an existing user set based on its identifier
@@ -407,8 +416,12 @@ public class WebUserSetRest extends BaseRest {
       UserSet updatedUserSet =
           getUserSetService().publishUnpublishUserSet(identifier, issued, authentication, publish);
 
+      // validate params - profile
+      List<LdProfiles> profiles = getProfiles(profileStr, request);
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);    
+      
       // serialize to JsonLd
-      LdProfiles profile = getProfile(profileStr, request);
       String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
       String etag =
           generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
@@ -470,7 +483,10 @@ public class WebUserSetRest extends BaseRest {
       String position, String profileStr) throws HttpException {
 
     try {
-      LdProfiles profile = getProfile(profileStr, request);
+      // validate params - profile
+      List<LdProfiles> profiles = getProfiles(profileStr, request);
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
 
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
@@ -648,8 +664,11 @@ public class WebUserSetRest extends BaseRest {
       String profileStr) throws HttpException {
 
     try {
-      LdProfiles profile = getProfile(profileStr, request);
-
+      // validate params - profile
+      List<LdProfiles> profiles = getProfiles(profileStr, request);
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
+      
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
