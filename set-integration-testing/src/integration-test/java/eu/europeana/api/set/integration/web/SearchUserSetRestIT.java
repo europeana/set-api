@@ -596,7 +596,7 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
     String[] qf = new String[] {"item:/08641/1037479000000476467",
         "item:/08641/1037479000000476875", "item:/11654/_Botany_U_1419207", "item:/2048128/618580",
         "item:/2048128/618580", "item:/2048128/notexisting", "item:/2048128/notexisting1"};
-    String result = callSearchItemsInSet(setIdentifier, qf, "1", "2", null);
+    String result = callSearchItemsInSet(setIdentifier, qf, String.valueOf(UserSetUtils.DEFAULT_PAGE + 1), "2", null);
     // check ids
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
@@ -609,7 +609,7 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
     // last page no next
     assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
 
-    result = callSearchItemsInSet(setIdentifier, qf, "0", "2", null);
+    result = callSearchItemsInSet(setIdentifier, qf, String.valueOf(UserSetUtils.DEFAULT_PAGE), "2", null);
     // check ids
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));

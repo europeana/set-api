@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.exception.request.ItemValidationException;
@@ -162,6 +164,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     // without page in request, it is not a collection page
     assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
     assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
+    assertEquals(((JSONObject)(new JSONObject(result)).get("creator")).getString("type"),AgentTypes.PERSON.name());
   }
 
   // Update user set Tests

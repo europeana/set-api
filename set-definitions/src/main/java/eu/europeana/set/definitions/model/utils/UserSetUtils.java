@@ -19,6 +19,7 @@ public class UserSetUtils {
 
     public static final String EUROPEANA_ID_FIELD_REGEX = "^[a-zA-Z0-9_]*$";
     public static final Pattern EUROPEANA_ID = Pattern.compile("^/[a-zA-Z0-9_]*/[a-zA-Z0-9_]*$");
+    public static final int DEFAULT_PAGE = 1;
     /**
      * This method converts string value to Map<String,String> values for given key - language.
      *
@@ -84,13 +85,10 @@ public class UserSetUtils {
            userSet.setTotal(total);
            //NOTE: the first and last properties are not used now and might be deprecated, they should not be stored in the database
            if (total > 0) {      
-               int first = 0;
+               int first = UserSetUtils.DEFAULT_PAGE;
                String firstPageStr = fillPage(userSet, config, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setFirst(firstPageStr);
-               int last = (int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE); 
-               if(last > 0) {
-                 last = last - 1; // we start counting by 0    
-               }
+               int last = ((int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE)) + UserSetUtils.DEFAULT_PAGE - 1; 
                String lastPageStr = fillPage(userSet, config, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setLast(lastPageStr);
            } 

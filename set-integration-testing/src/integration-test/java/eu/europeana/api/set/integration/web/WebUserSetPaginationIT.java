@@ -23,6 +23,7 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -65,7 +66,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "2")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -145,7 +146,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "0")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
             // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -189,7 +190,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "2")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -216,7 +217,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
-                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "2")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();
@@ -245,7 +246,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
-                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "2")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -275,7 +276,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
-                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "0")
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -358,7 +359,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "0")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "200")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
