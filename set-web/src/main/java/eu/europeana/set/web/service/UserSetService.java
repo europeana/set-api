@@ -224,8 +224,8 @@ public interface UserSetService {
      * Gets the profile for pagination urls and item page. Basically gets the profile valid for
      * collection page from the list of profiles passed during search request
      *
-     * @param profiles
-     * @return
+     * @param profiles list of candidate profiles
+     * @return the profile to be applied for generating the pagination
      */
     LdProfiles getProfileForPagination(List<LdProfiles> profiles);
 

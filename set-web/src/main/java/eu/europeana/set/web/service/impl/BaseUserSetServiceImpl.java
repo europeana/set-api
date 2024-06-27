@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.oauth2.model.ApiCredentials;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -50,8 +49,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   @Resource(name = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
-  @Resource
-  I18nService i18nService;
 
   UserSetUtils userSetUtils = new UserSetUtils();
 

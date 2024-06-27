@@ -485,9 +485,7 @@ public class WebUserSetRest extends BaseRest {
     try {
       // validate params - profile
       List<LdProfiles> profiles = getProfiles(profileStr, request);
-      // get profile for pagination urls and item Page
-      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
-
+      
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -518,6 +516,10 @@ public class WebUserSetRest extends BaseRest {
       checkIfMatchHeader(eTagOrigin, request);
       UserSet updatedUserSet =
           getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
+      
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
+
       String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
 
       String etag =
@@ -666,8 +668,6 @@ public class WebUserSetRest extends BaseRest {
     try {
       // validate params - profile
       List<LdProfiles> profiles = getProfiles(profileStr, request);
-      // get profile for pagination urls and item Page
-      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
       
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
@@ -707,6 +707,9 @@ public class WebUserSetRest extends BaseRest {
       // update an existing user set
       UserSet updatedUserSet = getUserSetService().updateItemList(existingUserSet);
 
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
+      
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
       String etag =
