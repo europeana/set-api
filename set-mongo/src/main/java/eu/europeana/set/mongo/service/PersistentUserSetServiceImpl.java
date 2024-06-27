@@ -409,7 +409,9 @@ public class PersistentUserSetServiceImpl extends
 
   @SuppressWarnings("deprecation")
   private void setPaginationOptions(Query<PersistentUserSet> mongoQuery, UserSetQuery query) {
-    mongoQuery.offset((query.getPageNr() - UserSetUtils.DEFAULT_PAGE) * query.getPageSize());
+    //first mongoPage has index 0
+    final int mongoPageIndex = query.getPageNr() - UserSetUtils.DEFAULT_PAGE;
+    mongoQuery.offset(mongoPageIndex * query.getPageSize());
     mongoQuery.limit(query.getPageSize());
   }
 

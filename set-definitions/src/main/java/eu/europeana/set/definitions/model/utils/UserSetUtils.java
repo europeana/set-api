@@ -88,8 +88,11 @@ public class UserSetUtils {
                int first = UserSetUtils.DEFAULT_PAGE;
                String firstPageStr = fillPage(userSet, config, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setFirst(firstPageStr);
-               int last = ((int) Math.ceil( (double)total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE)) + UserSetUtils.DEFAULT_PAGE - 1; 
-               String lastPageStr = fillPage(userSet, config, last, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+               final int totalPages = (int) Math.floor( (double) total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+               int pageIndexOfset = UserSetUtils.DEFAULT_PAGE -1;
+               //the index of last page depends on the start index. i.e. 2 pages [0,1] vs. [1,2]  
+               int lastPageIndex = totalPages + pageIndexOfset; 
+               String lastPageStr = fillPage(userSet, config, lastPageIndex, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
                userSet.setLast(lastPageStr);
            } 
            
