@@ -193,7 +193,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     // without page in request, it is not a collection page
     assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
     assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
-    assertEquals(((JSONObject)(new JSONObject(result)).get("creator")).getString("type"),AgentTypes.PERSON.name());
+    assertEquals(AgentTypes.PERSON.getJsonValue(), ((JSONObject)(new JSONObject(result)).get("creator")).getString("type"));
   }
 
   // Update user set Tests
