@@ -49,7 +49,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   @Resource(name = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
-  
+
   UserSetUtils userSetUtils = new UserSetUtils();
 
   UserSetSearchApiUtils userSetSearchApiUtils = new UserSetSearchApiUtils();
@@ -459,13 +459,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return value.startsWith("http://") || value.startsWith("https://");
   }
 
-  /**
-   * Gets the profile for pagination urls and item page. Basically gets the profile valid for
-   * collection page from the list of profiles passed during search request
-   *
-   * @param profiles
-   * @return
-   */
+  @Override
   public LdProfiles getProfileForPagination(List<LdProfiles> profiles) {
     LdProfiles profile = null;
     for (LdProfiles ldProfile : profiles) {
