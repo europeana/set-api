@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,8 +28,10 @@ import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
@@ -81,6 +84,34 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     addToCreatedSets(identifier);
   }
 
+  @Test
+  public void create_UserSet_DynamicCollecton_without_isDefinedBy() throws Exception {
+    String requestJson = getJsonStringInput(USER_SET_OPEN);
+    JSONObject withoutIsDefinedBy = new JSONObject(requestJson);
+    withoutIsDefinedBy.remove(WebUserSetModelFields.IS_DEFINED_BY);
+    
+    mockMvc
+    .perform(
+        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .content(withoutIsDefinedBy.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+    .andExpect(status().isBadRequest());
+  }
+  
+  @Test
+  public void create_UserSet_Collection_with_isDefinedBy() throws Exception {
+    String requestJson = getJsonStringInput(USER_SET_REGULAR);
+    JSONObject withIsDefinedBy = new JSONObject(requestJson);
+    withIsDefinedBy.append(WebUserSetModelFields.IS_DEFINED_BY, "https://api.europeana.eu/api/v2/search.json?query=%28europeana_collectionName%3A08641%2A%20AND%20NOT%28proxy_dc_identifier%3A%5C%221037479000000477087%5C%22%29%29");
+    
+    mockMvc
+    .perform(
+        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            .content(withIsDefinedBy.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+    .andExpect(status().isBadRequest());
+  }
+  
   @Test
   public void create_UserSet_401_bad_request_InvalidInput() throws Exception {
     mockMvc
@@ -162,6 +193,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     // without page in request, it is not a collection page
     assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
     assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
+    assertEquals(((JSONObject)(new JSONObject(result)).get("creator")).getString("type"),AgentTypes.PERSON.name());
   }
 
   // Update user set Tests

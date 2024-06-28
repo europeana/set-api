@@ -113,9 +113,10 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
     // get the identifier
+    final int secondPageIndex = UserSetUtils.DEFAULT_PAGE + 1;
     MvcResult response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
         .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-        .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+        .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(secondPageIndex))
         .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
         .header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)).andReturn();
@@ -130,11 +131,11 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
         .replaceFirst(getConfiguration().getApiBasePath(), "");
     String requestedPage = baseUrl + response.getRequest().getPathInfo();
     // int pageSize = 100;
-    // int page = 1;
+    // int page = 2;
     final String collectionUrl = getUserSetService().buildResultsPageUrl(requestedPage,
         response.getRequest().getQueryString(), null);
     final String resultPageId =
-        getUserSetService().buildPageUrl(collectionUrl, 1, 100, LdProfiles.ITEMDESCRIPTIONS);
+        getUserSetService().buildPageUrl(collectionUrl, secondPageIndex, 100, LdProfiles.ITEMDESCRIPTIONS);
     assertTrue(containsKeyOrValue(result, resultPageId));
 
     // check part of ID
@@ -173,10 +174,11 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
     // set size = 249 items, request for more than lastPage
+    final String firstIndexAfterLastPage = "4";
     MockHttpServletResponse response =
         mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "3")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, firstIndexAfterLastPage)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)).andReturn().getResponse();
 

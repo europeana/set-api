@@ -176,7 +176,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
     // TODO: reassess if the type should be kept muable
-    if (persistentUserSet.isOpenSet() && !webUserSet.isOpenSet()) {
+    if (persistentUserSet.isOpenSet() && webUserSet.getIsDefinedBy()==null) {
       // isDefinedBy is mandatory for open sets
       throw new RequestBodyValidationException(
           UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
@@ -271,7 +271,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
     // do not generate first and last if pageSize=0
     if (totalInCollection > 0 && pageSize > 0) {
-      first = buildPageUrl(paginationBaseUrl, 0, pageSize, profile);
+      first = buildPageUrl(paginationBaseUrl, UserSetUtils.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(paginationBaseUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(pageId, totalInCollection, first, last, type);
@@ -285,12 +285,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @return
    */
   protected int getLastPage(long totalResults, int pageSize) {
-    long lastPage = 0;
+    long lastPage = UserSetUtils.DEFAULT_PAGE;
     // avoid null divizion if pages size is 0
     if (totalResults > 0 && pageSize > 0) {
       long reaminder = (totalResults % pageSize);
       int extraPage = (reaminder == 0 ? 0 : 1);
-      lastPage = ((totalResults / pageSize) + extraPage) - 1;
+      lastPage = ((totalResults / pageSize) + extraPage) + UserSetUtils.DEFAULT_PAGE - 1;
     }
 
     return Math.toIntExact(lastPage);
@@ -363,7 +363,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     String last = null;
 
     if (totalInCollection > 0) {
-      first = buildPageUrl(collectionUrl, 0, pageSize, profile);
+      first = buildPageUrl(collectionUrl, UserSetUtils.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
@@ -577,11 +577,29 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           new String[] {WebUserSetModelFields.TITLE});
     }
 
-    // validate isDefinedBy and items - we should not have both of them
-    if (webUserSet.getItems() != null && webUserSet.isOpenSet()) {
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-          new String[] {WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN});
+    // validate open sets
+    if (webUserSet.isOpenSet()) {
+      //we should not have items for the open sets
+      if(webUserSet.getItems() != null) {
+        throw new RequestBodyValidationException(
+            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+            new String[] {WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN});
+      }
+      
+      //isDefinedBy is mandatory for open sets
+      if(webUserSet.getIsDefinedBy() == null) {
+        throw new RequestBodyValidationException(
+            UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+            new String[] {WebUserSetModelFields.IS_DEFINED_BY});
+      }
+    }
+    else {
+      //for sets that are not open sets (closed sets), isDefinedBy is not allowed
+      if(webUserSet.getIsDefinedBy() != null) {
+        throw new RequestBodyValidationException(
+            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+            new String[] {WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.SET_CLOSED});
+      }
     }
 
     // prevent updating the state to "published" (must use the publish method for that)

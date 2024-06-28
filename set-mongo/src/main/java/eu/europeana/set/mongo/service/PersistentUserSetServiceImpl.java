@@ -29,6 +29,7 @@ import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -408,7 +409,9 @@ public class PersistentUserSetServiceImpl extends
 
   @SuppressWarnings("deprecation")
   private void setPaginationOptions(Query<PersistentUserSet> mongoQuery, UserSetQuery query) {
-    mongoQuery.offset(query.getPageNr() * query.getPageSize());
+    //first mongoPage has index 0
+    final int mongoPageIndex = query.getPageNr() - UserSetUtils.DEFAULT_PAGE;
+    mongoQuery.offset(mongoPageIndex * query.getPageSize());
     mongoQuery.limit(query.getPageSize());
   }
 

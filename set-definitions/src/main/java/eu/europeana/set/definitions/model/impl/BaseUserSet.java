@@ -234,10 +234,10 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     }
 
     public boolean isOpenSet() {
-	if (getIsDefinedBy() != null) {
-	    return true;
-	}
-	return false;
+      if(UserSetTypes.DYNAMICCOLLECTION.getJsonValue().equals(type)) {
+        return true;
+      }
+      return false;
     }
 
     @Override

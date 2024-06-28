@@ -235,6 +235,7 @@ public abstract class BaseUserSetTestUtils {
     Authentication authentication = getAuthentication(token);
     WebUserSetImpl createdSet =
         (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
+    //keep the list of created sets to delete in the end
     createdUserSets.add(createdSet);
     return createdSet;
   }
