@@ -101,9 +101,7 @@ public class WebUserSetRest extends BaseRest {
 
       // validate params - profile
       List<LdProfiles> profiles = getProfiles(profileStr, request);
-      // get profile for pagination urls and item Page
-      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
-
+      
       // parse user set
       UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
@@ -118,6 +116,9 @@ public class WebUserSetRest extends BaseRest {
       // serialization
 
       UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
+
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
 
       if (mustFetchItems(storedUserSet, profile)) {
         int derefItems =
@@ -218,9 +219,7 @@ public class WebUserSetRest extends BaseRest {
     try {
       // validate params - profile
       List<LdProfiles> profiles = getProfiles(profileStr, request);
-      // get profile for pagination urls and item Page
-      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
-
+      
       // retrieve a Set based on its identifier - process query
       // if the Set doesn’t exist, respond with HTTP 404
       // if the Set is disabled respond with HTTP 410
@@ -230,6 +229,9 @@ public class WebUserSetRest extends BaseRest {
       if (userSet.isPrivate()) {
         getUserSetService().verifyOwnerOrAdmin(userSet, authentication, false);
       }
+
+      // get profile for pagination urls and item Page
+      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
 
       if (mustFetchItems(userSet, profile)) {
         // pageNr, if empty default value 0 is sent for fetching items
@@ -297,9 +299,7 @@ public class WebUserSetRest extends BaseRest {
 	try {
         // validate params - profile
         List<LdProfiles> profiles = getProfiles(profileStr, request);
-        // get profile for pagination urls and item Page
-        LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
-
+        
 	    // check if the Set exists, if not respond with HTTP 404
 	    // retrieve an existing user set based on its identifier
 	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -317,6 +317,9 @@ public class WebUserSetRest extends BaseRest {
 	    // parse fields of the new user set to an object
 	    UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
+	    // get profile for pagination urls and item Page
+        LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
+ 
 	    // Respond with HTTP 200
 	    // update an existing user set. merge user sets - insert new fields in existing
 	    // object
