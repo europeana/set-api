@@ -40,6 +40,7 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.stats.service.UsageStatsService;
@@ -295,7 +296,7 @@ public class BaseRest extends BaseRestController {
     
     protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, Integer pageNr, int pageSize, HttpServletRequest request) throws IOException, HttpException {
 	String jsonBody = "";
-	if(pageNr == null || pageNr < 0) {
+	if(pageNr == null || pageNr < UserSetUtils.DEFAULT_PAGE) {
 	    jsonBody = serializeUserSet(profile, userSet);    
 	}else {
 	    CollectionPage itemPage = getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);

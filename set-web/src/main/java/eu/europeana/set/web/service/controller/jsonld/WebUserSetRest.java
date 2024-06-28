@@ -120,7 +120,7 @@ public class WebUserSetRest extends BaseRest {
         int derefItems =
             getDerefItemsCount(storedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
         storedUserSet = getUserSetService().fetchItems(storedUserSet, null, null,
-            CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
+            UserSetUtils.DEFAULT_PAGE, derefItems, profile);
       }
 
       String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
@@ -155,7 +155,7 @@ public class WebUserSetRest extends BaseRest {
 
   }
 
-  @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.jsonld"},
+  @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.SEARCH_HELP_NOTE, summary = "Retrieve a user set")
   public ResponseEntity<String> getUserSet(
@@ -227,7 +227,7 @@ public class WebUserSetRest extends BaseRest {
 
       if (mustFetchItems(userSet, profile)) {
         // pageNr, if empty default value 0 is sent for fetching items
-        int page = (pageNr != null) ? pageNr : CommonApiConstants.DEFAULT_PAGE;
+        int page = (pageNr != null) ? pageNr : UserSetUtils.DEFAULT_PAGE;
         userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, page, pageSize, profile);
       }
       return buildGetResponse(userSet, profile, pageNr, pageSize, request);
@@ -323,7 +323,7 @@ public class WebUserSetRest extends BaseRest {
 	    if (mustFetchItems(updatedUserSet, profile)) {
 		int derefItems = getDerefItemsCount(updatedUserSet, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 		updatedUserSet = getUserSetService().fetchItems(updatedUserSet, null, null,
-			CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
+			UserSetUtils.DEFAULT_PAGE, derefItems, profile);
 	    }
 
 	    return buildGetResponse(updatedUserSet, profile, -1, -1, request);

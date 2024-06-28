@@ -7,6 +7,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.search.SearchApiRequest;
 
 /**
@@ -71,7 +72,7 @@ public class UserSetSearchApiUtils {
       SearchApiRequest searchApiRequest = new SearchApiRequest();
       
       // remove pagination and ordering
-      Integer start = pageNr * pageSize + 1;
+      Integer start = (pageNr - UserSetUtils.DEFAULT_PAGE) * pageSize + 1;
 
       searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
       
@@ -110,7 +111,7 @@ public class UserSetSearchApiUtils {
         String id;
         String fullId;
         // calculate the index of from and uptill where items for query will be sent
-        Integer start = pageNr * pageSize;
+        Integer start = (pageNr - UserSetUtils.DEFAULT_PAGE) * pageSize;
         Integer till = Math.min((start +  pageSize), userSet.getItems().size()); // should not exceed the size of item list
 
         StringBuilder query = new StringBuilder(100);

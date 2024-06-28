@@ -271,7 +271,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
     // do not generate first and last if pageSize=0
     if (totalInCollection > 0 && pageSize > 0) {
-      first = buildPageUrl(paginationBaseUrl, 0, pageSize, profile);
+      first = buildPageUrl(paginationBaseUrl, UserSetUtils.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(paginationBaseUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(pageId, totalInCollection, first, last, type);
@@ -285,12 +285,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @return
    */
   protected int getLastPage(long totalResults, int pageSize) {
-    long lastPage = 0;
+    long lastPage = UserSetUtils.DEFAULT_PAGE;
     // avoid null divizion if pages size is 0
     if (totalResults > 0 && pageSize > 0) {
       long reaminder = (totalResults % pageSize);
       int extraPage = (reaminder == 0 ? 0 : 1);
-      lastPage = ((totalResults / pageSize) + extraPage) - 1;
+      lastPage = ((totalResults / pageSize) + extraPage) + UserSetUtils.DEFAULT_PAGE - 1;
     }
 
     return Math.toIntExact(lastPage);
@@ -363,7 +363,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     String last = null;
 
     if (totalInCollection > 0) {
-      first = buildPageUrl(collectionUrl, 0, pageSize, profile);
+      first = buildPageUrl(collectionUrl, UserSetUtils.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);

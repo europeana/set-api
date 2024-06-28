@@ -242,7 +242,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 
     // check if the position is "pin" and is a EntityBestItem set then
-    // insert the item at the 0 positio
+    // insert the item at the 0 position
     UserSet userSet;
 
     if (WebUserSetModelFields.PINNED_POSITION.equals(position)
@@ -460,7 +460,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String localId;
     
     // calculate the index of from and until to get the right page of items
-    Integer start = pageNr * pageSize;
+    Integer start = (pageNr - UserSetUtils.DEFAULT_PAGE) * pageSize;
     Integer till = Math.min((start + pageSize), userSet.getItems().size()); // should not exceed
                                                                             // the size of item
                                                                             // list
@@ -579,7 +579,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     for (UserSet userSet : results.getResults()) {
       if (LdProfiles.ITEMDESCRIPTIONS == profile) {
-        fetchItems(userSet, null, null, CommonApiConstants.DEFAULT_PAGE, derefItems, profile);
+        fetchItems(userSet, null, null, UserSetUtils.DEFAULT_PAGE, derefItems, profile);
       }
 
       // items not included in results
@@ -610,7 +610,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
     resPage.setCurrentPageUri(currentPageUrl);
 
-    if (page > 0) {
+    if (page > UserSetUtils.DEFAULT_PAGE) {
       String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
       resPage.setPrevPageUri(prevPage);
     }
@@ -641,7 +641,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     // build Collection Page object
     CollectionPage page = null;
-    int startIndex = pageNr * pageSize;
+    int startIndex = (pageNr - UserSetUtils.DEFAULT_PAGE) * pageSize;
     // handle ITEMDESCRIPTIONS profile separately as it will have only the requested items present
     // Also, we don't want to sublist the item list, as number items returned from search api may
     // not be equal to
@@ -668,7 +668,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // add pagination URLs
     page.setCurrentPageUri(buildPageUrl(paginationBaseUrl, pageNr, pageSize, profile));
 
-    if (pageNr > 0) {
+    if (pageNr > UserSetUtils.DEFAULT_PAGE) {
       page.setPrevPageUri(buildPageUrl(paginationBaseUrl, pageNr - 1, pageSize, profile));
     }
 
@@ -706,7 +706,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       result.setPartOf(collectionOverview);
 
       // build Result page properties
-      int startPos = page * pageSize;
+      int startPos = (page - UserSetUtils.DEFAULT_PAGE) * pageSize;
       if (startPos < itemIds.size()) {
         int toIndex = Math.min(startPos + pageSize, itemIds.size());
         List<String> pageItems = itemIds.subList(startPos, toIndex);

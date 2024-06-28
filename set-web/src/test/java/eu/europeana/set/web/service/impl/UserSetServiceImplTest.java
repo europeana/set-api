@@ -19,6 +19,7 @@ import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
@@ -68,11 +69,11 @@ public class UserSetServiceImplTest {
     @Test
     public void TestGetLastPage() {
 	updateResultSetItems(55);
-	assertTrue(userSetService.getLastPage(55, 10) == 5);
-	assertTrue(userSetService.getLastPage(55, 11) == 4);
+	assertTrue(userSetService.getLastPage(55, 10) == 6);
+	assertTrue(userSetService.getLastPage(55, 11) == 5);
 	updateResultSetItems(50);
-	assertTrue(userSetService.getLastPage(50, 10) == 4);
-	assertTrue(userSetService.getLastPage(0, 10) == 0);
+	assertTrue(userSetService.getLastPage(50, 10) == 5);
+	assertTrue(userSetService.getLastPage(0, 10) == 1);
     }
 
     // test to verify the pagination fields
@@ -81,13 +82,13 @@ public class UserSetServiceImplTest {
     public void testPaginationForFirstPage() throws Exception {
 	updateResultSetItems(50);
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
-	assertTrue(lastPage == 4);
+	assertTrue(lastPage == 5);
 
-	userSetQuery.setPageNr(0);
+	userSetQuery.setPageNr(UserSetUtils.DEFAULT_PAGE);
 	LdProfiles profile = LdProfiles.STANDARD;
 	// check with standard profile
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-	String first = userSetService.buildPageUrl(requestUrl, 0, userSetQuery.getPageSize(), null);
+	String first = userSetService.buildPageUrl(requestUrl, UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), null);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), null);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -106,17 +107,17 @@ public class UserSetServiceImplTest {
 	}
 
     @Test
-    public void testPaginationForPage2() throws Exception {
+    public void testPaginationForPage3() throws Exception {
 
 	updateResultSetItems(50);
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
-	assertTrue(lastPage == 4);
+	assertTrue(lastPage == 5);
 
-	userSetQuery.setPageNr(2);
+	userSetQuery.setPageNr(3);
 	LdProfiles profile = LdProfiles.MINIMAL;
 	// check with minimal profile
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-	String first = userSetService.buildPageUrl(requestUrl , 0, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(requestUrl , UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -140,13 +141,13 @@ public class UserSetServiceImplTest {
     public void testPaginationForLastPage() throws Exception {
 	updateResultSetItems(50);
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
-	assertTrue(lastPage == 4);
+	assertTrue(lastPage == 5);
 
 	userSetQuery.setPageNr(lastPage);
 	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
     // check with item description profile
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-    String first = userSetService.buildPageUrl(requestUrl, 0, userSetQuery.getPageSize(), profile);
+    String first = userSetService.buildPageUrl(requestUrl, UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize(), profile);
@@ -169,13 +170,13 @@ public class UserSetServiceImplTest {
     public void testPaginationForOddNumberResults() throws Exception {
 	updateResultSetItems(57);
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
-	assertTrue(lastPage == 5);
+	assertTrue(lastPage == 6);
 
 	userSetQuery.setPageNr(3);
 
 	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-	String first = userSetService.buildPageUrl(requestUrl, 0, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(requestUrl, UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);

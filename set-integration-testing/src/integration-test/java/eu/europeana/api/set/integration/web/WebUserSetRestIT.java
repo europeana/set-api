@@ -28,6 +28,7 @@ import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
+import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
@@ -192,6 +193,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     // without page in request, it is not a collection page
     assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
     assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
+    assertEquals(((JSONObject)(new JSONObject(result)).get("creator")).getString("type"),AgentTypes.PERSON.name());
   }
 
   // Update user set Tests

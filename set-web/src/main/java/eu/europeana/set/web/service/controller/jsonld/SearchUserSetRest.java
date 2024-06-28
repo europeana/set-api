@@ -60,7 +60,7 @@ public class SearchUserSetRest extends BaseRest {
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sort,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false,
-          defaultValue = "0") int page,
+          defaultValue = "" + UserSetUtils.DEFAULT_PAGE) int page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
           defaultValue = "" + CommonApiConstants.DEFAULT_PAGE_SIZE) int pageSize,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_FACET, required = false) String facet,
@@ -70,6 +70,7 @@ public class SearchUserSetRest extends BaseRest {
       HttpServletRequest request) throws HttpException {
 
     try {
+      
       // authorization
       Authentication authentication = verifyReadAccess(request);
 
@@ -131,7 +132,7 @@ public class SearchUserSetRest extends BaseRest {
           defaultValue = UserSetQueryBuilder.SEARCH_ALL) String query,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false,
-          defaultValue = "0") int page,
+          defaultValue = "" + UserSetUtils.DEFAULT_PAGE) int page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
           defaultValue = "" + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) int pageSize,
       // @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
