@@ -274,6 +274,11 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     public boolean isEntityBestItemsSet() {
 	return UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(getType());
     }
+    
+    @Override
+    public boolean isCollection() {
+    return UserSetTypes.COLLECTION.getJsonValue().equals(getType());
+    }
 
     @Override
     public String toString() {

@@ -153,6 +153,7 @@ public abstract class BaseUserSetTestUtils {
     }
 
     disableOauth();
+    changeProperiesForTests();
   }
 
   private void disableOauth() {
@@ -160,6 +161,11 @@ public abstract class BaseUserSetTestUtils {
       ((UserSetConfigurationImpl) configuration).getSetProperties()
           .put(UserSetConfigurationImpl.KEY_AUTH_DISABLED, "true");
     }
+  }
+  
+  private void changeProperiesForTests() {
+    ((UserSetConfigurationImpl) configuration).getSetProperties()
+          .put(UserSetConfigurationImpl.MAX_ITEMS, "249");
   }
 
   public static void initRegularUserToken() {

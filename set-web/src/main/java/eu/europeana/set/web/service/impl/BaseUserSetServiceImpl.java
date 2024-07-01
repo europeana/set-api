@@ -608,6 +608,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
     }
+    
+    //validate number of items for the sets of type Collection
+    if(webUserSet.isCollection() && webUserSet.getItems()!=null && webUserSet.getItems().size()>getConfiguration().getMaxItems()) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_NUMBER_OF_ITEMS, new String[] {String.valueOf(getConfiguration().getMaxItems())} );
+    }
 
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);

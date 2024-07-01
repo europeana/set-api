@@ -46,6 +46,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
+import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -504,6 +505,12 @@ public class WebUserSetRest extends BaseRest {
           && StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
+      }
+      
+      //check max number of items for the sets of type Collection
+      int newNumberOfItems=existingUserSet.getItems()==null ? 1 : (existingUserSet.getItems().size() + 1); 
+      if(existingUserSet.isCollection() && newNumberOfItems>getConfiguration().getMaxItems()) {
+        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED, new String[] {String.valueOf(getConfiguration().getMaxItems())} );
       }
 
       // check visibility level for given user
