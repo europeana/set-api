@@ -53,12 +53,11 @@ public interface UserSetService {
     /**
      * update (stored) <code>persistentUserSet</code> with values from
      * <code>webUserSet</code>
-     *
+     * 
      * @param persistentUserSet
      * @param webUserSet
-     * @param profile
      * @return
-     * @throws HttpException 
+     * @throws HttpException
      */
     UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws HttpException;
 

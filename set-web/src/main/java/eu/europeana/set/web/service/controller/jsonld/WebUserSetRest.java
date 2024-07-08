@@ -167,10 +167,10 @@ public class WebUserSetRest extends BaseRest {
       profile=CommonApiConstants.PROFILE_MINIMAL;
     } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
-      pageNr = pageNr==null ? UserSetUtils.DEFAULT_PAGE : pageNr;
+      pageNr = pageNr==null ? Integer.valueOf(UserSetUtils.DEFAULT_PAGE) : pageNr;
       int maxPageSize = getConfiguration().getMaxPageSize();
       pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize, UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
-      pageItems = pageItems==null ? UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE : pageItems;
+      pageItems = pageItems==null ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) : pageItems;
     }
 
     return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems,
@@ -592,13 +592,12 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-    return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId);
+    return deleteItemFromUserSet(authentication, identifier, datasetId, localId);
   }
 
   /**
    * This method validates input values and deletes item from a user set.
-   * 
-   * @param request
+   *
    * @param authentication The Authentication object
    * @param identifier The identifier of a user set
    * @param datasetId The identifier of the dataset, typically a number
@@ -608,8 +607,8 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
-  protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request,
-      Authentication authentication, String identifier, String datasetId, String localId) 
+  protected ResponseEntity<String> deleteItemFromUserSet(Authentication authentication, 
+      String identifier, String datasetId, String localId) 
           throws HttpException {
     try {     
       // check if the Set exists, if not respond with HTTP 404
