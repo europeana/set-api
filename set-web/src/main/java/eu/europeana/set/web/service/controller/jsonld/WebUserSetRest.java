@@ -165,13 +165,12 @@ public class WebUserSetRest extends BaseRest {
     //in case of no pagination deprecate profile (set it to minimal)
     if(page==null && pageSize==null) {
       profile=CommonApiConstants.PROFILE_MINIMAL;
-    }
-    else {
+    } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
-      pageNr = pageNr!=null ? pageNr : UserSetUtils.DEFAULT_PAGE;
+      pageNr = pageNr==null ? UserSetUtils.DEFAULT_PAGE : pageNr;
       int maxPageSize = getConfiguration().getMaxPageSize();
       pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize, UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
-      pageItems = pageItems!=null ? pageItems : UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
+      pageItems = pageItems==null ? UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE : pageItems;
     }
 
     return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems,
@@ -236,17 +235,6 @@ public class WebUserSetRest extends BaseRest {
       throw e;
     } catch (RuntimeException | IOException | JSONException e) {
       throw new InternalServerException(e);
-    }
-  }
-
-  private int getDerefItemsCount(UserSet userSet, int pageSize) {
-    if (userSet.isOpenSet()) {
-      // limit to max deref items
-      return Math.min(pageSize, getConfiguration().getMaxRetrieveDereferencedItems());
-    } else {
-      // for closed set dereference all items
-      // limit to max deref items
-      return Math.min(userSet.getTotal(), getConfiguration().getMaxRetrieveDereferencedItems());
     }
   }
 
@@ -369,7 +357,7 @@ public class WebUserSetRest extends BaseRest {
       }
     }
         
-    return publishUnpublishUserSet(identifier, authentication, true, issuedDate, request);
+    return publishUnpublishUserSet(identifier, authentication, true, issuedDate);
   }
 
   @PutMapping(value = {"/set/{identifier}/unpublish"},
@@ -381,11 +369,11 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
-    return publishUnpublishUserSet(identifier, authentication, false, null, request);
+    return publishUnpublishUserSet(identifier, authentication, false, null);
   }
 
   protected ResponseEntity<String> publishUnpublishUserSet(String identifier, Authentication authentication, 
-      boolean publish, Date issued, HttpServletRequest request)
+      boolean publish, Date issued)
       throws HttpException {
     try {
       UserSet updatedUserSet =

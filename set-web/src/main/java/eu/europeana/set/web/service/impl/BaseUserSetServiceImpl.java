@@ -484,13 +484,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     /* for entity sets update there must not be any items present in new user set
      * only metadata can be update for entity sets
      */
-    if (storedUserSet.isEntityBestItemsSet()) {
-      if(userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) {
-        throw new ApplicationAuthenticationException(
+    if (storedUserSet.isEntityBestItemsSet() && userSetUpdates.getItems()!=null 
+        && userSetUpdates.getItems().size()>0) {
+      throw new ApplicationAuthenticationException(
           UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
           UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
           HttpStatus.BAD_REQUEST, null);
-      }
     }
     
     if(userSetUpdates.getItems()!=null && userSetUpdates.getItems().size()>0) { 

@@ -293,7 +293,8 @@ public class BaseRest extends BaseRestController {
         return buildInfo.getVersion();
     }
     
-    protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, Integer pageNr, Integer pageSize, HttpServletRequest request) throws IOException, HttpException {
+    protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, Integer pageNr, 
+        Integer pageSize, HttpServletRequest request) throws IOException, HttpException {
 	String jsonBody = "";
 	if(pageNr==null && pageSize==null) {
 	    jsonBody = serializeUserSet(profile, userSet);    
