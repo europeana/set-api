@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.UserSet;
@@ -75,7 +74,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
 
     String result = mockMvc
         .perform(
-            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            post(BASE_URL)
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
@@ -92,7 +91,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     
     mockMvc
     .perform(
-        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        post(BASE_URL)
             .content(withoutIsDefinedBy.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
     .andExpect(status().isBadRequest());
@@ -106,7 +105,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     
     mockMvc
     .perform(
-        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        post(BASE_URL)
             .content(withIsDefinedBy.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
     .andExpect(status().isBadRequest());
@@ -116,7 +115,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
   public void create_UserSet_401_bad_request_InvalidInput() throws Exception {
     mockMvc
         .perform(
-            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            post(BASE_URL)
                 .content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
@@ -127,7 +126,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     String requestJson = getJsonStringInput(USER_SET_REGULAR_PUBLISHED);
     mockMvc
         .perform(
-            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            post(BASE_URL)
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
@@ -138,7 +137,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     String requestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
     mockMvc
         .perform(
-            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            post(BASE_URL)
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
@@ -151,7 +150,6 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
 
     mockMvc
         .perform(post(BASE_URL)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
             .content(requestJson).header(HttpHeaders.AUTHORIZATION, "")
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -178,6 +176,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             // .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -224,7 +223,6 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_PUBLISHED);
     mockMvc
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
@@ -238,7 +236,6 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     // update the userset
     mockMvc
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest())
@@ -253,7 +250,6 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     // update the userset
     MockHttpServletResponse response = mockMvc
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -262,6 +258,8 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+    // the minimal profile is always used in the respose, so no items
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }

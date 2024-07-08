@@ -60,7 +60,7 @@ public interface UserSetService {
      * @return
      * @throws HttpException 
      */
-    UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, LdProfiles profile) throws HttpException;
+    UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws HttpException;
 
     /**
      * This method returns UserSet object for given user set identifier.

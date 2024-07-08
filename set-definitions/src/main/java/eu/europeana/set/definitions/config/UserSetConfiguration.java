@@ -17,7 +17,7 @@ public interface UserSetConfiguration {
   @Deprecated
   public String getUserSetBaseUrl();
 
-  public int getMaxPageSize(String profile);
+  public int getMaxPageSize();
 
   public int getMaxSearchDereferencedItems();
 
