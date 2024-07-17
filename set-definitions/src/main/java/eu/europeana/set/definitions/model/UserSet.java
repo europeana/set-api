@@ -79,6 +79,8 @@ public interface UserSet extends PageInfo {
     public boolean isBookmarksFolder();
 
     public boolean isEntityBestItemsSet();
+    
+    public boolean isCollection();
 
     public boolean isPrivate();
 
