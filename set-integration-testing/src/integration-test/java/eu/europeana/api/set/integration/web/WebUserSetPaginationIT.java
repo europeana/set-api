@@ -114,7 +114,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
-            // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
+            // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -148,7 +148,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
-            // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -193,6 +193,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, secondPageIdex)
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -221,6 +222,7 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, secondPageIndex)
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();

@@ -12,6 +12,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
 
   public static final int DEFAULT_ITEMS_PER_PAGE = 10;
+  public static final int MIN_ITEMS_PER_PAGE = 1;
   @Deprecated
   /**
    * use getMaxPageSize instead
@@ -107,7 +108,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     return getSetProperties().getProperty(USERSET_ENVIRONMENT);
   }
 
-  public int getMaxPageSize(String profile) {
+  public int getMaxPageSize() {
     // TODO enable configuration per profile when specified
     String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + LdProfiles.STANDARD.name().toLowerCase();
     return Integer.parseInt(getSetProperties().getProperty(key));
