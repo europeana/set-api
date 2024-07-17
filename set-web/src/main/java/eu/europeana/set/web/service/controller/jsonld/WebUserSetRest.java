@@ -46,7 +46,6 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
-import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -163,15 +162,15 @@ public class WebUserSetRest extends BaseRest {
 
     Integer pageNr=null;
     Integer pageItems=null;
-    //in case of no pagination deprecate profile (set it to minimal)
-    if(page==null && pageSize==null) {
+    //if no pagination requested, apply minimal profile (profiles deprecation)
+    if(page == null) {
       profile=CommonApiConstants.PROFILE_MINIMAL;
     } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
-      pageNr = pageNr==null ? Integer.valueOf(UserSetUtils.DEFAULT_PAGE) : pageNr;
+      pageNr = (pageNr == null) ? Integer.valueOf(UserSetUtils.DEFAULT_PAGE) : pageNr;
       int maxPageSize = getConfiguration().getMaxPageSize();
       pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize, UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
-      pageItems = pageItems==null ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) : pageItems;
+      pageItems = (pageItems == null) ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) : pageItems;
     }
 
     return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems,
@@ -183,7 +182,7 @@ public class WebUserSetRest extends BaseRest {
     if(paramValue!=null) {
       try {
         Integer value = Integer.valueOf(paramValue);
-        if ((maxValue>0 && value>maxValue) || value<minValue) {
+        if ((maxValue>0 && value>maxValue) || value < minValue) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
               I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue});
         }
@@ -842,4 +841,26 @@ public class WebUserSetRest extends BaseRest {
       throw new InternalServerException(e);
     }
   }
+  
+  
+  @Deprecated
+  /**
+   * SG: we might need to add back the verification of page size for dereference profile
+   * @deprecated need to verify specs to see if the page for items dereferencing stays the same as the size for standard profile
+   * @param userSet
+   * @param pageSize
+   * @return
+   */
+  private int getDerefItemsCount(UserSet userSet, int pageSize) {
+    if (userSet.isOpenSet()) {
+      // limit to max deref items
+      return Math.min(pageSize, getConfiguration().getMaxRetrieveDereferencedItems());
+    } else {
+      // for closed set dereference all items
+      // limit to max deref items
+      return Math.min(userSet.getTotal(), getConfiguration().getMaxRetrieveDereferencedItems());
+    }
+  }
+
+
 }

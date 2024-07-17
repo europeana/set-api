@@ -190,7 +190,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
     // validate new items
-    validateNewItems(persistentUserSet, webUserSet);
+    validateAndSetItems(persistentUserSet, webUserSet);
     // remove duplicated items
     removeItemDuplicates(persistentUserSet);
 
@@ -475,7 +475,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return profile;
   }
 
-  private void validateNewItems(UserSet storedUserSet, UserSet userSetUpdates) 
+  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
       throws ApplicationAuthenticationException {
     // no validation of items for open sets, they are retrieved dynamically
     if (storedUserSet.isOpenSet()) {
