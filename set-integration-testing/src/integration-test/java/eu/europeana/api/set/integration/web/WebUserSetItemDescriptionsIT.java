@@ -24,6 +24,7 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
@@ -92,6 +93,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -108,10 +110,6 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     // otherwise the default standard profile was used
     assertFalse(containsKeyOrValue(result, "completeness"));
 
-    /*
-     * if any of the params (page or pageSize) is given in the request, the CollectionPage is 
-     * returned, otherwise only a set as Collection
-     */
     assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
     
     int idCount = StringUtils.countMatches(result, "\"id\"");
@@ -161,6 +159,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     // check the collection url
     String baseUrl = getConfiguration().getSetApiEndpoint()
         .replaceFirst(getConfiguration().getApiBasePath(), "");
+    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
     String requestedPage = baseUrl + response.getRequest().getPathInfo();
     // int pageSize = 100;
     // int page = 2;
@@ -218,9 +217,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     assertNotNull(result);
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
 
-    // completeness field is not inclused in the minimal profile, must not be present in the results
-    // otherwise the default standard profile was used
-    assertFalse(containsKeyOrValue(result, "completeness"));
+    assertEquals("ErrorResponse", getvalueOfkey(result, WebUserSetFields.TYPE));
   }
 
   @Test
@@ -245,6 +242,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(),
         userSet.getIdentifier());
     assertTrue(containsKeyOrValue(result, userSetId));
+    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
 
     // completeness field is not inclused in the minimal profile, must not be present in the results
     // otherwise the default standard profile was used
@@ -261,6 +259,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -270,6 +269,8 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
+    //assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
     assertEquals("10", getvalueOfkey(result, WebUserSetFields.TOTAL));
     // one of set and one for creator and items = 10 (default pageSize)
     assertEquals(2 + 10, noOfOccurance(result, WebUserSetFields.ID));
@@ -303,6 +304,8 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
+    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
+    
     // completeness field is not inclused in the minimal profile, must not be present in the results
     // otherwise the default standard profile was used
     assertFalse(containsKeyOrValue(result, "completeness"));

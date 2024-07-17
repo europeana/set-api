@@ -163,7 +163,7 @@ public class WebUserSetRest extends BaseRest {
     Integer pageNr=null;
     Integer pageItems=null;
     //if no pagination requested, apply minimal profile (profiles deprecation)
-    if(page == null) {
+    if(isSetMetadataResponse(page)) {
       profile=CommonApiConstants.PROFILE_MINIMAL;
     } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
