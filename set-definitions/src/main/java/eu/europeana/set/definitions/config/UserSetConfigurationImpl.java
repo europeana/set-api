@@ -48,6 +48,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
   public static final String API_BASE_PATH = "set.api.basePath";
   
+  public static final String COLLECTION_SIZE_MAX = "set.collection.size.max";
   
   private Properties setProperties;
 
@@ -181,5 +182,10 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   @Override
   public String getEuropeanaPublisherNickname() {
     return getSetProperties().getProperty(EUROPEANA_PUBLISHER_NICKNAME);
+  }
+  
+  @Override
+  public int getCollectionMaxSize() {
+    return Integer.parseInt(getSetProperties().getProperty(COLLECTION_SIZE_MAX));
   }
 }

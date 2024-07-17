@@ -156,6 +156,27 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
+  
+  @Test
+  void create_Collection_numberOfItemsLimit() throws Exception {
+    String setJsonInit = getJsonStringInput(USER_SET_LARGE);
+    JSONObject setJson=new JSONObject(setJsonInit);
+    setJson.getJSONArray("items").put("http://data.europeana.eu/item/9200388/test_item");
+
+    String result = mockMvc
+        .perform(
+            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+                .content(setJson.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+
+    assertTrue(result.contains("Number of items") && result.contains("above") && result.contains("limit"));
+
+  }
+
+  
+
 
   // Get user sets Tests
 
@@ -369,5 +390,23 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
   }
+  
+  @Test
+  void insertItems_Collection_limitReached() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, editorUserToken);
+    String identifier = userSet.getIdentifier();
+
+    String result = mockMvc
+        .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+
+    assertTrue(result.contains("limit") && result.contains("reached"));
+
+  }
+
 
 }

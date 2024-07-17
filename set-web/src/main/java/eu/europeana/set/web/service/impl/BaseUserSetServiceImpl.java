@@ -1,5 +1,6 @@
 package eu.europeana.set.web.service.impl;
 
+import static eu.europeana.set.web.config.UserSetI18nConstants.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -608,6 +609,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
     }
+    
+    //validate number of items for the sets of type Collection
+    validateCollectionSize(webUserSet, 0);
 
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
@@ -617,6 +621,18 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateItems(webUserSet.getItems());
   }
 
+  public void validateCollectionSize(UserSet webUserSet, int newItems) throws ItemValidationException {
+    final int collectionMaxSize = getConfiguration().getCollectionMaxSize();
+    if(webUserSet.isCollection() 
+        && webUserSet.getItems()!=null 
+        && webUserSet.getItems().size() + newItems > collectionMaxSize) {
+      
+      String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;   
+      throw new ItemValidationException(messageKey, 
+          new String[] {String.valueOf(collectionMaxSize)} );
+    }
+  }
+  
   void validateProvider(UserSet webUserSet) throws RequestBodyValidationException {
     if (webUserSet.getProvider() == null) {
       return;

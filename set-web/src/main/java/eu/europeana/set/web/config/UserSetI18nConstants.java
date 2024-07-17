@@ -11,6 +11,8 @@ public class UserSetI18nConstants {
     public static final String USERSET_NOT_FOUND      = "error.userset_not_found";
     public static final String USERSET_ITEM_NOT_FOUND = "error.userset_item_not_found";
     public static final String USERSET_ITEM_INVALID_FORMAT = "error.userset_item_invalid_format";
+    public static final String USERSET_NUMBER_OF_ITEMS = "error.userset_number_of_items";
+    public static final String USERSET_ITEMS_LIMIT_REACHED = "error.userset_items_limit_reached";
     public static final String BASE64_DECODING_FAIL   = "error.userset_base64_encoding_fail";
     public static final String UNSUPPORTED_TOKEN_TYPE = "error.userset_unsupported_token_type";
     public static final String INVALID_HEADER_FORMAT  = "error.userset_invalid_header_format";
