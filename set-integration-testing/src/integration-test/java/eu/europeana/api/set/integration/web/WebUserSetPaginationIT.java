@@ -113,8 +113,8 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
-            // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -133,10 +133,8 @@ public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
     assertEquals(2, idCount);
 
     int total = StringUtils.countMatches(result, "\"total\"");
-    // 1 total only for the set
-    assertEquals(1, total);
-
-    // getUserSetService().deleteUserSet(userSet.getIdentifier());
+    // 1 total for the set and one for page
+    assertEquals(2, total);
   }
 
   @Test
