@@ -507,12 +507,6 @@ public class WebUserSetRest extends BaseRest {
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
       
-      //check max number of items for the sets of type Collection
-      int newNumberOfItems=existingUserSet.getItems()==null ? 1 : (existingUserSet.getItems().size() + 1); 
-      if(existingUserSet.isCollection() && newNumberOfItems>getConfiguration().getMaxItems()) {
-        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED, new String[] {String.valueOf(getConfiguration().getMaxItems())} );
-      }
-
       // check visibility level for given user
       getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
 

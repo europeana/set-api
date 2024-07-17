@@ -165,7 +165,7 @@ public abstract class BaseUserSetTestUtils {
   
   private void changeProperiesForTests() {
     ((UserSetConfigurationImpl) configuration).getSetProperties()
-          .put(UserSetConfigurationImpl.MAX_ITEMS, "249");
+          .put(UserSetConfigurationImpl.COLLECTION_SIZE_MAX, "249");
   }
 
   public static void initRegularUserToken() {

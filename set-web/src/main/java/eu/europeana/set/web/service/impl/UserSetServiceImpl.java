@@ -238,6 +238,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       UserSet existingUserSet) throws ApplicationAuthenticationException, ItemValidationException {
     String itemForPartialValidation = "/" + datasetId + "/" + localId;
     validateItemPartial(itemForPartialValidation);
+
+    //check max number of items for the sets of type Collection
+    validateCollectionSize(existingUserSet, 1);
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 

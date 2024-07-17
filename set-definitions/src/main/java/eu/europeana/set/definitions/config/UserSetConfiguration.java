@@ -58,5 +58,5 @@ public interface UserSetConfiguration {
 
   boolean isAuthEnabled();
   
-  int getMaxItems();
+  int getCollectionMaxSize();
 }
