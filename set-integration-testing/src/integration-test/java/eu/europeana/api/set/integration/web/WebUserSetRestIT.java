@@ -393,13 +393,13 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
   
   @Test
   void insertItems_Collection_limitReached() throws Exception {
-    WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, editorUserToken);
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
     String identifier = userSet.getIdentifier();
 
     String result = mockMvc
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
         .getContentAsString();
