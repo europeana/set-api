@@ -164,6 +164,12 @@ public class WebUserSetRest extends BaseRest {
     Integer pageItems=null;
     //if no pagination requested, apply minimal profile (profiles deprecation)
     if(isSetMetadataResponse(page)) {
+      List<LdProfiles> profiles = getProfiles(profile, request);
+      if(profiles.contains(LdProfiles.ITEMDESCRIPTIONS) || profiles.contains(LdProfiles.STANDARD)) {
+        //only minimal allow when retrieving metadata
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile});
+      }
       profile=CommonApiConstants.PROFILE_MINIMAL;
     } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
@@ -175,6 +181,11 @@ public class WebUserSetRest extends BaseRest {
 
     return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems,
         authentication);
+  }
+
+  private void verifyProfileForRetrieveSet(String profile) {
+    // TODO Auto-generated method stub
+    
   }
 
   private Integer parseIntegerParam(String paramName, String paramValue, int maxValue, int minValue)

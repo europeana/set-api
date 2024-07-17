@@ -24,7 +24,6 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
@@ -73,14 +72,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
 
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-
-    /*
-     * when both page and pageSize params in the get request are not provided, the minimal profile
-     * is used (no items), and only the set (Collection) is returned, so no CollectionPage
-     */
-    assertFalse(containsKeyOrValue(result, "items"));
-    assertEquals(CommonLdConstants.COLLECTION, getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   @Test
@@ -238,15 +230,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     //
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
-    final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(),
-        userSet.getIdentifier());
-    assertTrue(containsKeyOrValue(result, userSetId));
-    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
-
-    // completeness field is not inclused in the minimal profile, must not be present in the results
-    // otherwise the default standard profile was used
-    assertFalse(containsKeyOrValue(result, "completeness"));
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   // this test is to verify item search for large queries using POST Search API
@@ -292,6 +276,7 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     LdProfiles.ITEMDESCRIPTIONS.name())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -304,7 +289,8 @@ public class WebUserSetItemDescriptionsIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
-    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
+//    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
     
     // completeness field is not inclused in the minimal profile, must not be present in the results
     // otherwise the default standard profile was used
