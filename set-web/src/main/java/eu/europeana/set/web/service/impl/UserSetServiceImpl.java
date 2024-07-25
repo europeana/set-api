@@ -848,9 +848,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // presented
     if (profile != LdProfiles.MINIMAL && userSet.getItems() != null) {
       int itemsCount = userSet.getItems().size();
-      if (itemsCount > UserSetConfigurationImpl.MAX_ITEMS_TO_PRESENT) {
+      final int maxPageSize = getConfiguration().getMaxPageSize(profile.getRequestParamValue());
+      if (itemsCount > maxPageSize) {
         List<String> itemsPage =
-            userSet.getItems().subList(0, UserSetConfigurationImpl.MAX_ITEMS_TO_PRESENT);
+            userSet.getItems().subList(0, maxPageSize);
         userSet.setItems(itemsPage);
         profile = LdProfiles.STANDARD;
         getLogger().debug("Profile switched to standard, due to set size!");
