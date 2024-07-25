@@ -13,11 +13,8 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
   public static final int DEFAULT_ITEMS_PER_PAGE = 10;
   public static final int MIN_ITEMS_PER_PAGE = 1;
-  @Deprecated
-  /**
-   * use getMaxPageSize instead
-   */
-  public static final int MAX_ITEMS_TO_PRESENT = 1000;
+  public static final int DEFAULT_MAX_COLLECTION_SIZE = 100;
+  public static final int DEFAULT_MAX_ITEMS_TO_PRESENT = 1000;
 
 
   public static final String SET_API_ENDPOINT = "set.api.endpoint.baseUrl";
@@ -108,12 +105,6 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     return getSetProperties().getProperty(USERSET_ENVIRONMENT);
   }
 
-  public int getMaxPageSize() {
-    // TODO enable configuration per profile when specified
-    String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + LdProfiles.STANDARD.name().toLowerCase();
-    return Integer.parseInt(getSetProperties().getProperty(key));
-  }
-
   public int getMaxSearchDereferencedItems() {
     return Integer.parseInt(getSetProperties().getProperty(KEY_SEARCH_DEREFERENCE_ITEMS));
   }
@@ -187,6 +178,14 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   
   @Override
   public int getCollectionMaxSize() {
-    return Integer.parseInt(getSetProperties().getProperty(COLLECTION_SIZE_MAX));
+    return Integer.parseInt(getSetProperties().getProperty(COLLECTION_SIZE_MAX, ""+DEFAULT_MAX_COLLECTION_SIZE));
   }
+
+  @Override
+  public int getMaxPageSize(String profile) {
+    // TODO enable configuration per profile when specified
+    String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + LdProfiles.STANDARD.name().toLowerCase();
+    return Integer.parseInt(getSetProperties().getProperty(key, ""+DEFAULT_MAX_ITEMS_TO_PRESENT));
+  }
+
 }

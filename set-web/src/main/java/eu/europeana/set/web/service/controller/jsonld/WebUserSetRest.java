@@ -174,18 +174,13 @@ public class WebUserSetRest extends BaseRest {
     } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
       pageNr = (pageNr == null) ? Integer.valueOf(UserSetUtils.DEFAULT_PAGE) : pageNr;
-      int maxPageSize = getConfiguration().getMaxPageSize();
+      int maxPageSize = getConfiguration().getMaxPageSize(null);
       pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize, UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
       pageItems = (pageItems == null) ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) : pageItems;
     }
 
     return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems,
         authentication);
-  }
-
-  private void verifyProfileForRetrieveSet(String profile) {
-    // TODO Auto-generated method stub
-    
   }
 
   private Integer parseIntegerParam(String paramName, String paramValue, int maxValue, int minValue)

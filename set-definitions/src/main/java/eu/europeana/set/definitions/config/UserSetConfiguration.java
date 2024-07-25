@@ -17,7 +17,12 @@ public interface UserSetConfiguration {
   @Deprecated
   public String getUserSetBaseUrl();
 
-  public int getMaxPageSize();
+  /**
+   * Indicates the maximum number of items to be included for serialization of collection pages
+   * @param profile currently not used, might be used in the future to use different sizes for different profiles
+   * @return the configured value as present, or the hardcoded default value otherwise
+   */
+  public int getMaxPageSize(String profile);
 
   public int getMaxSearchDereferencedItems();
 
