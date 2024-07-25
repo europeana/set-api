@@ -495,7 +495,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
           new String[] {CommonApiConstants.QUERY_PARAM_PAGE,
-              "value our out range: " + pageNr + ", last page:" + lastPage});
+              "value out of range: " + pageNr + ", last page:" + lastPage});
     }
     return lastPage;
   }

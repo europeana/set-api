@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,10 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -94,8 +92,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-        .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())).andReturn().getResponse();
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     String result = response.getContentAsString();
@@ -124,8 +122,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -161,8 +158,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -190,8 +186,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
   }
 
@@ -209,7 +204,6 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     MockHttpServletResponse response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -226,9 +220,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
     // check the updated value of the title
     assertTrue(containsKeyOrValue(result, "Sportswear-updated"));
-    // check size of the items
-    int itemCount = StringUtils.countMatches(result, "data.europeana.eu/item/");
-    assertEquals(5, itemCount);
+    
+    //check new items size is 5
+    UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    assertEquals(5, existingUserSet.getItems().size());
   }
 
   @Test
@@ -245,7 +240,6 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
 
     MockHttpServletResponse response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -262,9 +256,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
     // check the updated value of the title
     assertTrue(containsKeyOrValue(result, "Sportswear-updated"));
-    // check size of the items
-    int itemCount = StringUtils.countMatches(result, "data.europeana.eu/item/");
-    assertEquals(5, itemCount);
+    
+    //check new items size is 5
+    UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    assertEquals(5, existingUserSet.getItems().size());
   }
 
   @Test
@@ -275,12 +270,10 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     // publish userset by other user, the ownership stays with the creator
     publishUserSet(userSet, null, USERNAME_REGULAR);
 
-
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(), "01",
             "123_test")
-                .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
                 .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -297,8 +290,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));
     assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
     // check size of the items
-    int itemCount = StringUtils.countMatches(result, "data.europeana.eu/item/");
-    assertEquals(8, itemCount);
+    UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    assertEquals(8, existingUserSet.getItems().size());
   }
 
   @Test
@@ -313,7 +306,6 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     MockHttpServletResponse response = mockMvc
         .perform(delete(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(),
             "2048128", "618580")
-                .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
                 .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
@@ -329,8 +321,8 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));
     assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
     // check size of the items
-    int itemCount = StringUtils.countMatches(result, "data.europeana.eu/item/");
-    assertEquals(6, itemCount);
+    UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    assertEquals(6, existingUserSet.getItems().size());
   }
 
 
@@ -358,7 +350,6 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
             .param(WebUserSetFields.REQUEST_PARAM_ISSUED, issued)).andReturn().getResponse();
 
     String result = response.getContentAsString();
@@ -385,8 +376,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + "test-dummy" + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
   }
   
@@ -397,8 +387,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet2.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
   }
@@ -411,8 +400,7 @@ public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
   }
    

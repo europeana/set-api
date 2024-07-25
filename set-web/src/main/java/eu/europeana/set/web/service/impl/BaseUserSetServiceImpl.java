@@ -170,9 +170,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * europeana.UserSet.definitions.model.UserSet, boolean)
    */
   // @Override
-  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet,
-      LdProfiles profile) throws SetUniquenessValidationException, RequestBodyValidationException,
-      ParamValidationException, ApplicationAuthenticationException, ItemValidationException {
+  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) 
+      throws SetUniquenessValidationException, RequestBodyValidationException, ParamValidationException, 
+      ApplicationAuthenticationException, ItemValidationException {
     // ###### FIRST Validate the input data, which is allowed to be partial ####/
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
@@ -189,8 +189,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
-    // validate items-profile conformance
-    validateSetAndSetItems(persistentUserSet, webUserSet, profile);
+    // validate new items
+    validateAndSetItems(persistentUserSet, webUserSet);
     // remove duplicated items
     removeItemDuplicates(persistentUserSet);
 
@@ -475,55 +475,25 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return profile;
   }
 
-  private void validateSetAndSetItems(UserSet storedUserSet, UserSet userSetUpdates,
-      LdProfiles profile) throws ApplicationAuthenticationException {
+  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
+      throws ApplicationAuthenticationException {
     // no validation of items for open sets, they are retrieved dynamically
     if (storedUserSet.isOpenSet()) {
       return;
     }
 
-    // for entity sets update :profile should be minimal and
-    // there must not be any items present in new user set
-    // only metadata can be update for entity sets
-    if (storedUserSet.isEntityBestItemsSet()) {
-      if (LdProfiles.MINIMAL != profile) {
-        throw new ApplicationAuthenticationException(
-            UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED,
-            UserSetI18nConstants.USERSET_PROFILE_MINIMAL_ALLOWED, new String[] {},
-            HttpStatus.BAD_REQUEST, null);
-      }
-      if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) {
-        throw new ApplicationAuthenticationException(
-            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
-            HttpStatus.BAD_REQUEST, null);
-      }
+    /* for entity sets update there must not be any items present in new user set
+     * only metadata can be update for entity sets
+     */
+    if (storedUserSet.isEntityBestItemsSet() && userSetUpdates.getItems()!=null 
+        && !userSetUpdates.getItems().isEmpty()) {
+      throw new ApplicationAuthenticationException(
+          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
+          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
+          HttpStatus.BAD_REQUEST, null);
     }
-
-    // update the Set based on its identifier (replace member items with the new
-    // items
-    // that are present in the Set description only when a profile is indicated and
-    // is
-    // different from "ldp:PreferMinimalContainer" is referred in the "Prefer"
-    // header)
-    // if the provided userset contains a list of items and the profile is set to
-    // minimal,
-    // respond with HTTP 412)
-    if (LdProfiles.MINIMAL == profile) {
-      if (userSetUpdates.getItems() != null && userSetUpdates.getItems().size() > 0) { 
-        // new user set contains items
-        throw new ApplicationAuthenticationException(
-            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-            UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
-            HttpStatus.PRECONDITION_FAILED, null);
-      }
-    } else { // it is a Standard profile
-      if (userSetUpdates.getItems() == null || userSetUpdates.getItems().isEmpty()) { 
-        // new user set contains no items
-        throw new ApplicationAuthenticationException(UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS,
-            UserSetI18nConstants.USERSET_CONTAINS_NO_ITEMS, new String[] {},
-            HttpStatus.PRECONDITION_FAILED, null);
-      }
+    
+    if(userSetUpdates.getItems()!=null && userSetUpdates.getItems().size()>0) { 
       storedUserSet.setItems(userSetUpdates.getItems());
     }
   }
