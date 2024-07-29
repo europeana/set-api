@@ -1,0 +1,247 @@
+#update commands
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004671090"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/1548"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000364563"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4550"]}})
+
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004516169"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/1863"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000364879"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4548"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000364299"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4522"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004506265"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/3386"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000001267039"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4425"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000003421183"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4355"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004375580"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4242"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000368701"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4511"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004502033"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/3968"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000338735"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4533"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000046579031"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/903"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000049047001"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/476"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004510599"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/2618"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000002112001"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4373"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004375509"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4254"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000368903"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4470"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000338795"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4579"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000338951"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4563"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000000362665"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4531"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004509120"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/2888"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004671152"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/1589"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000046393006"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/862"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000046543016"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/837"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004509068"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/2992"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004477257"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4305"]}})
+
+db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000001721054"}, 
+{$set : {"subject":["http://data.europeana.eu/organization/4402"]}})
+
+
+# get sets with old subject
+db.getCollection("userset").find({
+    "subject": {$in: 
+        [
+"http://data.europeana.eu/organization/1548"
+,"http://data.europeana.eu/organization/4550"
+,"http://data.europeana.eu/organization/1863"
+,"http://data.europeana.eu/organization/4548"
+,"http://data.europeana.eu/organization/4522"
+,"http://data.europeana.eu/organization/3386"
+,"http://data.europeana.eu/organization/4425"
+,"http://data.europeana.eu/organization/4355"
+,"http://data.europeana.eu/organization/4242"
+,"http://data.europeana.eu/organization/4511"
+,"http://data.europeana.eu/organization/3968"
+,"http://data.europeana.eu/organization/4533"
+,"http://data.europeana.eu/organization/903"
+,"http://data.europeana.eu/organization/476"
+,"http://data.europeana.eu/organization/2618"
+,"http://data.europeana.eu/organization/4373"
+,"http://data.europeana.eu/organization/4254"
+,"http://data.europeana.eu/organization/4470"
+,"http://data.europeana.eu/organization/4579"
+,"http://data.europeana.eu/organization/4563"
+,"http://data.europeana.eu/organization/4531"
+,"http://data.europeana.eu/organization/2888"
+,"http://data.europeana.eu/organization/1589"
+,"http://data.europeana.eu/organization/862"
+,"http://data.europeana.eu/organization/837"
+,"http://data.europeana.eu/organization/2992"
+,"http://data.europeana.eu/organization/4305"
+,"http://data.europeana.eu/organization/4402"
+        ]
+         }
+    
+})
+
+# get sets with updated subject
+db.getCollection("userset").find({
+    "subject": {$in: 
+        [
+        "http://data.europeana.eu/organization/1482250000004671090"
+,"http://data.europeana.eu/organization/1482250000000364563"
+,"http://data.europeana.eu/organization/1482250000004516169"
+,"http://data.europeana.eu/organization/1482250000000364879"
+,"http://data.europeana.eu/organization/1482250000000364299"
+,"http://data.europeana.eu/organization/1482250000004506265"
+,"http://data.europeana.eu/organization/1482250000001267039"
+,"http://data.europeana.eu/organization/1482250000003421183"
+,"http://data.europeana.eu/organization/1482250000004375580"
+,"http://data.europeana.eu/organization/1482250000000368701"
+,"http://data.europeana.eu/organization/1482250000004502033"
+,"http://data.europeana.eu/organization/1482250000000338735"
+,"http://data.europeana.eu/organization/1482250000046579031"
+,"http://data.europeana.eu/organization/1482250000049047001"
+,"http://data.europeana.eu/organization/1482250000004510599"
+,"http://data.europeana.eu/organization/1482250000002112001"
+,"http://data.europeana.eu/organization/1482250000004375509"
+,"http://data.europeana.eu/organization/1482250000000368903"
+,"http://data.europeana.eu/organization/1482250000000338795"
+,"http://data.europeana.eu/organization/1482250000000338951"
+,"http://data.europeana.eu/organization/1482250000000362665"
+,"http://data.europeana.eu/organization/1482250000004509120"
+,"http://data.europeana.eu/organization/1482250000004671152"
+,"http://data.europeana.eu/organization/1482250000046393006"
+,"http://data.europeana.eu/organization/1482250000046543016"
+,"http://data.europeana.eu/organization/1482250000004509068"
+,"http://data.europeana.eu/organization/1482250000004477257"
+,"http://data.europeana.eu/organization/1482250000001721054"
+        ]
+         }
+    
+})
+
+#subject mapping
+http://data.europeana.eu/organization/1482250000004671090
+http://data.europeana.eu/organization/1548
+
+http://data.europeana.eu/organization/1482250000000364563
+http://data.europeana.eu/organization/4550
+
+?? - empty
+http://data.europeana.eu/organization/1482250000004516169
+http://data.europeana.eu/organization/1863
+
+http://data.europeana.eu/organization/1482250000000364879
+http://data.europeana.eu/organization/4548
+
+http://data.europeana.eu/organization/1482250000000364299
+http://data.europeana.eu/organization/4522
+
+http://data.europeana.eu/organization/1482250000004506265
+http://data.europeana.eu/organization/3386
+
+http://data.europeana.eu/organization/1482250000001267039
+http://data.europeana.eu/organization/4425
+
+http://data.europeana.eu/organization/1482250000003421183
+http://data.europeana.eu/organization/4355
+
+http://data.europeana.eu/organization/1482250000004375580
+http://data.europeana.eu/organization/4242
+
+??
+http://data.europeana.eu/organization/1482250000000368701
+http://data.europeana.eu/organization/4511
+
+http://data.europeana.eu/organization/1482250000004502033
+http://data.europeana.eu/organization/3968
+
+http://data.europeana.eu/organization/1482250000000338735
+http://data.europeana.eu/organization/4533
+
+http://data.europeana.eu/organization/1482250000046579031
+http://data.europeana.eu/organization/903
+
+http://data.europeana.eu/organization/1482250000049047001
+http://data.europeana.eu/organization/476
+
+http://data.europeana.eu/organization/1482250000004510599
+http://data.europeana.eu/organization/2618
+
+http://data.europeana.eu/organization/1482250000002112001
+http://data.europeana.eu/organization/4373
+
+http://data.europeana.eu/organization/1482250000004375509
+http://data.europeana.eu/organization/4254
+
+http://data.europeana.eu/organization/1482250000000368903
+http://data.europeana.eu/organization/4470
+
+http://data.europeana.eu/organization/1482250000000338795
+http://data.europeana.eu/organization/4579
+
+http://data.europeana.eu/organization/1482250000000338951
+http://data.europeana.eu/organization/4563
+
+http://data.europeana.eu/organization/1482250000000362665
+http://data.europeana.eu/organization/4531
+
+http://data.europeana.eu/organization/1482250000004509120
+http://data.europeana.eu/organization/2888
+
+http://data.europeana.eu/organization/1482250000004671152
+http://data.europeana.eu/organization/1589
+
+http://data.europeana.eu/organization/1482250000046393006
+http://data.europeana.eu/organization/862
+
+http://data.europeana.eu/organization/1482250000046543016
+http://data.europeana.eu/organization/837
+
+http://data.europeana.eu/organization/1482250000004509068
+http://data.europeana.eu/organization/2992
+
+http://data.europeana.eu/organization/1482250000004477257
+http://data.europeana.eu/organization/4305
+
+http://data.europeana.eu/organization/1482250000001721054
+http://data.europeana.eu/organization/4402
