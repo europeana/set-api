@@ -1,3 +1,6 @@
+#delete dupplicated set 
+db.getCollection("userset").deleteOne({"identifier" : "15878"})
+
 #update commands
 db.getCollection('userset').update({"subject": "http://data.europeana.eu/organization/1482250000004671090"}, 
 {$set : {"subject":["http://data.europeana.eu/organization/1548"]}})
@@ -85,7 +88,7 @@ db.getCollection('userset').update({"subject": "http://data.europeana.eu/organiz
 {$set : {"subject":["http://data.europeana.eu/organization/4402"]}})
 
 
-# get sets with old subject
+# get sets with updated subject
 db.getCollection("userset").find({
     "subject": {$in: 
         [
@@ -122,7 +125,7 @@ db.getCollection("userset").find({
     
 })
 
-# get sets with updated subject
+# get sets with old subject
 db.getCollection("userset").find({
     "subject": {$in: 
         [
