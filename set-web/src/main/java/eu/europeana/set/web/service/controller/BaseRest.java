@@ -116,25 +116,29 @@ public class BaseRest extends BaseRestController {
     /**
      * This method takes profile string and validates the profiles
      * and return the List of LdProfiles
-     * NOTE : Multiple profiles are only supported in profile param
-     *        string only for serach
+     * NOTE : Multiple profiles (excluding debug) are only supported in profile param
+     *        string only for search
      *
-     * @param profileStr
-     * @param request
-     * @return
-     * @throws HttpException
+     * @param profileStr the profiles indicated in request params
+     * @param request used to extract the prefer header
+     * @return list of extracted profiles, exclusing debug
+     * @throws HttpException if multiple profiles are incompatible
      */
     public List<LdProfiles> getProfiles(String profileStr, HttpServletRequest request) throws HttpException {
         List<LdProfiles> ldProfiles = new ArrayList<>();
-        // if multiple profiles present seperated by comma
-        if (profileStr.contains(WebUserSetFields.COMMA)) {
+        LdProfiles headerProfile = getHeaderProfile(request);
+        if(headerProfile != null) {
+          ldProfiles.add(headerProfile);
+        }
+        
+        //multiple profiles can be present seperated by comma
+        if (StringUtils.isNotEmpty(profileStr)) {
             for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.COMMA))) {
                 ldProfiles.add(getProfileFromParam(profile));
-            }
-            validateMultipleProfile(ldProfiles, profileStr);
-        } else {
-            ldProfiles.add(getProfile(profileStr, request));
-        }
+            }  
+        } 
+        
+        validateMultipleProfiles(ldProfiles, profileStr);
         return ldProfiles;
     }
 
@@ -145,7 +149,7 @@ public class BaseRest extends BaseRestController {
      * @return
      * @throws HttpException
      */
-    private void validateMultipleProfile(List<LdProfiles> ldProfiles, String profileStr) throws HttpException {
+    private void validateMultipleProfiles(List<LdProfiles> ldProfiles, String profileStr) throws HttpException {
         // remove profile 'debug' as it's only used for stackTrace purpose
         if (ldProfiles.contains(LdProfiles.DEBUG)) {
             ldProfiles.remove(LdProfiles.DEBUG);
@@ -161,27 +165,6 @@ public class BaseRest extends BaseRestController {
             throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
                     new String[]{"These profiles are not supported together ", profileStr });
         }
-    }
-
-    /**
-     * This method takes profile from a HTTP header if it exists or from the passed
-     * request parameter.
-     *
-     * @param paramProfile The HTTP request parameter
-     * @param request      The HTTP request with headers
-     * @return profile value
-     * @throws HttpException
-     * @throws UserSetProfileValidationException
-     */
-    // TODO: consider moving to api-commons
-    public LdProfiles getProfile(String paramProfile, HttpServletRequest request) throws HttpException {
-        LdProfiles profile = null;
-        profile = getHeaderProfile(request);
-        if (profile == null) {
-            // get profile from param
-            profile = getProfileFromParam(paramProfile);
-        }
-        return profile;
     }
 
     private LdProfiles getProfileFromParam(String paramProfile) throws HttpException {
