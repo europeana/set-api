@@ -101,7 +101,7 @@ public class BaseRestTest {
         String preferHeader = "include=" + ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS + "; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
-        List<LdProfiles> profiles = baseRest.getProfiles(LdProfiles.ITEMDESCRIPTIONS.getHeaderValue(), request);
+        List<LdProfiles> profiles = baseRest.getProfiles(null, request);
 
         assertNotNull(profiles);
         assertTrue(StringUtils.equals(ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS, profiles.get(0).getHeaderValue()));
