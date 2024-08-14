@@ -479,6 +479,7 @@ public class WebUserSetRest extends BaseRest {
       String eTagOrigin =
           generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
+      
       UserSet updatedUserSet =
           getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
       

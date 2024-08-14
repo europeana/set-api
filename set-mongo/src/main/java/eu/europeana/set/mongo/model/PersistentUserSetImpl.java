@@ -74,4 +74,9 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 	public void setBaseUrl(String baseUrl) {
 	    //used only for web userset	    
 	}
+
+  @Override
+  public boolean hasItem(String itemId) {
+    return getItems() != null && getItems().contains(itemId); 
+  }
 }

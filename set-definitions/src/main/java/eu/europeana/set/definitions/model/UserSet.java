@@ -97,4 +97,6 @@ public interface UserSet extends PageInfo {
     void setProvider(Provider provider);
 
     Provider getProvider();
+
+    boolean hasItem(String itemId);
 }
