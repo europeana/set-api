@@ -591,6 +591,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateItems(webUserSet.getItems());
   }
 
+  @Override
   public void validateCollectionSize(UserSet webUserSet, int newItems) throws ItemValidationException {
     final int collectionMaxSize = getConfiguration().getCollectionMaxSize();
     if(webUserSet.isCollection() 

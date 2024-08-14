@@ -239,10 +239,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String itemForPartialValidation = "/" + datasetId + "/" + localId;
     validateItemPartial(itemForPartialValidation);
 
-    //check max number of items for the sets of type Collection
-    validateCollectionSize(existingUserSet, 1);
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
+    
+    //check max number of items for the sets of type Collection
+    if(existingUserSet.isCollection() && !existingUserSet.hasItem(newItem)) {
+      validateCollectionSize(existingUserSet, 1);  
+    }
 
     // check if the position is "pin" and is a EntityBestItem set then
     // insert the item at the 0 position
