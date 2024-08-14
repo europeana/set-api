@@ -76,7 +76,7 @@ public enum LdProfiles implements ProfileKeyword {
 
   @Override
   public String toString() {
-    return getHeaderValue();
+    return getRequestParamValue() + " (" + getHeaderValue() + ")";
   }
 
   public String getPreferHeaderValue() {

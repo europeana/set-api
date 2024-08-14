@@ -154,32 +154,42 @@ public class WebUserSetRest extends BaseRest {
           required = false) String sortOrderField,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) String page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false) String pageSize,
-      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
-          defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
+      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false) String profile,
       HttpServletRequest request) throws HttpException {
 
     Authentication authentication = verifyReadAccess(request);
-
-    Integer pageNr=null;
+        Integer pageNr=null;
     Integer pageItems=null;
+    
+    // validate params - profile
+    List<LdProfiles> profiles = getProfiles(profile, request); 
+    
     //if no pagination requested, apply minimal profile (profiles deprecation)
     if(isSetMetadataResponse(page)) {
-      List<LdProfiles> profiles = getProfiles(profile, request);
       if(profiles.contains(LdProfiles.ITEMDESCRIPTIONS) || profiles.contains(LdProfiles.STANDARD)) {
         //only minimal allow when retrieving metadata
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile});
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profiles.toString()});
       }
-      profile=CommonApiConstants.PROFILE_MINIMAL;
+      //add default profile if not present
+      if(!profiles.contains(LdProfiles.MINIMAL)) {
+        profiles.add(LdProfiles.MINIMAL);
+      }
+      
     } else {
       pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
       pageNr = (pageNr == null) ? Integer.valueOf(UserSetUtils.DEFAULT_PAGE) : pageNr;
       int maxPageSize = getConfiguration().getMaxPageSize(null);
       pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize, UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
       pageItems = (pageItems == null) ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) : pageItems;
+      //add default profile
+      final boolean noSerializationProfile = profiles.isEmpty() || (profiles.size() == 1 && profiles.contains(LdProfiles.MINIMAL));
+      if( noSerializationProfile ) {
+        profiles.add(LdProfiles.STANDARD);
+      }
     }
 
-    return getUserSet(profile, identifier, request, sortField, sortOrderField, pageNr, pageItems,
+    return getUserSet(profiles, identifier, request, sortField, sortOrderField, pageNr, pageItems,
         authentication);
   }
 
@@ -211,13 +221,10 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
-  private ResponseEntity<String> getUserSet(String profileStr, String identifier,
+  private ResponseEntity<String> getUserSet(List<LdProfiles> profiles, String identifier,
       HttpServletRequest request, String sort, String sortOrder, Integer pageNr, Integer pageSize,
       Authentication authentication) throws HttpException {
     try {
-      // validate params - profile
-      List<LdProfiles> profiles = getProfiles(profileStr, request);
-      
       // retrieve a Set based on its identifier - process query
       // if the Set doesn’t exist, respond with HTTP 404
       // if the Set is disabled respond with HTTP 410
