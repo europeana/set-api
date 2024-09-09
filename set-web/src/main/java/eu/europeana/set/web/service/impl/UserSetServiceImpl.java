@@ -478,7 +478,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // escape "/" to "\/" to match json string
       localId = StringUtils.replace(localId, "/", "\\/");
       for (String description : itemDescriptions) {
-        if (description.contains(localId)) {
+        if (description.contains("\"" + localId + "\"")) {
           orderedItemDescriptions.add(description);
           found = true;
           break;
