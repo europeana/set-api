@@ -477,10 +477,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
       // escape "/" to "\/" to match json string
       localId = StringUtils.replace(localId, "/", "\\/");
+      String idWithSpace="\"id\": \"" + localId + '"';
       for (String description : itemDescriptions) {
-        String idWithoutSpace="\"id\":" + "\"" + localId + "\"";
-        String idWithSpace="\"id\":" + " " + "\"" + localId + "\"";
-        if (description.contains(idWithoutSpace) || description.contains(idWithSpace)) {
+        if (description.contains(idWithSpace)) {
           orderedItemDescriptions.add(description);
           found = true;
           break;
