@@ -47,5 +47,5 @@ europeana.apikey.jwttoken.siganturekey=
 # location for the elevation file
 elevation.file.folder=
 
-#overwrite max size of Collection sets
-#set.collection.size.max=100
+#overwrite max size of Gallery sets
+#set.gallery.size.max=100

@@ -25,6 +25,10 @@ public interface PersistentUserSet extends UserSet, NoSqlEntity {
     String getType();
 
     void setType(String type);
+    
+    String getCollectionType();
+
+    void setCollectionType(String collectionType); 
 
     Map<String, String> getTitle();
 

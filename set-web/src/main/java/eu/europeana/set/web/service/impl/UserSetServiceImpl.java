@@ -244,7 +244,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     //check max number of items for the sets of type Collection
     if(existingUserSet.isCollection() && !existingUserSet.hasItem(newItem)) {
-      validateCollectionSize(existingUserSet, 1);  
+      validateGallerySize(existingUserSet, 1);  
     }
 
     // check if the position is "pin" and is a EntityBestItem set then
