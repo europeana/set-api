@@ -7,6 +7,7 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
 /**
  * Europeana Sets API Specification
@@ -294,7 +295,7 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
 
     @Override
     public boolean isGallery() {
-    return UserSetTypes.GALLERY.getJsonValue().equals(getCollectionType());
+    return WebUserSetModelFields.TYPE_GALLERY.equals(getCollectionType());
     }
     
     @Override

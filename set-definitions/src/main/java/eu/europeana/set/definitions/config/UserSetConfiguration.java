@@ -63,5 +63,5 @@ public interface UserSetConfiguration {
 
   boolean isAuthEnabled();
   
-  int getCollectionMaxSize();
+  int getGalleryMaxSize();
 }

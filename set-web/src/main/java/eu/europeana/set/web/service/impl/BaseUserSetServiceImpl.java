@@ -586,7 +586,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     
     //validate number of items for the sets of type Collection
-    validateCollectionSize(webUserSet, 0);
+    validateGallerySize(webUserSet, 0);
 
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
@@ -597,15 +597,15 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public void validateCollectionSize(UserSet webUserSet, int newItems) throws ItemValidationException {
-    final int collectionMaxSize = getConfiguration().getCollectionMaxSize();
+  public void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException {
+    final int galleryMaxSize = getConfiguration().getGalleryMaxSize();
     if(webUserSet.isGallery() 
         && webUserSet.getItems()!=null 
-        && webUserSet.getItems().size() + newItems > collectionMaxSize) {
+        && webUserSet.getItems().size() + newItems > galleryMaxSize) {
       
       String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;   
       throw new ItemValidationException(messageKey, 
-          new String[] {String.valueOf(collectionMaxSize)} );
+          new String[] {String.valueOf(galleryMaxSize)} );
     }
   }
   

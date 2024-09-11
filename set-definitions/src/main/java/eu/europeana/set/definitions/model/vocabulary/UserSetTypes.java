@@ -10,8 +10,7 @@ import java.util.Locale;
  */
 public enum UserSetTypes implements JsonKeyword {
 
-    COLLECTION("Collection"), DYNAMICCOLLECTION("DynamicCollection"), BOOKMARKSFOLDER("BookmarkFolder"), ENTITYBESTITEMSSET("EntityBestItemsSet"), 
-    GALLERY("Gallery");
+    COLLECTION("Collection"), DYNAMICCOLLECTION("DynamicCollection"), BOOKMARKSFOLDER("BookmarkFolder"), ENTITYBESTITEMSSET("EntityBestItemsSet");
 
     private String jsonValue;
 

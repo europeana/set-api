@@ -10,6 +10,7 @@ public class WebUserSetModelFields {
 	public static final String TYPE             = "type";
 	public static final String COLLECTION_TYPE  = "collectionType";
 	public static final String TYPE_COLLECTION  = "Collection";
+	public static final String TYPE_GALLERY     = "Gallery";
 	public static final String SET_OPEN         = "open";
 	public static final String SET_CLOSED       = "closed";
 
