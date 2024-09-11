@@ -22,8 +22,9 @@ import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 
 @JsonPropertyOrder({ WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetModelFields.COLLECTION_TYPE, WebUserSetModelFields.TITLE, 
         WebUserSetModelFields.SUBJECT, WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY, 
-        WebUserSetModelFields.PINNED, WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.PROVIDER, 
-        WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT, WebUserSetFields.PREV })
+        WebUserSetModelFields.PINNED, WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR, 
+        WebUserSetModelFields.PROVIDER, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL, 
+        WebUserSetFields.NEXT, WebUserSetFields.PREV })
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WebUserSetImpl extends PersistentUserSetImpl {
@@ -63,12 +64,14 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
 	return super.getIdentifier();
     }
 
-    @JsonProperty(WebUserSetFields.TYPE)
+    @Override
+    @JsonProperty(WebUserSetModelFields.TYPE)
     public void setType(String type) {
 	super.setType(type);
     }
 
-    @JsonProperty(WebUserSetFields.COLLECTION_TYPE)
+    @Override
+    @JsonProperty(WebUserSetModelFields.COLLECTION_TYPE)
     public void setCollectionType(String collType) {
     super.setCollectionType(collType);
     }

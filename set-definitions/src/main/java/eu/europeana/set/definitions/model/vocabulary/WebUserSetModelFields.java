@@ -5,10 +5,6 @@ package eu.europeana.set.definitions.model.vocabulary;
  */
 public class WebUserSetModelFields {
 
-	WebUserSetModelFields() {
-
-	}
-
 	//common fields constants
 	public static final String ID               = "id";
 	public static final String TYPE             = "type";
@@ -47,4 +43,8 @@ public class WebUserSetModelFields {
 
 	
 	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
+
+    WebUserSetModelFields() {
+    }
+
 }
