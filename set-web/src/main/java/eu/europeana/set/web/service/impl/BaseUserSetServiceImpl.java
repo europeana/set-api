@@ -1,6 +1,7 @@
 package eu.europeana.set.web.service.impl;
 
-import static eu.europeana.set.web.config.UserSetI18nConstants.*;
+import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED;
+import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_NUMBER_OF_ITEMS;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,6 +133,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   void mergeDescriptiveProperties(PersistentUserSet persistedSet, UserSet updates) {
     if (updates.getType() != null) {
       persistedSet.setType(updates.getType());
+    }
+
+    if (updates.getCollectionType() != null) {
+      persistedSet.setCollectionType(updates.getCollectionType());
     }
 
     if (updates.getVisibility() != null) {
@@ -594,7 +599,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   @Override
   public void validateCollectionSize(UserSet webUserSet, int newItems) throws ItemValidationException {
     final int collectionMaxSize = getConfiguration().getCollectionMaxSize();
-    if(webUserSet.isCollection() 
+    if(webUserSet.isGallery() 
         && webUserSet.getItems()!=null 
         && webUserSet.getItems().size() + newItems > collectionMaxSize) {
       

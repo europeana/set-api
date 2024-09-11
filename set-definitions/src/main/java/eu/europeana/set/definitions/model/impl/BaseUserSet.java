@@ -19,6 +19,8 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
 
     // Type of user set : #UserSetTypes
     private String type;
+    
+    private String collectionType;
 
     // Visibility of user set : #VisibilityTypes
     private String visibility;
@@ -115,6 +117,16 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
 	this.type = type;
     }
 
+    @Override
+    public String getCollectionType() {
+    return collectionType;
+    }
+
+    @Override
+    public void setCollectionType(String collectionType) {
+    this.collectionType = collectionType;
+    }
+    
     @Override
     public Map<String, String> getTitle() {
 	return title;
@@ -280,6 +292,11 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     return UserSetTypes.COLLECTION.getJsonValue().equals(getType());
     }
 
+    @Override
+    public boolean isGallery() {
+    return UserSetTypes.GALLERY.getJsonValue().equals(getCollectionType());
+    }
+    
     @Override
     public String toString() {
 	StringBuilder res = new StringBuilder("\t### User set ###\n");

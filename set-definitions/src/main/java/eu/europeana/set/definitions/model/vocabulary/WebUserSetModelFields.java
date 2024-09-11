@@ -12,6 +12,7 @@ public class WebUserSetModelFields {
 	//common fields constants
 	public static final String ID               = "id";
 	public static final String TYPE             = "type";
+	public static final String COLLECTION_TYPE  = "collectionType";
 	public static final String TYPE_COLLECTION  = "Collection";
 	public static final String SET_OPEN         = "open";
 	public static final String SET_CLOSED       = "closed";

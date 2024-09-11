@@ -12,6 +12,10 @@ public interface UserSet extends PageInfo {
 
     void setType(String type);
 
+    String getCollectionType();
+
+    void setCollectionType(String collectionType);
+
     String getVisibility();
 
     void setVisibility(String visibility);
@@ -81,6 +85,8 @@ public interface UserSet extends PageInfo {
     public boolean isEntityBestItemsSet();
     
     public boolean isCollection();
+    
+    public boolean isGallery();
 
     public boolean isPrivate();
 
