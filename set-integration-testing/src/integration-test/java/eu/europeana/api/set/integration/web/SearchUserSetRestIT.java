@@ -858,8 +858,9 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
 
   @Test
   public void searchFacetsMultipleValidProfileWithFacetsDebug() throws Exception {
+    //profiles can also be space separated
     String profile =
-        LdProfiles.DEBUG.name() + "," + LdProfiles.FACETS.name() + "," + LdProfiles.MINIMAL.name();
+        LdProfiles.DEBUG.name() + " " + LdProfiles.FACETS.name() + "  " + LdProfiles.MINIMAL.name();
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
             .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)

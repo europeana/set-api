@@ -135,9 +135,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       persistedSet.setType(updates.getType());
     }
 
-    if (updates.getCollectionType() != null) {
-      persistedSet.setCollectionType(updates.getCollectionType());
-    }
+    persistedSet.setCollectionType(updates.getCollectionType());
 
     if (updates.getVisibility() != null) {
       persistedSet.setVisibility(updates.getVisibility());

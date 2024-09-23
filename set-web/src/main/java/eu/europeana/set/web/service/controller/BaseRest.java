@@ -36,6 +36,7 @@ import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
@@ -131,11 +132,21 @@ public class BaseRest extends BaseRestController {
           ldProfiles.add(headerProfile);
         }
         
-        //multiple profiles can be present seperated by comma
+        //multiple profiles can be present seperated by comma or space
         if (StringUtils.isNotEmpty(profileStr)) {
+          if(profileStr.contains(WebUserSetFields.COMMA)) {
             for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.COMMA))) {
                 ldProfiles.add(getProfileFromParam(profile));
             }  
+          }
+          else if(profileStr.contains(WebUserSetFields.SPACE)) {
+            for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.SPACE))) {
+              ldProfiles.add(getProfileFromParam(profile));
+            }
+          }
+          else {
+            ldProfiles.add(getProfileFromParam(profileStr));
+          }
         } 
         
         validateMultipleProfiles(ldProfiles, profileStr);
@@ -290,7 +301,8 @@ public class BaseRest extends BaseRestController {
 	String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
 	// build response
-	MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+	MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
+	headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 	headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
