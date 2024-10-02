@@ -58,7 +58,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
     @Operation(description = "Generate Elevation file for best bets", summary = "Generate elevation file")
     public ResponseEntity<String> generateElevationFile(
-            @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
+            @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wsKey,
             HttpServletRequest request) throws HttpException {
     verifyReadAccess(request);
     return generateElevation();
