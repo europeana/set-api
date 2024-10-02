@@ -302,7 +302,6 @@ public class BaseRest extends BaseRestController {
 
 	// build response
 	MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
-	headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
 	headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);

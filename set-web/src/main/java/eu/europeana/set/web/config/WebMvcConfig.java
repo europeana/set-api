@@ -23,9 +23,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
   Map<String, MediaType> mediaTypesMaping = new HashMap<String, MediaType>();
-  
+
   private static final MediaType APPLICATION_JSONLD = new MediaType("application", "ld+json");
   private static final String EXTENSION_JSONLD = "jsonld";
+  private static final String EXTENSION_JSON = "json";
 
   /**
    * Setup CORS for all GET, HEAD and OPTIONS, requests.
@@ -33,47 +34,58 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/v3/api-docs").allowedOrigins("*").allowedMethods("GET")
-    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
-    .allowCredentials(false).maxAge(600L); // in seconds
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+        .allowCredentials(false).maxAge(600L); // in seconds
 
     registry.addMapping("/v3/api-docs/**").allowedOrigins("*").allowedMethods("GET")
-    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
-    .allowCredentials(false).maxAge(600L); // in seconds
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+        .allowCredentials(false).maxAge(600L); // in seconds
 
 
     registry.addMapping("/actuator/**").allowedOrigins("*").allowedMethods("GET")
-    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
-    .allowCredentials(false).maxAge(600L); // in seconds
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)
+        .allowCredentials(false).maxAge(600L); // in seconds
 
     // create method
-    // delete user's sets by admin, delete by user's sets by 
+    // delete user's sets by admin, delete by user's sets by
     registry.addMapping("/set/").allowedOrigins("*").allowedMethods("POST", "DELETE")
-        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ALLOW, HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY,
-            HttpHeaders.CACHE_CONTROL, HttpHeaders.PREFERENCE_APPLIED)
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ALLOW, HttpHeaders.LINK,
+            HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.CACHE_CONTROL,
+            HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // get, delete, update
     registry.addMapping("/set/*").allowedOrigins("*").allowedMethods("GET", "PUT", "DELETE")
-        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW,
-            HttpHeaders.LINK, HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
-        .allowCredentials(false).maxAge(600L); // in seconds
-
-    //lock/unlock
-    registry.addMapping("/set/admin/lock").allowedOrigins("*").allowedMethods("POST", "DELETE")
-    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW)
-    .allowCredentials(false).maxAge(600L); // in seconds
-
-    
-    // publish/unpublish
-    registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
-        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, 
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.LINK,
             HttpHeaders.ETAG, HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
-    //add,remove,exists item in set
-    registry.addMapping("/set/*/*/*").allowedOrigins("*").allowedMethods("GET", "HEAD", "PUT", "DELETE")
-    .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.PREFERENCE_APPLIED)
-    .allowCredentials(false).maxAge(600L); // in seconds
+    // lock/unlock
+    registry.addMapping("/set/admin/lock").allowedOrigins("*").allowedMethods("POST", "DELETE")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW)
+        .allowCredentials(false).maxAge(600L); // in seconds
+
+
+    // publish/unpublish
+    registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.ETAG,
+            HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
+        .allowCredentials(false).maxAge(600L); // in seconds
+
+    // add,remove,exists item in set
+    registry.addMapping("/set/*/*/*").allowedOrigins("*")
+        .allowedMethods("GET", "HEAD", "PUT", "DELETE")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW,
+            HttpHeaders.PREFERENCE_APPLIED)
+        .allowCredentials(false).maxAge(600L); // in seconds
   }
 
   /*
@@ -88,25 +100,30 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // work in future
     // releases
     configurer.favorPathExtension(true);
-    
+
     // use registered extensions instead of defaults
     configurer.useRegisteredExtensionsOnly(true);
 
     configurer.mediaTypes(getMediaTypesMapping());
 
-    
     // use application/ld+json if no Content-Type is specified
     configurer.defaultContentType(APPLICATION_JSONLD, MediaType.APPLICATION_JSON);
-
-    configurer.mediaTypes(getMediaTypesMapping());
   }
 
   private Map<String, MediaType> getMediaTypesMapping() {
     if (mediaTypesMaping.isEmpty()) {
-      for (MediaType mediaType : supportedMediaTypes) {
-        if(APPLICATION_JSONLD.equals(mediaType)){
+      for (MediaType mediaType : getSupportedMediaTypes()) {
+        if (APPLICATION_JSONLD.equals(mediaType)) {
+          // map .jsonld extention to jsonld media type
           mediaTypesMaping.put(EXTENSION_JSONLD, mediaType);
+          // map .json extention to jsonld output
+          mediaTypesMaping.put(EXTENSION_JSON, mediaType);
+          continue;
+        } else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+          //.json mappins is already mapped to APPLICATION_JSONLD
+          continue;
         }
+
         mediaTypesMaping.put(mediaType.getSubtype(), mediaType);
       }
     }
