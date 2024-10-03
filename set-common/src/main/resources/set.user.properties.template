@@ -42,7 +42,8 @@ europeana.apikey.jwttoken.siganturekey=
 #europeana.search.apikey=
 
 #API key used for invocation of search api
-#europeana.search.url=https://api.europeana.eu/api/v2/search.json?wskey=MY_KEY&query=
+#europeana.search.url=https://api.europeana.eu/record/v2/search.json?wskey=MY_KEY&query=
+
 
 # location for the elevation file
 elevation.file.folder=

@@ -203,6 +203,7 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
+    assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     String result = response.getContentAsString();
     assertNotNull(result);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
