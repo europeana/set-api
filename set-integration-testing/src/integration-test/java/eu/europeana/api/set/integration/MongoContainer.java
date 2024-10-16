@@ -12,7 +12,7 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
   private final String adminPassword = "admin_password";
 
   
-  private final boolean useFixedPorts = false;
+  int hostPort;
   int defaultMongoPort = 27017;
   
   /**
@@ -20,21 +20,21 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
    *
    * @param annotationDb entity database
    */
-  public MongoContainer(String annotationDb) {
+  public MongoContainer(String annotationDb, int hostPort) {
     this(
         new ImageFromDockerfile()
             // in test/resources directory
             .withFileFromClasspath("Dockerfile", "mongo-docker/Dockerfile")
             .withFileFromClasspath("init-mongo.sh", "mongo-docker/init-mongo.sh"),
-        annotationDb);
+        annotationDb, hostPort);
   }
 
   private MongoContainer(
-      ImageFromDockerfile dockerImageName, String annotationDb) {
+      ImageFromDockerfile dockerImageName, String annotationDb, int hostPort) {
     super(dockerImageName);
 
-    if (useFixedPorts) {
-      this.addFixedExposedPort(27018, defaultMongoPort);
+    if (hostPort > 0) {
+      this.addFixedExposedPort(hostPort, defaultMongoPort);
     } else {
       this.withExposedPorts(defaultMongoPort);
     }

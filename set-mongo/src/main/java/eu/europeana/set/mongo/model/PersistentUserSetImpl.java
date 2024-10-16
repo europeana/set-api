@@ -17,6 +17,7 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 @Indexes({@Index(fields = {@Field(WebUserSetFields.IDENTIFIER)},options = @IndexOptions(unique = true)),
     @Index(fields = {@Field(WebUserSetFields.CREATOR)}),
     @Index(fields = {@Field(WebUserSetFields.TYPE)}),
+    @Index(fields = {@Field(WebUserSetFields.COLLECTION_TYPE)}),
     @Index(fields = {@Field(WebUserSetFields.VISIBILITY)}),
     @Index(fields = {@Field(WebUserSetFields.CONTRIBUTOR)}),
     @Index(fields = {@Field(WebUserSetFields.SUBJECT)}),

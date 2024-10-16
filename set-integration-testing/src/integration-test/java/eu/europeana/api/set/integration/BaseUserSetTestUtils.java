@@ -64,6 +64,7 @@ public abstract class BaseUserSetTestUtils {
 
   protected static final String BASE_URL = "/set/";
   public static final String USER_SET_REGULAR = "/content/userset_regular.json";
+  public static final String USER_SET_GALLERY = "/content/userset_gallery.json";
   public static final String USER_SET_MANDATORY = "/content/userset_mandatory.json";
   public static final String USER_SET_OPEN = "/content/userset_open.json";
   public static final String USER_SET_MULTIPLE_QUERY_OPEN =
@@ -134,7 +135,10 @@ public abstract class BaseUserSetTestUtils {
   static {
 //    MONGO_CONTAINER = new MongoDBContainer("mongo:6.0.14-jammy")
     final String serviceDB = "admin";   // to change to "set-api-test"
-    MONGO_CONTAINER = new MongoContainer(serviceDB)
+    //for debugging set the host port to 27017 or 27018
+    int hostPort = -1;
+     
+    MONGO_CONTAINER = new MongoContainer(serviceDB, hostPort)
         .withLogConsumer(new WaitingConsumer()
         .andThen(new ToStringConsumer()));
 
