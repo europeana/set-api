@@ -84,6 +84,25 @@ public class WebUserSetRestIT extends BaseUserSetTestUtils {
     addToCreatedSets(identifier);
   }
 
+ @Test
+ public void createGalleryWithDepiction() throws Exception {
+   String requestJson = getJsonStringInput(USER_SET_GALLERY_DEPICTION);
+
+   String result = mockMvc
+       .perform(
+           post(BASE_URL)
+               .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+               .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+       .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+   String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+   assertNotNull(identifier);
+   addToCreatedSets(identifier);
+   
+   assertTrue(containsKeyOrValue(result, WebUserSetFields.TYPE_GALLERY));
+   assertTrue(containsKeyOrValue(result, WebUserSetFields.IS_SHOWN_BY));
+ }
+
+  
   @Test
   public void create_UserSet_DynamicCollecton_without_isDefinedBy() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_OPEN);

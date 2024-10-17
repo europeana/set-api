@@ -1,0 +1,25 @@
+{
+  "type": "Collection",
+  "collectionType": "Gallery",
+  "title": {
+     "en": "Sportswear"
+  },
+  "description": {
+     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
+  },
+  "isShownBy":{
+	"id": "https://i.vimeocdn.com/video/572458027_1280x960.jpeg",
+  	"type": "WebResource",
+  	"source": "http://data.europeana.eu/item/08641/1037479000000476703",
+  	"thumbnail": "https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F572458027_1280x960.jpeg&type=VIDEO"  
+  },
+  "items":[
+  "http://data.europeana.eu/item/08641/1037479000000476703",
+  "http://data.europeana.eu/item/08641/1037479000000476591",
+  "http://data.europeana.eu/item/08641/1037479000000476903",
+  "http://data.europeana.eu/item/08641/1037479000000476467",
+  "http://data.europeana.eu/item/08641/1037479000000476875",
+  "http://data.europeana.eu/item/11654/_Botany_U_1419207",
+  "http://data.europeana.eu/item/2048128/618580"
+  ]
+}
