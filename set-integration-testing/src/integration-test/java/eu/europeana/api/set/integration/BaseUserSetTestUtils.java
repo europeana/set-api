@@ -65,6 +65,7 @@ public abstract class BaseUserSetTestUtils {
   protected static final String BASE_URL = "/set/";
   public static final String USER_SET_REGULAR = "/content/userset_regular.json";
   public static final String USER_SET_GALLERY = "/content/userset_gallery.json";
+  public static final String USER_SET_GALLERY_DEPICTION = "/content/userset_gallery_with_depiction.json";
   public static final String USER_SET_MANDATORY = "/content/userset_mandatory.json";
   public static final String USER_SET_OPEN = "/content/userset_open.json";
   public static final String USER_SET_MULTIPLE_QUERY_OPEN =

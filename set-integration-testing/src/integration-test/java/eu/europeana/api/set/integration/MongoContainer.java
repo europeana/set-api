@@ -10,7 +10,8 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
   private final String annotationDb;
   private final String adminUsername = "admin_user";
   private final String adminPassword = "admin_password";
-
+  //MUST BE KEPT INLINE WITH THE IMAGE FROM THE DOCKERFILE
+  public static final String MONGO_IMAGE = "library/mongo:6.0.14-jammy";
   
   int hostPort;
   int defaultMongoPort = 27017;
@@ -22,6 +23,8 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
    */
   public MongoContainer(String annotationDb, int hostPort) {
     this(
+        //SG: deleteOnExit doesn't seems to make a difference in current version 
+        //new ImageFromDockerfile(MONGO_IMAGE, false)
         new ImageFromDockerfile()
             // in test/resources directory
             .withFileFromClasspath("Dockerfile", "mongo-docker/Dockerfile")
