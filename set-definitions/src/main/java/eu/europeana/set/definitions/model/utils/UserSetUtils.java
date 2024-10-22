@@ -167,5 +167,18 @@ public class UserSetUtils {
       return StringUtils.substring(dataEuropeanaUri, itemDataEndpoint.length());
     }
     }
+
+    //returns -1 if invalid or not provided
+    public static int parseItemsPosition(String position) {
+      int positionFinal = -1;
+      if (StringUtils.isNotEmpty(position)) {
+        try {
+          positionFinal = Integer.parseInt(position);
+        } catch (RuntimeException e) {
+          return -1;
+        }
+      }
+      return positionFinal;
+    }
  
 }

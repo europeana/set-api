@@ -26,7 +26,6 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -227,6 +226,92 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     return positionInt;
   }
+  
+  int calculatePosition(int position, List<String> items) {
+    int positionFinal = items.size();
+    if (position >= 0 && position < items.size()) {
+      positionFinal = position;
+    }
+    return positionFinal;
+  }
+
+  public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition, UserSet existingUserSet) 
+      throws ItemValidationException {
+    
+    validateItemsStrings(items);
+    
+    // check if the position is "pin" and is a EntityBestItem set then
+    // insert the item at the 0 position
+    UserSet userSet;
+
+    if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
+      userSet=updateItemsFromPinned(existingUserSet, items);
+    } else {
+      userSet=updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+    }
+    
+    return userSet;
+  }  
+  
+  private UserSet updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
+    List<String> usersetItems=existingUserSet.getItems();
+    if(usersetItems==null) {
+      usersetItems=new ArrayList<>();
+    }
+    else {    
+      /*remove all duplicate items from the set and count the number 
+      of removed pinned items, to change the pinned field
+      */
+      for(String newItem : items) {
+        int itemindex=usersetItems.indexOf(newItem);
+        if(itemindex>=0) {
+          if(itemindex < existingUserSet.getPinned()) {
+            existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+          }
+          usersetItems.remove(newItem);
+        }
+      }
+    }
+    
+    usersetItems.addAll(0, items);
+    existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
+    UserSet updatedSet=updateUserSetInMongo(existingUserSet);
+    return updatedSet;
+  }
+  
+  private UserSet updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
+    List<String> usersetItems=existingUserSet.getItems();
+    List<String> newItemsCopy=new ArrayList<>(items);
+    if(usersetItems==null) {
+      usersetItems=new ArrayList<>();
+    }
+    else {
+      /*remove from the new items the ones that were pinned before
+       *and from the user set the ones that are duplicates
+      */
+      for(String newItem : newItemsCopy) {
+        int itemindex=usersetItems.indexOf(newItem);
+        if(itemindex>=0) {
+          if(itemindex < existingUserSet.getPinned()) {
+            items.remove(newItem);
+          }
+          else {
+            usersetItems.remove(newItem);
+          }
+        }
+      }
+      //validation of the number of items for type Gallery 
+      if(existingUserSet.isGallery() && (usersetItems.size() + items.size()) > getConfiguration().getGalleryMaxSize()) {
+        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED, 
+            new String[] {String.valueOf(getConfiguration().getGalleryMaxSize())} );  
+      }  
+    }
+    
+    int positionFinal=calculatePosition(position, usersetItems);
+    usersetItems.addAll(positionFinal, items);
+    UserSet updatedSet=updateUserSetInMongo(existingUserSet);
+    return updatedSet;
+  }
 
   /*
    * (non-Javadoc)
@@ -261,7 +346,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
       userSet = insertItem(existingUserSet, newItem, positionInt, false);
     }
-    getUserSetUtils().updatePagination(userSet, getConfiguration());
+    //getUserSetUtils().updatePagination(userSet, getConfiguration());
     return userSet;
   }  
 
@@ -291,7 +376,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // add item && create item list if needed
       addNewItemToList(existingUserSet, finalPosition, newItem);
       updatePinCount(existingUserSet, pinnedItem, -1);
-      extUserSet = updateItemList(existingUserSet);
+      extUserSet = updateUserSetInMongo(existingUserSet);
     } else {
       // replace item
       int oldPosition = existingUserSet.getItems().indexOf(newItem);
@@ -302,7 +387,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       } else {
         replaceItem(existingUserSet, finalPosition, newItem);
         updatePinCount(existingUserSet, pinnedItem, oldPosition);
-        extUserSet = updateItemList(existingUserSet);
+        extUserSet = updateUserSetInMongo(existingUserSet);
       }
     }
 
@@ -340,7 +425,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @see eu.europeana.set.web.service.UserSetService#updateItemList(eu.europeana.set.
    * definitions.model.UserSet)
    */
-  public UserSet updateItemList(UserSet existingUserSet) {
+  public UserSet updateUserSetInMongo(UserSet existingUserSet) {
     // update total
     updateTotal(existingUserSet);
     // generate and add a created and modified timestamp to the Set
@@ -350,7 +435,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // update an existing user set. merge user sets - insert new fields in existing
     // object
     UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
-    getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
+    //getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
   }
 

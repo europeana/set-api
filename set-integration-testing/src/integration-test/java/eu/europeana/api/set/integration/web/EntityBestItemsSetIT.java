@@ -8,7 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -451,6 +454,97 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
         existingUserSet.getItems().size() - 1);
 
     // getUserSetService().deleteUserSet(identifier);
+  }
+
+  // test insert multiple items
+  @Test
+  void insertMultipleItems_EntityUserSets_withEditorUser() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+    String identifier = userSet.getIdentifier();
+
+    List<String> newItems=new ArrayList<>();
+    String item1="http://data.europeana.eu/item/01/123_pinnedItem";
+    String item2="/02/123_pinnedItem";
+    JSONArray newItemsJson = new JSONArray();
+    newItemsJson.put(item1);
+    newItemsJson.put(item2);
+
+    String result = mockMvc
+        .perform(
+            put(BASE_URL + "{identifier}/items", identifier)
+                .content(newItemsJson.toString())
+                .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
+                    WebUserSetModelFields.PINNED_POSITION)
+                .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value()))
+        .andReturn().getResponse()
+        .getContentAsString();
+
+    assertTrue(containsKeyOrValue(result, userSet.getId()));
+
+    UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    //check for the new items
+    assertEquals(0, existingUserSet.getItems().indexOf(item1));
+    assertEquals(1, existingUserSet.getItems().indexOf(item2));
+    assertEquals(2, existingUserSet.getPinned());
+    assertEquals(4, existingUserSet.getItems().size());
+
+    // insert pinned items, some of which already exist (and can be pinned or not-pinned in the set)
+    newItems.clear();
+    String item3="/03/123_pinnedItem";
+    newItems.add(item2);
+    String item4Existing=existingUserSet.getItems().get(2);
+    newItems.add(item4Existing);
+    newItems.add(item3);
+    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.PINNED_POSITION, -1, existingUserSet);
+    //check the new items
+    assertEquals(0, existingUserSet.getItems().indexOf(item2));
+    assertEquals(1, existingUserSet.getItems().indexOf(item4Existing));
+    assertEquals(2, existingUserSet.getItems().indexOf(item3));
+    assertEquals(3, existingUserSet.getItems().indexOf(item1));
+    assertEquals(4, existingUserSet.getPinned());
+    assertEquals(5, existingUserSet.getItems().size());
+    
+    //insert un-pinned items, some of which may exist (and can be pinned or not-pinned in the set)
+    newItems.clear();
+    //adding an existing pinned item in the request of un-pinned items
+    newItems.add(item1);
+    String item5="/05/123_unPinnedItem";
+    newItems.add(item5);
+    String item6Existing=existingUserSet.getItems().get(4);
+    newItems.add(item6Existing);
+    getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet);
+    //check the new items
+    assertEquals(0, existingUserSet.getItems().indexOf(item2));
+    assertEquals(1, existingUserSet.getItems().indexOf(item4Existing));
+    assertEquals(2, existingUserSet.getItems().indexOf(item3));
+    assertEquals(3, existingUserSet.getItems().indexOf(item1));
+    assertEquals(4, existingUserSet.getPinned());
+    assertEquals(4, existingUserSet.getItems().indexOf(item5));
+    assertEquals(5, existingUserSet.getItems().indexOf(item6Existing));
+    assertEquals(4, existingUserSet.getPinned());
+    assertEquals(6, existingUserSet.getItems().size());
+    
+    //insert item to the last position
+    newItems.clear();
+    String item7="/07/123_unPinnedItem";
+    newItems.add(item7);
+    getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet);
+    //check the new items
+    assertEquals(6, existingUserSet.getItems().indexOf(item7));
+    assertEquals(4, existingUserSet.getPinned());
+    assertEquals(7, existingUserSet.getItems().size());
+    //insert item to the position grater than the total size of items
+    newItems.clear();
+    String item8="/08/123_unPinnedItem";
+    newItems.add(item8);
+    getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet);
+    //check the new items
+    assertEquals(7, existingUserSet.getItems().indexOf(item8));
+    assertEquals(4, existingUserSet.getPinned());
+    assertEquals(8, existingUserSet.getItems().size());
+        
   }
 
   // test conversion of pinned -> normal item
