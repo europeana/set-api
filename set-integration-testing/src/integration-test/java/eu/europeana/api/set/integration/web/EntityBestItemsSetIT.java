@@ -700,6 +700,43 @@ public class EntityBestItemsSetIT extends BaseUserSetTestUtils {
 
   }
 
+  @Test
+  void deleteMultipleItems_EntityUserSets_withEditorUser() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
+    
+    List<String> newItems=new ArrayList<>();
+    String item1="/01/123_pinnedItem";
+    String item2="/02/123_pinnedItem";
+    newItems.add(item1);
+    newItems.add(item2);    
+    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.PINNED_POSITION, 0, userSet);
+
+    assertEquals(2, userSet.getPinned());
+    String identifier = userSet.getIdentifier();
+
+    JSONArray newItemsJson = new JSONArray();
+    newItemsJson.put(item2);
+    //this item is from the input json (ENTITY_USER_SET_REGULAR), so please check it exists there
+    newItemsJson.put("http://data.europeana.eu/item/08641/1037479000000476591");
+    //this is not existing item
+    newItemsJson.put("/03/123_non_existing_item");
+    
+    mockMvc
+        .perform(
+            delete(BASE_URL + "{identifier}/items", identifier)
+                .content(newItemsJson.toString())
+                .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
+
+    UserSet userSet1 = getUserSetService().getUserSetById(userSet.getIdentifier());
+    assertEquals(1, userSet1.getPinned());
+    assertEquals(2, userSet1.getItems().size());
+
+    // getUserSetService().deleteUserSet(identifier);
+
+  }
+
   private void checkItemCountAndPosition(UserSet existingUserSet, String newItem,
       int expectedTotalItems, int expectedPinnedItems, int expectedPositionOfItem) {
     assertEquals(expectedPinnedItems, existingUserSet.getPinned());

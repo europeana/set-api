@@ -685,6 +685,7 @@ public class WebUserSetRest extends BaseRest {
   }
 
 
+  @Deprecated
   @DeleteMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE, summary = "Delete a item from the set")
@@ -701,7 +702,7 @@ public class WebUserSetRest extends BaseRest {
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
     return deleteItemFromUserSet(authentication, identifier, datasetId, localId);
   }
-
+  
   /**
    * This method validates input values and deletes item from a user set.
    *
@@ -782,6 +783,88 @@ public class WebUserSetRest extends BaseRest {
       throw new InternalServerException(e);
     }
   }
+  
+  @DeleteMapping(value = {"/set/{identifier}/items"},
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+  @Operation(description = SwaggerConstants.DELETE_MULTIPLE_ITEMS_NOTE, summary = "Delete multiple items from the set")
+  public ResponseEntity<String> deleteMultipleItemsFromUserSet(
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+      @RequestBody List<String> items,
+      HttpServletRequest request) throws HttpException {
+    // check user credentials, if invalid respond with HTTP 401,
+    // or if unauthorized respond with HTTP 403
+    Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
+    return deleteMultipleItemsFromUserSet(authentication, identifier, items);
+  }
+
+  protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication, 
+      String identifier, List<String> items) 
+          throws HttpException {
+    try {     
+      // check if the Set exists, if not respond with HTTP 404
+      // retrieve an existing user set based on its identifier
+      UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+      // check if the user is the owner/creator of the set or admin,
+      // OR Editor for Entity sets, otherwise respond with
+      // 403
+      getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
+
+      // for entity user sets, add users with 'editor' role as contributors
+      addContributorForEntitySet(existingUserSet, authentication);
+
+      boolean itemsRemoved=false;
+      // check if it is a pinned item, decrease the counter by 1 for entity sets
+      if (existingUserSet.isEntityBestItemsSet()) {
+        for(String item : items) {
+          int currentPosition = existingUserSet.getItems().indexOf(item);
+          if (currentPosition>=0) {
+            itemsRemoved=true;
+            if(currentPosition < existingUserSet.getPinned() ) {
+              existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+            }
+            existingUserSet.getItems().remove(item);
+          }
+        }
+      }
+      else {
+        itemsRemoved=existingUserSet.getItems().removeAll(items);
+      }
+
+      UserSet updatedUserSet=existingUserSet;
+      if(itemsRemoved) {
+        // update an existing user set
+        updatedUserSet = getUserSetService().updateUserSetInMongo(existingUserSet);
+      }
+      
+      //update pagination fields (used only for the response serialization)
+      getUserSetService().updatePagination(updatedUserSet, getConfiguration());
+      
+      // serialize to JsonLd
+      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
+      String etag =
+          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+
+      // respond with HTTP 200 containing the updated Set description as body.
+      // serialize Set in JSON-LD following the requested profile
+      // (if not indicated assume the default, ie. minimal)
+      // build response entity with headers
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+      headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.ETAG, etag);
+
+      return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+    } catch (UserSetValidationException | UserSetInstantiationException e) {
+      throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
+          new String[] {e.getMessage()}, e);
+    } catch (HttpException e) {
+      throw e;
+    } catch (RuntimeException | IOException e) {
+      throw new InternalServerException(e);
+    }
+  }
+
 
   @DeleteMapping(value = {"/set/{identifier}"})
   @Operation(summary= "Delete Set", description = "Delete an existing user set")
