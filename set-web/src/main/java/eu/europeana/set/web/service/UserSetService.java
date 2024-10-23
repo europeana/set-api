@@ -10,6 +10,7 @@ import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
@@ -131,13 +132,16 @@ public interface UserSetService {
     UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 	    throws ApplicationAuthenticationException, ItemValidationException;
 
+    public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition, UserSet existingUserSet) 
+        throws ItemValidationException;
+
     /**
      * This method updates existing item list
      * 
      * @param existingUserSet
      * @return updated user set
      */
-    UserSet updateItemList(UserSet existingUserSet);
+    UserSet updateUserSetInMongo(UserSet existingUserSet);
 
     /**
      * search user sets using the given query and profile
@@ -257,4 +261,6 @@ public interface UserSetService {
 
     void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
 
+    UserSet updatePagination(UserSet userSet, UserSetConfiguration config);
+    
 }

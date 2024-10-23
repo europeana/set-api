@@ -62,6 +62,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   private SearchApiClient setApiService = new SearchApiClientImpl();
 
   Logger logger = LogManager.getLogger(getClass());
+  
+  
+  //update the pagination fields of the set (used only for the serialization to the output)
+  @Override
+  public UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
+    return userSetUtils.updatePagination(userSet, config);
+  }
 
   protected PersistentUserSetService getMongoPersistence() {
     return mongoPersistance;
@@ -501,6 +508,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
+  //this method is to be deprecated when the new items insert is used
+  @Deprecated
   protected void validateItems(List<String> items) throws ItemValidationException {
     if(items==null || items.isEmpty()) {
       return;
@@ -518,7 +527,35 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
     }
   }
-  
+
+  //items can be either a uri or a record identifier (e.g. "/1234/XPTO_2")
+  protected void validateItemsStrings(List<String> items) throws ItemValidationException {
+    if(items==null || items.isEmpty()) {
+      return;
+    }
+    List<String> invalidItems = new ArrayList<>();
+    for(String item : items) {
+      try {
+        if(item.startsWith(getConfiguration().getItemDataEndpoint())) {
+          String itemWithoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
+          if(!itemWithoutBase.startsWith("/")) {
+            itemWithoutBase = "/" + itemWithoutBase;
+          }
+          validateItemPartial(itemWithoutBase);
+        }
+        else {
+          validateItemPartial(item);
+        }
+      }
+      catch (ItemValidationException ex) {
+        invalidItems.add(item);
+      }
+    }
+    if(invalidItems.size()>0) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
+    }
+  }
+
   protected void validateItemWhole(String item) throws ItemValidationException {
     if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
