@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
@@ -42,7 +42,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
  * @author Roman Graf on 10-09-2020.
  */
 @SpringBootTest
-public class WebUserSetPaginationIT extends BaseUserSetTestUtils {
+public class WebUserSetPaginationIT extends IntegrationTestSetup {
 
   @BeforeAll
   public static void initTokens() {

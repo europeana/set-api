@@ -1,32 +1,43 @@
-package eu.europeana.set.web.utils;
+package eu.europeana.set.web.model.search;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.search.SearchApiRequest;
 
 /**
- * Creates the Serach api urls and request body
+ * Creates the Search api urls and request body
  * @author Srishti Singh
  */
-public class UserSetSearchApiUtils {
+public class SearchApiUtils {
 
+   private static final SearchApiUtils instance = new SearchApiUtils();
+  
+   private SearchApiUtils() {
+     //hide default constructor
+   }
+   
+   
+   public static SearchApiUtils getInstance() {
+     return instance;
+   }
+   
     /**
-     * Will create the Serach Api post request url
+     * Will create the Search Api post request url
      * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
      * 
-     * @param userSet
-     * @param apiKey
-     * @param searchUrl
+     * @param userSet the user set for which the 
+     * @param apiKey apiKey used to invoke the search api
+     * @param searchUrl 
      * @param profile
      * @return
      */
-    public String buildSearchApiPostUrl(UserSet userSet, String apiKey, String searchUrl, String profile) {
+    public String buildSearchApiUrl(UserSet userSet, String apiKey, String searchUrl, String profile) {
         StringBuilder url = new StringBuilder();
         if (!userSet.isOpenSet()) {
             url.append(getBaseSearchUrl(searchUrl));
@@ -39,6 +50,34 @@ public class UserSetSearchApiUtils {
         if(profile!=null) {
           url.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=').append(profile);
         }
+        return url.toString();
+    }
+    
+    /**
+     * Will create the Search Api post request url
+     * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
+     * 
+     * @param userSet the user set for which the 
+     * @param apiKey apiKey used to invoke the search api
+     * @param baseSearchApiUrl the base url of the search api
+     * @param profile
+     * @return
+     */
+    public String buildSearchApiUrlForItem(String baseSearchApiUrl, String itemId, String apiKey,  String profile) {
+        StringBuilder url = new StringBuilder();
+       url.append(getBaseSearchUrl(baseSearchApiUrl));
+        
+        // add apikey
+        url.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+        // add profile
+        if(profile!=null) {
+          url.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=').append(profile);
+        }
+        
+        String europeanaId = UserSetUtils.extractItemIdentifier(itemId);
+        final String searchQuery = "europeana_id:\"" + europeanaId + "\"";
+        url.append("&query=").append(URLEncoder.encode(searchQuery, StandardCharsets.UTF_8));
+        
         return url.toString();
     }
 

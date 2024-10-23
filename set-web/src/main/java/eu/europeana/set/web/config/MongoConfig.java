@@ -7,8 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import com.mongodb.WriteConcern;
 import dev.morphia.Datastore;
+import eu.europeana.api.commons.nosql.entity.ApiWriteLockImpl;
 import eu.europeana.corelib.db.wrapper.ApiMongoConnector;
-import eu.europeana.set.definitions.config.UserSetConfiguration;
+import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 
 /**
  * This mongo config crates a org.mongodb.morphia.Datastore instead of a dev.morphia.Datastore
@@ -33,8 +34,7 @@ public class MongoConfig {
   @Value("${mongodb.set.truststorepass:''}")
   private String mongoTrustStorePass;
 
-  private static final String[] MODEL_PACKAGES = new String[]{"eu.europeana.set.definitions", "eu.europeana.api.commons.nosql.entity"};
-  
+  private static final String[] MODEL_PACKAGES = new String[]{PersistentUserSetImpl.class.getPackageName(), ApiWriteLockImpl.class.getPackageName()};
   private ApiMongoConnector mongoConnector;
   
   @Bean(BeanNames.BEAN_SET_MONGO_STORE)

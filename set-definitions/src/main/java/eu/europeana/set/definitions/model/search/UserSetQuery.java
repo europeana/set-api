@@ -51,5 +51,9 @@ public interface UserSetQuery extends Query{
     void setTitleLang(String lang);
 
     String getTitleLang();
+
+    void setCollectionType(String collectionType);
+
+    String getCollectionType();
     
 }

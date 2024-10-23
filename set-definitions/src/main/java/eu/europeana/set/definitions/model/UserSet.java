@@ -105,4 +105,8 @@ public interface UserSet extends PageInfo {
     Provider getProvider();
 
     boolean hasItem(String itemId);
+
+    void setIsShownBy(BaseWebResource isShownBy);
+
+    BaseWebResource getIsShownBy();
 }

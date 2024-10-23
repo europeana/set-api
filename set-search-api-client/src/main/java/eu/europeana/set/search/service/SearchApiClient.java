@@ -5,7 +5,8 @@ import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpException;
 import org.codehaus.jettison.json.JSONException;
-
+import org.codehaus.jettison.json.JSONObject;
+import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.search.exception.SearchApiClientException;
 
 
@@ -38,5 +39,9 @@ public interface SearchApiClient {
      */
     public SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, String apiKey)
     		throws SearchApiClientException;
+
+    JSONObject searchItems(String uri, String postBody) throws SearchApiClientException;
+
+    void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction) throws SearchApiClientException;
     
 }

@@ -15,9 +15,11 @@ import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
@@ -256,5 +258,7 @@ public interface UserSetService {
     UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication, boolean publish) throws HttpException;
 
     void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
+
+    WebResource generateDepiction(UserSet userSet) throws SearchApiClientException;
 
 }

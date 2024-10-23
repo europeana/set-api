@@ -13,21 +13,22 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Transient;
+import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.impl.Provider;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 
 @JsonPropertyOrder({WebUserSetModelFields.ID, WebUserSetModelFields.TYPE,
     WebUserSetModelFields.COLLECTION_TYPE, WebUserSetModelFields.TITLE,
-    WebUserSetModelFields.SUBJECT, WebUserSetFields.DESCRIPTION, WebUserSetModelFields.VISIBILITY,
-    WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.PINNED, WebUserSetModelFields.ITEMS,
-    WebUserSetModelFields.CREATOR, WebUserSetModelFields.CONTRIBUTOR,
-    WebUserSetModelFields.PROVIDER, WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED,
-    WebUserSetModelFields.TOTAL, WebUserSetFields.NEXT, WebUserSetFields.PREV})
+    WebUserSetModelFields.SUBJECT, WebUserSetModelFields.IS_SHOWN_BY, WebUserSetFields.DESCRIPTION,
+    WebUserSetModelFields.VISIBILITY, WebUserSetModelFields.IS_DEFINED_BY,
+    WebUserSetModelFields.PINNED, WebUserSetModelFields.ITEMS, WebUserSetModelFields.CREATOR,
+    WebUserSetModelFields.CONTRIBUTOR, WebUserSetModelFields.PROVIDER,
+    WebUserSetModelFields.CREATED, WebUserSetModelFields.MODIFIED, WebUserSetModelFields.TOTAL,
+    WebUserSetFields.NEXT, WebUserSetFields.PREV})
 @JsonInclude(value = JsonInclude.Include.NON_DEFAULT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WebUserSetImpl extends PersistentUserSetImpl {
@@ -154,6 +155,17 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
   @JsonSetter(WebUserSetFields.PROVIDER)
   public void setProvider(WebProvider provider) {
     super.setProvider(provider);
+  }
+
+  @Override
+  @JsonGetter(WebUserSetFields.IS_SHOWN_BY)
+  public BaseWebResource getIsShownBy() {
+    return super.getIsShownBy();
+  }
+
+  @JsonSetter(WebUserSetFields.IS_SHOWN_BY)
+  public void setIsShownBy(WebResource isShownBy) {
+    super.setIsShownBy(isShownBy);
   }
 
   @JsonIgnore

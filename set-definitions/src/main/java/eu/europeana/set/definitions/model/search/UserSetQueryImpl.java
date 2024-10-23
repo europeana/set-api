@@ -16,6 +16,7 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     String text;
     String provider;
     String titleLang;
+    String collectionType;
     
     @Override
     public String getUser() {
@@ -125,5 +126,15 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     @Override
     public String getTitleLang() {
       return titleLang;
+    }
+
+    @Override
+    public String getCollectionType() {
+      return collectionType;
+    }
+
+    @Override
+    public void setCollectionType(String collectionType) {
+      this.collectionType = collectionType;
     }
 }
