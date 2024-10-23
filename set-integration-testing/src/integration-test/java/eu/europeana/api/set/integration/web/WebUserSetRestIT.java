@@ -24,7 +24,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -50,7 +50,7 @@ import eu.europeana.set.web.search.UserSetQueryBuilder;
  * @author Roman Graf on 10-09-2020.
  */
 @SpringBootTest
-public class WebUserSetRestIT extends BaseUserSetTestUtils {
+public class WebUserSetRestIT extends IntegrationTestSetup {
 
   @BeforeAll
   public static void initTokens() {

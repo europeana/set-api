@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -31,7 +31,7 @@ import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 
 @SpringBootTest
-public class SearchUserSetRestIT extends BaseUserSetTestUtils {
+public class SearchUserSetRestIT extends IntegrationTestSetup {
 
   private static final String API_KEY = "api2demo";
   private static final String SEARCH_URL = "/set/search";

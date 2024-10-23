@@ -65,7 +65,8 @@ public abstract class BaseUserSetTestUtils {
   protected static final String BASE_URL = "/set/";
   public static final String USER_SET_REGULAR = "/content/userset_regular.json";
   public static final String USER_SET_GALLERY = "/content/userset_gallery.json";
-  public static final String USER_SET_GALLERY_DEPICTION = "/content/userset_gallery_with_depiction.json";
+  public static final String USER_SET_GALLERY_DEPICTION =
+      "/content/userset_gallery_with_depiction.json";
   public static final String USER_SET_MANDATORY = "/content/userset_mandatory.json";
   public static final String USER_SET_OPEN = "/content/userset_open.json";
   public static final String USER_SET_MULTIPLE_QUERY_OPEN =
@@ -107,7 +108,7 @@ public abstract class BaseUserSetTestUtils {
   @Autowired
   @Qualifier(UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
-  
+
   @Autowired
   private UserSetConfiguration configuration;
   // format: user
@@ -131,25 +132,6 @@ public abstract class BaseUserSetTestUtils {
    * can be used to enable AUTH for local environment
    */
   protected static boolean DISABLE_AUTH = true;
-  private static final MongoContainer MONGO_CONTAINER;
-
-  static {
-//    MONGO_CONTAINER = new MongoDBContainer("mongo:6.0.14-jammy")
-    final String serviceDB = "admin";   // to change to "set-api-test"
-    //for debugging set the host port to 27017 or 27018
-    int hostPort = -1;
-     
-    MONGO_CONTAINER = new MongoContainer(serviceDB, hostPort)
-        .withLogConsumer(new WaitingConsumer()
-        .andThen(new ToStringConsumer()));
-
-    MONGO_CONTAINER.start();
-  }
-  
-  @DynamicPropertySource
-  static void setProperties(DynamicPropertyRegistry registry) {
-    registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
-  }
 
   @BeforeAll
   protected void initApplication() {
@@ -167,10 +149,10 @@ public abstract class BaseUserSetTestUtils {
           .put(UserSetConfigurationImpl.KEY_AUTH_DISABLED, "true");
     }
   }
-  
+
   private void changeProperiesForTests() {
     ((UserSetConfigurationImpl) configuration).getSetProperties()
-          .put(UserSetConfigurationImpl.GALLERY_SIZE_MAX, "249");
+        .put(UserSetConfigurationImpl.GALLERY_SIZE_MAX, "249");
   }
 
   public static void initRegularUserToken() {
@@ -195,13 +177,13 @@ public abstract class BaseUserSetTestUtils {
     editor2UserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
     creatorEntitySetUserToken = retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
   }
-  
+
   public static void initAdminUserToken() {
     if (DISABLE_AUTH) {
       return;
     }
     adminUserToken = retrieveOatuhToken(EuropeanaOauthClient.ADMIN_USER);
-  }  
+  }
 
   protected void deleteCreatedSets() {
     getMongoPersistance().removeAll(createdUserSets);
@@ -246,7 +228,7 @@ public abstract class BaseUserSetTestUtils {
     Authentication authentication = getAuthentication(token);
     WebUserSetImpl createdSet =
         (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
-    //keep the list of created sets to delete in the end
+    // keep the list of created sets to delete in the end
     createdUserSets.add(createdSet);
     return createdSet;
   }
@@ -332,17 +314,17 @@ public abstract class BaseUserSetTestUtils {
     userSet.setIdentifier(identifier);
     createdUserSets.add(userSet);
   }
-  
+
   protected String getStringValue(String jsonBody, String fieldName) throws JSONException {
     JSONObject json = new JSONObject(jsonBody);
     return json.getString(fieldName);
   }
-  
-  protected List<String> getStringListValues(String jsonBody, String fieldName) throws JSONException {
+
+  protected List<String> getStringListValues(String jsonBody, String fieldName)
+      throws JSONException {
     assertNotNull(jsonBody);
     JSONObject json = new JSONObject(jsonBody);
     return Collections.singletonList(json.getString(fieldName));
   }
-
-
+ 
 }
