@@ -7,8 +7,8 @@ import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelField
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
 import eu.europeana.set.definitions.model.BaseWebResource;
 
@@ -19,13 +19,7 @@ import eu.europeana.set.definitions.model.BaseWebResource;
 public class WebResource extends BaseWebResource {
 
   public static final String TYPE = "WebResource";
-  @JsonProperty(SOURCE)
-  private String source;
-  @JsonProperty(ID)
-  private String id;
-  @JsonProperty(THUMBNAIL)
-  private String thumbnail;
-
+  
   public WebResource() {
     super();
   }
@@ -38,17 +32,19 @@ public class WebResource extends BaseWebResource {
     super(id, source, thumbnail);
   }
 
-  
+  @JsonSetter(THUMBNAIL)
   public void setThumbnail(String thumbnailParam) {
     super.setThumbnail(thumbnailParam);
   }
 
+  @JsonSetter(SOURCE)
   public void setSource(String sourceParam) {
-    source = sourceParam;
+   super.setSource(sourceParam);;
   }
 
+  @JsonSetter(ID)
   public void setId(String idParam) {
-    id = idParam;
+    super.setId(idParam);
   }
 
   @Override
@@ -62,15 +58,15 @@ public class WebResource extends BaseWebResource {
 
     WebResource that = (WebResource) o;
 
-    return Objects.equals(source, that.getSource()) 
-        && id.equals(that.getId()) 
-        && Objects.equals(thumbnail, that.getThumbnail());
+    return Objects.equals(getSource(), that.getSource()) 
+        && Objects.equals(getId(), that.getId()) 
+        && Objects.equals(getThumbnail(), that.getThumbnail());
   }
 
   public int hashCode() {
-    int result = (id == null) ? 0 : id.hashCode();
-    result += (thumbnail == null) ? 0 : thumbnail.hashCode();
-    result += (source == null) ? 0 : source.hashCode();
+    int result = (getId() == null) ? 0 : getId().hashCode();
+    result += (getThumbnail() == null) ? 0 : getThumbnail().hashCode();
+    result += (getSource() == null) ? 0 : getSource().hashCode();
     return result;
   }
 
