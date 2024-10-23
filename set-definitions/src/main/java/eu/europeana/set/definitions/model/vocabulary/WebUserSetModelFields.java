@@ -42,9 +42,6 @@ public class WebUserSetModelFields {
 	// Pinned items constants
 	public static final String PINNED_POSITION = "pin";
 
-	
-	public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION = "http://www.europeana.eu/schemas/context/collection.jsonld";
-
     WebUserSetModelFields() {
     }
 

@@ -1,5 +1,5 @@
 {
-   "@context":"http://www.europeana.eu/schemas/context/collection.jsonld",
+   "@context":"https://api.europeana.eu/schema/context/set.jsonld",
    "type":"Collection",
    "title":{
       "en":"SGoaB Test Dataset"
