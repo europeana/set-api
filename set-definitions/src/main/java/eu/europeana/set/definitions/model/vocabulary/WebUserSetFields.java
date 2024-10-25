@@ -41,7 +41,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String TEXT_SCORE_SORT            = "score";
 
     // JsonLd Constants
-    public static final String CONTEXT                    = "http://www.europeana.eu/schemas/context/collection.jsonld";
+    public static final String CONTEXT                    = "https://api.europeana.eu/schema/context/set.jsonld";
     public static final String CONTEXT_FIELD              = "@context";
     public static final String IDENTIFIER                 = "identifier";
     public static final String TITLE                      = "title";

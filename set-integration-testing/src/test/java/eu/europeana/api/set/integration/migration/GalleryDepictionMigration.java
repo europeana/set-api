@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -54,7 +53,10 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test"); 
   }
 
-  @Test
+  /*
+   * Generate isShownBy field for all sets in the (local) db
+   */
+  //@Test
   public void generateGalleriesWithDepiction() throws Exception {
     createTestUserSet(USER_SET_REGULAR, regularUserToken);
     
@@ -87,7 +89,6 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     
   }
 
-
   private void generateDepictions(List<? extends UserSet> results) {
     for (UserSet userSet : results) {
       final WebResource isShownBy = generateGalleryDepiction(userSet);
@@ -99,7 +100,6 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       }
     }
   }
-
 
   private WebResource generateGalleryDepiction(UserSet userSet){
     if(userSet.isOpenSet() || userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet()) {
@@ -117,14 +117,9 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       return null;
     }
   }
-
-
   
-
-
   private boolean hasNext(final int pageSize, ResultSet<? extends UserSet> results) {
     return results.getResultSize() < pageSize;
   }
-
 
 }
