@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -41,7 +41,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
  * @author GordeaS
  */
 @SpringBootTest
-public class WebUserSetPublishingIT extends BaseUserSetTestUtils {
+public class WebUserSetPublishingIT extends IntegrationTestSetup {
 
   @BeforeAll
   public static void initTokens() {

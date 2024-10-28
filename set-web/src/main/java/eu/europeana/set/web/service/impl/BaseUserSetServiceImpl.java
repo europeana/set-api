@@ -39,13 +39,14 @@ import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
+import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
+import eu.europeana.set.web.model.search.SearchApiUtils;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
-import eu.europeana.set.web.utils.UserSetSearchApiUtils;
 
 public abstract class BaseUserSetServiceImpl implements UserSetService {
 
@@ -54,12 +55,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   UserSetUtils userSetUtils = new UserSetUtils();
 
-  UserSetSearchApiUtils userSetSearchApiUtils = new UserSetSearchApiUtils();
+  SearchApiUtils userSetSearchApiUtils = SearchApiUtils.getInstance();
 
   @Resource
   UserSetConfiguration configuration;
 
-  private SearchApiClient setApiService = new SearchApiClientImpl();
+  private SearchApiClient searchApiClient = new SearchApiClientImpl();
 
   Logger logger = LogManager.getLogger(getClass());
 
@@ -88,14 +89,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   public SearchApiClient getSearchApiClient() {
-    return setApiService;
+    return searchApiClient;
   }
 
   protected UserSetConfiguration getConfiguration() {
     return configuration;
   }
 
-  protected UserSetSearchApiUtils getSearchApiUtils() {
+  protected SearchApiUtils getSearchApiUtils() {
     return userSetSearchApiUtils;
   }
 
@@ -927,5 +928,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     String userId =
         UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), userIdentifier);
     return userSet.getCreator().getHttpUrl().equals(userId);
+  }
+
+  @Override
+  public WebResource generateDepiction(UserSet userSet) throws SearchApiClientException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

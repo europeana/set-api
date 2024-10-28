@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -31,7 +31,7 @@ import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 
 @SpringBootTest
-public class SearchUserSetRestIT extends BaseUserSetTestUtils {
+public class SearchUserSetRestIT extends IntegrationTestSetup {
 
   private static final String API_KEY = "api2demo";
   private static final String SEARCH_URL = "/set/search";
@@ -48,6 +48,8 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
       WebUserSetFields.TYPE + ":" + UserSetTypes.COLLECTION;
   private static final String SEARCH_ENTITY_SET =
       WebUserSetFields.TYPE + ":" + UserSetTypes.ENTITYBESTITEMSSET;
+  private static final String SEARCH_GALLERY =
+      WebUserSetFields.COLLECTION_TYPE + ":" + WebUserSetFields.TYPE_GALLERY;
   private static final String SEARCH_TITLE_LANG_EN = WebUserSetFields.LANG + ":" + "en";
   // private static final String SORT_MODIFIED_WebUserSetFields.MODIFIED
   private static final String PAGE_SIZE = "100";
@@ -731,6 +733,44 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
   }
 
   @Test
+  public void searchGalleries() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_GALLERY, regularUserToken);
+    assertNotNull(set1);
+    String result = mockMvc
+        .perform(
+            get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_GALLERY)
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+                .header("Authorization", "Bearer " + regularUserToken)
+                )
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
+        .getContentAsString();
+
+    assertTrue(containsKeyOrValue(result,
+        UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(), set1.getIdentifier())));
+    //only id retured in the minimal profile, to be enabled after refactoring profiles
+    //assertTrue(containsKeyOrValue(result, WebUserSetFields.TYPE_GALLERY));
+  }
+  
+  @Test
+  public void searchByWrongCollectionType() throws Exception {
+    final String wrongCollectionType = "wrongCollectionType";
+    final String query = WebUserSetFields.COLLECTION_TYPE+":"+wrongCollectionType;
+    String result = mockMvc
+        .perform(
+            get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+
+    assertTrue(result.contains(wrongCollectionType));
+  }
+
+  
+  @Test
   public void searchTypeCollection() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     UserSet set2 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
@@ -745,6 +785,7 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
     assertNotNull(set1);
     assertNotNull(set2);
   }
+
 
   // Facet validation
   @Test
