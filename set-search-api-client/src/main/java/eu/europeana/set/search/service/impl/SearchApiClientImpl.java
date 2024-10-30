@@ -223,7 +223,7 @@ public class SearchApiClientImpl implements SearchApiClient {
 
 
   private String getResourceId(String thumbnailUrl) throws SearchApiClientException {
-    final String queryString = StringUtils.substringAfter(thumbnailUrl, '?');
+    final String queryString = StringUtils.substringAfter(thumbnailUrl, "?");
     List<NameValuePair> params = URLEncodedUtils.parse(queryString, StandardCharsets.UTF_8);
     for (NameValuePair param : params) {
       if ("uri".equals(param.getName())) {

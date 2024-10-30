@@ -956,9 +956,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   
   @Override
   public WebResource generateDepiction(UserSet userSet) throws SearchApiClientException {
+    if(userSet.getItems() == null || userSet.getItems().isEmpty()) {
+      return null;
+    }
+        
     String itemId = userSet.getItems().get(0);
     String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
-        itemId, getConfiguration().getSearchApiKey(), "minimal");
+        itemId, getConfiguration().getSearchApiKey(), getConfiguration().getSearchApiProfileForItemDescriptions());
     
     WebResource depiction = new WebResource();
     getSearchApiClient().fillDepiction(url, itemId, depiction);

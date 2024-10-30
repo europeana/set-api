@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -49,16 +50,18 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   @DynamicPropertySource
   static void setProperties(DynamicPropertyRegistry registry) {
-    //  registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
-      registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test"); 
+    registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test");
+    //registry.add("mongodb.set.connectionUrl",  () -> "");
+    //registry.add("mongodb.set.truststore", () -> "");
+    //registry.add("mongodb.set.truststorepass", () -> "");
   }
 
   /*
    * Generate isShownBy field for all sets in the (local) db
    */
-  //@Test
+  @Test
   public void generateGalleriesWithDepiction() throws Exception {
-    createTestUserSet(USER_SET_REGULAR, regularUserToken);
+//    createTestUserSet(USER_SET_REGULAR, regularUserToken);
     
     // create object in database
     UserSetQueryBuilder queryBuilder = new UserSetQueryBuilder();
@@ -72,12 +75,13 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
         queryBuilder.buildUserSetQuery("type:Collection", null, sort, page, pageSize, getConfiguration());
     final ArrayList<LdProfiles> profiles = new ArrayList<LdProfiles>();
     profiles.add(LdProfiles.STANDARD);
+    DepictionGenerationReport report = new DepictionGenerationReport();
     
     ResultSet<? extends UserSet> results = null;
     do {
       results =
           getUserSetService().search(searchQuery, null, profiles, adminAuth);
-      generateDepictions(results.getResults());
+      generateDepictions(results.getResults(), report);
       
       //move to next page
       page++;
@@ -89,34 +93,49 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     
   }
 
-  private void generateDepictions(List<? extends UserSet> results) {
+  private void generateDepictions(List<? extends UserSet> results, DepictionGenerationReport report) {
+
     for (UserSet userSet : results) {
+      if(userSet.isOpenSet() || userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet()) {
+        //bookmarks and entity best items sets is redundant, but we keep it for future
+        //open/dynamic sets must not be migrated
+        report.increaseSkipped();
+        continue;
+      }
+      if(userSet.getIsShownBy() != null) {
+        report.increaseSkipped();
+        continue;
+      }
+      
       final WebResource isShownBy = generateGalleryDepiction(userSet);
       //do not update set if the depiction cannot be generated
       if(isShownBy != null) {
         userSet.setIsShownBy(isShownBy);
         userSet.setCollectionType(WebUserSetFields.TYPE_GALLERY);
         mongoPersistance.store(userSet);
+        report.increaseGenerated();
+      } else {
+        report.increaseNotGenerated();
       }
     }
+    System.out.println("Generated depictions: " + report.getGenerated());
+    System.out.println("Skipped sets: " + report.getSkipped());
+    System.out.println("Not generated: " + report.getNotGenerated());  
   }
 
   private WebResource generateGalleryDepiction(UserSet userSet){
-    if(userSet.isOpenSet() || userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet()) {
-      //bookmarks and entity best items sets is redundant, but we keep it for future
-      //open/dynamic sets must not be migrated
-      return null;
-    }
-    
+
     try {
       return getUserSetService().generateDepiction(userSet);
     } catch (SearchApiClientException e) {
       //work with best user effort
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      System.out.println("Cannot generate depiciton for set: "+ userSet.getIdentifier() + ", " + e.getMessage());
+      //e.printStackTrace();
       return null;
     }
   }
+
+  
   
   private boolean hasNext(final int pageSize, ResultSet<? extends UserSet> results) {
     return results.getResultSize() < pageSize;
