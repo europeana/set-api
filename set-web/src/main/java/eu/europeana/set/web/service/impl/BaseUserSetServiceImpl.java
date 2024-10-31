@@ -65,10 +65,24 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   
   
   //update the pagination fields of the set (used only for the serialization to the output)
-  @Override
-  public UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
+  protected UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
     return userSetUtils.updatePagination(userSet, config);
   }
+  
+  protected UserSet writeUserSetToDb(UserSet existingUserSet) {
+    // update total
+    updateTotal(existingUserSet);
+    // generate and add a created and modified timestamp to the Set
+    existingUserSet.setModified(new Date());
+
+    // Respond with HTTP 200
+    // update an existing user set. merge user sets - insert new fields in existing
+    // object
+    UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
+    //getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
+    return updatedUserSet;
+  }
+
 
   protected PersistentUserSetService getMongoPersistence() {
     return mongoPersistance;

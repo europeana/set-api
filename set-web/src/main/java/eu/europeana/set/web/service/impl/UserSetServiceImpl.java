@@ -234,6 +234,54 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     return positionFinal;
   }
+  
+  public UserSet deleteItem(String item, UserSet existingUserSet) {
+    // check if it is a pinned item, decrease the counter by 1 for entity sets
+    if (existingUserSet.isEntityBestItemsSet()) {
+      int currentPosition = existingUserSet.getItems().indexOf(item);
+      if (currentPosition < existingUserSet.getPinned()) {
+        existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+      }
+    }
+    // if already exists - remove item and update modified date
+    existingUserSet.getItems().remove(item);
+
+    // update an existing user set
+    UserSet updatedUserSet = writeUserSetToDb(existingUserSet);
+    //update pagination fields (used only for the response serialization)
+    updatePagination(updatedUserSet, getConfiguration());
+    return updatedUserSet;
+  }
+  
+  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) {
+    boolean itemsRemoved=false;
+    // check if it is a pinned item, decrease the counter by 1 for entity sets
+    if (existingUserSet.isEntityBestItemsSet()) {
+      for(String item : items) {
+        int currentPosition = existingUserSet.getItems().indexOf(item);
+        if (currentPosition>=0) {
+          itemsRemoved=true;
+          if(currentPosition < existingUserSet.getPinned() ) {
+            existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+          }
+          existingUserSet.getItems().remove(item);
+        }
+      }
+    }
+    else {
+      itemsRemoved=existingUserSet.getItems().removeAll(items);
+    }
+
+    UserSet updatedUserSet=existingUserSet;
+    if(itemsRemoved) {
+      // update an existing user set
+      updatedUserSet = writeUserSetToDb(existingUserSet);
+    }
+    
+    //update pagination fields (used only for the response serialization)
+    updatePagination(updatedUserSet, getConfiguration());
+    return updatedUserSet;
+  }
 
   public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition, UserSet existingUserSet) 
       throws ItemValidationException {
@@ -249,6 +297,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     } else {
       userSet=updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
     }
+    updatePagination(userSet, getConfiguration());
     
     return userSet;
   }  
@@ -275,7 +324,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     usersetItems.addAll(0, items);
     existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
-    UserSet updatedSet=updateUserSetInMongo(existingUserSet);
+    UserSet updatedSet=writeUserSetToDb(existingUserSet);
     return updatedSet;
   }
   
@@ -309,7 +358,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     int positionFinal=calculatePosition(position, usersetItems);
     usersetItems.addAll(positionFinal, items);
-    UserSet updatedSet=updateUserSetInMongo(existingUserSet);
+    UserSet updatedSet=writeUserSetToDb(existingUserSet);
     return updatedSet;
   }
 
@@ -346,7 +395,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
       userSet = insertItem(existingUserSet, newItem, positionInt, false);
     }
-    //getUserSetUtils().updatePagination(userSet, getConfiguration());
+    updatePagination(userSet, getConfiguration());
+    
     return userSet;
   }  
 
@@ -376,7 +426,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // add item && create item list if needed
       addNewItemToList(existingUserSet, finalPosition, newItem);
       updatePinCount(existingUserSet, pinnedItem, -1);
-      extUserSet = updateUserSetInMongo(existingUserSet);
+      extUserSet = writeUserSetToDb(existingUserSet);
     } else {
       // replace item
       int oldPosition = existingUserSet.getItems().indexOf(newItem);
@@ -387,7 +437,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       } else {
         replaceItem(existingUserSet, finalPosition, newItem);
         updatePinCount(existingUserSet, pinnedItem, oldPosition);
-        extUserSet = updateUserSetInMongo(existingUserSet);
+        extUserSet = writeUserSetToDb(existingUserSet);
       }
     }
 
@@ -417,26 +467,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // increase only if pinned item (do not increase for normal items)
       existingUserSet.setPinned(existingUserSet.getPinned() + 1);
     }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see eu.europeana.set.web.service.UserSetService#updateItemList(eu.europeana.set.
-   * definitions.model.UserSet)
-   */
-  public UserSet updateUserSetInMongo(UserSet existingUserSet) {
-    // update total
-    updateTotal(existingUserSet);
-    // generate and add a created and modified timestamp to the Set
-    existingUserSet.setModified(new Date());
-
-    // Respond with HTTP 200
-    // update an existing user set. merge user sets - insert new fields in existing
-    // object
-    UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
-    //getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
-    return updatedUserSet;
   }
 
   /**

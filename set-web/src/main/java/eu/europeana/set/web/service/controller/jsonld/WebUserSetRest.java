@@ -498,7 +498,6 @@ public class WebUserSetRest extends BaseRest {
       
       UserSet updatedUserSet =
           getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-      getUserSetService().updatePagination(updatedUserSet, getConfiguration());
             
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
@@ -555,7 +554,7 @@ public class WebUserSetRest extends BaseRest {
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
       
-      int itemsPosition=UserSetUtils.parseItemsPosition(position);
+      int itemsPosition=parseItemsPosition(position);
       if(!StringUtils.equals(position, WebUserSetFields.PINNED) && itemsPosition>=0 && itemsPosition < existingUserSet.getPinned()) {
         throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION, null);
       }
@@ -574,7 +573,6 @@ public class WebUserSetRest extends BaseRest {
       
       UserSet updatedUserSet =
           getUserSetService().insertMultipleItems(items, position, itemsPosition, existingUserSet);
-      getUserSetService().updatePagination(updatedUserSet, getConfiguration());
       
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
@@ -597,6 +595,27 @@ public class WebUserSetRest extends BaseRest {
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
     }
+  }
+  
+  //returns -1 if not provided
+  private int parseItemsPosition(String position) throws ParamValidationException {
+    if(StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
+      return 0;
+    }
+    int positionFinal = -1;
+    if(position!=null) {
+      try {
+        positionFinal = Integer.parseInt(position);
+        if(positionFinal<0) {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+              I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});          
+        }
+      } catch (RuntimeException e) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
+      }
+    }
+    return positionFinal;
   }
 
   @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
@@ -744,20 +763,7 @@ public class WebUserSetRest extends BaseRest {
             new String[] {datasetId + "/" + localId, identifier});
       }
 
-      // check if it is a pinned item, decrease the counter by 1 for entity sets
-      if (existingUserSet.isEntityBestItemsSet()) {
-        int currentPosition = existingUserSet.getItems().indexOf(newItem);
-        if (currentPosition < existingUserSet.getPinned()) {
-          existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-        }
-      }
-      // if already exists - remove item and update modified date
-      existingUserSet.getItems().remove(newItem);
-
-      // update an existing user set
-      UserSet updatedUserSet = getUserSetService().updateUserSetInMongo(existingUserSet);
-      //update pagination fields (used only for the response serialization)
-      getUserSetService().updatePagination(updatedUserSet, getConfiguration());
+      UserSet updatedUserSet=getUserSetService().deleteItem(newItem, existingUserSet);
       
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
@@ -813,32 +819,7 @@ public class WebUserSetRest extends BaseRest {
       // for entity user sets, add users with 'editor' role as contributors
       addContributorForEntitySet(existingUserSet, authentication);
 
-      boolean itemsRemoved=false;
-      // check if it is a pinned item, decrease the counter by 1 for entity sets
-      if (existingUserSet.isEntityBestItemsSet()) {
-        for(String item : items) {
-          int currentPosition = existingUserSet.getItems().indexOf(item);
-          if (currentPosition>=0) {
-            itemsRemoved=true;
-            if(currentPosition < existingUserSet.getPinned() ) {
-              existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-            }
-            existingUserSet.getItems().remove(item);
-          }
-        }
-      }
-      else {
-        itemsRemoved=existingUserSet.getItems().removeAll(items);
-      }
-
-      UserSet updatedUserSet=existingUserSet;
-      if(itemsRemoved) {
-        // update an existing user set
-        updatedUserSet = getUserSetService().updateUserSetInMongo(existingUserSet);
-      }
-      
-      //update pagination fields (used only for the response serialization)
-      getUserSetService().updatePagination(updatedUserSet, getConfiguration());
+      UserSet updatedUserSet=getUserSetService().deleteMultipleItems(items, existingUserSet);
       
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
