@@ -4,7 +4,7 @@
 
 	<groupId>eu.europeana.set</groupId>
 	<artifactId>set-api</artifactId>
-	<version>${revision}</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>User sets API</name>
 	<description>User Sets API - API for curating collections by end users</description>
@@ -38,7 +38,6 @@
 	</repositories>
 
 	<properties>
-		<revision>1.0</revision>
 		<java.version>17</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
@@ -48,7 +47,7 @@
 		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
         	--add-opens java.base/java.lang=ALL-UNNAMED
 		</java.17.addopens>
-		<version.commonsApi>0.4</version.commonsApi>
+		<version.commonsApi>0.4.3-SNAPSHOT</version.commonsApi>
 		<version.springBoot>2.5.14</version.springBoot>
 		
 		<!-- overwrite version defined in spring boot parent pom -->

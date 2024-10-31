@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -38,7 +38,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
  * @author Roman Graf on 10-09-2020.
  */
 @SpringBootTest
-public class WriteLockIT extends BaseUserSetTestUtils {
+public class WriteLockIT extends IntegrationTestSetup {
 
   @Resource(name = "set_db_apilockService")
   protected ApiWriteLockService writeLockService; 

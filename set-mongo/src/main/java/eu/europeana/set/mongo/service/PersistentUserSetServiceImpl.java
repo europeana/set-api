@@ -455,6 +455,10 @@ public class PersistentUserSetServiceImpl extends
     if (query.getType() != null) {
       mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
     }
+    
+    if (query.getCollectionType() != null) {
+      mongoQuery.filter(WebUserSetModelFields.COLLECTION_TYPE, query.getCollectionType());
+    }
 
     if (query.getCreator() != null) {
       mongoQuery.filter(WebUserSetModelFields.CREATOR + ".httpUrl", query.getCreator());

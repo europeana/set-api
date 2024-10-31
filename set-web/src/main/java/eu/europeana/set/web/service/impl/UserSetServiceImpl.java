@@ -44,6 +44,7 @@ import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
+import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionOverview;
@@ -52,6 +53,7 @@ import eu.europeana.set.web.model.search.FacetFieldViewImpl;
 import eu.europeana.set.web.model.search.ItemDescriptionsCollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsCollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
+import eu.europeana.set.web.model.search.SearchApiUtils;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.model.vocabulary.Roles;
@@ -527,7 +529,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String searchApiProfile = null;
     searchApiProfile = getConfiguration().getSearchApiProfileForItemDescriptions();
 
-    String url = getSearchApiUtils().buildSearchApiPostUrl(userSet, apiKey,
+    String url = getSearchApiUtils().buildSearchApiUrl(userSet, apiKey,
         getConfiguration().getSearchApiUrl(), searchApiProfile);
     SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet,
         getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize,
@@ -1066,5 +1068,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   private boolean isPublishingPrevented(PersistentUserSet userSet) {
     return userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet();
+  }
+  
+  @Override
+  public WebResource generateDepiction(UserSet userSet) throws SearchApiClientException {
+    if(userSet.getItems() == null || userSet.getItems().isEmpty()) {
+      return null;
+    }
+        
+    String itemId = userSet.getItems().get(0);
+    String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
+        itemId, getConfiguration().getSearchApiKey(), getConfiguration().getSearchApiProfileForItemDescriptions());
+    
+    WebResource depiction = new WebResource();
+    getSearchApiClient().fillDepiction(url, itemId, depiction);
+    return depiction;
   }
 }

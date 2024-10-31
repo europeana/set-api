@@ -16,7 +16,7 @@
   "http://data.europeana.eu/item/08641/1037479000000476467",
   "http://data.europeana.eu/item/08641/1037479000000476875"
   ],
-  "@context": "http://www.europeana.eu/schemas/context/collection.jsonld",
+  "@context": "https://api.europeana.eu/schema/context/set.jsonld",
   "id":"http://data.europeana.eu/set/1",
   "created": "2020-08-28T13:43:07Z",
   "modified": "2020-08-28T13:44:48Z",
