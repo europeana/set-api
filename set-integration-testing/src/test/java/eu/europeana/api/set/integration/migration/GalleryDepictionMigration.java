@@ -50,8 +50,8 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   @DynamicPropertySource
   static void setProperties(DynamicPropertyRegistry registry) {
+//    registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
     registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test");
-    //registry.add("mongodb.set.connectionUrl",  () -> "");
     //registry.add("mongodb.set.truststore", () -> "");
     //registry.add("mongodb.set.truststorepass", () -> "");
   }
@@ -69,28 +69,51 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     Authentication adminAuth = UserSetAuthorizationUtils.createAuthentication(adminUserToken);
     
     final int pageSize = 200;
-    int page = Integer.valueOf(UserSetUtils.DEFAULT_PAGE);
+    //int page = Integer.valueOf(UserSetUtils.DEFAULT_PAGE);
     String sort = WebUserSetModelFields.CREATED + " asc";
     UserSetQuery searchQuery =
-        queryBuilder.buildUserSetQuery("type:Collection", null, sort, page, pageSize, getConfiguration());
+        queryBuilder.buildUserSetQuery("type:Collection", null, sort, 0, pageSize, getConfiguration());
     final ArrayList<LdProfiles> profiles = new ArrayList<LdProfiles>();
     profiles.add(LdProfiles.STANDARD);
     DepictionGenerationReport report = new DepictionGenerationReport();
     
     ResultSet<? extends UserSet> results = null;
+    //page index startw with 1, but that is set at the beginning of the 
+    int page= 0;
     do {
+      //move to first/next page
+      page++;
+      searchQuery.setPageNr(page);
       results =
           getUserSetService().search(searchQuery, null, profiles, adminAuth);
+      final int found = results.getResults() == null? 0 : results.getResults().size();
+      System.out.println(found + " Items found on page: " + page);
+      
+      if(hasNoItems(results)) {
+        break; // stop if no results found anymore
+      }
       generateDepictions(results.getResults(), report);
       
-      //move to next page
-      page++;
       searchQuery.setPageNr(page);
       
       //brake
-      results = null;
-    } while (results != null && hasNext(pageSize, results));
+      //results = null;
+    } while (hasItems(results));
     
+    System.out.println("Completed Depiction Generation for result pages: " + page);
+    
+    System.out.println("Generated depictions: " + report.getGenerated());
+    System.out.println("Skipped sets: " + report.getSkipped());
+    System.out.println("Not generated: " + report.getNotGenerated()); 
+    
+  }
+
+  private boolean hasItems(ResultSet<? extends UserSet> results) {
+    return !hasNoItems(results);
+  }
+
+  private boolean hasNoItems(ResultSet<? extends UserSet> results) {
+    return results == null || results.getResults() == null || results.getResults().isEmpty();
   }
 
   private void generateDepictions(List<? extends UserSet> results, DepictionGenerationReport report) {
@@ -134,11 +157,4 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       return null;
     }
   }
-
-  
-  
-  private boolean hasNext(final int pageSize, ResultSet<? extends UserSet> results) {
-    return results.getResultSize() < pageSize;
-  }
-
 }
