@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
@@ -60,6 +61,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
    * Generate isShownBy field for all sets in the (local) db
    */
   @Test
+  @Disabled
   public void generateGalleriesWithDepiction() throws Exception {
 //    createTestUserSet(USER_SET_REGULAR, regularUserToken);
     

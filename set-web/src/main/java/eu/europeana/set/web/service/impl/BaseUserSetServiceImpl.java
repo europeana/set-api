@@ -573,7 +573,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   private String extractRecordId(String item) {
     //remove base item url
-    String itemWithoutBase = item.substring(0, getConfiguration().getItemDataEndpoint().length());
+    String itemWithoutBase = item.substring(getConfiguration().getItemDataEndpoint().length());
     if('/' != itemWithoutBase.charAt(0)) {
       itemWithoutBase = '/' + itemWithoutBase;
     }
