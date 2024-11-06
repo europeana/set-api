@@ -10,17 +10,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.search.result.ResultsPage;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -56,7 +52,6 @@ import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.SearchApiUtils;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
-import eu.europeana.set.web.model.vocabulary.Roles;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
@@ -229,14 +224,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return positionInt;
   }
   
-  int calculatePosition(int position, List<String> items) {
-    int positionFinal = items.size();
-    if (position >= 0 && position < items.size()) {
-      positionFinal = position;
-    }
-    return positionFinal;
-  }
-  
   public UserSet deleteItem(String item, UserSet existingUserSet) {
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
@@ -269,8 +256,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           existingUserSet.getItems().remove(item);
         }
       }
-    }
-    else {
+    } else {
       itemsRemoved=existingUserSet.getItems().removeAll(items);
     }
 
@@ -326,8 +312,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     usersetItems.addAll(0, items);
     existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
-    UserSet updatedSet=writeUserSetToDb(existingUserSet);
-    return updatedSet;
+    return writeUserSetToDb(existingUserSet);
   }
   
   private UserSet updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
@@ -335,8 +320,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     List<String> newItemsCopy=new ArrayList<>(items);
     if(usersetItems==null) {
       usersetItems=new ArrayList<>();
-    }
-    else {
+    } else {
       /*remove from the new items the ones that were pinned before
        *and from the user set the ones that are duplicates
       */
@@ -345,8 +329,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         if(itemindex>=0) {
           if(itemindex < existingUserSet.getPinned()) {
             items.remove(newItem);
-          }
-          else {
+          } else {
             usersetItems.remove(newItem);
           }
         }
@@ -360,8 +343,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     int positionFinal=calculatePosition(position, usersetItems);
     usersetItems.addAll(positionFinal, items);
-    UserSet updatedSet=writeUserSetToDb(existingUserSet);
-    return updatedSet;
+    return writeUserSetToDb(existingUserSet);
   }
 
   /*
@@ -373,7 +355,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   public UserSet insertItem(String datasetId, String localId, String position,
       UserSet existingUserSet) throws ApplicationAuthenticationException, ItemValidationException {
     String itemForPartialValidation = "/" + datasetId + "/" + localId;
-    validateItemPartial(itemForPartialValidation);
+    validateEuropeanaRecordId(itemForPartialValidation);
 
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
@@ -609,18 +591,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return orderedItemDescriptions;
   }
 
-  private int validateLastPage(long totalInCollection, int pageSize, int pageNr)
-      throws ParamValidationException {
-    int lastPage = getLastPage(totalInCollection, pageSize);
-    if (pageNr > lastPage) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {CommonApiConstants.QUERY_PARAM_PAGE,
-              "value out of range: " + pageNr + ", last page:" + lastPage});
-    }
-    return lastPage;
-  }
-
   @Override
   public ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery,
       List<LdProfiles> profiles, Authentication authentication) {
@@ -729,23 +699,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     resPage.setTotalInPage(items.size());
   }
 
-  private void addPagination(ResultsPage<?> resPage, String collectionUrl, int page,
-      int pageSize, int lastPage, LdProfiles profile) {
-    String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
-    resPage.setCurrentPageUri(currentPageUrl);
-
-    if (page > UserSetUtils.DEFAULT_PAGE) {
-      String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
-      resPage.setPrevPageUri(prevPage);
-    }
-
-    // if current page is not the last one
-    if (!isLastPage(page, lastPage)) {
-      String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize, profile);
-      resPage.setNextPageUri(nextPage);
-    }
-  }
-
   @Override
   public CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr,
       int pageSize, HttpServletRequest request) throws ParamValidationException {
@@ -801,10 +754,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     return page;
-  }
-
-  private String buildSetIdUrl(final String identifier) {
-    return getConfiguration().getSetDataEndpoint() + identifier;
   }
 
   public ItemIdsResultPage buildItemIdsResultsPage(String setIdentifier, List<String> itemIds,
@@ -869,90 +818,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   public boolean hasEditorRole(Authentication authentication) {
     return hasEditorRights(authentication);
   }
-
-  /**
-   * This method validates if the user is the owner/creator of the userset or the admin
-   * 
-   * @param userSet
-   * @param authentication
-   * @return
-   * @return userSet object
-   * @throws HttpException
-   */
-  @Override
-  public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication,
-      boolean includeEntitySetMsg) throws HttpException {
-
-    return verifyOwnerOrAdminOrRole(userSet, authentication, null, includeEntitySetMsg);
-  }
-
-  /**
-   * This method validates if the user is the owner/creator of the userset or the admin
-   * 
-   * @param userSet the user set to verify access
-   * @param authentication the authentication token
-   * @param role optional role granting access
-   * @return the userset if the access is granted
-   * @throws HttpException if hte access is not granted
-   */
-  UserSet verifyOwnerOrAdminOrRole(UserSet userSet, Authentication authentication, String role,
-      boolean includeEntitySetMsg) throws HttpException {
-
-    if (authentication == null) {
-      // access by API KEY, authentication not available
-      throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
-          UserSetI18nConstants.USER_NOT_AUTHORIZED,
-          new String[] {
-              "Access to update operations of private User Sets require user authentication with JwtToken"},
-          HttpStatus.FORBIDDEN);
-    }
-
-    // verify ownership
-    if (isOwner(userSet, authentication) || hasAdminRights(authentication)) {
-      // approve owner or admin
-      return userSet;
-    }
-    if (role != null && hasRole(authentication, role)) {
-      // approve usr with role if provided
-      return userSet;
-    } else {
-      // not authorized
-      StringBuilder message = new StringBuilder();
-      if (includeEntitySetMsg) {
-        message.append(
-            "Only the contributors, creator of the entity user set or admins are authorized to perform this operation.");
-      } else {
-        message.append(
-            "Only the creators of the user set or admins are authorized to perform this operation.");
-      }
-      throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
-          I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {message.toString()},
-          HttpStatus.FORBIDDEN);
-    }
-  }
-
-  /**
-   * This method checks the permission to create or Update the entity user sets for entity sets
-   * creation or updating the items: 1) 'contributors' (users with editor role) 2) owner or admin ;
-   * all three are allowed to create/update the entity set
-   *
-   * @param existingUserSet
-   * @param authentication
-   * @throws HttpException
-   */
-  public void verifyPermissionToUpdate(UserSet existingUserSet, Authentication authentication,
-      boolean includeEntitySetMsg) throws HttpException {
-    if (existingUserSet.isEntityBestItemsSet() && hasEditorRole(authentication)) {
-      return;
-    }
-    // verifyOwnerOrAdmin(existingUserSet, authentication, includeEntitySetMsg);
-    if (existingUserSet.isPublished()) {
-      verifyOwnerOrAdminOrRole(existingUserSet, authentication, Roles.PUBLISHER.getName(), false);
-    } else {
-      verifyOwnerOrAdmin(existingUserSet, authentication, false);
-    }
-  }
- 
 
   /**
    * This methods applies Linked Data profile to a user set

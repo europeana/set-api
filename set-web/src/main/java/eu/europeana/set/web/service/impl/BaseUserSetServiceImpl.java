@@ -16,9 +16,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
+import eu.europeana.api.commons.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.oauth2.model.ApiCredentials;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
@@ -79,9 +82,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // Respond with HTTP 200
     // update an existing user set. merge user sets - insert new fields in existing
     // object
-    UserSet updatedUserSet = getMongoPersistence().update((PersistentUserSet) existingUserSet);
-    //getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
-    return updatedUserSet;
+    return getMongoPersistence().update((PersistentUserSet) existingUserSet);
   }
 
 
@@ -523,8 +524,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  //this method is to be deprecated when the new items insert is used
-  @Deprecated
+  /**
+   * Validate conformity of item URLs
+   * @param items
+   * @throws ItemValidationException
+   */
   protected void validateItems(List<String> items) throws ItemValidationException {
     if(items==null || items.isEmpty()) {
       return;
@@ -538,7 +542,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         invalidItems.add(item);
       }
     }
-    if(invalidItems.size()>0) {
+    if(!invalidItems.isEmpty()) {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
     }
   }
@@ -551,24 +555,29 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     List<String> invalidItems = new ArrayList<>();
     for(String item : items) {
       try {
-        if(item.startsWith(getConfiguration().getItemDataEndpoint())) {
-          String itemWithoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
-          if(!itemWithoutBase.startsWith("/")) {
-            itemWithoutBase = "/" + itemWithoutBase;
-          }
-          validateItemPartial(itemWithoutBase);
-        }
-        else {
-          validateItemPartial(item);
-        }
-      }
-      catch (ItemValidationException ex) {
+        validateItem(item);
+      } catch (ItemValidationException ex) {
+        logger.trace("Invalid item: {}", item);
         invalidItems.add(item);
       }
     }
-    if(invalidItems.size()>0) {
+    if(!invalidItems.isEmpty()) {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
     }
+  }
+
+  private void validateItem(String item) throws ItemValidationException {
+    String recordId = (item.startsWith(getConfiguration().getItemDataEndpoint())) ? extractRecordId(item) : item;
+    validateEuropeanaRecordId(recordId);
+  }
+
+  private String extractRecordId(String item) {
+    //remove base item url
+    String itemWithoutBase = item.substring(0, getConfiguration().getItemDataEndpoint().length());
+    if('/' != itemWithoutBase.charAt(0)) {
+      itemWithoutBase = '/' + itemWithoutBase;
+    }
+    return itemWithoutBase;
   }
 
   protected void validateItemWhole(String item) throws ItemValidationException {
@@ -576,18 +585,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
     }
     else {
-      String itemWithoutBase = item.replace(getConfiguration().getItemDataEndpoint(), "");
-      if(!itemWithoutBase.startsWith("/")) {
-        itemWithoutBase = "/" + itemWithoutBase;
-      }
-      validateItemPartial(itemWithoutBase);
+      validateEuropeanaRecordId(extractRecordId(item));
     }
   }
   
   /*
    * item validation is also implemented in the recommendation-api and can be moved to api-commons
    */
-  protected void validateItemPartial(String item) throws ItemValidationException {
+  protected void validateEuropeanaRecordId(String item) throws ItemValidationException {
      if(! UserSetUtils.EUROPEANA_ID.matcher(item).matches()) {
        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
      }
@@ -986,4 +991,127 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // TODO Auto-generated method stub
     return null;
   }
+
+  protected int calculatePosition(int position, List<String> items) {
+    int positionFinal = items.size();
+    if (position >= 0 && position < items.size()) {
+      positionFinal = position;
+    }
+    return positionFinal;
+  }
+
+  protected void addPagination(ResultsPage<?> resPage, String collectionUrl, int page, int pageSize, int lastPage,
+      LdProfiles profile) {
+        String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
+        resPage.setCurrentPageUri(currentPageUrl);
+      
+        if (page > UserSetUtils.DEFAULT_PAGE) {
+          String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
+          resPage.setPrevPageUri(prevPage);
+        }
+      
+        // if current page is not the last one
+        if (!isLastPage(page, lastPage)) {
+          String nextPage = buildPageUrl(collectionUrl, page + 1, pageSize, profile);
+          resPage.setNextPageUri(nextPage);
+        }
+      }
+
+  protected String buildSetIdUrl(final String identifier) {
+    return getConfiguration().getSetDataEndpoint() + identifier;
+  }
+
+  protected int validateLastPage(long totalInCollection, int pageSize, int pageNr)
+      throws ParamValidationException {
+        int lastPage = getLastPage(totalInCollection, pageSize);
+        if (pageNr > lastPage) {
+          throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              new String[] {CommonApiConstants.QUERY_PARAM_PAGE,
+                  "value out of range: " + pageNr + ", last page:" + lastPage});
+        }
+        return lastPage;
+      }
+
+  /**
+   * This method validates if the user is the owner/creator of the userset or the admin
+   * 
+   * @param userSet
+   * @param authentication
+   * @return
+   * @return userSet object
+   * @throws HttpException
+   */
+  @Override
+  public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
+  
+    return verifyOwnerOrAdminOrRole(userSet, authentication, null, includeEntitySetMsg);
+  }
+
+  /**
+   * This method validates if the user is the owner/creator of the userset or the admin
+   * 
+   * @param userSet the user set to verify access
+   * @param authentication the authentication token
+   * @param role optional role granting access
+   * @return the userset if the access is granted
+   * @throws HttpException if hte access is not granted
+   */
+  protected UserSet verifyOwnerOrAdminOrRole(UserSet userSet, Authentication authentication, String role, boolean includeEntitySetMsg)
+      throws HttpException {
+      
+        if (authentication == null) {
+          // access by API KEY, authentication not available
+          throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
+              UserSetI18nConstants.USER_NOT_AUTHORIZED,
+              new String[] {
+                  "Access to update operations of private User Sets require user authentication with JwtToken"},
+              HttpStatus.FORBIDDEN);
+        }
+      
+        // verify ownership
+        if (isOwner(userSet, authentication) || hasAdminRights(authentication)) {
+          // approve owner or admin
+          return userSet;
+        }
+        if (role != null && hasRole(authentication, role)) {
+          // approve usr with role if provided
+          return userSet;
+        } else {
+          // not authorized
+          StringBuilder message = new StringBuilder();
+          if (includeEntitySetMsg) {
+            message.append(
+                "Only the contributors, creator of the entity user set or admins are authorized to perform this operation.");
+          } else {
+            message.append(
+                "Only the creators of the user set or admins are authorized to perform this operation.");
+          }
+          throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
+              I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {message.toString()},
+              HttpStatus.FORBIDDEN);
+        }
+      }
+
+  /**
+   * This method checks the permission to create or Update the entity user sets for entity sets
+   * creation or updating the items: 1) 'contributors' (users with editor role) 2) owner or admin ;
+   * all three are allowed to create/update the entity set
+   *
+   * @param existingUserSet
+   * @param authentication
+   * @throws HttpException
+   */
+  public void verifyPermissionToUpdate(UserSet existingUserSet, Authentication authentication, boolean includeEntitySetMsg)
+      throws HttpException {
+        if (existingUserSet.isEntityBestItemsSet() && hasEditorRole(authentication)) {
+          return;
+        }
+        // verifyOwnerOrAdmin(existingUserSet, authentication, includeEntitySetMsg);
+        if (existingUserSet.isPublished()) {
+          verifyOwnerOrAdminOrRole(existingUserSet, authentication, Roles.PUBLISHER.getName(), false);
+        } else {
+          verifyOwnerOrAdmin(existingUserSet, authentication, false);
+        }
+      }
 }
