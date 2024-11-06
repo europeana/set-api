@@ -1,5 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
+import static eu.europeana.api.commons.web.definitions.WebFields.FORMAT_JSONLD;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields.PINNED_POSITION;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -28,7 +30,6 @@ import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.exception.DateParsingException;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -114,7 +115,7 @@ public class WebUserSetRest extends BaseRest {
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, storedUserSet);
 
       String etag =
-          generateETag(storedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
@@ -297,7 +298,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
-	    String eTagOrigin = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+	    String eTagOrigin = generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 	    checkIfMatchHeader(eTagOrigin, request);
 
 	    // parse fields of the new user set to an object
@@ -397,7 +398,7 @@ public class WebUserSetRest extends BaseRest {
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
@@ -479,7 +480,7 @@ public class WebUserSetRest extends BaseRest {
 
       // if set is not entity set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
-          && StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
+          && StringUtils.equals(position, PINNED_POSITION)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
@@ -493,7 +494,7 @@ public class WebUserSetRest extends BaseRest {
       // check timestamp if provided within the “If-Match” HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
-          generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
       
       UserSet updatedUserSet =
@@ -502,7 +503,7 @@ public class WebUserSetRest extends BaseRest {
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -549,7 +550,7 @@ public class WebUserSetRest extends BaseRest {
 
       // if set is not entity best item set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
-          && StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
+          && StringUtils.equals(position, PINNED_POSITION)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
@@ -568,7 +569,7 @@ public class WebUserSetRest extends BaseRest {
       // check timestamp if provided within the “If-Match” HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
-          generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
       
       UserSet updatedUserSet =
@@ -577,7 +578,7 @@ public class WebUserSetRest extends BaseRest {
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -599,7 +600,7 @@ public class WebUserSetRest extends BaseRest {
   
   //returns -1 if not provided
   private int parseItemsPosition(String position) throws ParamValidationException {
-    if(StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
+    if(StringUtils.equals(position, PINNED_POSITION)) {
       return 0;
     }
     int positionFinal = -1;
@@ -704,7 +705,7 @@ public class WebUserSetRest extends BaseRest {
   }
 
 
-  @Deprecated
+  @Deprecated(since="EA-3869", forRemoval = true)
   @DeleteMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE, summary = "Delete a item from the set")
@@ -768,7 +769,7 @@ public class WebUserSetRest extends BaseRest {
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // respond with HTTP 200 containing the updated Set description as body.
       // serialize Set in JSON-LD following the requested profile
@@ -824,7 +825,7 @@ public class WebUserSetRest extends BaseRest {
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // respond with HTTP 200 containing the updated Set description as body.
       // serialize Set in JSON-LD following the requested profile
@@ -891,7 +892,7 @@ public class WebUserSetRest extends BaseRest {
       // check timestamp if provided within the "If-Match" HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
-          generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
 
       // if the user set is disabled and the user is not an admin, respond with HTTP
