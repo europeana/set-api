@@ -133,13 +133,12 @@ public interface UserSetService {
     UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
 	    throws ApplicationAuthenticationException, ItemValidationException;
 
-    /**
-     * This method updates existing item list
-     * 
-     * @param existingUserSet
-     * @return updated user set
-     */
-    UserSet updateItemList(UserSet existingUserSet);
+    public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition, UserSet existingUserSet) 
+        throws ItemValidationException;
+
+    UserSet deleteItem(String item, UserSet existingUserSet);
+    
+    UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet);
 
     /**
      * search user sets using the given query and profile

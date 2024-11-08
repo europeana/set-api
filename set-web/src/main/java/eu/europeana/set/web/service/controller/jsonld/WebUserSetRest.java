@@ -1,5 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
+import static eu.europeana.api.commons.web.definitions.WebFields.FORMAT_JSONLD;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields.PINNED_POSITION;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -28,7 +30,6 @@ import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.exception.DateParsingException;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
@@ -114,7 +115,7 @@ public class WebUserSetRest extends BaseRest {
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, storedUserSet);
 
       String etag =
-          generateETag(storedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
@@ -297,7 +298,7 @@ public class WebUserSetRest extends BaseRest {
 
 	    // check timestamp if provided within the “If-Match” HTTP header, if false
 	    // respond with HTTP 412
-	    String eTagOrigin = generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+	    String eTagOrigin = generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 	    checkIfMatchHeader(eTagOrigin, request);
 
 	    // parse fields of the new user set to an object
@@ -397,7 +398,7 @@ public class WebUserSetRest extends BaseRest {
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
@@ -415,6 +416,7 @@ public class WebUserSetRest extends BaseRest {
     }
   }
 
+  @Deprecated
   @PutMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.INSERT_ITEM_NOTE,
@@ -433,6 +435,21 @@ public class WebUserSetRest extends BaseRest {
     return insertItemIntoUserSet(request, authentication, identifier, datasetId, localId, position);
   }
 
+  @PutMapping(value = {"/set/{identifier}/items"},
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+  @Operation(description = SwaggerConstants.INSERT_MULTIPLE_ITEM_NOTE,
+      summary = "Insert multiple items to an existing user set")
+  public ResponseEntity<String> insertMultipleItemsIntoUserSet(
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+      @RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required = false) String position,
+      @RequestBody List<String> items,
+      HttpServletRequest request) throws HttpException {
+    // check user credentials, if invalid respond with HTTP 401,
+    // or if unauthorized respond with HTTP 403
+    Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
+    return insertMultipleItemsIntoUserSet(request, authentication, identifier, items, position);
+  }
+
   /**
    * This method validates input values, retrieves user set object and inserts item within user set
    * to given position or at the end if no valid position provided.
@@ -443,10 +460,10 @@ public class WebUserSetRest extends BaseRest {
    * @param datasetId The identifier of the dataset, typically a number
    * @param localId The local identifier within the provider
    * @param position The position in the existin item list
-   * @param profileStr The profile definition
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
+  @Deprecated
   protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request,
       Authentication authentication, String identifier, String datasetId, String localId, 
       String position) throws HttpException {
@@ -463,7 +480,7 @@ public class WebUserSetRest extends BaseRest {
 
       // if set is not entity set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
-          && StringUtils.equals(position, WebUserSetFields.PINNED_POSITION)) {
+          && StringUtils.equals(position, PINNED_POSITION)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
@@ -477,16 +494,16 @@ public class WebUserSetRest extends BaseRest {
       // check timestamp if provided within the “If-Match” HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
-          generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
       
       UserSet updatedUserSet =
           getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-      
+            
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -504,6 +521,102 @@ public class WebUserSetRest extends BaseRest {
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
     }
+  }
+
+  /**
+   * This method validates input values, retrieves user set object and inserts multiple items
+   * within user set to the given position or at the end if no valid position provided.
+   * 
+   * @param request
+   * @param authentication The Authentication object
+   * @param identifier The identifier of a user set
+   * @param items Items to be added to the set
+   * @param position The position in the existin item list
+   * @return response entity that comprises response body, headers and status code
+   * @throws HttpException
+   */
+  protected ResponseEntity<String> insertMultipleItemsIntoUserSet(HttpServletRequest request,
+      Authentication authentication, String identifier, List<String> items, String position) throws HttpException {
+    try {     
+      // check if the Set exists, if not respond with HTTP 404
+      // retrieve an existing user set based on its identifier
+      UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+      if (existingUserSet.isOpenSet()) {
+        // cannot add items to open sets
+        throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+            new String[] {"'Insert item to existing user set'", "open"});
+      }
+
+      // if set is not entity best item set and position is "pin", throw exception
+      if (!existingUserSet.isEntityBestItemsSet()
+          && StringUtils.equals(position, PINNED_POSITION)) {
+        throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+            new String[] {"Pinning item ", existingUserSet.getType()});
+      }
+      
+      int itemsPosition=parseItemsPosition(position);
+      if(!StringUtils.equals(position, WebUserSetFields.PINNED) && itemsPosition>=0 && itemsPosition < existingUserSet.getPinned()) {
+        throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION, null);
+      }
+      
+      // check visibility level for given user
+      getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
+
+      // for entity user sets, add users with 'editor' role as contributors
+      addContributorForEntitySet(existingUserSet, authentication);
+
+      // check timestamp if provided within the “If-Match” HTTP header, if false
+      // respond with HTTP 412
+      String eTagOrigin =
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+      checkIfMatchHeader(eTagOrigin, request);
+      
+      UserSet updatedUserSet =
+          getUserSetService().insertMultipleItems(items, position, itemsPosition, existingUserSet);
+      
+      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
+
+      String etag =
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+
+      // build response entity with headers
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+      headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+      headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.ETAG, etag);
+      return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+
+    } catch (UserSetValidationException e) {
+      throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION,
+          new String[] {e.getMessage()}, e);
+    } catch (HttpException e) {
+      throw e;
+    } catch (RuntimeException | IOException e) {
+      throw new InternalServerException(e);
+    }
+  }
+  
+  //returns -1 if not provided
+  private int parseItemsPosition(String position) throws ParamValidationException {
+    if(StringUtils.equals(position, PINNED_POSITION)) {
+      return 0;
+    }
+    int positionFinal = -1;
+    if(position!=null) {
+      try {
+        positionFinal = Integer.parseInt(position);
+        if(positionFinal<0) {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+              I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});          
+        }
+      } catch (RuntimeException e) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
+      }
+    }
+    return positionFinal;
   }
 
   @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
@@ -592,6 +705,7 @@ public class WebUserSetRest extends BaseRest {
   }
 
 
+  @Deprecated(since="EA-3869", forRemoval = true)
   @DeleteMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE, summary = "Delete a item from the set")
@@ -608,7 +722,7 @@ public class WebUserSetRest extends BaseRest {
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
     return deleteItemFromUserSet(authentication, identifier, datasetId, localId);
   }
-
+  
   /**
    * This method validates input values and deletes item from a user set.
    *
@@ -650,23 +764,12 @@ public class WebUserSetRest extends BaseRest {
             new String[] {datasetId + "/" + localId, identifier});
       }
 
-      // check if it is a pinned item, decrease the counter by 1 for entity sets
-      if (existingUserSet.isEntityBestItemsSet()) {
-        int currentPosition = existingUserSet.getItems().indexOf(newItem);
-        if (currentPosition < existingUserSet.getPinned()) {
-          existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-        }
-      }
-      // if already exists - remove item and update modified date
-      existingUserSet.getItems().remove(newItem);
-
-      // update an existing user set
-      UserSet updatedUserSet = getUserSetService().updateItemList(existingUserSet);
+      UserSet updatedUserSet=getUserSetService().deleteItem(newItem, existingUserSet);
       
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
       String etag =
-          generateETag(updatedUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // respond with HTTP 200 containing the updated Set description as body.
       // serialize Set in JSON-LD following the requested profile
@@ -687,6 +790,63 @@ public class WebUserSetRest extends BaseRest {
       throw new InternalServerException(e);
     }
   }
+  
+  @DeleteMapping(value = {"/set/{identifier}/items"},
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+  @Operation(description = SwaggerConstants.DELETE_MULTIPLE_ITEMS_NOTE, summary = "Delete multiple items from the set")
+  public ResponseEntity<String> deleteMultipleItemsFromUserSet(
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
+      @RequestBody List<String> items,
+      HttpServletRequest request) throws HttpException {
+    // check user credentials, if invalid respond with HTTP 401,
+    // or if unauthorized respond with HTTP 403
+    Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
+    return deleteMultipleItemsFromUserSet(authentication, identifier, items);
+  }
+
+  protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication, 
+      String identifier, List<String> items) 
+          throws HttpException {
+    try {     
+      // check if the Set exists, if not respond with HTTP 404
+      // retrieve an existing user set based on its identifier
+      UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+
+      // check if the user is the owner/creator of the set or admin,
+      // OR Editor for Entity sets, otherwise respond with
+      // 403
+      getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
+
+      // for entity user sets, add users with 'editor' role as contributors
+      addContributorForEntitySet(existingUserSet, authentication);
+
+      UserSet updatedUserSet=getUserSetService().deleteMultipleItems(items, existingUserSet);
+      
+      // serialize to JsonLd
+      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
+      String etag =
+          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+
+      // respond with HTTP 200 containing the updated Set description as body.
+      // serialize Set in JSON-LD following the requested profile
+      // (if not indicated assume the default, ie. minimal)
+      // build response entity with headers
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+      headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.ETAG, etag);
+
+      return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+    } catch (UserSetValidationException | UserSetInstantiationException e) {
+      throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
+          new String[] {e.getMessage()}, e);
+    } catch (HttpException e) {
+      throw e;
+    } catch (RuntimeException | IOException e) {
+      throw new InternalServerException(e);
+    }
+  }
+
 
   @DeleteMapping(value = {"/set/{identifier}"})
   @Operation(summary= "Delete Set", description = "Delete an existing user set")
@@ -732,7 +892,7 @@ public class WebUserSetRest extends BaseRest {
       // check timestamp if provided within the "If-Match" HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
-          generateETag(existingUserSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
 
       // if the user set is disabled and the user is not an admin, respond with HTTP

@@ -18,6 +18,7 @@ public class UserSetI18nConstants {
     public static final String INVALID_HEADER_FORMAT  = "error.userset_invalid_header_format";
     public static final String INVALID_HEADER_VALUE   = "error.userset_invalid_header_value";
     public static final String INVALID_SUBJECT_VALUE   = "error.userset_subject_invalid_value";
+    public static final String INVALID_UNPINNED_ITEMS_POSITION = "error.userset_unpinned_items_position_invalid";
 
     public static final String USERSET_VALIDATION    			= "error.userset_validation";
     public static final String USERSET_DUPLICATION              = "error.userset_duplication";

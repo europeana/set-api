@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,6 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
-import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
@@ -60,6 +60,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
    * Generate isShownBy field for all sets in the (local) db
    */
   @Test
+  @Disabled
   public void generateGalleriesWithDepiction() throws Exception {
 //    createTestUserSet(USER_SET_REGULAR, regularUserToken);
     
