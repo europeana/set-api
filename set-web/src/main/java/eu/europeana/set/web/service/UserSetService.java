@@ -257,7 +257,7 @@ public interface UserSetService {
     UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication, boolean publish) throws HttpException;
 
     void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
-
+    
     WebResource generateDepiction(UserSet userSet) throws SearchApiClientException;
 
 }
