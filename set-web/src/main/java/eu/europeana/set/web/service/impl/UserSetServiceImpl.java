@@ -260,14 +260,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
   
   public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) {
-    //keep the first item to check if it is changed, for the re-creation of the isShownBy field
-    String firstItemOld=null;
-    if(existingUserSet.getItems()!=null && !existingUserSet.getItems().isEmpty()) {
-      firstItemOld=existingUserSet.getItems().get(0);
-    }
-    else {
+    if(existingUserSet.getItems()==null || existingUserSet.getItems().isEmpty()) {
       return existingUserSet;
     }
+    
+    //keep the first item to check if it is changed, for the re-creation of the isShownBy field
+    String firstItemOld=existingUserSet.getItems().get(0);
 
     boolean itemsRemoved=false;
     // check if it is a pinned item, decrease the counter by 1 for entity sets
@@ -312,22 +310,21 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     
     //update items
-    UserSet userSet;
     if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
-      userSet=updateItemsFromPinned(existingUserSet, items);
+      updateItemsFromPinned(existingUserSet, items);
     } else {
-      userSet=updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+      updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
     }
     
     //update isShownBy
-    updateIsShownBy(userSet, firstItemOld);
+    updateIsShownBy(existingUserSet, firstItemOld);
     
-    writeUserSetToDb(userSet);
-    updatePagination(userSet, getConfiguration());
-    return userSet;
+    UserSet updatedSet = writeUserSetToDb(existingUserSet);
+    updatePagination(updatedSet, getConfiguration());
+    return updatedSet;
   }  
   
-  private UserSet updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
+  private void updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
     List<String> usersetItems=existingUserSet.getItems();
     if(usersetItems==null) {
       usersetItems=new ArrayList<>();
@@ -350,10 +347,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     usersetItems.addAll(0, items);
     existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
-    return existingUserSet;
   }
   
-  private UserSet updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
+  private void updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
     List<String> usersetItems=existingUserSet.getItems();
     List<String> newItemsCopy=new ArrayList<>(items);
     if(usersetItems==null) {
@@ -382,7 +378,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     int positionFinal=calculatePosition(position, usersetItems);
     usersetItems.addAll(positionFinal, items);
-    return existingUserSet;
   }
 
   /*
