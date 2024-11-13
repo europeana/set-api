@@ -27,7 +27,7 @@ import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
-interface UserSetService {
+public interface UserSetService {
 
   /**
    * This method stores UserSet object in database and in Solr.
@@ -153,7 +153,7 @@ interface UserSetService {
    * @param authentication
    * @return
    */
-  ResultSet<UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery,
+  ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery,
       List<SetPageProfile> profile, Authentication authentication);
 
   BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery,
