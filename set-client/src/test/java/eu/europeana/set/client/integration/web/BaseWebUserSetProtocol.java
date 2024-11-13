@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApiImpl;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BaseWebUserSetProtocol {
@@ -84,7 +84,7 @@ public class BaseWebUserSetProtocol {
 	}
 
 	protected ResponseEntity<String> getUserSet(UserSet set) {
-		return getApiClient().getUserSet(set.getIdentifier(), LdProfiles.MINIMAL.name());
+		return getApiClient().getUserSet(set.getIdentifier(), SetResourceProfile.META.getProfileParamValue());
 	}
 	
 	

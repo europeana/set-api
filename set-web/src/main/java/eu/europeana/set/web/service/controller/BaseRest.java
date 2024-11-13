@@ -1,5 +1,6 @@
 package eu.europeana.set.web.service.controller;
 
+import static eu.europeana.api.commons.web.definitions.WebFields.FORMAT_JSONLD;
 import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW;
 import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_DELETE;
 import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_POST;
@@ -10,11 +11,11 @@ import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.HttpHeaders.ETAG;
 import static javax.ws.rs.core.HttpHeaders.VARY;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,17 +38,20 @@ import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.SetProfileHelper;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.stats.service.UsageStatsService;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
+import eu.europeana.set.web.service.RequestPathMethodService;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
@@ -68,6 +73,10 @@ public class BaseRest extends BaseRestController {
     
     @Resource
     protected BuildProperties buildInfo;
+    
+    @Autowired private RequestPathMethodService requestMethodService;
+    
+    SetProfileHelper profileHelper = new SetProfileHelper();
     
     @PostConstruct
     void started() {
@@ -113,116 +122,46 @@ public class BaseRest extends BaseRestController {
         return "/" + collection + "/" + object;
     }
 
-    /**
-     * This method takes profile string and validates the profiles
-     * and return the List of LdProfiles
-     * NOTE : Multiple profiles (excluding debug) are only supported in profile param
-     *        string only for search
-     *
-     * @param profileStr the profiles indicated in request params
-     * @param request used to extract the prefer header
-     * @return list of extracted profiles, exclusing debug
-     * @throws HttpException if multiple profiles are incompatible
-     */
-    public List<LdProfiles> getProfiles(String profileStr, HttpServletRequest request) throws HttpException {
-        List<LdProfiles> ldProfiles = new ArrayList<>();
-        LdProfiles headerProfile = getHeaderProfile(request);
-        if(headerProfile != null) {
-          ldProfiles.add(headerProfile);
+    protected List<SetPageProfile> getProfilesFromRequest(String profile, HttpServletRequest request)
+        throws ParamValidationException {
+      String preferHeader = request.getHeader(PREFER);
+      getLogger().debug("'Prefer' header value: {} ", preferHeader);
+
+      //parse and validate profiles
+      List<SetPageProfile> profiles = null;
+      try {
+        profiles = getProfileHelper().getSetPageProfiles(profile, preferHeader);
+      } catch (UserSetProfileValidationException e) {
+        if(StringUtils.isNotEmpty(preferHeader)) {
+          throw new ParamValidationException(UserSetI18nConstants.INVALID_HEADER_VALUE,
+              UserSetI18nConstants.INVALID_HEADER_VALUE, new String[] {PREFER, preferHeader}, e);  
+        }else {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile}, e);
         }
-        
-        //multiple profiles can be present seperated by comma or space
-        if (StringUtils.isNotEmpty(profileStr)) {
-          if(profileStr.contains(WebUserSetFields.COMMA)) {
-            for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.COMMA))) {
-                ldProfiles.add(getProfileFromParam(profile));
-            }  
-          }
-          else if(profileStr.contains(WebUserSetFields.SPACE)) {
-            for(String profile : Arrays.asList(StringUtils.split(profileStr, WebUserSetFields.SPACE))) {
-              ldProfiles.add(getProfileFromParam(profile));
-            }
-          }
-          else {
-            ldProfiles.add(getProfileFromParam(profileStr));
-          }
-        } 
-        
-        validateMultipleProfiles(ldProfiles, profileStr);
-        return ldProfiles;
+      }
+      return profiles;
     }
 
-    // TODO - This should be refactored once other profiles are deprecated
     /**
      * Method validates the multiple profile combinations
      * @param ldProfiles
      * @return
      * @throws HttpException
      */
-    private void validateMultipleProfiles(List<LdProfiles> ldProfiles, String profileStr) throws HttpException {
+    protected void validateMultipleProfiles(List<SetPageProfile> profiles, String profileStr) throws HttpException {
         // remove profile 'debug' as it's only used for stackTrace purpose
-        if (ldProfiles.contains(LdProfiles.DEBUG)) {
-            ldProfiles.remove(LdProfiles.DEBUG);
-        }
         // For now maximum two profile-combinations are possible
         // profile=facets OR profile=facets,minimal OR profile=standard,facets OR profile=itemDescription,facets
-        if(ldProfiles.size() > 2) {
+        if(profiles.size() > 2) {
             throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-                    new String[]{"Either of these should be provided ", StringUtils.remove(profileStr, LdProfiles.FACETS.getHeaderValue() + ",")});
+                    new String[]{"Only one of these should be provided ", StringUtils.remove(profileStr, SetPageProfile.FACETS.getProfileParamValue())});
         }
         // For now - if multiple profile then one of them has to be facets
-        if (ldProfiles.size() == 2 && !ldProfiles.contains(LdProfiles.FACETS)) {
+        if (profiles.size() == 2 && !profiles.contains(SetPageProfile.FACETS)) {
             throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
                     new String[]{"These profiles are not supported together ", profileStr });
         }
-    }
-
-    private LdProfiles getProfileFromParam(String paramProfile) throws HttpException {
-        try {
-            return LdProfiles.getByName(paramProfile);
-        } catch (UserSetProfileValidationException e) {
-            throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, I18nConstants.INVALID_PARAM_VALUE,
-                    new String[]{CommonApiConstants.QUERY_PARAM_PROFILE, paramProfile}, e);
-        }
-    }
-
-    /**
-     * This method identifies profile from a HTTP header if it exists.
-     *
-     * @param request The HTTP request with headers
-     * @return profile value
-     * @throws HttpException
-     * @throws UserSetProfileValidationException
-     */
-    // TODO: consider moving to api-commons
-    public LdProfiles getHeaderProfile(HttpServletRequest request) throws HttpException {
-
-        LdProfiles profile = null;
-        String preferHeader = request.getHeader(PREFER);
-        if (preferHeader != null) {
-            // identify profile by prefer header
-            // retrieve profile if provided within the "If-Match" HTTP
-            String ldPreferHeaderStr = null;
-            String include = "include";
-            if (StringUtils.isNotEmpty(preferHeader)) {
-                // log header for debuging
-                getLogger().debug("'Prefer' header value: {} ", preferHeader);
-                try {
-                    Map<String, String> preferHeaderMap = parsePreferHeader(preferHeader);
-                    ldPreferHeaderStr = preferHeaderMap.get(include).replace("\"", "");
-                    profile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
-                } catch (UserSetProfileValidationException e) {
-                    throw new HttpException(UserSetI18nConstants.INVALID_HEADER_VALUE, UserSetI18nConstants.INVALID_HEADER_VALUE,
-                            new String[]{PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
-                } catch (RuntimeException e) {
-                    throw new HttpException(UserSetI18nConstants.INVALID_HEADER_FORMAT, UserSetI18nConstants.INVALID_HEADER_FORMAT,
-                            new String[]{PREFER, preferHeader}, HttpStatus.BAD_REQUEST, e);
-                }
-            }
-            getLogger().debug("Profile identified by prefer header: {} ", profile);
-
-        }
-        return profile;
     }
 
     /**
@@ -233,12 +172,28 @@ public class BaseRest extends BaseRestController {
      * @return serialized user set as a JsonLd string
      * @throws IOException
      */
-    protected String serializeUserSet(LdProfiles profile, UserSet storedUserSet) throws IOException {
+    protected String serializeUserSet(SetPageProfile profile, UserSet storedUserSet) throws IOException {
 	//prepare data for serialization according to the profile
 	getUserSetService().applyProfile(storedUserSet, profile);
 
 	UserSetLdSerializer serializer = new UserSetLdSerializer();
 	return serializer.serialize(storedUserSet);
+    }
+    
+    /**
+     * This method serializes user set and applies profile to the object.
+     *
+     * @param profile
+     * @param storedUserSet
+     * @return serialized user set as a JsonLd string
+     * @throws IOException
+     */
+    protected String serializeUserSet(SetResourceProfile profile, UserSet storedUserSet) throws IOException {
+    //prepare data for serialization according to the profile
+    getUserSetService().applyProfile(storedUserSet, profile);
+
+    UserSetLdSerializer serializer = new UserSetLdSerializer();
+    return serializer.serialize(storedUserSet);
     }
     
     protected String serializeCollectionPage(CollectionPage itemPage) throws IOException {
@@ -249,7 +204,7 @@ public class BaseRest extends BaseRestController {
     }
     
     
-    protected String serializeResultPage(LdProfiles profile, UserSet storedUserSet) throws IOException {
+    protected String serializeResultPage(SetPageProfile profile, UserSet storedUserSet) throws IOException {
 	//prepare data for serialization according to the profile
 	getUserSetService().applyProfile(storedUserSet, profile);
 
@@ -286,26 +241,45 @@ public class BaseRest extends BaseRestController {
         return buildInfo.getVersion();
     }
     
-    protected ResponseEntity<String> buildGetResponse(UserSet userSet, LdProfiles profile, Integer pageNr, 
+    protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
+        final SetResourceProfile profile, final HttpStatus responseStatus, Map<String, String> additionalHeaders,  HttpServletRequest request) throws IOException {
+      String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
+
+      String etag = generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+      headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+      headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+      headers.add(HttpHeaders.ALLOW, createAllowHeader(request));
+      //headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
+      if(additionalHeaders != null){
+        for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
+          headers.add(entry.getKey(), entry.getValue());
+        }
+      }
+      
+      // generate “ETag”;
+      headers.add(UserSetHttpHeaders.ETAG, etag);
+      // headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED,
+      // LdProfiles.MINIMAL.getPreferHeaderValue());
+
+      return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, responseStatus);
+    }
+
+    protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, Date modified, SetPageProfile profile, Integer pageNr, 
         Integer pageSize, HttpServletRequest request) throws IOException, HttpException {
 	String jsonBody = "";
-	if(isSetMetadataResponse(pageNr)) {
-	    jsonBody = serializeUserSet(profile, userSet);    
-	}else {
-	    CollectionPage itemPage = getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
-	    jsonBody = serializeCollectionPage(itemPage);
-	}
-	
-	
-	String etag = generateETag(userSet.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
+	jsonBody = serializeCollectionPage(setPage);
+	String etag = generateETag(modified, WebFields.FORMAT_JSONLD, getApiVersion());
 
 	// build response
 	MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
 	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
 	headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-	headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
+	//headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
+	headers.add(ALLOW, createAllowHeader(request));
 	headers.add(VARY, PREFER);
-	headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+	headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferenceApplied());
 	// generate “ETag”;
 	headers.add(ETAG, etag);
 
@@ -317,7 +291,7 @@ public class BaseRest extends BaseRestController {
      * @param pageNr page number from request
      * @return true if pageNr is null
      */
-    protected boolean isSetMetadataResponse(Object pageNr) {
+    protected boolean isSetResourceRequestResponse(Object pageNr) {
       return pageNr==null;
     }
 
@@ -373,5 +347,26 @@ public class BaseRest extends BaseRestController {
       return new ResponseEntity<>(jsonStr, headers, httpStatus);
     }
     
+
+    protected String createAllowHeader(HttpServletRequest request) {
+      String allowHeaderValue;
+
+      Optional<String> methodsForRequestPattern =
+          requestMethodService.getMethodsForRequestPattern(request);
+      if (methodsForRequestPattern.isEmpty()) {
+        logger.warn(
+            "Could not find other matching methods for {}. Using current request method in Allow header",
+            request.getRequestURL());
+        allowHeaderValue = request.getMethod();
+      } else {
+        allowHeaderValue = methodsForRequestPattern.get();
+      }
+
+      return allowHeaderValue;
+    }
+
+    protected SetProfileHelper getProfileHelper() {
+      return profileHelper;
+    }
     
 }

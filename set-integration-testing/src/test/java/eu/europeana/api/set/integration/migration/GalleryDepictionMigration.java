@@ -16,7 +16,7 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
@@ -27,6 +27,7 @@ import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 
 @SpringBootTest
+@Disabled
 public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   @Resource
@@ -74,8 +75,8 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     String sort = WebUserSetModelFields.CREATED + " asc";
     UserSetQuery searchQuery =
         queryBuilder.buildUserSetQuery("type:Collection", null, sort, 0, pageSize, getConfiguration());
-    final ArrayList<LdProfiles> profiles = new ArrayList<LdProfiles>();
-    profiles.add(LdProfiles.STANDARD);
+    final ArrayList<SetPageProfile> profiles = new ArrayList<>();
+    profiles.add(SetPageProfile.ITEMS);
     DepictionGenerationReport report = new DepictionGenerationReport();
     
     ResultSet<? extends UserSet> results = null;

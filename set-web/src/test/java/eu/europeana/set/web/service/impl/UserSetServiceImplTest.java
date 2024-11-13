@@ -16,11 +16,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import eu.europeana.api.commons.definitions.search.ResultSet;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
-import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 
@@ -84,11 +86,11 @@ public class UserSetServiceImplTest {
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
 	assertTrue(lastPage == 5);
 
-	userSetQuery.setPageNr(UserSetUtils.DEFAULT_PAGE);
-	LdProfiles profile = LdProfiles.STANDARD;
+	userSetQuery.setPageNr(WebUserSetFields.DEFAULT_PAGE);
+	SetPageProfile profile = SetPageProfile.ITEMS;
 	// check with standard profile
-	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-	String first = userSetService.buildPageUrl(requestUrl, UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), null);
+	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
+	String first = userSetService.buildPageUrl(requestUrl, WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), null);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), null);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -114,10 +116,10 @@ public class UserSetServiceImplTest {
 	assertTrue(lastPage == 5);
 
 	userSetQuery.setPageNr(3);
-	LdProfiles profile = LdProfiles.MINIMAL;
+	SetPageProfile profile = SetPageProfile.META;
 	// check with minimal profile
-	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-	String first = userSetService.buildPageUrl(requestUrl , UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
+	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
+	String first = userSetService.buildPageUrl(requestUrl , WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -144,10 +146,10 @@ public class UserSetServiceImplTest {
 	assertTrue(lastPage == 5);
 
 	userSetQuery.setPageNr(lastPage);
-	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
+	SetPageProfile profile = SetPageProfile.ITEMS_META;
     // check with item description profile
-	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-    String first = userSetService.buildPageUrl(requestUrl, UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
+	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
+    String first = userSetService.buildPageUrl(requestUrl, WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize(), profile);
@@ -174,9 +176,9 @@ public class UserSetServiceImplTest {
 
 	userSetQuery.setPageNr(3);
 
-	LdProfiles profile = LdProfiles.ITEMDESCRIPTIONS;
-	String requestUrl = REQUEST_URL + "?profile=" + profile.getRequestParamValue();
-	String first = userSetService.buildPageUrl(requestUrl, UserSetUtils.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
+	SetPageProfile profile = SetPageProfile.ITEMS_META;
+	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
+	String first = userSetService.buildPageUrl(requestUrl, WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -201,9 +203,9 @@ public class UserSetServiceImplTest {
 	 * @param result
 	 * @param profile
 	 */
-	private void checkPartOfUrls(BaseUserSetResultPage<?> result, LdProfiles profile) {
-    	assertTrue(StringUtils.contains(result.getPartOf().getFirst(), "profile="+profile.getRequestParamValue()));
-		assertTrue(StringUtils.contains(result.getPartOf().getLast(), "profile="+profile.getRequestParamValue()));
+	private void checkPartOfUrls(BaseUserSetResultPage<?> result, UserSetProfile profile) {
+    	assertTrue(StringUtils.contains(result.getPartOf().getFirst(), "profile="+profile.getProfileParamValue()));
+		assertTrue(StringUtils.contains(result.getPartOf().getLast(), "profile="+profile.getProfileParamValue()));
     }
 
 }

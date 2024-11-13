@@ -23,8 +23,7 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
-import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
@@ -66,7 +65,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     final String secondPageIndex = "2";
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, secondPageIndex)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -112,7 +111,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // get the identifier
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -144,8 +143,8 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // get the identifier
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -189,7 +188,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     final String secondPageIdex = "2";
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, secondPageIdex)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -218,7 +217,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, secondPageIndex)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -250,7 +249,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    SetPageProfile.ITEMS.getProfileParamValue())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, secondPageContent)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, requestedPageSize)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -281,8 +280,8 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
-                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, requestedPageSize)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -291,15 +290,14 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     String result = response.getContentAsString();
     assertNotNull(result);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+    //System.out.println(result);
 
-    int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
-    int pageSize = StringUtils.countMatches(result, "\\/item\\/");
+    int pageSize = StringUtils.countMatches(result, "\"guid\"");
 
     String[] missingItems = new String[0];
     verifyItemOrder(userSet, result, missingItems);
-    assertEquals(defaultPageSize, pageSize);
+    assertEquals(Integer.valueOf(requestedPageSize), pageSize);
 
-    // getUserSetService().deleteUserSet(userSet.getIdentifier());
   }
 
 
@@ -319,7 +317,8 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     for (int i = 0; i < itemDescriptions.length(); i++) {
       itemDescription = itemDescriptions.getJSONObject(i);
       identifier = itemDescription.getString("id");
-      id = "http://data.europeana.eu/item" + identifier;
+      //remove first slash from identifier
+      id = getConfiguration().getItemDataEndpoint() + identifier.substring(1);
       pos = userSet.getItems().indexOf(id);
       System.out.println(
           "verifying position for item with identifier: " + identifier + " (id: " + id + ")");
@@ -343,7 +342,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // get the identifier
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "")
             // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "5")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -365,8 +364,8 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     final String requestedPageSize = "200";
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(UserSetUtils.DEFAULT_PAGE))
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, requestedPageSize)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))

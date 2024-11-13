@@ -23,7 +23,7 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
@@ -296,7 +296,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     mockMvc
         .perform(delete(BASE_URL + "{identifier}", identifier)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetResourceProfile.META.getProfileParamValue())
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
@@ -310,7 +310,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     mockMvc
         .perform(delete(BASE_URL + "{identifier}", identifier)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,SetResourceProfile.META.getProfileParamValue())
             .header(HttpHeaders.AUTHORIZATION, editorUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
