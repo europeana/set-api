@@ -150,7 +150,7 @@ public interface UserSetService {
      * @param authentication
      * @return
      */
-    ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<SetPageProfile> profile,
+    ResultSet<UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<SetPageProfile> profile,
                                                Authentication authentication);
 
     BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,

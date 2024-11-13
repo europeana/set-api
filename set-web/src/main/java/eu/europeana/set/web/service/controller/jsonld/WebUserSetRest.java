@@ -46,6 +46,7 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
@@ -575,7 +576,7 @@ public class WebUserSetRest extends BaseRest {
       }
 
       int itemsPosition = parseItemsPosition(position);
-      if (!StringUtils.equals(position, WebUserSetFields.PINNED) && itemsPosition >= 0
+      if (!StringUtils.equals(position, WebUserSetModelFields.PINNED) && itemsPosition >= 0
           && itemsPosition < existingUserSet.getPinned()) {
         throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION,
             null);
