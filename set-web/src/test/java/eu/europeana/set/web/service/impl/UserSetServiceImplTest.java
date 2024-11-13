@@ -22,6 +22,7 @@ import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQueryImpl;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 
@@ -85,11 +86,11 @@ public class UserSetServiceImplTest {
 	int lastPage = userSetService.getLastPage(resultSet.getResultSize(), userSetQuery.getPageSize());
 	assertTrue(lastPage == 5);
 
-	userSetQuery.setPageNr(CommonApiConstants.DEFAULT_PAGE);
+	userSetQuery.setPageNr(WebUserSetFields.DEFAULT_PAGE);
 	SetPageProfile profile = SetPageProfile.ITEMS;
 	// check with standard profile
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
-	String first = userSetService.buildPageUrl(requestUrl, CommonApiConstants.DEFAULT_PAGE, userSetQuery.getPageSize(), null);
+	String first = userSetService.buildPageUrl(requestUrl, WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), null);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), null);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -118,7 +119,7 @@ public class UserSetServiceImplTest {
 	SetPageProfile profile = SetPageProfile.META;
 	// check with minimal profile
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
-	String first = userSetService.buildPageUrl(requestUrl , CommonApiConstants.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(requestUrl , WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);
@@ -148,7 +149,7 @@ public class UserSetServiceImplTest {
 	SetPageProfile profile = SetPageProfile.ITEMS_META;
     // check with item description profile
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
-    String first = userSetService.buildPageUrl(requestUrl, CommonApiConstants.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
+    String first = userSetService.buildPageUrl(requestUrl, WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String prev = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() - 1,
 		userSetQuery.getPageSize(), profile);
@@ -177,7 +178,7 @@ public class UserSetServiceImplTest {
 
 	SetPageProfile profile = SetPageProfile.ITEMS_META;
 	String requestUrl = REQUEST_URL + "?profile=" + profile.getProfileParamValue();
-	String first = userSetService.buildPageUrl(requestUrl, CommonApiConstants.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
+	String first = userSetService.buildPageUrl(requestUrl, WebUserSetFields.DEFAULT_PAGE, userSetQuery.getPageSize(), profile);
 	String last = userSetService.buildPageUrl(requestUrl, lastPage, userSetQuery.getPageSize(), profile);
 	String next = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr() + 1,
 		userSetQuery.getPageSize(), profile);

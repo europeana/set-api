@@ -181,8 +181,8 @@ public class WebUserSetRest extends BaseRest {
     SetPageProfile searializationProfile = getUserSetService().getProfileForPagination(profiles);   
     
     pageNr =
-        parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, CommonApiConstants.DEFAULT_PAGE);
-    pageNr = (pageNr == null) ? Integer.valueOf(CommonApiConstants.DEFAULT_PAGE) : pageNr;
+        parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, WebUserSetFields.DEFAULT_PAGE);
+    pageNr = (pageNr == null) ? Integer.valueOf(WebUserSetFields.DEFAULT_PAGE) : pageNr;
     int maxPageSize = getConfiguration().getMaxPageSize(searializationProfile.getProfileParamValue());
     
     pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize,

@@ -138,7 +138,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
     // get the identifier
-    final int secondPageIndex = CommonApiConstants.DEFAULT_PAGE + 1;
+    final int secondPageIndex = WebUserSetFields.DEFAULT_PAGE + 1;
     MvcResult response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
         .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS_META.getProfileParamValue())
         .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(secondPageIndex))
@@ -225,7 +225,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     SetPageProfile.ITEMS_META.getProfileParamValue())
-                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, ""+CommonApiConstants.DEFAULT_PAGE)
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, ""+WebUserSetFields.DEFAULT_PAGE)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))

@@ -19,6 +19,8 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String EQUALS_PARAMETER           = "=";
     public static final String JSON_LD_REST               = ".jsonld";
     public static final String FORMAT_JSONLD              = "jsonld";
+    
+    public static final int DEFAULT_PAGE = 1;
 
     // Query Params Constants
     public static final String PATH_PARAM_SET_ID          = "identifier";

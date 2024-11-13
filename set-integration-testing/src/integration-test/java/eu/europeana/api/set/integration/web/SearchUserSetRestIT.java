@@ -598,7 +598,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String[] qf = new String[] {"item:/08641/1037479000000476467",
         "item:/08641/1037479000000476875", "item:/11654/_Botany_U_1419207", "item:/2048128/618580",
         "item:/2048128/618580", "item:/2048128/notexisting", "item:/2048128/notexisting1"};
-    final String secondPageIndex = String.valueOf(CommonApiConstants.DEFAULT_PAGE + 1);
+    final String secondPageIndex = String.valueOf(WebUserSetFields.DEFAULT_PAGE + 1);
     //using pagesize 2, we get two pages of results (only 4 items found in set)
     //retrieve last page
     String result = callSearchItemsInSet(setIdentifier, qf, secondPageIndex, "2", null);
@@ -615,7 +615,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
 
     //retrieve fist page of results
-    result = callSearchItemsInSet(setIdentifier, qf, String.valueOf(CommonApiConstants.DEFAULT_PAGE), "2", null);
+    result = callSearchItemsInSet(setIdentifier, qf, String.valueOf(WebUserSetFields.DEFAULT_PAGE), "2", null);
     // check ids
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));

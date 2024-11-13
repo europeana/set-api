@@ -299,7 +299,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
     // do not generate first and last if pageSize=0
     if (totalInCollection > 0 && pageSize > 0) {
-      first = buildPageUrl(paginationBaseUrl, CommonApiConstants.DEFAULT_PAGE, pageSize, profile);
+      first = buildPageUrl(paginationBaseUrl, WebUserSetFields.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(paginationBaseUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(pageId, totalInCollection, first, last, type);
@@ -313,12 +313,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @return
    */
   protected int getLastPage(long totalResults, int pageSize) {
-    long lastPage = CommonApiConstants.DEFAULT_PAGE;
+    long lastPage = WebUserSetFields.DEFAULT_PAGE;
     // avoid null divizion if pages size is 0
     if (totalResults > 0 && pageSize > 0) {
       long reaminder = (totalResults % pageSize);
       int extraPage = (reaminder == 0 ? 0 : 1);
-      lastPage = ((totalResults / pageSize) + extraPage) + CommonApiConstants.DEFAULT_PAGE - 1;
+      lastPage = ((totalResults / pageSize) + extraPage) + WebUserSetFields.DEFAULT_PAGE - 1;
     }
 
     return Math.toIntExact(lastPage);
@@ -391,7 +391,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     String last = null;
 
     if (totalInCollection > 0) {
-      first = buildPageUrl(collectionUrl, CommonApiConstants.DEFAULT_PAGE, pageSize, profile);
+      first = buildPageUrl(collectionUrl, WebUserSetFields.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
@@ -1002,7 +1002,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
         resPage.setCurrentPageUri(currentPageUrl);
       
-        if (page > CommonApiConstants.DEFAULT_PAGE) {
+        if (page > WebUserSetFields.DEFAULT_PAGE) {
           String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
           resPage.setPrevPageUri(prevPage);
         }

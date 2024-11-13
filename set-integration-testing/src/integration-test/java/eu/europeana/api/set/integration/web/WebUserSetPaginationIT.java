@@ -144,7 +144,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(CommonApiConstants.DEFAULT_PAGE))
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -281,7 +281,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     SetPageProfile.ITEMS_META.getProfileParamValue())
-                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(CommonApiConstants.DEFAULT_PAGE))
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, requestedPageSize)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -365,7 +365,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(CommonApiConstants.DEFAULT_PAGE))
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, requestedPageSize)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))

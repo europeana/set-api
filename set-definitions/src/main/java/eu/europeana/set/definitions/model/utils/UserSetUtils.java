@@ -89,13 +89,13 @@ public class UserSetUtils {
       // NOTE: the first and last properties are not used now and might be deprecated, they should
       // not be stored in the database
       if (total > 0) {
-        int first = CommonApiConstants.DEFAULT_PAGE;
+        int first = WebUserSetFields.DEFAULT_PAGE;
         String firstPageStr =
             fillPage(userSet, config, first, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
         userSet.setFirst(firstPageStr);
         final int totalPages =
             (int) Math.floor((double) total / UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
-        int pageIndexOfset = CommonApiConstants.DEFAULT_PAGE - 1;
+        int pageIndexOfset = WebUserSetFields.DEFAULT_PAGE - 1;
         // the index of last page depends on the start index. i.e. 2 pages [0,1] vs. [1,2]
         int lastPageIndex = totalPages + pageIndexOfset;
         String lastPageStr = fillPage(userSet, config, lastPageIndex,
