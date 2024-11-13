@@ -13,7 +13,9 @@ import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
+import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.web.exception.request.ItemValidationException;
@@ -49,8 +51,8 @@ public interface UserSetService {
      * @throws HttpException
      * @throws JSONException
      */
-    UserSet fetchItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr, int pageSize,
-	    LdProfiles profile) throws HttpException, JSONException;
+    UserSet fetchUserSetItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr, int pageSize,
+        SetPageProfile profile) throws HttpException, JSONException;
 
     /**
      * update (stored) <code>persistentUserSet</code> with values from
@@ -148,17 +150,17 @@ public interface UserSetService {
      * @param authentication
      * @return
      */
-    ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<LdProfiles> profiles,
+    ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery, List<SetPageProfile> profile,
                                                Authentication authentication);
 
     BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery, ResultSet<? extends UserSet> results,
-	    String requestUrl, String reqParams, List<LdProfiles> profiles, Authentication authentication)
+	    String requestUrl, String reqParams, List<SetPageProfile> profiles, Authentication authentication)
             throws HttpException;
     
     ItemIdsResultPage buildItemIdsResultsPage(String setId, List<String> itemIds, int page, int pageSize,
 	    HttpServletRequest request);
     
-    CollectionPage buildCollectionPage(UserSet userSet, LdProfiles profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
+    CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr, int pageSize, HttpServletRequest request) throws HttpException;
 
     /**
      * This method validates input if the user is the owner/creator of the user set or is admin
@@ -218,8 +220,17 @@ public interface UserSetService {
      * @param profile Provided Linked Data profile
      * @return profiled user set value
      */
-    void applyProfile(UserSet userSet, LdProfiles profile);
+    void applyProfile(UserSet userSet, SetResourceProfile profile);
     
+    /**
+     * This methods applies Linked Data profile to a user set
+     * 
+     * @param userSet The given user set
+     * @param profile Provided Linked Data profile
+     * @return profiled user set value
+     */
+    public void applyProfile(UserSet userSet, SetPageProfile profile);
+   
     /**
      * Gets the profile for pagination urls and item page. Basically gets the profile valid for
      * collection page from the list of profiles passed during search request
@@ -227,7 +238,7 @@ public interface UserSetService {
      * @param profiles list of candidate profiles
      * @return the profile to be applied for generating the pagination
      */
-    LdProfiles getProfileForPagination(List<LdProfiles> profiles);
+    public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles);
 
     /**
      * Return the List of entity sets with
@@ -244,7 +255,7 @@ public interface UserSetService {
      * @param profile
      * @return
      */
-    String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) ;
+    String buildPageUrl(String collectionUrl, int page, int pageSize, UserSetProfile profile) ;
 
     /**
      * This method publishes and/or un-publishes an existing UserSet.

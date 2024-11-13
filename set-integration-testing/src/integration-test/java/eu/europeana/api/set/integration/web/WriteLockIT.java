@@ -20,7 +20,8 @@ import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
@@ -91,7 +92,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     
     //test create should fail with status locked
     mockMvc
-      .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+      .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE,SetResourceProfile.META.getProfileParamValue())
         .content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
@@ -99,7 +100,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     //test update should fail with status locked
     mockMvc
       .perform(put(BASE_URL + "{identifier}", "1")
-        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetResourceProfile.META.getProfileParamValue())
         .content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
@@ -120,7 +121,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     //test insert item should fail with status locked
     mockMvc
       .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", "1", "01", "123_test")
-        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
         .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
@@ -129,7 +130,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     mockMvc
     .perform(
         delete(BASE_URL + "{identifier}/{datasetId}/{localId}", "1", "01", "123_test")
-        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
         .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
     .andExpect(status().is(HttpStatus.LOCKED.value()));
@@ -139,7 +140,7 @@ public class WriteLockIT extends IntegrationTestSetup {
       .perform(MockMvcRequestBuilders.put(BASE_URL + "1" + "/publish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
 
     //test unpublish should fail with status locked
@@ -147,7 +148,7 @@ public class WriteLockIT extends IntegrationTestSetup {
       .perform(MockMvcRequestBuilders.put(BASE_URL + "1" + "/unpublish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
     
     //unlock write operations methods
@@ -161,7 +162,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     String requestJson = getJsonStringInput(USER_SET_REGULAR);
     String result = mockMvc
       .perform(
-        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
           .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
@@ -174,7 +175,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
     mockMvc
       .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
         .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isOk());
@@ -197,7 +198,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
     mockMvc
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(), "01", "123_test")
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value()));
@@ -207,7 +208,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     mockMvc
       .perform(
           delete(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(), "02", "123_test")
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.OK.value()));
@@ -218,7 +219,7 @@ public class WriteLockIT extends IntegrationTestSetup {
       .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
         .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+        .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS))
     .andExpect(status().is(HttpStatus.OK.value()));
     
     //test unpublish after unlock
@@ -226,7 +227,7 @@ public class WriteLockIT extends IntegrationTestSetup {
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
           .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-          .param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name()))
+          .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS))
         .andExpect(status().is(HttpStatus.OK.value()));
   }
  
@@ -243,7 +244,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     
     //test create to be locked
     mockMvc
-      .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+      .perform(post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, SetResourceProfile.META.getProfileParamValue())
         .content("{}").header(HttpHeaders.AUTHORIZATION, regularUserToken)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().is(HttpStatus.LOCKED.value()));
@@ -266,7 +267,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     String requestJson = getJsonStringInput(USER_SET_REGULAR);
     String result = mockMvc
       .perform(
-        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+        post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
           .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
       .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();

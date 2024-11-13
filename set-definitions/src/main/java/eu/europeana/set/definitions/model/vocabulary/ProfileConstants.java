@@ -11,6 +11,11 @@ public abstract class ProfileConstants {
     public static final String VALUE_PARAM_STANDARD = "standard";
     public static final String VALUE_PARAM_ITEMDESCRIPTIONS = "itemDescriptions";
 
+    //new 
+    public static final String VALUE_PARAM_META = "meta";
+    public static final String VALUE_PARAM_ITEMS = "items";
+    public static final String VALUE_PARAM_ITEMS_META = "items.meta";
+    public static final String VALUE_PARAM_ITEMS_DEFAULT = "items.default";
 
     public static final String COMMON_STRING = "return=representation;include=\"";
 

@@ -27,7 +27,8 @@ import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -292,13 +293,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   protected CollectionOverview buildCollectionOverview(String pageId, String paginationBaseUrl,
-      int pageSize, long totalInCollection, int lastPage, String type, LdProfiles profile) {
+      int pageSize, long totalInCollection, int lastPage, String type, UserSetProfile profile) {
     String first = null;
     String last = null;
 
     // do not generate first and last if pageSize=0
     if (totalInCollection > 0 && pageSize > 0) {
-      first = buildPageUrl(paginationBaseUrl, UserSetUtils.DEFAULT_PAGE, pageSize, profile);
+      first = buildPageUrl(paginationBaseUrl, CommonApiConstants.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(paginationBaseUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(pageId, totalInCollection, first, last, type);
@@ -312,12 +313,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @return
    */
   protected int getLastPage(long totalResults, int pageSize) {
-    long lastPage = UserSetUtils.DEFAULT_PAGE;
+    long lastPage = CommonApiConstants.DEFAULT_PAGE;
     // avoid null divizion if pages size is 0
     if (totalResults > 0 && pageSize > 0) {
       long reaminder = (totalResults % pageSize);
       int extraPage = (reaminder == 0 ? 0 : 1);
-      lastPage = ((totalResults / pageSize) + extraPage) + UserSetUtils.DEFAULT_PAGE - 1;
+      lastPage = ((totalResults / pageSize) + extraPage) + CommonApiConstants.DEFAULT_PAGE - 1;
     }
 
     return Math.toIntExact(lastPage);
@@ -335,7 +336,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public String buildPageUrl(String collectionUrl, int page, int pageSize, LdProfiles profile) {
+  public String buildPageUrl(String collectionUrl, int page, int pageSize, UserSetProfile profile) {
     StringBuilder builder = new StringBuilder(collectionUrl);
     // if collection url already has a query string, then append "&" or else "?"
     if (collectionUrl.contains("?")) {
@@ -351,7 +352,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         StringUtils.contains(collectionUrl, CommonApiConstants.QUERY_PARAM_PROFILE + '=');
     if (profile != null && !hasProfileParam) {
       builder.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=')
-          .append(profile.getRequestParamValue());
+          .append(profile.getProfileParamValue());
     }
     return builder.toString();
   }
@@ -385,12 +386,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
 
   protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize,
-      long totalInCollection, int lastPage, String type, LdProfiles profile) {
+      long totalInCollection, int lastPage, String type, SetPageProfile profile) {
     String first = null;
     String last = null;
 
     if (totalInCollection > 0) {
-      first = buildPageUrl(collectionUrl, UserSetUtils.DEFAULT_PAGE, pageSize, profile);
+      first = buildPageUrl(collectionUrl, CommonApiConstants.DEFAULT_PAGE, pageSize, profile);
       last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
     }
     return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
@@ -487,16 +488,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public LdProfiles getProfileForPagination(List<LdProfiles> profiles) {
-    LdProfiles profile = null;
-    for (LdProfiles ldProfile : profiles) {
-      if (LdProfiles.FACETS != profile) {
+  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
+    SetPageProfile profile = null;
+    for (SetPageProfile ldProfile : profiles) {
+      if (SetPageProfile.FACETS != profile) {
         profile = ldProfile;
       }
-    }
-
-    if (profile == null) {
-      profile = LdProfiles.STANDARD;
     }
     return profile;
   }
@@ -1001,11 +998,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   protected void addPagination(ResultsPage<?> resPage, String collectionUrl, int page, int pageSize, int lastPage,
-      LdProfiles profile) {
+      UserSetProfile profile) {
         String currentPageUrl = buildPageUrl(collectionUrl, page, pageSize, profile);
         resPage.setCurrentPageUri(currentPageUrl);
       
-        if (page > UserSetUtils.DEFAULT_PAGE) {
+        if (page > CommonApiConstants.DEFAULT_PAGE) {
           String prevPage = buildPageUrl(collectionUrl, page - 1, pageSize, profile);
           resPage.setPrevPageUri(prevPage);
         }

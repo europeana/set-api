@@ -1,16 +1,14 @@
 package eu.europeana.set.web.service.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +18,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.web.config.UserSetI18nConstants;
@@ -62,10 +61,10 @@ public class BaseRestTest {
         String preferHeader = "include=" + ProfileConstants.VALUE_LD_MINIMAL + "; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
-        LdProfiles profile = baseRest.getHeaderProfile(request);
+        List<SetPageProfile> profiles = baseRest.getProfilesFromRequest(null, request);
 
-        assertNotNull(profile);
-        assertTrue(StringUtils.equals(ProfileConstants.VALUE_LD_MINIMAL, profile.getHeaderValue()));
+        assertNotNull(profiles);
+        assertEquals(SetPageProfile.META, profiles.get(0));
     }
 
     @Test
@@ -75,7 +74,7 @@ public class BaseRestTest {
 
         HttpException thrown = assertThrows(
                 HttpException.class,
-                () -> baseRest.getHeaderProfile(request),
+                () -> baseRest.getProfilesFromRequest(null, request),
                 "Something went wrong, check preferHeader "
         );
 
@@ -89,7 +88,7 @@ public class BaseRestTest {
 
         HttpException thrown = assertThrows(
                 HttpException.class,
-                () -> baseRest.getHeaderProfile(request),
+                () -> baseRest.getProfilesFromRequest(null, request),
                 "Something went wrong, check preferHeader value "
         );
 
@@ -101,10 +100,10 @@ public class BaseRestTest {
         String preferHeader = "include=" + ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS + "; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
-        List<LdProfiles> profiles = baseRest.getProfiles(null, request);
+        List<SetPageProfile> profiles = baseRest.getProfilesFromRequest(null, request);
 
         assertNotNull(profiles);
-        assertTrue(StringUtils.equals(ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS, profiles.get(0).getHeaderValue()));
+        assertTrue(StringUtils.equals(ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS, profiles.get(0).getLdPreference()));
     }
 
     @Test
@@ -118,9 +117,9 @@ public class BaseRestTest {
         userSet.setItems(items);
         
         //Mockito.when(baseRest.getUserSetService().applyProfile(Mockito.any(), Mockito.any())).thenReturn(userSet);
-        baseRest.getUserSetService().applyProfile(userSet, LdProfiles.STANDARD);
+        baseRest.getUserSetService().applyProfile(userSet, SetResourceProfile.META);
 
-        String serialisedUserSet = baseRest.serializeUserSet(LdProfiles.MINIMAL, userSet);
+        String serialisedUserSet = baseRest.serializeUserSet(SetResourceProfile.META, userSet);
         assertNotNull(serialisedUserSet);
     }
 

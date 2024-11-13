@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,8 @@ import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
@@ -52,6 +54,7 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
+import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,10 +65,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 
 @RestController
-@Tag(name = "Web User Set API", description= "Perform CRUD Operations for User Sets" )
+@Tag(name = "Web User Set API", description = "Perform CRUD Operations for User Sets")
 public class WebUserSetRest extends BaseRest {
-  
-  private static final String INVALID_RECORD_ID_MESSAGE = "Invalid record identifier. Only alpha-numeric characters and underscore are allowed";
+
+  private static final String INVALID_RECORD_ID_MESSAGE =
+      "Invalid record identifier. Only alpha-numeric characters and underscore are allowed";
 
   public WebUserSetRest() {
     super();
@@ -73,7 +77,7 @@ public class WebUserSetRest extends BaseRest {
 
   @PostMapping(value = "/set/",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Operation(summary="Create user set", description = SwaggerConstants.SAMPLES_JSONLD)
+  @Operation(summary = "Create user set", description = SwaggerConstants.SAMPLES_JSONLD)
   public ResponseEntity<String> createUserSet(@RequestBody String userSet,
       HttpServletRequest request) throws HttpException {
     // validate user - check user credentials (all registered users can create)
@@ -93,10 +97,9 @@ public class WebUserSetRest extends BaseRest {
    * @throws HttpException
    */
   protected ResponseEntity<String> storeUserSet(String userSetJsonLdStr,
-      Authentication authentication, HttpServletRequest request)
-      throws HttpException {
+      Authentication authentication, HttpServletRequest request) throws HttpException {
     try {
-      
+
       // parse user set
       UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
@@ -109,25 +112,14 @@ public class WebUserSetRest extends BaseRest {
       // generate and add a created and modified timestamp to the Set
       // type should be saved now in the database and not generated on the fly during
       // serialization
-
       UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
 
-      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, storedUserSet);
-
-      String etag =
-          generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
-
-      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-      headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
-      headers.add(UserSetHttpHeaders.CACHE_CONTROL,
+      // add specific headers
+      Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
           UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
-      // generate “ETag”;
-      headers.add(UserSetHttpHeaders.ETAG, etag);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
-
-      return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.CREATED);
+      // only one profile used as default, no validation required
+      return buildResponseEntity(storedUserSet, SetResourceProfile.META, HttpStatus.CREATED,
+          specificHeaders, request);
     } catch (JsonParseException | UserSetValidationException
         | UserSetAttributeInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
@@ -154,52 +146,88 @@ public class WebUserSetRest extends BaseRest {
       @RequestParam(value = WebUserSetFields.PARAM_SORT_ORDER,
           required = false) String sortOrderField,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false) String page,
-      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false) String pageSize,
-      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false) String profile,
+      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE,
+          required = false) String pageSize,
+      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE,
+          required = false) String profile,
       HttpServletRequest request) throws HttpException {
 
     Authentication authentication = verifyReadAccess(request);
-        Integer pageNr=null;
-    Integer pageItems=null;
-    
-    // validate params - profile
-    List<LdProfiles> profiles = getProfiles(profile, request); 
-    
-    //if no pagination requested, apply minimal profile (profiles deprecation)
-    if(isSetMetadataResponse(page)) {
-      if(profiles.contains(LdProfiles.ITEMDESCRIPTIONS) || profiles.contains(LdProfiles.STANDARD)) {
-        //only minimal allow when retrieving metadata
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profiles.toString()});
-      }
-      //add default profile if not present
-      if(!profiles.contains(LdProfiles.MINIMAL)) {
-        profiles.add(LdProfiles.MINIMAL);
-      }
-      
-    } else {
-      pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, UserSetUtils.DEFAULT_PAGE);
-      pageNr = (pageNr == null) ? Integer.valueOf(UserSetUtils.DEFAULT_PAGE) : pageNr;
-      int maxPageSize = getConfiguration().getMaxPageSize(null);
-      pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize, UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
-      pageItems = (pageItems == null) ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) : pageItems;
-      //add default profile
-      final boolean noSerializationProfile = profiles.isEmpty() || (profiles.size() == 1 && profiles.contains(LdProfiles.MINIMAL));
-      if( noSerializationProfile ) {
-        profiles.add(LdProfiles.STANDARD);
-      }
-    }
 
-    return getUserSet(profiles, identifier, request, sortField, sortOrderField, pageNr, pageItems,
-        authentication);
+    // if no pagination requested, apply minimal profile (profiles deprecation)
+    if (isSetResourceRequestResponse(page)) {
+      return processRetrieveSetRequest(identifier, authentication, request);
+    } else {
+      return processRetrieveSetPageRequest(identifier, sortField, sortOrderField, page, pageSize,
+          profile, authentication, request);
+    }
+  }
+
+  private ResponseEntity<String> processRetrieveSetPageRequest(String identifier, String sortField,
+      String sortOrderField, String page, String pageSize, String profile,
+      Authentication authentication, HttpServletRequest request)
+      throws HttpException, ParamValidationException {
+    Integer pageNr;
+    Integer pageItems;
+    // validate params - profile
+    List<SetPageProfile> profiles = getProfilesFromRequest(profile, request);
+    // final boolean noSerializationProfile =
+    // profiles.isEmpty() || (profiles.size() == 1 && profiles.contains(SetPageProfile.META));
+    if (profiles.isEmpty()) {
+      profiles.add(SetPageProfile.ITEMS);
+    }
+    
+    validateMultipleProfiles(profiles, profile);
+    SetPageProfile searializationProfile = getUserSetService().getProfileForPagination(profiles);   
+    
+    pageNr =
+        parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, CommonApiConstants.DEFAULT_PAGE);
+    pageNr = (pageNr == null) ? Integer.valueOf(CommonApiConstants.DEFAULT_PAGE) : pageNr;
+    int maxPageSize = getConfiguration().getMaxPageSize(searializationProfile.getProfileParamValue());
+    
+    pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize,
+        UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
+    pageItems =
+        (pageItems == null) ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE)
+            : pageItems;
+    // add default profile
+
+
+    return getUserSetPage(profiles, identifier, sortField, sortOrderField, pageNr, pageItems,
+        authentication, request);
+  }
+
+  private ResponseEntity<String> processRetrieveSetRequest(String identifier,
+      Authentication authentication, HttpServletRequest request) throws HttpException {
+    // validate params - profile
+    // retrieve a Set based on its identifier - process query
+    // if the Set doesn’t exist, respond with HTTP 404
+    // if the Set is disabled respond with HTTP 410
+    try {
+      UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
+      return buildResponseEntity(userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
+    } catch (IOException e) {
+      throw new InternalServerException(e);
+    }
+  }
+
+  private UserSet getSetAndVerifyAccess(String identifier, Authentication authentication)
+      throws UserSetNotFoundException, HttpException {
+    UserSet userSet = getUserSetService().getUserSetById(identifier);
+
+    // check visibility level for given user
+    if (userSet.isPrivate()) {
+      getUserSetService().verifyOwnerOrAdmin(userSet, authentication, false);
+    }
+    return userSet;
   }
 
   private Integer parseIntegerParam(String paramName, String paramValue, int maxValue, int minValue)
       throws ParamValidationException {
-    if(paramValue!=null) {
+    if (paramValue != null) {
       try {
         Integer value = Integer.valueOf(paramValue);
-        if ((maxValue>0 && value>maxValue) || value < minValue) {
+        if ((maxValue > 0 && value > maxValue) || value < minValue) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
               I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue});
         }
@@ -222,27 +250,24 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
-  private ResponseEntity<String> getUserSet(List<LdProfiles> profiles, String identifier,
-      HttpServletRequest request, String sort, String sortOrder, Integer pageNr, Integer pageSize,
-      Authentication authentication) throws HttpException {
+  private ResponseEntity<String> getUserSetPage(List<SetPageProfile> profiles, String identifier,
+      String sort, String sortOrder, Integer pageNr, Integer pageSize,
+      Authentication authentication, HttpServletRequest request) throws HttpException {
     try {
-      // retrieve a Set based on its identifier - process query
-      // if the Set doesn’t exist, respond with HTTP 404
-      // if the Set is disabled respond with HTTP 410
-      UserSet userSet = getUserSetService().getUserSetById(identifier);
-
-      // check visibility level for given user
-      if (userSet.isPrivate()) {
-        getUserSetService().verifyOwnerOrAdmin(userSet, authentication, false);
-      }
+      UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
 
       // get profile for pagination urls and item Page
-      LdProfiles profile = getUserSetService().getProfileForPagination(profiles);      
+      SetPageProfile profile = getProfileHelper().getProfileForPagination(profiles);
 
       if (mustFetchItems(userSet, profile)) {
-        userSet = getUserSetService().fetchItems(userSet, sort, sortOrder, pageNr, pageSize, profile);
+        userSet = getUserSetService().fetchUserSetItems(userSet, sort, sortOrder, pageNr, pageSize,
+            profile);
       }
-      return buildGetResponse(userSet, profile, pageNr, pageSize, request);
+      CollectionPage itemPage =
+          getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
+
+      return buildSetPageResponse(itemPage, userSet.getModified(), profile, pageNr, pageSize,
+          request);
 
     } catch (HttpException e) {
       // avoid wrapping http exception
@@ -252,9 +277,9 @@ public class WebUserSetRest extends BaseRest {
     }
   }
 
-  private boolean mustFetchItems(UserSet userSet, LdProfiles profile) {
-    boolean itemDescriptionsProfile = LdProfiles.ITEMDESCRIPTIONS == profile;
-    boolean fetchItemsForOpenSet = userSet.isOpenSet() && LdProfiles.MINIMAL != profile;
+  private boolean mustFetchItems(UserSet userSet, SetPageProfile profile) {
+    boolean itemDescriptionsProfile = SetPageProfile.ITEMS_META == profile;
+    boolean fetchItemsForOpenSet = userSet.isOpenSet() && SetPageProfile.META != profile;
     return itemDescriptionsProfile || fetchItemsForOpenSet;
   }
 
@@ -264,8 +289,7 @@ public class WebUserSetRest extends BaseRest {
       summary = "Update an existing user set")
   public ResponseEntity<String> updateUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @RequestBody String userSet,
-      HttpServletRequest request) throws HttpException {
+      @RequestBody String userSet, HttpServletRequest request) throws HttpException {
 
     // check user credentials, if invalid respond with HTTP 401,
     Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
@@ -273,60 +297,63 @@ public class WebUserSetRest extends BaseRest {
   }
 
   /**
-     * This method validates input values, retrieves user set object and updates it.
-     * 
-     * @param request
-     * @param authentication   The Authentication object
-     * @param identifier       The identifier
-     * @param userSetJsonLdStr The user set fields to update in JSON format e.g.
-     *                         title or description
-     * @return response entity that comprises response body, headers and status code
-     * @throws HttpException
-     */
-    protected ResponseEntity<String> updateUserSet(HttpServletRequest request, Authentication authentication,
-	    String identifier, String userSetJsonLdStr) throws HttpException {
+   * This method validates input values, retrieves user set object and updates it.
+   * 
+   * @param request
+   * @param authentication The Authentication object
+   * @param identifier The identifier
+   * @param userSetJsonLdStr The user set fields to update in JSON format e.g. title or description
+   * @return response entity that comprises response body, headers and status code
+   * @throws HttpException
+   */
+  protected ResponseEntity<String> updateUserSet(HttpServletRequest request,
+      Authentication authentication, String identifier, String userSetJsonLdStr)
+      throws HttpException {
 
-	try {      
-	    // check if the Set exists, if not respond with HTTP 404
-	    // retrieve an existing user set based on its identifier
-	    UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
+    try {
+      // check if the Set exists, if not respond with HTTP 404
+      // retrieve an existing user set based on its identifier
+      UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
-	    // only an editor can set the state of a set to "published"
-	    // and only if the set is in "public" visibility.
-		// only owner or admin can update any user set
-	    getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, false);
+      // only an editor can set the state of a set to "published"
+      // and only if the set is in "public" visibility.
+      // only owner or admin can update any user set
+      getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, false);
 
-	    // check timestamp if provided within the “If-Match” HTTP header, if false
-	    // respond with HTTP 412
-	    String eTagOrigin = generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
-	    checkIfMatchHeader(eTagOrigin, request);
+      // check timestamp if provided within the “If-Match” HTTP header, if false
+      // respond with HTTP 412
+      String eTagOrigin =
+          generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+      checkIfMatchHeader(eTagOrigin, request);
 
-	    // parse fields of the new user set to an object
-	    UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
- 
-	    // Respond with HTTP 200
-	    // update an existing user set. merge user sets - insert new fields in existing
-	    // object
-	    // update pagination
-	    // generate and add a created and modified timestamp to the Set;
+      // parse fields of the new user set to an object
+      UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
 
-	    // if the Set corresponds to a closed set, replace member items with the new
-	    // items
-	    // that are present in the Set description only when a profile is indicated and
-	    // modified date is set in the service;
-	    UserSet updatedUserSet = getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
+      // Respond with HTTP 200
+      // update an existing user set. merge user sets - insert new fields in existing
+      // object
+      // update pagination
+      // generate and add a created and modified timestamp to the Set;
 
-	    return buildGetResponse(updatedUserSet, LdProfiles.MINIMAL, null, null, request);
+      // if the Set corresponds to a closed set, replace member items with the new
+      // items
+      // that are present in the Set description only when a profile is indicated and
+      // modified date is set in the service;
+      UserSet updatedUserSet =
+          getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
 
-	} catch (UserSetValidationException | UserSetInstantiationException e) {
-	    throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
-		    new String[] { e.getMessage() }, e);
-	} catch (HttpException e) {
-	    throw e;
-	} catch (RuntimeException | IOException e) {
-	    throw new InternalServerException(e);
-	}
+      return buildResponseEntity(updatedUserSet, SetResourceProfile.META, HttpStatus.OK, null,
+          request);
+
+    } catch (UserSetValidationException | UserSetInstantiationException e) {
+      throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
+          new String[] {e.getMessage()}, e);
+    } catch (HttpException e) {
+      throw e;
+    } catch (RuntimeException | IOException e) {
+      throw new InternalServerException(e);
     }
+  }
 
   /**
    * Will add the last editor at the end of the contributor List
@@ -353,7 +380,8 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/publish"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE, summary = "Publish an existing user set")
+  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE,
+      summary = "Publish an existing user set")
   public ResponseEntity<String> publishUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = WebUserSetFields.REQUEST_PARAM_ISSUED, required = false) String issued,
@@ -361,53 +389,43 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
-    Date issuedDate=null;
-    if(issued!=null) {
+    Date issuedDate = null;
+    if (issued != null) {
       try {
         issuedDate = DateUtils.parseToDate(issued);
       } catch (DateParsingException e) {
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.REQUEST_PARAM_ISSUED, issued}, e);
+            I18nConstants.INVALID_PARAM_VALUE,
+            new String[] {WebUserSetFields.REQUEST_PARAM_ISSUED, issued}, e);
       }
     }
-        
-    return publishUnpublishUserSet(identifier, authentication, true, issuedDate);
+
+    return publishUnpublishUserSet(identifier, authentication, true, issuedDate, request);
   }
 
   @PutMapping(value = {"/set/{identifier}/unpublish"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE, summary = "Unpublish an existing user set")
+  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE,
+      summary = "Unpublish an existing user set")
   public ResponseEntity<String> unpublishUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(SetOperations.PUBLISH, request);
-    return publishUnpublishUserSet(identifier, authentication, false, null);
+    return publishUnpublishUserSet(identifier, authentication, false, null, request);
   }
 
-  protected ResponseEntity<String> publishUnpublishUserSet(String identifier, Authentication authentication, 
-      boolean publish, Date issued)
+  protected ResponseEntity<String> publishUnpublishUserSet(String identifier,
+      Authentication authentication, boolean publish, Date issued, HttpServletRequest request)
       throws HttpException {
     try {
       UserSet updatedUserSet =
           getUserSetService().publishUnpublishUserSet(identifier, issued, authentication, publish);
-      
-      LdProfiles profile = LdProfiles.MINIMAL;    
-      
-      // serialize to JsonLd
-      String serializedUserSetJsonLdStr = serializeUserSet(profile, updatedUserSet);
-      String etag =
-          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
-      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PUT);
-      headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
-      headers.add(UserSetHttpHeaders.ETAG, etag);
-
-      return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
+      return buildResponseEntity(updatedUserSet, SetResourceProfile.META, HttpStatus.OK, null,
+          request);
 
     } catch (HttpException e) {
       throw e;
@@ -423,10 +441,12 @@ public class WebUserSetRest extends BaseRest {
       summary = "Insert item to an existing user set")
   public ResponseEntity<String> insertItemIntoUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
-        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String datasetId,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) 
-        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String localId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) @Pattern(
+          regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
+          message = INVALID_RECORD_ID_MESSAGE) String datasetId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) @Pattern(
+          regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
+          message = INVALID_RECORD_ID_MESSAGE) String localId,
       @RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required = false) String position,
       HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
@@ -442,8 +462,7 @@ public class WebUserSetRest extends BaseRest {
   public ResponseEntity<String> insertMultipleItemsIntoUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = WebUserSetFields.PATH_PARAM_POSITION, required = false) String position,
-      @RequestBody List<String> items,
-      HttpServletRequest request) throws HttpException {
+      @RequestBody List<String> items, HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.UPDATE, request);
@@ -465,9 +484,9 @@ public class WebUserSetRest extends BaseRest {
    */
   @Deprecated
   protected ResponseEntity<String> insertItemIntoUserSet(HttpServletRequest request,
-      Authentication authentication, String identifier, String datasetId, String localId, 
+      Authentication authentication, String identifier, String datasetId, String localId,
       String position) throws HttpException {
-    try {     
+    try {
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -484,7 +503,7 @@ public class WebUserSetRest extends BaseRest {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
-      
+
       // check visibility level for given user
       getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
 
@@ -496,20 +515,19 @@ public class WebUserSetRest extends BaseRest {
       String eTagOrigin =
           generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
-      
+
       UserSet updatedUserSet =
           getUserSetService().insertItem(datasetId, localId, position, existingUserSet);
-            
-      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
-      String etag =
-          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+      String serializedUserSetJsonLdStr = serializeUserSet(SetPageProfile.META, updatedUserSet);
+
+      String etag = generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
@@ -524,8 +542,8 @@ public class WebUserSetRest extends BaseRest {
   }
 
   /**
-   * This method validates input values, retrieves user set object and inserts multiple items
-   * within user set to the given position or at the end if no valid position provided.
+   * This method validates input values, retrieves user set object and inserts multiple items within
+   * user set to the given position or at the end if no valid position provided.
    * 
    * @param request
    * @param authentication The Authentication object
@@ -536,8 +554,9 @@ public class WebUserSetRest extends BaseRest {
    * @throws HttpException
    */
   protected ResponseEntity<String> insertMultipleItemsIntoUserSet(HttpServletRequest request,
-      Authentication authentication, String identifier, List<String> items, String position) throws HttpException {
-    try {     
+      Authentication authentication, String identifier, List<String> items, String position)
+      throws HttpException {
+    try {
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -554,12 +573,14 @@ public class WebUserSetRest extends BaseRest {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
-      
-      int itemsPosition=parseItemsPosition(position);
-      if(!StringUtils.equals(position, WebUserSetFields.PINNED) && itemsPosition>=0 && itemsPosition < existingUserSet.getPinned()) {
-        throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION, null);
+
+      int itemsPosition = parseItemsPosition(position);
+      if (!StringUtils.equals(position, WebUserSetFields.PINNED) && itemsPosition >= 0
+          && itemsPosition < existingUserSet.getPinned()) {
+        throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION,
+            null);
       }
-      
+
       // check visibility level for given user
       getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
 
@@ -571,20 +592,19 @@ public class WebUserSetRest extends BaseRest {
       String eTagOrigin =
           generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
-      
+
       UserSet updatedUserSet =
           getUserSetService().insertMultipleItems(items, position, itemsPosition, existingUserSet);
-      
-      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
 
-      String etag =
-          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+      String serializedUserSetJsonLdStr = serializeUserSet(SetPageProfile.META, updatedUserSet);
+
+      String etag = generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
@@ -597,23 +617,25 @@ public class WebUserSetRest extends BaseRest {
       throw new InternalServerException(e);
     }
   }
-  
-  //returns -1 if not provided
+
+  // returns -1 if not provided
   private int parseItemsPosition(String position) throws ParamValidationException {
-    if(StringUtils.equals(position, PINNED_POSITION)) {
+    if (StringUtils.equals(position, PINNED_POSITION)) {
       return 0;
     }
     int positionFinal = -1;
-    if(position!=null) {
+    if (position != null) {
       try {
         positionFinal = Integer.parseInt(position);
-        if(positionFinal<0) {
+        if (positionFinal < 0) {
           throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-              I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});          
+              I18nConstants.INVALID_PARAM_VALUE,
+              new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
         }
       } catch (RuntimeException e) {
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
+            I18nConstants.INVALID_PARAM_VALUE,
+            new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
       }
     }
     return positionFinal;
@@ -626,10 +648,12 @@ public class WebUserSetRest extends BaseRest {
   public ResponseEntity<String> isItemInUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
-        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String datasetId,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) 
-      @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String localId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) @Pattern(
+          regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
+          message = INVALID_RECORD_ID_MESSAGE) String datasetId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) @Pattern(
+          regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
+          message = INVALID_RECORD_ID_MESSAGE) String localId,
       HttpServletRequest request) throws HttpException {
 
     // check user credentials, if invalid respond with HTTP 401,
@@ -705,16 +729,19 @@ public class WebUserSetRest extends BaseRest {
   }
 
 
-  @Deprecated(since="EA-3869", forRemoval = true)
+  @Deprecated(since = "EA-3869", forRemoval = true)
   @DeleteMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE, summary = "Delete a item from the set")
+  @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE,
+      summary = "Delete a item from the set")
   public ResponseEntity<String> deleteItemFromUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) 
-        @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String datasetId,
-      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) 
-       @Pattern(regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX, message = INVALID_RECORD_ID_MESSAGE) String localId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_DATASET_ID) @Pattern(
+          regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
+          message = INVALID_RECORD_ID_MESSAGE) String datasetId,
+      @PathVariable(value = WebUserSetFields.PATH_PARAM_LOCAL_ID) @Pattern(
+          regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
+          message = INVALID_RECORD_ID_MESSAGE) String localId,
       HttpServletRequest request) throws HttpException {
 
     // check user credentials, if invalid respond with HTTP 401,
@@ -722,7 +749,7 @@ public class WebUserSetRest extends BaseRest {
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
     return deleteItemFromUserSet(authentication, identifier, datasetId, localId);
   }
-  
+
   /**
    * This method validates input values and deletes item from a user set.
    *
@@ -731,14 +758,13 @@ public class WebUserSetRest extends BaseRest {
    * @param datasetId The identifier of the dataset, typically a number
    * @param localId The local identifier within the provider
    * @param userSet The user set fields to update in JSON format e.g. title or description
-   * @param profile The profile definition
+   * @param profileParamValue The profile definition
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
-  protected ResponseEntity<String> deleteItemFromUserSet(Authentication authentication, 
-      String identifier, String datasetId, String localId) 
-          throws HttpException {
-    try {     
+  protected ResponseEntity<String> deleteItemFromUserSet(Authentication authentication,
+      String identifier, String datasetId, String localId) throws HttpException {
+    try {
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -764,12 +790,11 @@ public class WebUserSetRest extends BaseRest {
             new String[] {datasetId + "/" + localId, identifier});
       }
 
-      UserSet updatedUserSet=getUserSetService().deleteItem(newItem, existingUserSet);
-      
+      UserSet updatedUserSet = getUserSetService().deleteItem(newItem, existingUserSet);
+
       // serialize to JsonLd
-      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
-      String etag =
-          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+      String serializedUserSetJsonLdStr = serializeUserSet(SetPageProfile.META, updatedUserSet);
+      String etag = generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // respond with HTTP 200 containing the updated Set description as body.
       // serialize Set in JSON-LD following the requested profile
@@ -777,7 +802,7 @@ public class WebUserSetRest extends BaseRest {
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
 
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
@@ -790,24 +815,23 @@ public class WebUserSetRest extends BaseRest {
       throw new InternalServerException(e);
     }
   }
-  
+
   @DeleteMapping(value = {"/set/{identifier}/items"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.DELETE_MULTIPLE_ITEMS_NOTE, summary = "Delete multiple items from the set")
+  @Operation(description = SwaggerConstants.DELETE_MULTIPLE_ITEMS_NOTE,
+      summary = "Delete multiple items from the set")
   public ResponseEntity<String> deleteMultipleItemsFromUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @RequestBody List<String> items,
-      HttpServletRequest request) throws HttpException {
+      @RequestBody List<String> items, HttpServletRequest request) throws HttpException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
     return deleteMultipleItemsFromUserSet(authentication, identifier, items);
   }
 
-  protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication, 
-      String identifier, List<String> items) 
-          throws HttpException {
-    try {     
+  protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication,
+      String identifier, List<String> items) throws HttpException {
+    try {
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
@@ -820,12 +844,11 @@ public class WebUserSetRest extends BaseRest {
       // for entity user sets, add users with 'editor' role as contributors
       addContributorForEntitySet(existingUserSet, authentication);
 
-      UserSet updatedUserSet=getUserSetService().deleteMultipleItems(items, existingUserSet);
-      
+      UserSet updatedUserSet = getUserSetService().deleteMultipleItems(items, existingUserSet);
+
       // serialize to JsonLd
-      String serializedUserSetJsonLdStr = serializeUserSet(LdProfiles.MINIMAL, updatedUserSet);
-      String etag =
-          generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
+      String serializedUserSetJsonLdStr = serializeUserSet(SetPageProfile.META, updatedUserSet);
+      String etag = generateETag(updatedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
       // respond with HTTP 200 containing the updated Set description as body.
       // serialize Set in JSON-LD following the requested profile
@@ -833,7 +856,7 @@ public class WebUserSetRest extends BaseRest {
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, LdProfiles.MINIMAL.getPreferHeaderValue());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
 
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
@@ -849,7 +872,7 @@ public class WebUserSetRest extends BaseRest {
 
 
   @DeleteMapping(value = {"/set/{identifier}"})
-  @Operation(summary= "Delete Set", description = "Delete an existing user set")
+  @Operation(summary = "Delete Set", description = "Delete an existing user set")
   public ResponseEntity<String> deleteUserSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       HttpServletRequest request) throws HttpException {
@@ -907,9 +930,10 @@ public class WebUserSetRest extends BaseRest {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
       headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
+      // headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_GPPD);
+      headers.add(HttpHeaders.ALLOW, createAllowHeader(request));
 
-      return new ResponseEntity<>(identifier, headers, httpStatus);
+      return new ResponseEntity<>(null, headers, httpStatus);
     } catch (HttpException e) {
       throw e;
     } catch (RuntimeException e) {
@@ -927,7 +951,7 @@ public class WebUserSetRest extends BaseRest {
    * @throws HttpException
    */
   @DeleteMapping(value = {"/set/"})
-  @Operation(summary="Delete Sets", description = "Delete sets associated with user")
+  @Operation(summary = "Delete Sets", description = "Delete sets associated with user")
   public ResponseEntity<String> deleteUserAssociatedSet(
       @RequestParam(value = WebUserSetFields.PATH_PARAM_CREATOR_ID,
           required = false) String creator,
@@ -1015,12 +1039,14 @@ public class WebUserSetRest extends BaseRest {
       throw new InternalServerException(e);
     }
   }
-  
-  
+
+
   @Deprecated
   /**
    * SG: we might need to add back the verification of page size for dereference profile
-   * @deprecated need to verify specs to see if the page for items dereferencing stays the same as the size for standard profile
+   * 
+   * @deprecated need to verify specs to see if the page for items dereferencing stays the same as
+   *             the size for standard profile
    * @param userSet
    * @param pageSize
    * @return

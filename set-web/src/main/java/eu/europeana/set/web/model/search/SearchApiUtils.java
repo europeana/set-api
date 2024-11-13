@@ -111,7 +111,7 @@ public class SearchApiUtils {
       SearchApiRequest searchApiRequest = new SearchApiRequest();
       
       // remove pagination and ordering
-      Integer start = (pageNr - UserSetUtils.DEFAULT_PAGE) * pageSize + 1;
+      Integer start = (pageNr - CommonApiConstants.DEFAULT_PAGE) * pageSize + 1;
 
       searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
       
@@ -150,7 +150,7 @@ public class SearchApiUtils {
         String id;
         String fullId;
         // calculate the index of from and uptill where items for query will be sent
-        Integer start = (pageNr - UserSetUtils.DEFAULT_PAGE) * pageSize;
+        Integer start = (pageNr - CommonApiConstants.DEFAULT_PAGE) * pageSize;
         Integer till = Math.min((start +  pageSize), userSet.getItems().size()); // should not exceed the size of item list
 
         StringBuilder query = new StringBuilder(100);
