@@ -20,6 +20,7 @@ public enum SetPageProfile implements UserSetProfile{
   SetPageProfile(String profileParamValue, List<String> aliases,  String ldPreference, String preferenceApplied) {
     this.aliases = aliases;
     this.profileParamValue = profileParamValue;
+    this.ldPreference = ldPreference;
     this.preferenceApplied = preferenceApplied;
   }
 
@@ -36,9 +37,9 @@ public enum SetPageProfile implements UserSetProfile{
     return preferenceApplied;
   }
   
-  public static SetPageProfile getByLdProfile(String ldProfile) {
+  public static SetPageProfile getByLdPreference(String ldPreference) {
     for(SetPageProfile profile : SetPageProfile.values()) {
-      if(profile.getProfileParamValue() != null && profile.getProfileParamValue().equals(ldProfile)) {
+      if(profile.getLdPreference() != null && profile.getLdPreference().equals(ldPreference)) {
         return profile;
       }
     }

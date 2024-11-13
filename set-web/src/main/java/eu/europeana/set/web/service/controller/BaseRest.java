@@ -47,6 +47,7 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetProfileHelper;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.stats.service.UsageStatsService;
+import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
@@ -131,9 +132,13 @@ public class BaseRest extends BaseRestController {
       try {
         profiles = getProfileHelper().getSetPageProfiles(profile, preferHeader);
       } catch (UserSetProfileValidationException e) {
-        String paramValue = StringUtils.isNotEmpty(preferHeader)? preferHeader : profile;
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, paramValue}, e);
+        if(StringUtils.isNotEmpty(preferHeader)) {
+          throw new ParamValidationException(UserSetI18nConstants.INVALID_HEADER_VALUE,
+              UserSetI18nConstants.INVALID_HEADER_VALUE, new String[] {PREFER, preferHeader}, e);  
+        }else {
+          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile}, e);
+        }
       }
       return profiles;
     }

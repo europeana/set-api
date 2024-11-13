@@ -30,7 +30,7 @@ public class SetProfileHelper {
   public List<SetPageProfile> getSetPageProfiles(String profileStr, String preferHeader) throws UserSetProfileValidationException {
     List<SetPageProfile> setPageProfiles = new ArrayList<>();
 
-    if (StringUtils.isEmpty(profileStr)) {
+    if (StringUtils.isEmpty(preferHeader) && StringUtils.isEmpty(profileStr)) {
       //quick return if empty
       return setPageProfiles;
     }
@@ -57,7 +57,7 @@ public class SetProfileHelper {
       throw new UserSetProfileValidationException("Cannot extract profile specification from prefer header: " + preferHeader);
     }
       
-    SetPageProfile profile = SetPageProfile.getByLdProfile(ldProfile);  
+    SetPageProfile profile = SetPageProfile.getByLdPreference(ldProfile);  
     if(profile == null) {
       throw new UserSetProfileValidationException("Invalid profile required through prefer header: " + ldProfile); 
     }
