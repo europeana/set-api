@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 
 /**
  * This class aims at testing of the annotation methods.
@@ -23,7 +22,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 		
     @Test
     public void createUserSet() throws IOException {
-	String setId = createTestUserSet(USER_SET_CONTENT, ProfileConstants.VALUE_PARAM_META);
+	String setId = createTestUserSet(USER_SET_CONTENT, null);
 	assertNotNull(setId);
 	getApiClient().deleteUserSet(setId);
     }
@@ -36,29 +35,29 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 	@Test
 	public void retrieveUserSet() throws IllegalArgumentException, IOException {
 		ResponseEntity<String> response;
-		String testSetId = createTestUserSet(USER_SET_CONTENT, ProfileConstants.VALUE_PARAM_META);
+		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
-		response = getApiClient().getUserSet(testSetId, ProfileConstants.VALUE_PARAM_META);
+		response = getApiClient().getUserSet(testSetId, null);
 		validateResponse(response, HttpStatus.OK);
 	}
 	
 	@Test
 	public void updateUserSet() throws IOException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, ProfileConstants.VALUE_PARAM_META);
+		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// updated user set value
 		String requestBody = getJsonStringInput(USER_SET_UPDATE_CONTENT);
 		assertNotNull(requestBody);
 		// update user set by identifier URL
 		ResponseEntity<String> updateResponse = getApiClient().updateUserSet(
-			testSetId, requestBody,ProfileConstants.VALUE_PARAM_ITEMS);
+			testSetId, requestBody, null);
 		validateResponse(updateResponse, HttpStatus.OK);
 	}
 	
 	@Test
 	public void deleteUserSet() throws IOException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, ProfileConstants.VALUE_PARAM_META);
+		String testSetId = createTestUserSet(USER_SET_CONTENT,null);
 		assertNotNull(testSetId);
 		// delete user set by identifier URL
 		ResponseEntity<String> deleteResponse = getApiClient().deleteUserSet(
