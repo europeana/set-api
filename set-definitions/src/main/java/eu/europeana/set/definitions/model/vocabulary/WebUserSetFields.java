@@ -5,9 +5,6 @@ package eu.europeana.set.definitions.model.vocabulary;
  */
 public class WebUserSetFields extends WebUserSetModelFields {
 
-    WebUserSetFields() {
-    }
-
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";
     public static final String USER_SET_APPLICATION_NAME  = "webuserset";
@@ -90,4 +87,5 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String PROJECT_EUROPEANA_BASE_URL      = "https://pro.europeana.eu/project/";
     public static final String ENTITY_URI_BASE      = "/base";
 
+    WebUserSetFields() {}
 }
