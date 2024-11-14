@@ -845,8 +845,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
-        //invalid profiles in request are ignored 
-        .andExpect(status().is(HttpStatus.OK.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
   }
 
   @Test

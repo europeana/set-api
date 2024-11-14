@@ -7,7 +7,7 @@ public enum SetPageProfile implements UserSetProfile{
       ProfileConstants.VALUE_PREFER_MINIMAL),
   ITEMS(ProfileConstants.VALUE_PARAM_ITEMS, List.of(ProfileConstants.VALUE_PARAM_STANDARD),  ProfileConstants.VALUE_LD_CONTAINEDIRIS,
       ProfileConstants.VALUE_PREFER_CONTAINEDIRIS),
-  ITEMS_META(ProfileConstants.VALUE_PARAM_ITEMS_META,List.of(ProfileConstants.VALUE_PARAM_ITEMS_DEFAULT), 
+  ITEMS_META(ProfileConstants.VALUE_PARAM_ITEMS_META,List.of(ProfileConstants.VALUE_PARAM_ITEMS_DEFAULT, ProfileConstants.VALUE_PARAM_ITEMDESCRIPTIONS), 
       ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS,
       ProfileConstants.VALUE_PREFER_ITEM_DESCRIPTIONS),
   FACETS(ProfileConstants.VALUE_PARAM_FACETS, null, null, null);
@@ -45,7 +45,8 @@ public enum SetPageProfile implements UserSetProfile{
     }
     return null;
   }
-
+ 
+  
   public String getLdPreference() {
     return ldPreference;
   }
