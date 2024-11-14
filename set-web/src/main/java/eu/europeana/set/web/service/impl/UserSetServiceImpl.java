@@ -724,30 +724,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         totalInCollection, lastPage, CommonLdConstants.COLLECTION, profile);
 
     // build Collection Page object
-    CollectionPage page = null;
-    int startIndex = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
-    // handle ITEMDESCRIPTIONS profile separately as it will have only the requested items present
-    // Also, we don't want to sublist the item list, as number items returned from search api may
-    // not be equal to
-    // number of items requested
-    // TODO: refactor to use setter methods
-    if (SetPageProfile.ITEMS_META == profile) {
-      page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
-      ((ItemDescriptionsCollectionPage) page).setItemList(userSet.getItems());
-      page.setTotalInPage(userSet.getItems().size());
-    } else { // other profiles
-      final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
-      if (endIndex > startIndex) {
-        List<String> items = userSet.getItems().subList(startIndex, endIndex);
-        page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
-        page.setItems(items);
-        page.setTotalInPage(items.size());
-      } else {
-        // this if for the empty user Sets
-        page = new CollectionPage(userSet, partOf, startIndex);
-        page.setTotalInPage(0);
-      }
-    }
+    CollectionPage page =
+        createCollectionPageWithItems(userSet, profile, pageNr, pageSize, totalInCollection, partOf);
 
     // add pagination URLs
     page.setCurrentPageUri(buildPageUrl(paginationBaseUrl, pageNr, pageSize, profile));
@@ -760,6 +738,67 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       page.setNextPageUri(buildPageUrl(paginationBaseUrl, pageNr + 1, pageSize, profile));
     }
 
+    return page;
+  }
+
+  private CollectionPage createCollectionPageWithItems(UserSet userSet, UserSetProfile profile, int pageNr,
+      int pageSize, int totalInCollection, CollectionOverview partOf) {
+    CollectionPage page = null;
+    int startIndex = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
+    final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
+    
+    // handle ITEMDESCRIPTIONS profile separately as it will have only the requested items present
+    // Also, we don't want to sublist the item list, as number items returned from search api may
+    // not be equal to
+    // number of items requested
+    // TODO: refactor to use setter methods
+    switch ((SetPageProfile)profile) {
+      case ITEMS_META:
+        //dereferenced items are allready present in the set
+        page = createItemDescriptionsCollectionPage(userSet, partOf, startIndex);
+        break;
+      case META:
+        page = createEmptyCollectionPage(userSet, partOf, startIndex, endIndex);
+        break;
+      case ITEMS:
+        if (startIndex >= endIndex) {
+          // this if for the empty user Sets / empty colleciton page
+          page = createEmptyCollectionPage(userSet, partOf, startIndex, endIndex);  
+        } else {
+          page = createItemIdsCollectionPage(userSet, partOf, startIndex, endIndex);
+        }
+        break;
+      case FACETS:
+        //should not be used for this method
+        break;
+    }
+    return page;
+  }
+
+  private CollectionPage createItemIdsCollectionPage(UserSet userSet, CollectionOverview partOf,
+      int startIndex, final int endIndex) {
+    CollectionPage page;
+    page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
+    List<String> items = userSet.getItems().subList(startIndex, endIndex);
+    page.setItems(items);
+    page.setTotalInPage(items.size());
+    return page;
+  }
+
+  private CollectionPage createItemDescriptionsCollectionPage(UserSet userSet,
+      CollectionOverview partOf, int startIndex) {
+    CollectionPage page;
+    page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
+    ((ItemDescriptionsCollectionPage) page).setItemList(userSet.getItems());
+    page.setTotalInPage(userSet.getItems().size());
+    return page;
+  }
+
+  private CollectionPage createEmptyCollectionPage(UserSet userSet, CollectionOverview partOf, int startIndex,
+      final int endIndex) {
+    CollectionPage page = new CollectionPage(userSet, partOf, startIndex);
+    //if pageNr is too high, do not set negative totalInPage
+    page.setTotalInPage(Math.max(0, endIndex - startIndex));
     return page;
   }
 

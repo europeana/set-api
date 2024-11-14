@@ -59,7 +59,7 @@ public class SetProfileHelper {
       
     SetPageProfile profile = SetPageProfile.getByLdPreference(ldProfile);  
     if(profile == null) {
-      throw new UserSetProfileValidationException("Invalid profile required through prefer header: " + ldProfile); 
+      throw new UserSetProfileValidationException("Invalid profile requested through prefer header: " + ldProfile); 
     }
     
     setPageProfiles.add(profile);
@@ -88,19 +88,35 @@ public class SetProfileHelper {
       return null;
   }
 
-  private void parseProfileParam(String profileStr, List<SetPageProfile> setPageProfiles) {
+  private void parseProfileParam(String profileStr, List<SetPageProfile> setPageProfiles) throws UserSetProfileValidationException {
     // multiple profiles can be present separated by comma or space
     String[] profiles = toStringArray(profileStr);
     // check each param
     for (String profile : profiles) {
-      for (SetPageProfile profileEnum : SetPageProfile.values()) {
-        // by name or alias
-        if (hasNameOrAlias(profile, profileEnum)) {
-          setPageProfiles.add(profileEnum);
-          break;
-        }
+      if(isTechnicalProfile(profile)) {
+        continue;
+      }
+      SetPageProfile pageProfile = getByProfileParamOrAlias(profile);
+      if(pageProfile == null) {
+        throw new UserSetProfileValidationException("Invalid profile requsted through request parameter: " + profile);
+      }
+      setPageProfiles.add(pageProfile);
+      
+    }
+  }
+
+  private boolean isTechnicalProfile(String profile) {
+    return ProfileConstants.VALUE_PARAM_DEBUG.equalsIgnoreCase(profile);
+  }
+
+  private SetPageProfile getByProfileParamOrAlias(String profile) {
+    for (SetPageProfile profileEnum : SetPageProfile.values()) {
+      // by name or alias
+      if (hasNameOrAlias(profile, profileEnum)) {
+        return profileEnum;
       }
     }
+    return null;
   }
 
   private String[] toStringArray(String profileStr) {

@@ -184,7 +184,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
 
     String result = mockMvc
         .perform(
-            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
+            post(BASE_URL)
                 .content(setJson.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 
 
 /**
@@ -46,7 +45,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     public void createWebsetUserSetWithoutBody() throws IOException {
 
         ResponseEntity<String> response = getApiClient().createUserSet(
-                null, SetResourceProfile.META.getProfileParamValue());
+                null, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -55,7 +54,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     @Test
     public void createWebUserSetWithCorruptedBody() {
         ResponseEntity<String> response = getApiClient().createUserSet(
-                CORRUPTED_JSON, SetResourceProfile.META.getProfileParamValue());
+                CORRUPTED_JSON, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -63,7 +62,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     @Test
     public void getWebUserSetWithWrongIdentifier() {
         ResponseEntity<String> response = getApiClient().getUserSet(
-                WRONG_GENERATED_IDENTIFIER, SetResourceProfile.META.getProfileParamValue());
+                WRONG_GENERATED_IDENTIFIER, null);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
@@ -74,7 +73,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
         ResponseEntity<String> response = getApiClient().updateUserSet(
                 WRONG_GENERATED_IDENTIFIER
                 , requestBody
-                , SetResourceProfile.META.getProfileParamValue());
+                , null);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
@@ -85,7 +84,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
         ResponseEntity<String> response = getApiClient().updateUserSet(
                 WRONG_GENERATED_IDENTIFIER
                 , requestBody
-                , SetResourceProfile.META.getProfileParamValue());
+                , null);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 

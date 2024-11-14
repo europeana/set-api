@@ -125,7 +125,9 @@ public class BaseRest extends BaseRestController {
     protected List<SetPageProfile> getProfilesFromRequest(String profile, HttpServletRequest request)
         throws ParamValidationException {
       String preferHeader = request.getHeader(PREFER);
-      getLogger().debug("'Prefer' header value: {} ", preferHeader);
+      if(preferHeader != null && getLogger().isDebugEnabled()) {
+        getLogger().debug("'Prefer' header value: {} ", preferHeader);
+      }
 
       //parse and validate profiles
       List<SetPageProfile> profiles = null;
