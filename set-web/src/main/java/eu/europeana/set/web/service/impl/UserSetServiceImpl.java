@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -635,25 +636,45 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String resultsPageId =
         buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getProfileParamValue());
 
+    resPage = createResultPageWithItems(results, resultPageSize, profile, profiles, authentication);
+
     // we don't want to add profile in partOf, hence profile is passed null
     // pageId is the same as the baseUrl for pagination
     CollectionOverview ResultList = buildCollectionOverview(resultsPageId, resultsPageId, pageSize,
         totalInCollection, lastPage, CommonLdConstants.RESULT_LIST, null);
 
-    if (profiles.contains(SetPageProfile.ITEMS) || profiles.contains(SetPageProfile.ITEMS_META)) {
-      resPage = new UserSetResultPage();
-      // LdProfiles.ITEMDESCRIPTIONS OR LdProfiles.STANDARD is passed as profile
-      setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
-    } else {
-      // LdProfiles.MINIMAL.equals(profile) - default
-      resPage = setPageItemsAsSetIds(results, resultPageSize);
-    }
-
     resPage.setPartOf(ResultList);
+    addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
+    return resPage;
+  }
+
+  private BaseUserSetResultPage<?> createResultPageWithItems(ResultSet<? extends UserSet> results,
+      int resultPageSize, SetPageProfile serializationProfile, List<SetPageProfile> profiles,
+      Authentication authentication) throws HttpException {
+    BaseUserSetResultPage<?> resPage;
+    switch(serializationProfile) {
+      case ITEMS_META:
+        // LdProfiles.ITEMDESCRIPTIONS OR LdProfiles.STANDARD is passed as profile
+        //dereferencing is done during  search 
+        resPage = setPageItemsAsSetData(results, authentication, serializationProfile);
+        break;
+      case ITEMS:
+        resPage = setPageItemsAsSetIds(results, resultPageSize);
+        break;
+      case META:
+        //empty page (no items)
+        resPage = new UserSetResultPage();
+        break;
+      case FACETS:
+      //serialization profile should not be facets
+      default:
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, serializationProfile.getProfileParamValue()});
+    }
+    //add facets if requested
     if (profiles.contains(SetPageProfile.FACETS)) {
       resPage.setFacetFields(results.getFacetFields());
     }
-    addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
     return resPage;
   }
 
@@ -671,21 +692,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return resPage;
   }
 
-  void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage,
-      Authentication authentication, SetPageProfile profile) throws HttpException {
+  UserSetResultPage setPageItemsAsSetData(ResultSet<? extends UserSet> results, Authentication authentication, SetPageProfile profile) throws HttpException {
+    
+    UserSetResultPage resPage = new UserSetResultPage();
     List<UserSet> items = new ArrayList<>(results.getResults().size());
 
-    // TODO: define a second parameter for itemset page size
-    int derefItems = getConfiguration().getMaxSearchDereferencedItems();
-
     for (UserSet userSet : results.getResults()) {
-      if (SetPageProfile.ITEMS_META == profile) {
-        fetchUserSetItems(userSet, null, null, WebUserSetFields.DEFAULT_PAGE, derefItems, profile);
-      }
+      // int derefItems = getConfiguration().getMaxSearchDereferencedItems();
+//      if (SetPageProfile.ITEMS_META == profile) {
+//        fetchUserSetItems(userSet, null, null, WebUserSetFields.DEFAULT_PAGE, derefItems, profile);
+//      }
 
-      // items not included in results
-      // set.setItems(null);
-      // set.setTotal(0);
       if (!userSet.isPrivate()) {
         items.add(userSet);
       } else {
@@ -699,11 +716,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           items.add(id);
         }
       }
-
-      applyProfile(userSet, profile);
+      //Apply META Profile for Sets
+      applyProfile(userSet, SetResourceProfile.META);
     }
     resPage.setItems(items);
     resPage.setTotalInPage(items.size());
+    return resPage;
   }
 
   @Override
