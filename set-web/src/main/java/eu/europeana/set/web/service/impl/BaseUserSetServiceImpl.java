@@ -489,13 +489,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   @Override
   public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
-    SetPageProfile profile = null;
-    for (SetPageProfile ldProfile : profiles) {
-      if (SetPageProfile.FACETS != profile) {
-        profile = ldProfile;
+    for (SetPageProfile profile : profiles) {
+      if (!SetPageProfile.FACETS.equals(profile)) {
+        return profile;
       }
     }
-    return profile;
+    return null;
   }
 
   private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
