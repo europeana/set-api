@@ -10,12 +10,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
@@ -51,6 +53,7 @@ import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.search.FacetFieldViewImpl;
 import eu.europeana.set.web.model.search.ItemDescriptionsCollectionPage;
+import eu.europeana.set.web.model.search.ItemDescriptionsResultPage;
 import eu.europeana.set.web.model.search.ItemIdsCollectionPage;
 import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.SearchApiUtils;
@@ -74,7 +77,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       verifyPermissionToUpdate(newUserSet, authentication, true);
     }
 
-    //new sets are not yet published
+    // new sets are not yet published
     validateWebUserSet(newUserSet, false);
 
     // store in mongo database
@@ -101,7 +104,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     ArrayList<PersistentUserSet> result = new ArrayList<>();
     Iterator<PersistentUserSet> iter = getMongoPersistence().getByCreator(creatorId).iterator();
     iter.forEachRemaining(result::add);
-    
+
     return result;
   }
 
@@ -227,7 +230,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
     return positionInt;
   }
-  
+
   public UserSet deleteItem(String item, UserSet existingUserSet) {
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
@@ -241,111 +244,114 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     // update an existing user set
     UserSet updatedUserSet = writeUserSetToDb(existingUserSet);
-    //update pagination fields (used only for the response serialization)
+    // update pagination fields (used only for the response serialization)
     updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
   }
-  
+
   public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) {
-    boolean itemsRemoved=false;
+    boolean itemsRemoved = false;
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
-      for(String item : items) {
+      for (String item : items) {
         int currentPosition = existingUserSet.getItems().indexOf(item);
-        if (currentPosition>=0) {
-          itemsRemoved=true;
-          if(currentPosition < existingUserSet.getPinned() ) {
+        if (currentPosition >= 0) {
+          itemsRemoved = true;
+          if (currentPosition < existingUserSet.getPinned()) {
             existingUserSet.setPinned(existingUserSet.getPinned() - 1);
           }
           existingUserSet.getItems().remove(item);
         }
       }
     } else {
-      itemsRemoved=existingUserSet.getItems().removeAll(items);
+      itemsRemoved = existingUserSet.getItems().removeAll(items);
     }
 
-    UserSet updatedUserSet=existingUserSet;
-    if(itemsRemoved) {
+    UserSet updatedUserSet = existingUserSet;
+    if (itemsRemoved) {
       // update an existing user set
       updatedUserSet = writeUserSetToDb(existingUserSet);
     }
-    
-    //update pagination fields (used only for the response serialization)
+
+    // update pagination fields (used only for the response serialization)
     updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
   }
 
-  public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition, UserSet existingUserSet) 
-      throws ItemValidationException {
-    
+  public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
+      UserSet existingUserSet) throws ItemValidationException {
+
     validateItemsStrings(items);
-    
+
     // check if the position is "pin" and is a EntityBestItem set then
     // insert the item at the 0 position
     UserSet userSet;
 
     if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
-      userSet=updateItemsFromPinned(existingUserSet, items);
+      userSet = updateItemsFromPinned(existingUserSet, items);
     } else {
-      userSet=updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+      userSet = updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
     }
     updatePagination(userSet, getConfiguration());
-    
+
     return userSet;
-  }  
-  
+  }
+
   private UserSet updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
-    List<String> usersetItems=existingUserSet.getItems();
-    if(usersetItems==null) {
-      usersetItems=new ArrayList<>();
-    }
-    else {    
-      /*remove all duplicate items from the set and count the number 
-      of removed pinned items, to change the pinned field
-      */
-      for(String newItem : items) {
-        int itemindex=usersetItems.indexOf(newItem);
-        if(itemindex>=0) {
-          if(itemindex < existingUserSet.getPinned()) {
+    List<String> usersetItems = existingUserSet.getItems();
+    if (usersetItems == null) {
+      usersetItems = new ArrayList<>();
+    } else {
+      /*
+       * remove all duplicate items from the set and count the number of removed pinned items, to
+       * change the pinned field
+       */
+      for (String newItem : items) {
+        int itemindex = usersetItems.indexOf(newItem);
+        if (itemindex >= 0) {
+          if (itemindex < existingUserSet.getPinned()) {
             existingUserSet.setPinned(existingUserSet.getPinned() - 1);
           }
           usersetItems.remove(newItem);
         }
       }
     }
-    
+
     usersetItems.addAll(0, items);
     existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
     return writeUserSetToDb(existingUserSet);
   }
-  
-  private UserSet updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
-    List<String> usersetItems=existingUserSet.getItems();
-    List<String> newItemsCopy=new ArrayList<>(items);
-    if(usersetItems==null) {
-      usersetItems=new ArrayList<>();
+
+  private UserSet updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position)
+      throws ItemValidationException {
+    List<String> usersetItems = existingUserSet.getItems();
+    List<String> newItemsCopy = new ArrayList<>(items);
+    if (usersetItems == null) {
+      usersetItems = new ArrayList<>();
     } else {
-      /*remove from the new items the ones that were pinned before
-       *and from the user set the ones that are duplicates
-      */
-      for(String newItem : newItemsCopy) {
-        int itemindex=usersetItems.indexOf(newItem);
-        if(itemindex>=0) {
-          if(itemindex < existingUserSet.getPinned()) {
+      /*
+       * remove from the new items the ones that were pinned before and from the user set the ones
+       * that are duplicates
+       */
+      for (String newItem : newItemsCopy) {
+        int itemindex = usersetItems.indexOf(newItem);
+        if (itemindex >= 0) {
+          if (itemindex < existingUserSet.getPinned()) {
             items.remove(newItem);
           } else {
             usersetItems.remove(newItem);
           }
         }
       }
-      //validation of the number of items for type Gallery 
-      if(existingUserSet.isGallery() && (usersetItems.size() + items.size()) > getConfiguration().getGalleryMaxSize()) {
-        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED, 
-            new String[] {String.valueOf(getConfiguration().getGalleryMaxSize())} );  
-      }  
+      // validation of the number of items for type Gallery
+      if (existingUserSet.isGallery()
+          && (usersetItems.size() + items.size()) > getConfiguration().getGalleryMaxSize()) {
+        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED,
+            new String[] {String.valueOf(getConfiguration().getGalleryMaxSize())});
+      }
     }
-    
-    int positionFinal=calculatePosition(position, usersetItems);
+
+    int positionFinal = calculatePosition(position, usersetItems);
     usersetItems.addAll(positionFinal, items);
     return writeUserSetToDb(existingUserSet);
   }
@@ -363,10 +369,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
-    
-    //check max number of items for the sets of type Collection
-    if(existingUserSet.isCollection() && !existingUserSet.hasItem(newItem)) {
-      validateGallerySize(existingUserSet, 1);  
+
+    // check max number of items for the sets of type Collection
+    if (existingUserSet.isCollection() && !existingUserSet.hasItem(newItem)) {
+      validateGallerySize(existingUserSet, 1);
     }
 
     // check if the position is "pin" and is a EntityBestItem set then
@@ -384,9 +390,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       userSet = insertItem(existingUserSet, newItem, positionInt, false);
     }
     updatePagination(userSet, getConfiguration());
-    
+
     return userSet;
-  }  
+  }
 
   /**
    * check if item already exists in the Set, if so remove it insert item to Set in the indicated
@@ -431,7 +437,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     return extUserSet;
   }
-  
+
   private void updatePinCount(UserSet existingUserSet, boolean pinnedItem, int oldPosition) {
     boolean mustHandlePinCount = existingUserSet.isEntityBestItemsSet();
     if (!mustHandlePinCount) {
@@ -524,21 +530,21 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       String jsonBody = serializeSearchApiRequest(searchApiRequest);
       SearchApiResponse apiResult;
       if (userSet.isOpenSet() && SetPageProfile.ITEMS == profile) {
-        //item ids for open sets
+        // item ids for open sets
         apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, false);
         setItemIds(userSet, apiResult);
       } else if (SetPageProfile.ITEMS_META == profile) {
-        //item descriptions for open otr closed sets
+        // item descriptions for open otr closed sets
         apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
         int total = apiResult.getTotal();
         if (!userSet.isOpenSet()) {
           // dereferenciation of closed sets is limited to 100
           // use the count of item ids
-          //TODO: SG consider improving
+          // TODO: SG consider improving
           total = userSet.getItems().size();
         }
         List<String> sortedItemDescriptions =
-            sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);        
+            sortItemDescriptions(userSet, apiResult.getItems(), pageNr, pageSize);
         setItems(userSet, sortedItemDescriptions, total);
       }
       return userSet;
@@ -558,7 +564,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   private List<String> sortItemDescriptions(UserSet userSet, List<String> itemDescriptions,
       int pageNr, int pageSize) {
-    
+
     if (userSet.getItems() != null) {
       return reorderItemDescriptions(userSet, itemDescriptions, pageNr, pageSize);
     }
@@ -570,7 +576,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       int pageNr, int pageSize) {
     List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
     String localId;
-    
+
     // calculate the index of from and until to get the right page of items
     Integer start = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
     Integer till = Math.min((start + pageSize), userSet.getItems().size()); // should not exceed
@@ -583,7 +589,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
       // escape "/" to "\/" to match json string
       localId = StringUtils.replace(localId, "/", "\\/");
-      String idWithSpace="\"id\": \"" + localId + '"';
+      String idWithSpace = "\"id\": \"" + localId + '"';
       for (String description : itemDescriptions) {
         if (description.contains(idWithSpace)) {
           orderedItemDescriptions.add(description);
@@ -635,31 +641,51 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String resultsPageId =
         buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getProfileParamValue());
 
+    resPage = createResultPageWithItems(results, resultPageSize, profile, profiles, authentication);
+
     // we don't want to add profile in partOf, hence profile is passed null
     // pageId is the same as the baseUrl for pagination
     CollectionOverview ResultList = buildCollectionOverview(resultsPageId, resultsPageId, pageSize,
         totalInCollection, lastPage, CommonLdConstants.RESULT_LIST, null);
 
-    if (profiles.contains(SetPageProfile.ITEMS) || profiles.contains(SetPageProfile.ITEMS_META)) {
-      resPage = new UserSetResultPage();
-      // LdProfiles.ITEMDESCRIPTIONS OR LdProfiles.STANDARD is passed as profile
-      setPageItems(results, (UserSetResultPage) resPage, authentication, profile);
-    } else {
-      // LdProfiles.MINIMAL.equals(profile) - default
-      resPage = setPageItemsAsSetIds(results, resultPageSize);
-    }
-
     resPage.setPartOf(ResultList);
+    addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
+    return resPage;
+  }
+
+  private BaseUserSetResultPage<?> createResultPageWithItems(ResultSet<? extends UserSet> results,
+      int resultPageSize, SetPageProfile serializationProfile, List<SetPageProfile> profiles,
+      Authentication authentication) throws HttpException {
+    BaseUserSetResultPage<?> resPage;
+    switch (serializationProfile) {
+      case ITEMS_META:
+        // only set descriptions, not item descriptions
+        resPage = setPageItemsAsSetData(results, authentication, serializationProfile);
+        break;
+      case ITEMS:
+        resPage = setPageItemsAsSetIds(results, resultPageSize);
+        break;
+      case META:
+        // empty page (no items)
+        resPage = new UserSetResultPage();
+        break;
+      case FACETS:
+        // serialization profile should not be facets
+      default:
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE,
+                serializationProfile.getProfileParamValue()});
+    }
+    // add facets if requested
     if (profiles.contains(SetPageProfile.FACETS)) {
       resPage.setFacetFields(results.getFacetFields());
     }
-    addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
     return resPage;
   }
 
   UserSetIdsResultPage setPageItemsAsSetIds(ResultSet<? extends UserSet> results,
       int resultPageSize) {
-    
+
     UserSetIdsResultPage resPage = new UserSetIdsResultPage();
     List<String> items = new ArrayList<>(resultPageSize);
     for (UserSet set : results.getResults()) {
@@ -671,21 +697,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return resPage;
   }
 
-  void setPageItems(ResultSet<? extends UserSet> results, UserSetResultPage resPage,
+  UserSetResultPage setPageItemsAsSetData(ResultSet<? extends UserSet> results,
       Authentication authentication, SetPageProfile profile) throws HttpException {
+
+    UserSetResultPage resPage = new UserSetResultPage();
     List<UserSet> items = new ArrayList<>(results.getResults().size());
 
-    // TODO: define a second parameter for itemset page size
-    int derefItems = getConfiguration().getMaxSearchDereferencedItems();
-
     for (UserSet userSet : results.getResults()) {
-      if (SetPageProfile.ITEMS_META == profile) {
-        fetchUserSetItems(userSet, null, null, WebUserSetFields.DEFAULT_PAGE, derefItems, profile);
-      }
+      // int derefItems = getConfiguration().getMaxSearchDereferencedItems();
+      // if (SetPageProfile.ITEMS_META == profile) {
+      // fetchUserSetItems(userSet, null, null, WebUserSetFields.DEFAULT_PAGE, derefItems, profile);
+      // }
 
-      // items not included in results
-      // set.setItems(null);
-      // set.setTotal(0);
       if (!userSet.isPrivate()) {
         items.add(userSet);
       } else {
@@ -699,11 +722,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           items.add(id);
         }
       }
-
-      applyProfile(userSet, profile);
+      // Apply META Profile for Sets
+      applyProfile(userSet, SetResourceProfile.META);
     }
     resPage.setItems(items);
     resPage.setTotalInPage(items.size());
+    return resPage;
   }
 
   @Override
@@ -724,8 +748,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         totalInCollection, lastPage, CommonLdConstants.COLLECTION, profile);
 
     // build Collection Page object
-    CollectionPage page =
-        createCollectionPageWithItems(userSet, profile, pageNr, pageSize, totalInCollection, partOf);
+    CollectionPage page = createCollectionPageWithItems(userSet, profile, pageNr, pageSize,
+        totalInCollection, partOf);
 
     // add pagination URLs
     page.setCurrentPageUri(buildPageUrl(paginationBaseUrl, pageNr, pageSize, profile));
@@ -741,20 +765,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return page;
   }
 
-  private CollectionPage createCollectionPageWithItems(UserSet userSet, UserSetProfile profile, int pageNr,
-      int pageSize, int totalInCollection, CollectionOverview partOf) {
+  private CollectionPage createCollectionPageWithItems(UserSet userSet, UserSetProfile profile,
+      int pageNr, int pageSize, int totalInCollection, CollectionOverview partOf) {
     CollectionPage page = null;
     int startIndex = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
     final int endIndex = Math.min(startIndex + pageSize, totalInCollection);
-    
+
     // handle ITEMDESCRIPTIONS profile separately as it will have only the requested items present
     // Also, we don't want to sublist the item list, as number items returned from search api may
     // not be equal to
     // number of items requested
     // TODO: refactor to use setter methods
-    switch ((SetPageProfile)profile) {
+    switch ((SetPageProfile) profile) {
       case ITEMS_META:
-        //dereferenced items are allready present in the set
+        // dereferenced items are allready present in the set
         page = createItemDescriptionsCollectionPage(userSet, partOf, startIndex);
         break;
       case META:
@@ -763,13 +787,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       case ITEMS:
         if (startIndex >= endIndex) {
           // this if for the empty user Sets / empty colleciton page
-          page = createEmptyCollectionPage(userSet, partOf, startIndex, endIndex);  
+          page = createEmptyCollectionPage(userSet, partOf, startIndex, endIndex);
         } else {
           page = createItemIdsCollectionPage(userSet, partOf, startIndex, endIndex);
         }
         break;
       case FACETS:
-        //should not be used for this method
+        // should not be used for this method
         break;
     }
     return page;
@@ -794,18 +818,19 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return page;
   }
 
-  private CollectionPage createEmptyCollectionPage(UserSet userSet, CollectionOverview partOf, int startIndex,
-      final int endIndex) {
+  private CollectionPage createEmptyCollectionPage(UserSet userSet, CollectionOverview partOf,
+      int startIndex, final int endIndex) {
     CollectionPage page = new CollectionPage(userSet, partOf, startIndex);
-    //if pageNr is too high, do not set negative totalInPage
+    // if pageNr is too high, do not set negative totalInPage
     page.setTotalInPage(Math.max(0, endIndex - startIndex));
     return page;
   }
 
-  public ItemIdsResultPage buildItemIdsResultsPage(String setIdentifier, List<String> itemIds,
-      int page, int pageSize, HttpServletRequest request) {
+  public BaseUserSetResultPage<String> buildRecodsResultsPage(String setIdentifier,
+      List<String> itemIds, int page, int pageSize, SetPageProfile profile,
+      HttpServletRequest request) throws HttpException {
     // new ResultsPageImpl<T>()
-    ItemIdsResultPage result = new ItemIdsResultPage();
+    BaseUserSetResultPage<String> result;
 
     // String requestURL = request.getUrl();
     String baseUrl = getConfiguration().getSetApiEndpoint();
@@ -814,34 +839,90 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String resultPageId = baseUrl + relativePath;
     String collectionUrl = buildResultsPageUrl(resultPageId, request.getQueryString(), null);
 
-    if (itemIds != null && !itemIds.isEmpty()) {
-      // build isPartOf (result)
-      long totalnCollection = (long) itemIds.size();
-      int lastPage = getLastPage(itemIds.size(), pageSize);
+    // if no results found, return empty page
+    if (itemIds == null || itemIds.isEmpty()) {
+      // empty result page, but we must still return the ID
+      return createItemIdsResultPage(page, pageSize, 0, profile, collectionUrl);
+    }
 
-      // there is no profile param for search items in user set
-      final CollectionOverview collectionOverview = buildCollectionOverview(collectionUrl,
-          collectionUrl, pageSize, totalnCollection, lastPage, CommonLdConstants.RESULT_LIST, null);
-      result.setPartOf(collectionOverview);
+    // build isPartOf (result)
+    long totalnCollection = (long) itemIds.size();
+    int lastPage = getLastPage(itemIds.size(), pageSize);
 
-      // build Result page properties
-      int startPos = (page - WebUserSetFields.DEFAULT_PAGE) * pageSize;
-      if (startPos < itemIds.size()) {
-        int toIndex = Math.min(startPos + pageSize, itemIds.size());
-        List<String> pageItems = itemIds.subList(startPos, toIndex);
+    // build Result page properties
+    int startPos = (page - WebUserSetFields.DEFAULT_PAGE) * pageSize;
+    if (startPos >= itemIds.size()) {
+      // requested page is out of range, return empty result
+      return createItemIdsResultPage(page, pageSize, 0, profile, collectionUrl);
+    }
+
+    // compute Items list for page
+    int toIndex = Math.min(startPos + pageSize, itemIds.size());
+    List<String> pageItems = itemIds.subList(startPos, toIndex);
+
+    switch (profile) {
+      case META:
+        // no items, just total
+        result =
+            createItemIdsResultPage(lastPage, pageSize, totalnCollection, profile, collectionUrl);
+        break;
+      case ITEMS:
+        result =
+            createItemIdsResultPage(lastPage, pageSize, totalnCollection, profile, collectionUrl);
         result.setItems(pageItems);
         result.setTotalInPage(pageItems.size());
-        // there is no profile param for searching items in user set
-        addPagination(result, collectionUrl, page, pageSize, lastPage, null);
-      }
-    } else {
-      // empty result page, but we must still return the ID
-      result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize, null));
+        break;
+      case ITEMS_META:
+        result = createItemDescriptionsResultPage(lastPage, pageSize, totalnCollection, profile,
+            collectionUrl);
+        List<String> dereferencedItems = dereferenceItems(pageItems, profile);
+        ((ItemDescriptionsResultPage)result).setItemList(dereferencedItems);
+        result.setTotalInPage(dereferencedItems.size());
+        break;
+      case FACETS:
+        // serialization profile should not be facets
+      default:
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE,
+            new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile.getProfileParamValue()});
+
     }
+
+    // there is no profile param for search items in user set
+    final CollectionOverview collectionOverview =
+        buildCollectionOverview(collectionUrl, collectionUrl, pageSize, totalnCollection, lastPage,
+            CommonLdConstants.RESULT_LIST, profile);
+    result.setPartOf(collectionOverview);
+
+    // there is no profile param for searching items in user set
+    addPagination(result, collectionUrl, page, pageSize, lastPage, profile);
 
     return result;
   }
 
+  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile) throws HttpException {
+    UserSet itemsSet = new WebUserSetImpl();
+    itemsSet.setItems(pageItems);
+    UserSet dereferenced = fetchUserSetItems(itemsSet, null, null, WebUserSetFields.DEFAULT_PAGE,
+        pageItems.size(), profile);
+    return dereferenced.getItems();
+  }
+
+  private ItemIdsResultPage createItemIdsResultPage(int page, int pageSize, long totalnCollection,
+      SetPageProfile profile, String collectionUrl) {
+    ItemIdsResultPage result = new ItemIdsResultPage();
+    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize, profile));
+    result.setTotalInCollection(totalnCollection);
+    return result;
+  }
+
+  private ItemDescriptionsResultPage createItemDescriptionsResultPage(int page, int pageSize,
+      long totalnCollection, SetPageProfile profile, String collectionUrl) {
+    ItemDescriptionsResultPage result = new ItemDescriptionsResultPage();
+    result.setCurrentPageUri(buildPageUrl(collectionUrl, page, pageSize, profile));
+    result.setTotalInCollection(totalnCollection);
+    return result;
+  }
 
   /**
    * This method checks admin role
@@ -882,11 +963,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       int itemsCount = userSet.getItems().size();
       final int maxPageSize = getConfiguration().getMaxPageSize(profile.getProfileParamValue());
       if (itemsCount > maxPageSize) {
-        List<String> itemsPage =
-            userSet.getItems().subList(0, maxPageSize);
+        List<String> itemsPage = userSet.getItems().subList(0, maxPageSize);
         userSet.setItems(itemsPage);
-//        profile = LdProfiles.STANDARD;
-//        getLogger().debug("Profile switched to standard, due to set size!");
+        // profile = LdProfiles.STANDARD;
+        // getLogger().debug("Profile switched to standard, due to set size!");
       }
     }
 
@@ -939,8 +1019,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication,
-      boolean publish) throws HttpException {
+  public UserSet publishUnpublishUserSet(String userSetId, Date issued,
+      Authentication authentication, boolean publish) throws HttpException {
     PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
     // if the user set does not exist, return 404
     if (userSet == null) {
@@ -962,7 +1042,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @param authentication
    * @throws HttpException
    */
-  private void validateUserSetForPublishUnPublish(PersistentUserSet userSet, boolean publish) throws HttpException {
+  private void validateUserSetForPublishUnPublish(PersistentUserSet userSet, boolean publish)
+      throws HttpException {
     // Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond
     // with 400;
     if (isPublishingPrevented(userSet)) {
@@ -980,17 +1061,18 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   private boolean isPublishingPrevented(PersistentUserSet userSet) {
     return userSet.isBookmarksFolder() || userSet.isEntityBestItemsSet();
   }
-  
+
   @Override
   public WebResource generateDepiction(UserSet userSet) throws SearchApiClientException {
-    if(userSet.getItems() == null || userSet.getItems().isEmpty()) {
+    if (userSet.getItems() == null || userSet.getItems().isEmpty()) {
       return null;
     }
-        
+
     String itemId = userSet.getItems().get(0);
-    String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
-        itemId, getConfiguration().getSearchApiKey(), getConfiguration().getSearchApiProfileForItemDescriptions());
-    
+    String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(
+        getConfiguration().getSearchApiUrl(), itemId, getConfiguration().getSearchApiKey(),
+        getConfiguration().getSearchApiProfileForItemDescriptions());
+
     WebResource depiction = new WebResource();
     getSearchApiClient().fillDepiction(url, itemId, depiction);
     return depiction;
@@ -1013,11 +1095,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         userSet.setItems(null);
         break;
       default:
-        //currently only one profile for SetResource
-        //update when needed
+        // currently only one profile for SetResource
+        // update when needed
         userSet.setItems(null);
         break;
     }
-    
+
   }
 }

@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,6 @@ import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
-import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
@@ -144,7 +144,7 @@ public class SearchUserSetRest extends BaseRest {
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
           defaultValue = "" + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) int pageSize,
        @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
-       defaultValue = ProfileConstants.VALUE_PARAM_META) String profileStr,
+       defaultValue = ProfileConstants.VALUE_PARAM_ITEMS) String profileStr,
       HttpServletRequest request) throws HttpException {
 
     try {
@@ -161,13 +161,12 @@ public class SearchUserSetRest extends BaseRest {
       List<SetPageProfile> profiles = getProfilesFromRequest(profileStr, request);
       validateMultipleProfiles(profiles, profileStr);
       
-      //TODO: fix
-//      // get profile for pagination urls and item Page
-//      SetPageProfile profile = getUserSetService().getProfileForPagination(profiles);
-//      if(profile == null) {
-//        //if only technical profiles included in request, append the default profile
-//        profiles.add(SetPageProfile.ITEMS_META);
-//      }
+      // get profile for pagination urls and item Page
+      SetPageProfile profile = getUserSetService().getProfileForPagination(profiles);
+      if(profile == null) {
+        //if only technical profiles included in request, append the default profile
+        profiles.add(SetPageProfile.ITEMS);
+      }
 
       // parses and validates qf
       List<String> itemIds = buildItemIdsList(qf);
@@ -187,16 +186,16 @@ public class SearchUserSetRest extends BaseRest {
       }
 
       List<String> filtered;
-      if (itemIds == null) {
-        filtered = existingUserSet.getItems();
-      } else {
+      if (itemIds != null && !itemIds.isEmpty()) {
         filtered = new ArrayList<String>(existingUserSet.getItems());
-        filtered.retainAll(itemIds);
+        filtered.retainAll(itemIds);   
+      } else {
+        filtered = Collections.emptyList();
       }
-
-      ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(identifier,
-          filtered, page, pageSize, request);
-
+ 
+      BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecodsResultsPage(identifier,
+          filtered, page, pageSize, profile, request);
+      
       UserSetLdSerializer serializer = new UserSetLdSerializer();
       String jsonLd = serializer.serialize(resultPage);
 

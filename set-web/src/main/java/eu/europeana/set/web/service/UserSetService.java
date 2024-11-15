@@ -24,7 +24,6 @@ import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
-import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
@@ -160,8 +159,8 @@ public interface UserSetService {
       ResultSet<? extends UserSet> results, String requestUrl, String reqParams,
       List<SetPageProfile> profiles, Authentication authentication) throws HttpException;
 
-  ItemIdsResultPage buildItemIdsResultsPage(String setId, List<String> itemIds, int page,
-      int pageSize, HttpServletRequest request);
+  BaseUserSetResultPage<String> buildRecodsResultsPage(String setId, List<String> itemIds, int page,
+      int pageSize, SetPageProfile profile, HttpServletRequest request) throws HttpException;
 
   CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr,
       int pageSize, HttpServletRequest request) throws HttpException;
