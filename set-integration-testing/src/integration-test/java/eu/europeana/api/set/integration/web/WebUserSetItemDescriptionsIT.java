@@ -23,7 +23,8 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
@@ -65,14 +66,16 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();
 
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+    //without pagination we get the response of the meta profile
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertFalse(StringUtils.contains(result, "\"items\""));
   }
 
   @Test
@@ -84,7 +87,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -135,9 +138,9 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
 
     // get the identifier
-    final int secondPageIndex = UserSetUtils.DEFAULT_PAGE + 1;
+    final int secondPageIndex = WebUserSetFields.DEFAULT_PAGE + 1;
     MvcResult response = mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+        .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS_META.getProfileParamValue())
         .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(secondPageIndex))
         .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
         .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -158,7 +161,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     final String collectionUrl = getUserSetService().buildResultsPageUrl(requestedPage,
         response.getRequest().getQueryString(), null);
     final String resultPageId =
-        getUserSetService().buildPageUrl(collectionUrl, secondPageIndex, 100, LdProfiles.ITEMDESCRIPTIONS);
+        getUserSetService().buildPageUrl(collectionUrl, secondPageIndex, 100, SetPageProfile.ITEMS_META);
     assertTrue(containsKeyOrValue(result, resultPageId));
 
     // check part of ID
@@ -200,7 +203,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     final String firstIndexAfterLastPage = "4";
     MockHttpServletResponse response =
         mockMvc.perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.ITEMDESCRIPTIONS.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS_META.getProfileParamValue())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, firstIndexAfterLastPage)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "100")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)).andReturn().getResponse();
@@ -221,7 +224,8 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, ""+WebUserSetFields.DEFAULT_PAGE)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -230,7 +234,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     //
     String result = response.getContentAsString();
     assertNotNull(result);
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
   // this test is to verify item search for large queries using POST Search API
@@ -242,7 +246,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -275,7 +279,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
         mockMvc
             .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
-                    LdProfiles.ITEMDESCRIPTIONS.name())
+                    ProfileConstants.VALUE_PARAM_ITEMDESCRIPTIONS)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, "1")
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)

@@ -29,7 +29,8 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.exception.request.ItemValidationException;
@@ -183,7 +184,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
 
     String result = mockMvc
         .perform(
-            post(BASE_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.MINIMAL.name())
+            post(BASE_URL)
                 .content(setJson.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
@@ -324,7 +325,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator,
         null, null, 0, 1, getConfiguration());
     ResultSet<? extends UserSet> results = getUserSetService().search(searchQuery, null,
-        Collections.singletonList(LdProfiles.MINIMAL), getAuthentication(regularUserToken));
+        Collections.singletonList(SetPageProfile.ITEMS), getAuthentication(regularUserToken));
     assertEquals(0, results.getResultSize());
   }
 
@@ -417,7 +418,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
 
     String result = mockMvc
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, LdProfiles.STANDARD.name())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()

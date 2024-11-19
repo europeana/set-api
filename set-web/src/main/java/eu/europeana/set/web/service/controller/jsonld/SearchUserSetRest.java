@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -24,14 +25,14 @@ import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
-import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
@@ -60,13 +61,13 @@ public class SearchUserSetRest extends BaseRest {
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sort,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false,
-          defaultValue = "" + UserSetUtils.DEFAULT_PAGE) int page,
+          defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
           defaultValue = "" + CommonApiConstants.DEFAULT_PAGE_SIZE) int pageSize,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_FACET, required = false) String facet,
       @RequestParam(value = "facet.limit", required = false, defaultValue = "50") int facetLimit,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
-          defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profileStr,
+          defaultValue = ProfileConstants.VALUE_PARAM_ITEMS_META) String profileStr,
       HttpServletRequest request) throws HttpException {
 
     try {
@@ -75,11 +76,18 @@ public class SearchUserSetRest extends BaseRest {
       Authentication authentication = verifyReadAccess(request);
 
       // validate params - profile
-      List<LdProfiles> profiles = getProfiles(profileStr, request);
+      List<SetPageProfile> profiles = getProfilesFromRequest(profileStr, request);
+      validateMultipleProfiles(profiles, profileStr);
+   // get profile for pagination urls and item Page
+      SetPageProfile profile = getUserSetService().getProfileForPagination(profiles);
+      if(profile == null) {
+        //if only technical profiles included in request, append the default profile
+        profiles.add(SetPageProfile.ITEMS_META);
+      }
 
       // create facet query and validate facet - if profile is facets
       UserSetFacetQuery facetQuery = null;
-      if (profiles.contains(LdProfiles.FACETS)) {
+      if (profiles.contains(SetPageProfile.FACETS)) {
         facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
       }
       //validate the search params and build the search query
@@ -132,11 +140,11 @@ public class SearchUserSetRest extends BaseRest {
           defaultValue = UserSetQueryBuilder.SEARCH_ALL) String query,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false,
-          defaultValue = "" + UserSetUtils.DEFAULT_PAGE) int page,
+          defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
           defaultValue = "" + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) int pageSize,
-      // @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
-      // defaultValue = CommonApiConstants.PROFILE_STANDARD) String profileStr,
+       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
+       defaultValue = ProfileConstants.VALUE_PARAM_ITEMS) String profileStr,
       HttpServletRequest request) throws HttpException {
 
     try {
@@ -147,6 +155,17 @@ public class SearchUserSetRest extends BaseRest {
         throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
             UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] {"query", query
                 + " Currently only * is supported as query, use qf for provinding the items list."});
+      }
+      
+      // validate params - profile
+      List<SetPageProfile> profiles = getProfilesFromRequest(profileStr, request);
+      validateMultipleProfiles(profiles, profileStr);
+      
+      // get profile for pagination urls and item Page
+      SetPageProfile profile = getUserSetService().getProfileForPagination(profiles);
+      if(profile == null) {
+        //if only technical profiles included in request, append the default profile
+        profiles.add(SetPageProfile.ITEMS);
       }
 
       // parses and validates qf
@@ -167,16 +186,16 @@ public class SearchUserSetRest extends BaseRest {
       }
 
       List<String> filtered;
-      if (itemIds == null) {
-        filtered = existingUserSet.getItems();
-      } else {
+      if (itemIds != null && !itemIds.isEmpty()) {
         filtered = new ArrayList<String>(existingUserSet.getItems());
-        filtered.retainAll(itemIds);
+        filtered.retainAll(itemIds);   
+      } else {
+        filtered = Collections.emptyList();
       }
-
-      ItemIdsResultPage resultPage = getUserSetService().buildItemIdsResultsPage(identifier,
-          filtered, page, pageSize, request);
-
+ 
+      BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecodsResultsPage(identifier,
+          filtered, page, pageSize, profile, request);
+      
       UserSetLdSerializer serializer = new UserSetLdSerializer();
       String jsonLd = serializer.serialize(resultPage);
 

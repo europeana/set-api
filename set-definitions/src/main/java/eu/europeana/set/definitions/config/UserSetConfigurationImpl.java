@@ -2,7 +2,6 @@ package eu.europeana.set.definitions.config;
 
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 public class UserSetConfigurationImpl implements UserSetConfiguration {
 
@@ -15,6 +14,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final int MIN_ITEMS_PER_PAGE = 1;
   public static final int DEFAULT_MAX_GALLERY_SIZE = 100;
   public static final int DEFAULT_MAX_ITEMS_TO_PRESENT = 1000;
+  public static final int DEFAULT_MAX_ITEMS_TO_DEREF = 100;
 
 
   public static final String SET_API_ENDPOINT = "set.api.endpoint.baseUrl";
@@ -106,11 +106,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   }
 
   public int getMaxSearchDereferencedItems() {
-    return Integer.parseInt(getSetProperties().getProperty(KEY_SEARCH_DEREFERENCE_ITEMS));
+    return Integer.parseInt(getSetProperties().getProperty(KEY_SEARCH_DEREFERENCE_ITEMS, ""+DEFAULT_MAX_ITEMS_TO_DEREF));
   }
 
   public int getMaxRetrieveDereferencedItems() {
-    return Integer.parseInt(getSetProperties().getProperty(KEY_RETRIEVE_DEREFERENCE_ITEMS));
+    return Integer.parseInt(getSetProperties().getProperty(KEY_RETRIEVE_DEREFERENCE_ITEMS, ""+DEFAULT_MAX_ITEMS_TO_DEREF));
   }
 
 
@@ -184,7 +184,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   @Override
   public int getMaxPageSize(String profile) {
     // TODO enable configuration per profile when specified
-    String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + LdProfiles.STANDARD.name().toLowerCase();
+    String key = PREFIX_RETRIEVE_MAX_PAGE_SIZE + profile;
     return Integer.parseInt(getSetProperties().getProperty(key, ""+DEFAULT_MAX_ITEMS_TO_PRESENT));
   }
 

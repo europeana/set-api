@@ -2,17 +2,13 @@ package eu.europeana.set.client.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import eu.europeana.set.definitions.model.vocabulary.LdProfiles;
 
 /**
  * This class aims at testing of the annotation methods.
@@ -26,7 +22,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 		
     @Test
     public void createUserSet() throws IOException {
-	String setId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+	String setId = createTestUserSet(USER_SET_CONTENT, null);
 	assertNotNull(setId);
 	getApiClient().deleteUserSet(setId);
     }
@@ -39,29 +35,29 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 	@Test
 	public void retrieveUserSet() throws IllegalArgumentException, IOException {
 		ResponseEntity<String> response;
-		String testSetId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
-		response = getApiClient().getUserSet(testSetId, LdProfiles.MINIMAL.name());
+		response = getApiClient().getUserSet(testSetId, null);
 		validateResponse(response, HttpStatus.OK);
 	}
 	
 	@Test
 	public void updateUserSet() throws IOException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// updated user set value
 		String requestBody = getJsonStringInput(USER_SET_UPDATE_CONTENT);
 		assertNotNull(requestBody);
 		// update user set by identifier URL
 		ResponseEntity<String> updateResponse = getApiClient().updateUserSet(
-			testSetId, requestBody, LdProfiles.STANDARD.name());
+			testSetId, requestBody, null);
 		validateResponse(updateResponse, HttpStatus.OK);
 	}
 	
 	@Test
 	public void deleteUserSet() throws IOException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, LdProfiles.MINIMAL.name());
+		String testSetId = createTestUserSet(USER_SET_CONTENT,null);
 		assertNotNull(testSetId);
 		// delete user set by identifier URL
 		ResponseEntity<String> deleteResponse = getApiClient().deleteUserSet(

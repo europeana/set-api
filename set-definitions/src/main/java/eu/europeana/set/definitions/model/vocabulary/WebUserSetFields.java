@@ -5,9 +5,6 @@ package eu.europeana.set.definitions.model.vocabulary;
  */
 public class WebUserSetFields extends WebUserSetModelFields {
 
-    WebUserSetFields() {
-    }
-
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";
     public static final String USER_SET_APPLICATION_NAME  = "webuserset";
@@ -19,6 +16,8 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String EQUALS_PARAMETER           = "=";
     public static final String JSON_LD_REST               = ".jsonld";
     public static final String FORMAT_JSONLD              = "jsonld";
+    
+    public static final int DEFAULT_PAGE = 1;
 
     // Query Params Constants
     public static final String PATH_PARAM_SET_ID          = "identifier";
@@ -88,4 +87,5 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String PROJECT_EUROPEANA_BASE_URL      = "https://pro.europeana.eu/project/";
     public static final String ENTITY_URI_BASE      = "/base";
 
+    WebUserSetFields() {}
 }
