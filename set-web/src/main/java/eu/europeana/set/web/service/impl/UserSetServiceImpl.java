@@ -249,8 +249,32 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return updatedUserSet;
   }
 
+  private void updateIsShownBy(UserSet userSet, String firstItemOld) {
+    String firstItemNew=null;
+    if(userSet.getItems()!=null && !userSet.getItems().isEmpty()) {
+      firstItemNew=userSet.getItems().get(0);
+    }
+    if(!StringUtils.equals(firstItemOld, firstItemNew)) {
+      try {
+        final WebResource isShownBy = generateDepiction(userSet);
+        userSet.setIsShownBy(isShownBy);
+      } catch (SearchApiClientException e) {
+        if(getLogger().isInfoEnabled()) {
+          getLogger().info("Cannot generate depiciton for set: {}. Exception: {}.", userSet.getIdentifier(), e.getMessage());
+        }
+      }
+    }
+  }
+  
   public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) {
-    boolean itemsRemoved = false;
+    if(existingUserSet.getItems()==null || existingUserSet.getItems().isEmpty()) {
+      return existingUserSet;
+    }
+    
+    //keep the first item to check if it is changed, for the re-creation of the isShownBy field
+    String firstItemOld=existingUserSet.getItems().get(0);
+
+    boolean itemsRemoved=false;
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
       for (String item : items) {
@@ -267,10 +291,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       itemsRemoved = existingUserSet.getItems().removeAll(items);
     }
 
-    UserSet updatedUserSet = existingUserSet;
-    if (itemsRemoved) {
-      // update an existing user set
-      updatedUserSet = writeUserSetToDb(existingUserSet);
+    UserSet updatedUserSet=existingUserSet;
+    if(itemsRemoved) {
+      //update isShownBy
+      updateIsShownBy(updatedUserSet, firstItemOld);
+
+      // update a user set in db
+      updatedUserSet = writeUserSetToDb(updatedUserSet);
     }
 
     // update pagination fields (used only for the response serialization)
@@ -282,34 +309,43 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       UserSet existingUserSet) throws ItemValidationException {
 
     validateItemsStrings(items);
-
-    // check if the position is "pin" and is a EntityBestItem set then
-    // insert the item at the 0 position
-    UserSet userSet;
-
-    if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
-      userSet = updateItemsFromPinned(existingUserSet, items);
-    } else {
-      userSet = updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+    
+    //keep the first item to check if it is changed, for the re-creation of the isShownBy field
+    String firstItemOld=null;
+    if(existingUserSet.getItems()!=null && !existingUserSet.getItems().isEmpty()) {
+      firstItemOld=existingUserSet.getItems().get(0);
     }
-    updatePagination(userSet, getConfiguration());
 
-    return userSet;
-  }
-
-  private UserSet updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
-    List<String> usersetItems = existingUserSet.getItems();
-    if (usersetItems == null) {
-      usersetItems = new ArrayList<>();
+    UserSet userSet; 
+    //update items
+    if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
+      updateItemsFromPinned(existingUserSet, items);
     } else {
-      /*
-       * remove all duplicate items from the set and count the number of removed pinned items, to
-       * change the pinned field
-       */
-      for (String newItem : items) {
-        int itemindex = usersetItems.indexOf(newItem);
-        if (itemindex >= 0) {
-          if (itemindex < existingUserSet.getPinned()) {
+      updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+    }
+    
+    //update isShownBy
+    updateIsShownBy(existingUserSet, firstItemOld);
+    
+    UserSet updatedSet = writeUserSetToDb(existingUserSet);
+    updatePagination(updatedSet, getConfiguration());
+    return updatedSet;
+  }  
+  
+  private void updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
+    List<String> usersetItems=existingUserSet.getItems();
+    if(usersetItems==null) {
+      usersetItems=new ArrayList<>();
+      existingUserSet.setItems(usersetItems);
+    }
+    else {    
+      /*remove all duplicate items from the set and count the number 
+      of removed pinned items, to change the pinned field
+      */
+      for(String newItem : items) {
+        int itemindex=usersetItems.indexOf(newItem);
+        if(itemindex>=0) {
+          if(itemindex < existingUserSet.getPinned()) {
             existingUserSet.setPinned(existingUserSet.getPinned() - 1);
           }
           usersetItems.remove(newItem);
@@ -319,15 +355,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     usersetItems.addAll(0, items);
     existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
-    return writeUserSetToDb(existingUserSet);
   }
-
-  private UserSet updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position)
-      throws ItemValidationException {
-    List<String> usersetItems = existingUserSet.getItems();
-    List<String> newItemsCopy = new ArrayList<>(items);
-    if (usersetItems == null) {
-      usersetItems = new ArrayList<>();
+  
+  private void updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
+    List<String> usersetItems=existingUserSet.getItems();
+    List<String> newItemsCopy=new ArrayList<>(items);
+    if(usersetItems==null) {
+      usersetItems=new ArrayList<>();
+      existingUserSet.setItems(usersetItems);
     } else {
       /*
        * remove from the new items the ones that were pinned before and from the user set the ones
@@ -353,7 +388,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     int positionFinal = calculatePosition(position, usersetItems);
     usersetItems.addAll(positionFinal, items);
-    return writeUserSetToDb(existingUserSet);
   }
 
   /*
@@ -1069,10 +1103,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     String itemId = userSet.getItems().get(0);
-    String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(
-        getConfiguration().getSearchApiUrl(), itemId, getConfiguration().getSearchApiKey(),
+    String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
+        getConfiguration().getItemDataEndpoint(), itemId, getConfiguration().getSearchApiKey(), 
         getConfiguration().getSearchApiProfileForItemDescriptions());
-
+    
     WebResource depiction = new WebResource();
     getSearchApiClient().fillDepiction(url, itemId, depiction);
     return depiction;

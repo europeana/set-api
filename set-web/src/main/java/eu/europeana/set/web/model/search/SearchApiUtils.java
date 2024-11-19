@@ -59,13 +59,14 @@ public class SearchApiUtils {
      * Will create the Search Api post request url
      * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
      * 
-     * @param userSet the user set for which the 
-     * @param apiKey apiKey used to invoke the search api
-     * @param baseSearchApiUrl the base url of the search api
+     * @param baseSearchApiUrl
+     * @param baseItemUrl
+     * @param itemId
+     * @param apiKey
      * @param profile
      * @return
      */
-    public String buildSearchApiUrlForItem(String baseSearchApiUrl, String itemId, String apiKey,  String profile) {
+    public String buildSearchApiUrlForItem(String baseSearchApiUrl, String baseItemUrl, String itemId, String apiKey,  String profile) {
         StringBuilder url = new StringBuilder();
        url.append(getBaseSearchUrl(baseSearchApiUrl));
         
@@ -76,7 +77,7 @@ public class SearchApiUtils {
           url.append('&').append(CommonApiConstants.QUERY_PARAM_PROFILE).append('=').append(profile);
         }
         
-        String europeanaId = UserSetUtils.extractItemIdentifier(itemId);
+        String europeanaId = itemId.startsWith(baseItemUrl) ? UserSetUtils.extractItemIdentifier(itemId) : itemId;
         final String searchQuery = "europeana_id:\"" + europeanaId + "\"";
         url.append("&query=").append(URLEncoder.encode(searchQuery, StandardCharsets.UTF_8));
         
