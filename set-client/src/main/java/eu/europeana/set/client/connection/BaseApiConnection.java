@@ -1,6 +1,8 @@
 package eu.europeana.set.client.connection;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,6 +10,11 @@ import org.springframework.http.ResponseEntity;
 
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import org.springframework.web.util.UriBuilder;
+
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.FACETS;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.*;
 
 public class BaseApiConnection {
 
@@ -126,6 +133,34 @@ public class BaseApiConnection {
 			urlBuilder.append(WebUserSetFields.SLASH);
 
 		return urlBuilder;
+	}
+
+	public static Function<UriBuilder, URI> buildSearchUrl(String query, String[] qf, String sort, int page,
+														   int pageSize, String facet, int facetLimit,
+														   String profile) {
+		return uriBuilder -> {
+			UriBuilder builder =
+					uriBuilder
+							.path(SEARCH_PATH)
+							//.queryParam(WSKEY, wskey)
+							.queryParam(QUERY_PARAM_QUERY, query)
+			                .queryParam(QUERY_PARAM_PAGE, page)
+							.queryParam(QUERY_PARAM_PAGE_SIZE, pageSize);
+			if (qf != null) {
+				builder.queryParam(QUERY_PARAM_QF, qf);
+			}
+			if (sort != null) {
+				builder.queryParam(QUERY_PARAM_SORT, sort);
+			}
+			if (facet != null) {
+				builder.queryParam(QUERY_PARAM_FACET, facet);
+				builder.queryParam("facet.limit", facetLimit);
+			}
+			if (profile != null) {
+				builder.queryParam(QUERY_PARAM_PROFILE, profile);
+			}
+			return builder.build();
+		};
 	}
 
 	public String getApiKey() {

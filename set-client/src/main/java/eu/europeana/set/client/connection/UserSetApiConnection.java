@@ -44,10 +44,6 @@ public class UserSetApiConnection extends BaseApiConnection {
     String resUrl = urlBuilder.toString();
 
     logger.trace("Ivoking create set: {} ", resUrl);
-
-    /**
-     * Execute Europeana API request
-     */
     return postURL(resUrl, set, regularUserAuthorizationValue);
   }
 
@@ -69,10 +65,6 @@ public class UserSetApiConnection extends BaseApiConnection {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-
-    /**
-     * Execute Europeana API request
-     */
     return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 
@@ -97,10 +89,6 @@ public class UserSetApiConnection extends BaseApiConnection {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-
-    /**
-     * Execute Europeana API request
-     */
     return putURL(urlBuilder.toString(), updateUserSet, regularUserAuthorizationValue);
   }
 
@@ -116,13 +104,17 @@ public class UserSetApiConnection extends BaseApiConnection {
 
     StringBuilder urlBuilder = getUserSetServiceUri();
     urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
-
-    /**
-     * Execute Europeana API request
-     */
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 
+  public ResponseEntity<String> searchUserSet(String query, String[] qf, String sort, int page,
+                                              int pageSize, String facet, int facetLimit,
+                                              String profile) throws IOException {
+
+    StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
+    System.out.println(urlBuilder.toString());
+    return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
+  }
 
 
 }

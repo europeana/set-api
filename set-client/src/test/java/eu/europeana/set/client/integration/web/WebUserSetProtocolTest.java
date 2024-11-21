@@ -24,7 +24,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
     public void createUserSet() throws IOException {
 	String setId = createTestUserSet(USER_SET_CONTENT, null);
 	assertNotNull(setId);
-	getApiClient().deleteUserSet(setId);
+	apiClient.getWebUserSetApi().deleteUserSet(setId);
     }
 
 	/**
@@ -38,7 +38,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
-		response = getApiClient().getUserSet(testSetId, null);
+		response = apiClient.getWebUserSetApi().getUserSet(testSetId, null);
 		validateResponse(response, HttpStatus.OK);
 	}
 	
@@ -50,7 +50,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 		String requestBody = getJsonStringInput(USER_SET_UPDATE_CONTENT);
 		assertNotNull(requestBody);
 		// update user set by identifier URL
-		ResponseEntity<String> updateResponse = getApiClient().updateUserSet(
+		ResponseEntity<String> updateResponse = apiClient.getWebUserSetApi().updateUserSet(
 			testSetId, requestBody, null);
 		validateResponse(updateResponse, HttpStatus.OK);
 	}
@@ -60,7 +60,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 		String testSetId = createTestUserSet(USER_SET_CONTENT,null);
 		assertNotNull(testSetId);
 		// delete user set by identifier URL
-		ResponseEntity<String> deleteResponse = getApiClient().deleteUserSet(
+		ResponseEntity<String> deleteResponse = apiClient.getWebUserSetApi().deleteUserSet(
 			testSetId);
 		assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
 	}

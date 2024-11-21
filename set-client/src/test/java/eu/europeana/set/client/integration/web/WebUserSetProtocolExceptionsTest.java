@@ -44,7 +44,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     @Test
     public void createWebsetUserSetWithoutBody() throws IOException {
 
-        ResponseEntity<String> response = getApiClient().createUserSet(
+        ResponseEntity<String> response = apiClient.getWebUserSetApi().createUserSet(
                 null, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -53,7 +53,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     @Test
     public void createWebUserSetWithCorruptedBody() {
-        ResponseEntity<String> response = getApiClient().createUserSet(
+        ResponseEntity<String> response = apiClient.getWebUserSetApi().createUserSet(
                 CORRUPTED_JSON, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -61,7 +61,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     @Test
     public void getWebUserSetWithWrongIdentifier() {
-        ResponseEntity<String> response = getApiClient().getUserSet(
+        ResponseEntity<String> response = apiClient.getWebUserSetApi().getUserSet(
                 WRONG_GENERATED_IDENTIFIER, null);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -70,7 +70,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     public void updateWebsetUserSetWithWrongIdentifierNumber() throws IOException {
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
 
-        ResponseEntity<String> response = getApiClient().updateUserSet(
+        ResponseEntity<String> response = apiClient.getWebUserSetApi().updateUserSet(
                 WRONG_GENERATED_IDENTIFIER
                 , requestBody
                 , null);
@@ -81,7 +81,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     public void updateWebUserSetWithWrongIdentifier() throws IOException {
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
 
-        ResponseEntity<String> response = getApiClient().updateUserSet(
+        ResponseEntity<String> response = apiClient.getWebUserSetApi().updateUserSet(
                 WRONG_GENERATED_IDENTIFIER
                 , requestBody
                 , null);

@@ -28,15 +28,11 @@ public class BaseWebUserSetProtocol {
 	String START = "{";
 	String END = "}";
 
-	private WebUserSetApi apiClient;
+	protected UserSetApiClient apiClient;
 
 	@BeforeEach
 	public void initObjects() throws SetApiClientException {
 		apiClient = new UserSetApiClient(new ClientConfiguration());
-	}
-
-	public WebUserSetApi getApiClient() {
-		return apiClient;
 	}
 
 	/**
@@ -54,7 +50,7 @@ public class BaseWebUserSetProtocol {
 		/**
 		 * store set
 		 */
-		ResponseEntity<String> storedResponse = getApiClient().createUserSet(requestBody, profile);
+		ResponseEntity<String> storedResponse = apiClient.getWebUserSetApi().createUserSet(requestBody, profile);
 		return storedResponse;
 	}
 
@@ -75,14 +71,13 @@ public class BaseWebUserSetProtocol {
 	}
 
 	protected void deleteUserSet(String identifier) throws SetApiClientException {
-		WebUserSetApi webUserSetApi = new UserSetApiClient(new ClientConfiguration());
-		ResponseEntity<String> re = webUserSetApi.deleteUserSet(identifier);
+		ResponseEntity<String> re = apiClient.getWebUserSetApi().deleteUserSet(identifier);
 		assertEquals(HttpStatus.OK, re.getStatusCode());
 		log.trace("User set deleted: /" + identifier);
 	}
 
 	protected ResponseEntity<String> getUserSet(UserSet set) {
-		return getApiClient().getUserSet(set.getIdentifier(), null);
+		return apiClient.getWebUserSetApi().getUserSet(set.getIdentifier(), null);
 	}
 	
 	
