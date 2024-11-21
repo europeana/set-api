@@ -558,36 +558,42 @@ public class WebUserSetRest extends BaseRest {
       Authentication authentication, String identifier, List<String> items, String position)
       throws HttpException {
     try {
-      // check if the Set exists, if not respond with HTTP 404
+      // 3. check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+      //4. check if user is authorized check visibility level for given user
+      getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
+
+      //5. assign contribtor for entityBestItemsSet 
+      // for entity user sets, add users with 'editor' role as contributors
+      addContributorForEntitySet(existingUserSet, authentication);
+
+      
+      //6. check if set is closed
       if (existingUserSet.isOpenSet()) {
         // cannot add items to open sets
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"'Insert item to existing user set'", "open"});
       }
 
+      //9. verify if possition is higher than pinned
+      int itemsPosition = parseAndValidateItemPosition(position, existingUserSet);
+      //7. verify size for Galleries
+      //TODO
+
+      //8. pinned is available only for entityBestItemsSet
       // if set is not entity best item set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
           && StringUtils.equals(position, PINNED_POSITION)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
-
-      int itemsPosition = parseItemsPosition(position);
-      if (!StringUtils.equals(position, WebUserSetModelFields.PINNED) && itemsPosition >= 0
-          && itemsPosition < existingUserSet.getPinned()) {
-        throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION,
-            null);
-      }
-
-      // check visibility level for given user
-      getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
-
-      // for entity user sets, add users with 'editor' role as contributors
-      addContributorForEntitySet(existingUserSet, authentication);
-
+      
+      
+      //TODO
+      
+      
       // check timestamp if provided within the “If-Match” HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
@@ -617,6 +623,17 @@ public class WebUserSetRest extends BaseRest {
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
     }
+  }
+
+  private int parseAndValidateItemPosition(String position, UserSet existingUserSet)
+      throws ParamValidationException, RequestValidationException {
+    int itemsPosition = parseItemsPosition(position);
+    if (!StringUtils.equals(position, WebUserSetModelFields.PINNED) && itemsPosition >= 0
+        && itemsPosition < existingUserSet.getPinned()) {
+      throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION,
+          null);
+    }
+    return itemsPosition;
   }
 
   // returns -1 if not provided
