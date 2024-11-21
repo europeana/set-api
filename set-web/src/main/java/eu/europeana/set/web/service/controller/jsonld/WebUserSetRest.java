@@ -492,11 +492,7 @@ public class WebUserSetRest extends BaseRest {
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
-      if (existingUserSet.isOpenSet()) {
-        // cannot add items to open sets
-        throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
-            new String[] {"'Insert item to existing user set'", "open"});
-      }
+      verifyIfClosedSet(existingUserSet);
 
       // if set is not entity set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
@@ -571,13 +567,8 @@ public class WebUserSetRest extends BaseRest {
 
       
       //6. check if set is closed
-      if (existingUserSet.isOpenSet()) {
-        // cannot add items to open sets
-        throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
-            new String[] {"'Insert item to existing user set'", "open"});
-      }
+      verifyIfClosedSet(existingUserSet);
 
-      //9. verify if possition is higher than pinned
       int itemsPosition = parseAndValidateItemPosition(position, existingUserSet);
       //7. verify size for Galleries
       //TODO
@@ -590,7 +581,7 @@ public class WebUserSetRest extends BaseRest {
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
       
-      
+      //9. verify if possition is higher than pinned
       //TODO
       
       
@@ -622,6 +613,14 @@ public class WebUserSetRest extends BaseRest {
       throw e;
     } catch (RuntimeException | IOException e) {
       throw new InternalServerException(e);
+    }
+  }
+
+  private void verifyIfClosedSet(UserSet existingUserSet) throws RequestValidationException {
+    if (existingUserSet.isOpenSet()) {
+      // cannot add items to open sets
+      throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+          new String[] {"'Insert item to existing user set'", "open"});
     }
   }
 
@@ -850,18 +849,24 @@ public class WebUserSetRest extends BaseRest {
   protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication,
       String identifier, List<String> items) throws HttpException {
     try {
-      // check if the Set exists, if not respond with HTTP 404
+      //3. check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
+      //4. Check if the Set it is a closed set
+      verifyIfClosedSet(existingUserSet);
+      
+      //5. Check if the user is authorised
       // check if the user is the owner/creator of the set or admin,
       // OR Editor for Entity sets, otherwise respond with
       // 403
       getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
 
+      //6. If the “type” of the set is “EntityBestItemsSet” assign the user associated to the JWT token
       // for entity user sets, add users with 'editor' role as contributors
       addContributorForEntitySet(existingUserSet, authentication);
 
+      //7. & 8. remove items, update pinned, update modified
       UserSet updatedUserSet = getUserSetService().deleteMultipleItems(items, existingUserSet);
 
       // serialize to JsonLd

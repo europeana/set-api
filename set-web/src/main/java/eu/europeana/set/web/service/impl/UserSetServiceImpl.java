@@ -281,14 +281,16 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       for (String item : items) {
         int currentPosition = existingUserSet.getItems().indexOf(item);
         if (currentPosition >= 0) {
-          itemsRemoved = true;
           if (currentPosition < existingUserSet.getPinned()) {
-            existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+            //decrease counter when removing pinned items
+            existingUserSet.descreasePinned(1);
           }
           existingUserSet.getItems().remove(item);
+          itemsRemoved = true;
         }
       }
     } else {
+      //remove 
       itemsRemoved = existingUserSet.getItems().removeAll(items);
     }
 
@@ -297,7 +299,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // update isShownBy
       updateIsShownBy(updatedUserSet, firstItemOld);
 
-      // update a user set in db
+      // update a user set in db (including modified and total)
       updatedUserSet = writeUserSetToDb(updatedUserSet);
     }
 
