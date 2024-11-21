@@ -177,15 +177,16 @@ public class WebUserSetRest extends BaseRest {
     if (profiles.isEmpty()) {
       profiles.add(SetPageProfile.ITEMS);
     }
-    
+
     validateMultipleProfiles(profiles, profile);
-    SetPageProfile searializationProfile = getUserSetService().getProfileForPagination(profiles);   
-    
-    pageNr =
-        parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1, WebUserSetFields.DEFAULT_PAGE);
+    SetPageProfile searializationProfile = getUserSetService().getProfileForPagination(profiles);
+
+    pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1,
+        WebUserSetFields.DEFAULT_PAGE);
     pageNr = (pageNr == null) ? Integer.valueOf(WebUserSetFields.DEFAULT_PAGE) : pageNr;
-    int maxPageSize = getConfiguration().getMaxPageSize(searializationProfile.getProfileParamValue());
-    
+    int maxPageSize =
+        getConfiguration().getMaxPageSize(searializationProfile.getProfileParamValue());
+
     pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize,
         UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
     pageItems =
@@ -524,7 +525,8 @@ public class WebUserSetRest extends BaseRest {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED,
+          SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
@@ -558,39 +560,43 @@ public class WebUserSetRest extends BaseRest {
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
-      //4. check if user is authorized check visibility level for given user
+      // 4. check if user is authorized check visibility level for given user
       getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
 
-      //5. assign contribtor for entityBestItemsSet 
+      // 5. assign contribtor for entityBestItemsSet
       // for entity user sets, add users with 'editor' role as contributors
       addContributorForEntitySet(existingUserSet, authentication);
 
-      
-      //6. check if set is closed
+
+      // 6. check if set is closed
       verifyIfClosedSet(existingUserSet);
 
       int itemsPosition = parseAndValidateItemPosition(position, existingUserSet);
-      //7. verify size for Galleries
-      //TODO
 
-      //8. pinned is available only for entityBestItemsSet
+      // 8. pinned is available only for entityBestItemsSet
       // if set is not entity best item set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
           && StringUtils.equals(position, PINNED_POSITION)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
-      
-      //9. verify if possition is higher than pinned
-      //TODO
-      
-      
+
+      // 9. verify if position is higher than pinned
+      if (!WeUserSetRequestUtils.isPinnRequest(position) && itemsPosition > -1
+          && itemsPosition < existingUserSet.getPinned()) {
+        throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+            new String[] {"Position smaller than pinned is not allowed for non pin request!",
+                itemsPosition + " < " + existingUserSet.getPinned()});
+      }
+
+
       // check timestamp if provided within the “If-Match” HTTP header, if false
       // respond with HTTP 412
       String eTagOrigin =
           generateETag(existingUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
       checkIfMatchHeader(eTagOrigin, request);
 
+      // 7. (verify size for Galleries) & 11-13. (process items)
       UserSet updatedUserSet =
           getUserSetService().insertMultipleItems(items, position, itemsPosition, existingUserSet);
 
@@ -602,7 +608,8 @@ public class WebUserSetRest extends BaseRest {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(UserSetHttpHeaders.VARY, HttpHeaders.PREFER);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED,
+          SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
 
@@ -819,7 +826,8 @@ public class WebUserSetRest extends BaseRest {
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED,
+          SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
 
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
@@ -849,24 +857,25 @@ public class WebUserSetRest extends BaseRest {
   protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication,
       String identifier, List<String> items) throws HttpException {
     try {
-      //3. check if the Set exists, if not respond with HTTP 404
+      // 3. check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
       UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 
-      //4. Check if the Set it is a closed set
+      // 4. Check if the Set it is a closed set
       verifyIfClosedSet(existingUserSet);
-      
-      //5. Check if the user is authorised
+
+      // 5. Check if the user is authorised
       // check if the user is the owner/creator of the set or admin,
       // OR Editor for Entity sets, otherwise respond with
       // 403
       getUserSetService().verifyPermissionToUpdate(existingUserSet, authentication, true);
 
-      //6. If the “type” of the set is “EntityBestItemsSet” assign the user associated to the JWT token
+      // 6. If the “type” of the set is “EntityBestItemsSet” assign the user associated to the JWT
+      // token
       // for entity user sets, add users with 'editor' role as contributors
       addContributorForEntitySet(existingUserSet, authentication);
 
-      //7. & 8. remove items, update pinned, update modified
+      // 7. & 8. remove items, update pinned, update modified
       UserSet updatedUserSet = getUserSetService().deleteMultipleItems(items, existingUserSet);
 
       // serialize to JsonLd
@@ -879,7 +888,8 @@ public class WebUserSetRest extends BaseRest {
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
-      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, SetPageProfile.META.getPreferenceApplied());
+      headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED,
+          SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
 
       return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, HttpStatus.OK);
