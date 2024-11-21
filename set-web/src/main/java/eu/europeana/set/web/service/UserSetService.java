@@ -142,7 +142,7 @@ public interface UserSetService {
 
   UserSet deleteItem(String item, UserSet existingUserSet);
 
-  UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet);
+  UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) throws ItemValidationException;
 
   /**
    * search user sets using the given query and profile

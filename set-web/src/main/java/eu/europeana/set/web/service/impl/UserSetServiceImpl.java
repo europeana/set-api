@@ -267,20 +267,22 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
   }
 
-  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) {
+  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) throws ItemValidationException {
     if (existingUserSet.getItems() == null || existingUserSet.getItems().isEmpty()) {
       return existingUserSet;
     }
 
     // keep the first item to check if it is changed, for the re-creation of the isShownBy field
     String firstItemOld = existingUserSet.getItems().get(0);
-
+    //convert to full URIs if needed
+    List<String> fullUriItems = validateItemsStrings(items);
+    
     boolean itemsRemoved = false;
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
-      for (String item : items) {
+      for (String item : fullUriItems) {
         int currentPosition = existingUserSet.getItems().indexOf(item);
-        if (currentPosition >= 0) {
+        if (currentPosition > -1) {
           if (currentPosition < existingUserSet.getPinned()) {
             //decrease counter when removing pinned items
             existingUserSet.descreasePinned(1);
@@ -383,7 +385,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // append pinned at the beginning
       existingUserSet.getItems().addAll(0, items);
       existingUserSet.increasePinned(items.size());
-    } else if (position < 0 || position >= existingUserSet.getItems().size()) {
+    } else if (position > -1 && position < existingUserSet.getItems().size()) {
       // append at given position
       existingUserSet.getItems().addAll(position, items);
     } else {
