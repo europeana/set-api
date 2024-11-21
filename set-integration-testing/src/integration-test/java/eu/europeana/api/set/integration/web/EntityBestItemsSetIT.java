@@ -482,7 +482,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
     //check for the new items
     assertEquals(0, existingUserSet.getItems().indexOf(item1));
-    assertEquals(1, existingUserSet.getItems().indexOf(item2));
+    String item2FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item2);
+    assertEquals(1, existingUserSet.getItems().indexOf(item2FullUrl));
     assertEquals(2, existingUserSet.getPinned());
     assertEquals(4, existingUserSet.getItems().size());
 
@@ -493,11 +494,13 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item4Existing=existingUserSet.getItems().get(2);
     newItems.add(item4Existing);
     newItems.add(item3);
-    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.PINNED_POSITION, -1, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.PINNED_POSITION, -1, existingUserSet);
+     
     //check the new items
-    assertEquals(0, existingUserSet.getItems().indexOf(item2));
+    assertEquals(0, existingUserSet.getItems().indexOf(item2FullUrl));
     assertEquals(1, existingUserSet.getItems().indexOf(item4Existing));
-    assertEquals(2, existingUserSet.getItems().indexOf(item3));
+    String item3FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item3);
+    assertEquals(2, existingUserSet.getItems().indexOf(item3FullUrl));
     assertEquals(3, existingUserSet.getItems().indexOf(item1));
     assertEquals(4, existingUserSet.getPinned());
     assertEquals(5, existingUserSet.getItems().size());
@@ -510,14 +513,16 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.add(item5);
     String item6Existing=existingUserSet.getItems().get(4);
     newItems.add(item6Existing);
-    getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet);
-    //check the new items
-    assertEquals(0, existingUserSet.getItems().indexOf(item2));
-    assertEquals(1, existingUserSet.getItems().indexOf(item4Existing));
-    assertEquals(2, existingUserSet.getItems().indexOf(item3));
-    assertEquals(3, existingUserSet.getItems().indexOf(item1));
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet);
+    
     assertEquals(4, existingUserSet.getPinned());
-    assertEquals(4, existingUserSet.getItems().indexOf(item5));
+    //check the new items
+    assertEquals(0, existingUserSet.getItems().indexOf(item2FullUrl));
+    assertEquals(1, existingUserSet.getItems().indexOf(item4Existing));
+    assertEquals(2, existingUserSet.getItems().indexOf(item3FullUrl));
+    assertEquals(3, existingUserSet.getItems().indexOf(item1));
+    String item5FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item5);
+    assertEquals(4, existingUserSet.getItems().indexOf(item5FullUrl));
     assertEquals(5, existingUserSet.getItems().indexOf(item6Existing));
     assertEquals(4, existingUserSet.getPinned());
     assertEquals(6, existingUserSet.getItems().size());
@@ -526,18 +531,20 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.clear();
     String item7="/07/123_unPinnedItem";
     newItems.add(item7);
-    getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet);
     //check the new items
-    assertEquals(6, existingUserSet.getItems().indexOf(item7));
+    String item7FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item7);
+    assertEquals(6, existingUserSet.getItems().indexOf(item7FullUrl));
     assertEquals(4, existingUserSet.getPinned());
     assertEquals(7, existingUserSet.getItems().size());
     //insert item to the position grater than the total size of items
     newItems.clear();
     String item8="/08/123_unPinnedItem";
     newItems.add(item8);
-    getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet);
     //check the new items
-    assertEquals(7, existingUserSet.getItems().indexOf(item8));
+    String item8FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item8);
+    assertEquals(7, existingUserSet.getItems().indexOf(item8FullUrl));
     assertEquals(4, existingUserSet.getPinned());
     assertEquals(8, existingUserSet.getItems().size());
         

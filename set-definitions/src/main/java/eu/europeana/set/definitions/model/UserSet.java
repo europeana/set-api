@@ -35,6 +35,10 @@ public interface UserSet extends PageInfo {
     int getPinned();
 
     void setPinned(int pinned);
+    
+    void increasePinned(int count);
+    
+    void descreasePinned(int count);
 
     List<String> getContributor();
 

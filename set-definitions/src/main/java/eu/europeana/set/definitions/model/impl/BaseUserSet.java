@@ -336,4 +336,12 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     public void setIsShownBy(BaseWebResource isShownBy) {
       this.isShownBy = isShownBy;
     }
+    
+    public void increasePinned(int count) {
+      this.pinned += count;
+    }
+    
+    public void descreasePinned(int count) {
+      this.pinned = Math.max(0, pinned - count);
+    }
 }
