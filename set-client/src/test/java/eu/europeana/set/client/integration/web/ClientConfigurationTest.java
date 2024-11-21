@@ -11,8 +11,9 @@ public class ClientConfigurationTest {
 
     @Test
     public void clientConfiguration_loadProperties() {
-        assertTrue(StringUtils.isNotEmpty(ClientConfiguration.getInstance().getOauthRequestParams()));
-        assertTrue(StringUtils.isNotEmpty(ClientConfiguration.getInstance().getServiceUri()));
-        assertTrue(StringUtils.isNotEmpty(ClientConfiguration.getInstance().getOauthServiceUri()));
+        ClientConfiguration configuration = new ClientConfiguration();
+        assertTrue(StringUtils.isNotEmpty(configuration.getOauthRequestParams()));
+        assertTrue(StringUtils.isNotEmpty(configuration.getServiceUri()));
+        assertTrue(StringUtils.isNotEmpty(configuration.getOauthServiceUri()));
     }
 }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import eu.europeana.set.client.config.ClientConfiguration;
+import eu.europeana.set.client.exception.SetApiClientException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import eu.europeana.set.client.web.WebUserSetApi;
-import eu.europeana.set.client.web.WebUserSetApiImpl;
+import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.definitions.model.UserSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,8 +31,8 @@ public class BaseWebUserSetProtocol {
 	private WebUserSetApi apiClient;
 
 	@BeforeEach
-	public void initObjects() {
-		apiClient = new WebUserSetApiImpl();
+	public void initObjects() throws SetApiClientException {
+		apiClient = new UserSetApiClient(new ClientConfiguration());
 	}
 
 	public WebUserSetApi getApiClient() {
@@ -68,15 +70,12 @@ public class BaseWebUserSetProtocol {
 
 	}
 
-	/**
-	 * @param user set
-	 */
-	protected void deleteUserSet(UserSet set) {
+	protected void deleteUserSet(UserSet set) throws SetApiClientException {
 		deleteUserSet(set.getIdentifier());
 	}
 
-	protected void deleteUserSet(String identifier) {
-		WebUserSetApi webUserSetApi = new WebUserSetApiImpl();
+	protected void deleteUserSet(String identifier) throws SetApiClientException {
+		WebUserSetApi webUserSetApi = new UserSetApiClient(new ClientConfiguration());
 		ResponseEntity<String> re = webUserSetApi.deleteUserSet(identifier);
 		assertEquals(HttpStatus.OK, re.getStatusCode());
 		log.trace("User set deleted: /" + identifier);

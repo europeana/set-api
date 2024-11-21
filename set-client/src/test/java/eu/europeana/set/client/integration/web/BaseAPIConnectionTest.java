@@ -10,18 +10,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Disabled("needs configuration file")
 public class BaseAPIConnectionTest {
-
-
     private static final String SERVICE_URI     = "testUri";
     private static final String API_KEY_1       = "api_key";
-    private static final String API_KEY_2       = "test_api_key";
     private static final String API_ADMIN_KEY   = "apiadmin";
 
     private BaseApiConnection baseApiConnection;
 
     @BeforeEach
     void setup() {
-     baseApiConnection = new BaseApiConnection(SERVICE_URI, API_KEY_1);
+     baseApiConnection = new BaseApiConnection(SERVICE_URI, API_KEY_1, null);
     }
 
     @Test
@@ -30,14 +27,12 @@ public class BaseAPIConnectionTest {
         assertEquals(SERVICE_URI + WebUserSetFields.SLASH, result.toString());
 
         result = new StringBuilder();
-        baseApiConnection = new BaseApiConnection(SERVICE_URI + WebUserSetFields.SLASH, API_KEY_1);
+        baseApiConnection = new BaseApiConnection(SERVICE_URI + WebUserSetFields.SLASH, API_KEY_1, null);
         result = baseApiConnection.getUserSetServiceUri();
         assertEquals(SERVICE_URI + WebUserSetFields.SLASH, result.toString());
 
         assertEquals(API_KEY_1, baseApiConnection.getApiKey());
         assertEquals(API_ADMIN_KEY, baseApiConnection.getAdminApiKey());
-        baseApiConnection.setApiKey(API_KEY_2);
-        assertEquals(API_KEY_2, baseApiConnection.getApiKey());
     }
 
 }

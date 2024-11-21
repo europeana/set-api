@@ -17,58 +17,24 @@ public class BaseApiConnection {
 	private static final String DELETE_URL_RESPONSE = ". Returns headers and status code.";
 	private static final String API_ADMIN_KEY       = "apiadmin";
 
-	private String apiKey;
-	private String setServiceUri = "";
 	private HttpConnection httpConnection = new HttpConnection();
+	private String apiKey;
+	private String setServiceUri;
+	String regularUserAuthorizationValue = null;
 
-
-	public String getApiKey() {
-		return apiKey;
+	public BaseApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
+		this.setServiceUri = setServiceUri;
+		this.apiKey = apiKey;
+		this.regularUserAuthorizationValue = regularUserAuthorizationValue;
 	}
-
 	public String getAdminApiKey() {
 		return API_ADMIN_KEY;
-	}
-	
-	public void setApiKey(String apiKey) {
-		this.apiKey = apiKey;
-	}
-
-	public StringBuilder getUserSetServiceUri() {
-		StringBuilder urlBuilder = new StringBuilder();	
-		urlBuilder.append(setServiceUri);		
-		
-		if(!setServiceUri.endsWith(WebUserSetFields.SLASH))
-			urlBuilder.append(WebUserSetFields.SLASH);
-		
-		return urlBuilder;
-	}
-
-	public void setUserSetServiceUri(String setServiceUri) {
-		this.setServiceUri = setServiceUri;
 	}
 
 	public HttpConnection getHttpConnection() {
 		return httpConnection;
 	}
 
-	public void setHttpConnection(HttpConnection httpConnection) {
-		this.httpConnection = httpConnection;
-	}
-	
-
-	/**
-	 * Create a new connection to the UserSet Service (REST API).
-	 * 
-	 * @param apiKey
-	 *            API Key required to access the API
-	 */
-	public BaseApiConnection(String setServiceUri, String apiKey) {
-		this.apiKey = apiKey;
-		this.setServiceUri = setServiceUri;
-	}
-	
-	
 	/**
 	 * This method makes POST request for given URL, header and JSON body parameter that returns
 	 * response body, response headers and status code.
@@ -152,5 +118,21 @@ public class BaseApiConnection {
 		logger.trace("Call to UserSet API (DELETE): {}. Returns headers and status code.", url);
 		return getHttpConnection().deleteURL(url, authorizationHeaderValue);
 	}
-		
+
+	public StringBuilder getUserSetServiceUri() {
+		StringBuilder urlBuilder = new StringBuilder();
+		urlBuilder.append(this.setServiceUri);
+		if(!this.setServiceUri.endsWith(WebUserSetFields.SLASH))
+			urlBuilder.append(WebUserSetFields.SLASH);
+
+		return urlBuilder;
+	}
+
+	public String getApiKey() {
+		return apiKey;
+	}
+
+	public String getSetServiceUri() {
+		return setServiceUri;
+	}
 }

@@ -18,57 +18,10 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
  */
 public class UserSetApiConnection extends BaseApiConnection {
 
-  String regularUserAuthorizationValue = null;
-
-  /**
-   * Create a new connection to the UserSet Service (REST API).
-   *
-   * @param apiKey API Key required to access the API
-   */
-  public UserSetApiConnection(String setServiceUri, String apiKey) {
-    super(setServiceUri, apiKey);
-    initConfigurations();
+  public UserSetApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
+   super(setServiceUri, apiKey, regularUserAuthorizationValue);
   }
 
-  public UserSetApiConnection() {
-    this(ClientConfiguration.getInstance().getServiceUri(),
-        ClientConfiguration.getInstance().getApiKey());
-    initConfigurations();
-  }
-
-  private void initConfigurations() {
-    // regularUserAuthorizationValue =
-    // ClientConfiguration.getInstance().getAuthorizationHeaderValue();
-    regularUserAuthorizationValue = getOauthToken();
-  }
-
-  public String getOauthToken() {
-    try {
-
-      String ACCESS_TOKEN = "access_token";
-      String oauthUri = ClientConfiguration.getInstance().getOauthServiceUri();
-      String oauthParams = ClientConfiguration.getInstance().getOauthRequestParams();
-      HttpConnection connection = new HttpConnection();
-      ResponseEntity<String> response;
-      response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded");
-
-      if (HttpStatus.OK == response.getStatusCode()) {
-        String body = response.getBody();
-        JSONObject json = new JSONObject(body);
-        if (json.has(ACCESS_TOKEN)) {
-          return "Bearer " + json.getString(ACCESS_TOKEN);
-        } else {
-          throw new TechnicalRuntimeException(
-              "Cannot extract authentication token from reponse:" + body);
-        }
-      } else {
-        throw new TechnicalRuntimeException("Error occured when calling oath service! " + response);
-      }
-    } catch (IOException | JSONException e) {
-      throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);
-    }
-
-  }
 
   /**
    * This method creates UserSet object from Json string. Example HTTP request for tag object:
@@ -169,5 +122,7 @@ public class UserSetApiConnection extends BaseApiConnection {
      */
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
+
+
 
 }
