@@ -10,9 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * configuration for accessing remote api
- * 
  * @author GordeaS
- *
  */
 
 public final class ClientConfiguration {

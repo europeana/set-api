@@ -107,6 +107,20 @@ public class UserSetApiConnection extends BaseApiConnection {
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 
+  /**
+   * This method searches usersets for the given queries and params
+   * Example : /set/search?query=visibility:published&pageSize=1000
+   * @param query
+   * @param qf
+   * @param sort
+   * @param page
+   * @param pageSize
+   * @param facet
+   * @param facetLimit
+   * @param profile
+   * @return
+   * @throws IOException
+   */
   public ResponseEntity<String> searchUserSet(String query, String[] qf, String sort, int page,
                                               int pageSize, String facet, int facetLimit,
                                               String profile) throws IOException {
@@ -115,6 +129,4 @@ public class UserSetApiConnection extends BaseApiConnection {
     System.out.println(urlBuilder.toString());
     return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
-
-
 }

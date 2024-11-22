@@ -2,6 +2,11 @@ package eu.europeana.set.client.web;
 
 import org.springframework.http.ResponseEntity;
 
+/**
+ * Search Client API interface
+ * @author Srishti singh
+ * @since 20 Nov 2024
+ */
 public interface SearchUserSetApi {
 
     /**

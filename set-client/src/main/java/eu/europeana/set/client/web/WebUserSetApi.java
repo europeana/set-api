@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 /**
  * Client API interface
  * @author GordeaS
- *
  */
 public interface WebUserSetApi {
 

@@ -12,7 +12,6 @@ import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.springframework.web.util.UriBuilder;
 
-import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.FACETS;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
 import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.*;
 
@@ -27,13 +26,15 @@ public class BaseApiConnection {
 	private HttpConnection httpConnection = new HttpConnection();
 	private String apiKey;
 	private String setServiceUri;
-	String regularUserAuthorizationValue = null;
+	String regularUserAuthorizationValue;
 
 	public BaseApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
 		this.setServiceUri = setServiceUri;
 		this.apiKey = apiKey;
 		this.regularUserAuthorizationValue = regularUserAuthorizationValue;
 	}
+
+	// getters
 	public String getAdminApiKey() {
 		return API_ADMIN_KEY;
 	}
@@ -47,7 +48,7 @@ public class BaseApiConnection {
 	 * response body, response headers and status code.
 	 * @param url
 	 * @param jsonPost
-         * @param requestHeaderValue
+	 * @param headerValue
 	 * @return The response body, response headers and status code.
 	 * @throws IOException
 	 */
@@ -126,6 +127,9 @@ public class BaseApiConnection {
 		return getHttpConnection().deleteURL(url, authorizationHeaderValue);
 	}
 
+	/**
+	 * Fetches the Set api service url with "/" at the end
+	 */
 	public StringBuilder getUserSetServiceUri() {
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(this.setServiceUri);
@@ -135,6 +139,18 @@ public class BaseApiConnection {
 		return urlBuilder;
 	}
 
+	/**
+	 * Builds search url with the given params
+	 * @param query
+	 * @param qf
+	 * @param sort
+	 * @param page
+	 * @param pageSize
+	 * @param facet
+	 * @param facetLimit
+	 * @param profile
+	 * @return
+	 */
 	public static Function<UriBuilder, URI> buildSearchUrl(String query, String[] qf, String sort, int page,
 														   int pageSize, String facet, int facetLimit,
 														   String profile) {
