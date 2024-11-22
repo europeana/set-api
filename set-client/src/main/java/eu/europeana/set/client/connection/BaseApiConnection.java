@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.function.Function;
 
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
 import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.*;
@@ -140,6 +142,21 @@ public class BaseApiConnection {
 	}
 
 	/**
+	 * Build get user Set get Url
+	 * @param path
+	 * @param profile
+	 * @return
+	 */
+	public static URI buildGetUrls(String path, String profile, String apikey) {
+		UriBuilder builder = UriComponentsBuilder.newInstance().path(path)
+				.queryParam(CommonApiConstants.PARAM_WSKEY, apikey); // by default pass apikey. If in case outh token is null apikey can be used to authenticate;
+		if (profile != null) {
+			builder.queryParam(QUERY_PARAM_PROFILE, profile);
+		}
+		return builder.build();
+	}
+
+	/**
 	 * Builds search url with the given params
 	 * @param query
 	 * @param qf
@@ -151,17 +168,15 @@ public class BaseApiConnection {
 	 * @param profile
 	 * @return
 	 */
-	public static Function<UriBuilder, URI> buildSearchUrl(String query, String[] qf, String sort, int page,
+	public static URI buildSearchUrl(String query, String[] qf, String sort, int page,
 														   int pageSize, String facet, int facetLimit,
-														   String profile) {
-		return uriBuilder -> {
-			UriBuilder builder =
-					uriBuilder
-							.path(SEARCH_PATH)
-							//.queryParam(WSKEY, wskey)
-							.queryParam(QUERY_PARAM_QUERY, query)
-			                .queryParam(QUERY_PARAM_PAGE, page)
-							.queryParam(QUERY_PARAM_PAGE_SIZE, pageSize);
+														   String profile, String apikey) {
+		UriBuilder builder = UriComponentsBuilder.newInstance().path(SEARCH_PATH)
+				.queryParam(QUERY_PARAM_QUERY, query)
+				.queryParam(QUERY_PARAM_PAGE, page)
+				.queryParam(QUERY_PARAM_PAGE_SIZE, pageSize)
+				.queryParam(CommonApiConstants.PARAM_WSKEY, apikey); // by default pass apikey. If in case outh token is null apikey can be used to authenticate
+
 			if (qf != null) {
 				builder.queryParam(QUERY_PARAM_QF, qf);
 			}
@@ -176,7 +191,6 @@ public class BaseApiConnection {
 				builder.queryParam(QUERY_PARAM_PROFILE, profile);
 			}
 			return builder.build();
-		};
 	}
 
 	public String getApiKey() {

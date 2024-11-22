@@ -57,14 +57,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @throws IOException
    */
   public ResponseEntity<String> getUserSet(String identifier, String profile) throws IOException {
-
-    StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
-    if (StringUtils.isNotEmpty(profile)) {
-      urlBuilder.append(WebUserSetFields.PAR_CHAR);
-      urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
-          .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
-    }
+    StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile, getApiKey()));
     return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 
@@ -125,7 +118,7 @@ public class UserSetApiConnection extends BaseApiConnection {
                                               int pageSize, String facet, int facetLimit,
                                               String profile) throws IOException {
 
-    StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
+    StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile, getApiKey()));
     System.out.println(urlBuilder.toString());
     return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }

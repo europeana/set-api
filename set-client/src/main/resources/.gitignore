@@ -1,4 +1,4 @@
-set.client.properties
+set-client.properties
 **user.properties.template
 /log4j.xml
 /log4j2.xml
