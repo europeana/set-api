@@ -153,7 +153,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().isBadRequest());
   }
 
-  @Test
+  //@Test
+  //@Disabled("Items are now ignored in the create request")
   public void create_UserSet_InvalidItems() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
     mockMvc
@@ -176,7 +177,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
   
-  @Test
+  //@Test
+//  @Disabled("Items are now ignored in the create request")
   void create_Collection_numberOfItemsLimit() throws Exception {
     String setJsonInit = getJsonStringInput(USER_SET_LARGE);
     JSONObject setJson=new JSONObject(setJsonInit);
