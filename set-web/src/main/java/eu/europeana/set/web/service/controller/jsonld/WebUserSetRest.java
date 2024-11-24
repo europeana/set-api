@@ -103,6 +103,11 @@ public class WebUserSetRest extends BaseRest {
 
       // parse user set
       UserSet webUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
+      
+      //ignore items submitted in request
+      if(webUserSet.getItems() != null) {
+        webUserSet.setItems(null);
+      }
 
       // validate and process the Set description for format and mandatory fields
       // if false respond with HTTP 400
@@ -729,7 +734,7 @@ public class WebUserSetRest extends BaseRest {
       // check if item already exists in the Set, if so respond with
       // HTTP 200, otherwise respond with HTTP 404.
       // check if item already exists in the Set, if so remove it
-      if (existingUserSet.getItems().contains(newItem)) {
+      if (existingUserSet.getItems()!=null && existingUserSet.getItems().contains(newItem)) {
         httpStatus = HttpStatus.NO_CONTENT;
       } else {
         httpStatus = HttpStatus.NOT_FOUND;
