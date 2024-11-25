@@ -92,7 +92,7 @@ public class UserSetApiClient extends BaseUserSetApi {
 		}
 	}
 
-	public class SearchUserSetClient implements SearchUserSetApi {
+	private class SearchUserSetClient implements SearchUserSetApi {
 
 		@Override
 		public ResponseEntity<String> searchUserSet(String query, String[] qf,
