@@ -14,7 +14,7 @@ public interface WebUserSetApi {
 	 * @param profile
 	 * @return response entity containing body, headers and status code.
 	 */
-	public ResponseEntity<String> createUserSet(
+	ResponseEntity<String> createUserSet(
 			String requestBody, String profile);
 	
 	/**
@@ -24,7 +24,7 @@ public interface WebUserSetApi {
 	 * @param profile
 	 * @return response entity that contains response body, headers and status code.
 	 */	
-	public ResponseEntity<String> getUserSet(
+	ResponseEntity<String> getUserSet(
 			String identifier, String profile);
 	
 	/**
@@ -32,7 +32,7 @@ public interface WebUserSetApi {
 	 * @param identifier
 	 * @return response entity containing headers and status code.
 	 */
-	public ResponseEntity<String> deleteUserSet(
+	ResponseEntity<String> deleteUserSet(
 			String identifier);
 	
 	/**
@@ -42,7 +42,7 @@ public interface WebUserSetApi {
 	 * @param profile
 	 * @return response entity containing body, headers and status code.
 	 */
-	public ResponseEntity<String> updateUserSet(
+	ResponseEntity<String> updateUserSet(
 			String identifier, String requestBody, String profile);
 
 }

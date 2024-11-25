@@ -5,7 +5,6 @@ import eu.europeana.set.client.connection.UserSetApiConnection;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.exception.TechnicalRuntimeException;
 import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.HttpStatus;

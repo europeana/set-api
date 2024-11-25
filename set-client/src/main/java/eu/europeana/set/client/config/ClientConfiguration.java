@@ -1,10 +1,8 @@
 package eu.europeana.set.client.config;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
-import eu.europeana.set.client.exception.TechnicalRuntimeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -8,7 +8,6 @@ import eu.europeana.set.client.web.SearchUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApi;
 import org.springframework.http.ResponseEntity;
 
-import eu.europeana.set.client.BaseUserSetApi;
 import eu.europeana.set.client.exception.TechnicalRuntimeException;
 
 /**

@@ -21,6 +21,6 @@ public interface SearchUserSetApi {
      * @param profile
      * @return
      */
-    public ResponseEntity<String> searchUserSet(String query, String[] qf, String sort, int page, int pageSize,
+    ResponseEntity<String> searchUserSet(String query, String[] qf, String sort, int page, int pageSize,
                                                 String facet, int facetLimit, String profile);
 }

@@ -2,7 +2,6 @@ package eu.europeana.set.client.connection;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.function.Function;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import org.apache.logging.log4j.LogManager;
