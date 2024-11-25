@@ -146,9 +146,8 @@ public class BaseApiConnection {
 	 * @param profile
 	 * @return
 	 */
-	public static URI buildGetUrls(String path, String profile, String apikey) {
-		UriBuilder builder = UriComponentsBuilder.newInstance().path(path)
-				.queryParam(CommonApiConstants.PARAM_WSKEY, apikey); // by default pass apikey. If in case outh token is null apikey can be used to authenticate;
+	public static URI buildGetUrls(String path, String profile) {
+		UriBuilder builder = UriComponentsBuilder.newInstance().path(path);
 		if (profile != null) {
 			builder.queryParam(QUERY_PARAM_PROFILE, profile);
 		}
@@ -169,12 +168,11 @@ public class BaseApiConnection {
 	 */
 	public static URI buildSearchUrl(String query, String[] qf, String sort, int page,
 														   int pageSize, String facet, int facetLimit,
-														   String profile, String apikey) {
+														   String profile) {
 		UriBuilder builder = UriComponentsBuilder.newInstance().path(SEARCH_PATH)
 				.queryParam(QUERY_PARAM_QUERY, query)
 				.queryParam(QUERY_PARAM_PAGE, page)
-				.queryParam(QUERY_PARAM_PAGE_SIZE, pageSize)
-				.queryParam(CommonApiConstants.PARAM_WSKEY, apikey); // by default pass apikey. If in case outh token is null apikey can be used to authenticate
+				.queryParam(QUERY_PARAM_PAGE_SIZE, pageSize);
 
 			if (qf != null) {
 				builder.queryParam(QUERY_PARAM_QF, qf);
