@@ -16,10 +16,10 @@ public final class ClientConfiguration {
     private static final Logger LOGGER = LogManager.getLogger(ClientConfiguration.class);
 
     protected static final String SET_CLIENT_PROPERTIES_FILE = "/set-client.user.properties";
-    protected static final String PROP_SET_API_KEY = "set.api.key";
-    protected static final String PROP_SET_SERVICE_URI = "set.service.uri";
-    protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
-    protected static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
+    public static final String PROP_SET_API_KEY = "set.api.key";
+    public static final String PROP_SET_SERVICE_URI = "set.service.uri";
+    public static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
+    public static final String PROP_OAUTH_REQUEST_PARAMS = "oauth.token.request.params";
 
     private Properties properties;
 
