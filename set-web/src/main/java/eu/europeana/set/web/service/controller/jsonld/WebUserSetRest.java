@@ -335,13 +335,13 @@ public class WebUserSetRest extends BaseRest {
 
       // parse fields of the new user set to an object
       UserSet newUserSet = getUserSetService().parseUserSetLd(userSetJsonLdStr);
-
-      // Respond with HTTP 200
-      // update an existing user set. merge user sets - insert new fields in existing
-      // object
-      // update pagination
-      // generate and add a created and modified timestamp to the Set;
-
+      
+      //ignore items submitted in request
+      if(newUserSet.getItems() != null) {
+        throw new RequestValidationException(UserSetI18nConstants.USERSET_VALIDATION,
+            new String[] {"Update method is not allowed to update the items list, please use the insert items method (/set/{identifier}/items)"});
+      }
+     
       // if the Set corresponds to a closed set, replace member items with the new
       // items
       // that are present in the Set description only when a profile is indicated and
