@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -273,7 +274,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().isBadRequest());
   }
   
-  @Test
+  //@Test
+  @Disabled("Update does not suport item list anymore. This test sould be migrated to insertMultipleItems tests")
   public void updateUserSet_InvalidItems() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 

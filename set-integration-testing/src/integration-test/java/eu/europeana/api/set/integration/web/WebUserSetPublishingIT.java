@@ -221,9 +221,9 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     // check the updated value of the title
     assertTrue(containsKeyOrValue(result, "Sportswear-updated"));
     
-    //check new items size is 5
+    //check items, update is not modifying the items list
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
-    assertEquals(5, existingUserSet.getItems().size());
+    assertEquals(userSet.getItems().size(), existingUserSet.getItems().size());
   }
 
   @Test
@@ -257,9 +257,9 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     // check the updated value of the title
     assertTrue(containsKeyOrValue(result, "Sportswear-updated"));
     
-    //check new items size is 5
+    //check items has the same size, update is not modifying the item list
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
-    assertEquals(5, existingUserSet.getItems().size());
+    assertEquals(userSet.getItems().size(), existingUserSet.getItems().size());
   }
 
   @Test
