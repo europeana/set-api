@@ -120,13 +120,20 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     private Provider provider;
 
     /**
-     * Adding @JsonGetter, as this field is ignored in the json responses. Will build the identifier value from the field "id"
+     * For deserialization -
+     *        Adding @JsonGetter, as this field is ignored in the json responses.
+     *        Will build the identifier value from the field "id".
+     *
+     *  Only if identifier is present and has a baseUrl (which means it is fetched via ID, during deserialization)
+     *  In other cases, return the actual identifier value
+     *
      *  exmaple : 'id' : http://data.europeana.eu/set/xyz , identifier : xyz
+     *
      * @return identifier of the set
      */
     @JsonGetter(WebUserSetModelFields.ID)
     public String getIdentifier() {
-        if (identifier != null) {
+        if (identifier != null && StringUtils.contains(identifier, "/")) {
             return StringUtils.substringAfterLast(identifier, "/");
         }
 	return identifier;
