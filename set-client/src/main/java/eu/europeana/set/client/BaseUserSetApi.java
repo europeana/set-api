@@ -51,8 +51,6 @@ public class BaseUserSetApi {
 
             CloseableHttpResponse response = connection.post(oauthServiceUri, oauthRequestParams, "application/x-www-form-urlencoded", null);
             String body = EntityUtils.toString(response.getEntity());
-
-            System.out.println(body);
             if (HttpStatus.SC_OK == response.getCode()) {
                 JSONObject json = new JSONObject(body);
                 if (json.has(ACCESS_TOKEN)) {
