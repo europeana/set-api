@@ -11,7 +11,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
 
   public static final int DEFAULT_ITEMS_PER_PAGE = 10;
-  public static final int MIN_ITEMS_PER_PAGE = 1;
+  public static final int MIN_ITEMS_PER_PAGE = 0;
   public static final int DEFAULT_MAX_GALLERY_SIZE = 100;
   public static final int DEFAULT_MAX_ITEMS_TO_PRESENT = 1000;
   public static final int DEFAULT_MAX_ITEMS_TO_DEREF = 100;

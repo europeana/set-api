@@ -186,23 +186,17 @@ public class WebUserSetRest extends BaseRest {
     validateMultipleProfiles(profiles, profile);
     SetPageProfile searializationProfile = getUserSetService().getProfileForPagination(profiles);
 
-    pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, -1,
-        WebUserSetFields.DEFAULT_PAGE);
-    pageNr = (pageNr == null) ? Integer.valueOf(WebUserSetFields.DEFAULT_PAGE) : pageNr;
+    pageNr = WeUserSetRequestUtils.parsePageNumber(page, -1);
+    
     int maxPageSize =
         getConfiguration().getMaxPageSize(searializationProfile.getProfileParamValue());
-
-    pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize,
-        UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
-    pageItems =
-        (pageItems == null) ? Integer.valueOf(UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE)
-            : pageItems;
-    // add default profile
-
+    
+    pageItems = WeUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 
     return getUserSetPage(profiles, identifier, sortField, sortOrderField, pageNr, pageItems,
         authentication, request);
   }
+
 
   private ResponseEntity<String> processRetrieveSetRequest(String identifier,
       Authentication authentication, HttpServletRequest request) throws HttpException {
@@ -227,24 +221,6 @@ public class WebUserSetRest extends BaseRest {
       getUserSetService().verifyOwnerOrAdmin(userSet, authentication, false);
     }
     return userSet;
-  }
-
-  private Integer parseIntegerParam(String paramName, String paramValue, int maxValue, int minValue)
-      throws ParamValidationException {
-    if (paramValue != null) {
-      try {
-        Integer value = Integer.valueOf(paramValue);
-        if ((maxValue > 0 && value > maxValue) || value < minValue) {
-          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-              I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue});
-        }
-        return value;
-      } catch (NumberFormatException e) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue}, e);
-      }
-    }
-    return null;
   }
 
   /**
