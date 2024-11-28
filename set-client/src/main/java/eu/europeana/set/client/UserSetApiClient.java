@@ -1,11 +1,12 @@
 package eu.europeana.set.client;
 
-import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.web.SearchUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.definitions.model.UserSet;
+
+import java.util.List;
 
 /**
  * Implementation of client api
@@ -61,8 +62,8 @@ public class UserSetApiClient extends BaseUserSetApi {
 	private class SearchUserSetClient implements SearchUserSetApi {
 
 		@Override
-		public ResultsPageImpl<? extends UserSet> searchUserSet(String query, String[] qf,
-																String sort, int page, int pageSize, String facet, int facetLimit, String profile) throws SetApiClientException{
+		public List<? extends UserSet> searchUserSet(String query, String[] qf,
+													 String sort, int page, int pageSize, String facet, int facetLimit, String profile) throws SetApiClientException{
 			return getApiConnection().searchUserSet(query, qf, sort, page, pageSize, facet, facetLimit, profile);
 		}
 	}

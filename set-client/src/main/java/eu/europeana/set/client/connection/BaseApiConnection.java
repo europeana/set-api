@@ -151,7 +151,7 @@ public class BaseApiConnection {
      * @return
      * @throws SetApiClientException
      */
-    protected ResultsPageImpl<? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue) throws SetApiClientException {
+    protected List<? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
             CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
@@ -159,7 +159,7 @@ public class BaseApiConnection {
             if (response.getCode() == HttpStatus.SC_OK) {
                 TypeReference<ResultsPageImpl<BaseUserSet>> typeRef = new TypeReference<>() {
                 };
-                return mapper.readValue(responseBody, typeRef);
+                return mapper.readValue(responseBody, typeRef).getItems();
             } else {
                 AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
                 if (LOGGER.isDebugEnabled()) {

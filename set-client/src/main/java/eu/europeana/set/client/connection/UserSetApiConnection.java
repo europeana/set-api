@@ -1,8 +1,8 @@
 package eu.europeana.set.client.connection;
 
 import java.io.IOException;
+import java.util.List;
 
-import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.definitions.model.UserSet;
 import org.apache.commons.lang3.StringUtils;
@@ -103,9 +103,9 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return
    * @throws IOException
    */
-  public ResultsPageImpl<? extends UserSet> searchUserSet(String query, String[] qf, String sort, int page,
-                                                          int pageSize, String facet, int facetLimit,
-                                                          String profile) throws SetApiClientException {
+  public List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, int page,
+                                               int pageSize, String facet, int facetLimit,
+                                               String profile) throws SetApiClientException {
 
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
     return getSearchUserSetResponse(urlBuilder.toString(), regularUserAuthorizationValue);
