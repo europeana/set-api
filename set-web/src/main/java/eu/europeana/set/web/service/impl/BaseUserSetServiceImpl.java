@@ -551,17 +551,17 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     
     List<String> invalidItems = new ArrayList<>();
+    String fullUrl;
     for(String item : items) {
       try {
         validateItem(item);
-        if(item.startsWith(getConfiguration().getItemDataEndpoint())) {
-          itemsWithFullUrls.add(item);
-        } else {
-          //convert to full URL
-          itemsWithFullUrls.add(
-              UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item));
+        //convert to fullUrl if needed
+        fullUrl = (item.startsWith(getConfiguration().getItemDataEndpoint())) ? 
+            item : UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item);
+        //do not include duplicates
+        if(!itemsWithFullUrls.contains(fullUrl)) {
+          itemsWithFullUrls.add(fullUrl);
         }
-        
       } catch (ItemValidationException ex) {
         logger.trace("Invalid item: {}", item);
         invalidItems.add(item);
