@@ -1,6 +1,7 @@
 package eu.europeana.set.client.web;
 
-import org.springframework.http.ResponseEntity;
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.definitions.model.UserSet;
 
 /**
  * Client API interface
@@ -14,8 +15,7 @@ public interface WebUserSetApi {
 	 * @param profile
 	 * @return response entity containing body, headers and status code.
 	 */
-	ResponseEntity<String> createUserSet(
-			String requestBody, String profile);
+	UserSet createUserSet(String requestBody, String profile) throws SetApiClientException;
 	
 	/**
 	 * This method retrieves user set from database
@@ -24,16 +24,16 @@ public interface WebUserSetApi {
 	 * @param profile
 	 * @return response entity that contains response body, headers and status code.
 	 */	
-	ResponseEntity<String> getUserSet(
-			String identifier, String profile);
+	UserSet getUserSet(
+			String identifier, String profile) throws SetApiClientException;
 	
 	/**
 	 * This method deletes user set by the given identifier
 	 * @param identifier
 	 * @return response entity containing headers and status code.
 	 */
-	ResponseEntity<String> deleteUserSet(
-			String identifier);
+	String deleteUserSet(
+			String identifier) throws SetApiClientException;
 	
 	/**
 	 * This method updates user set by the given update string in JSON format
@@ -42,7 +42,6 @@ public interface WebUserSetApi {
 	 * @param profile
 	 * @return response entity containing body, headers and status code.
 	 */
-	ResponseEntity<String> updateUserSet(
-			String identifier, String requestBody, String profile);
+	UserSet updateUserSet(String identifier, String requestBody, String profile) throws SetApiClientException;
 
 }

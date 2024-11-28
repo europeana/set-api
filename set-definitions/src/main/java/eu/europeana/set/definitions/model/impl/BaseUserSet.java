@@ -3,19 +3,28 @@ package eu.europeana.set.definitions.model.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import eu.europeana.set.definitions.json.AgentDeserializer;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Europeana Sets API Specification
  *
+ * @JsonIgnoreProperties - to ignore "@context" while parsing the results in the Client side code
+ *
  * @author GrafR Modified by Srishti Singh 2-2-2021
  */
-public abstract class BaseUserSet extends BasePageInfo implements UserSet {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class BaseUserSet extends BasePageInfo implements UserSet {
 
     // EDM Collection Profile
 
@@ -55,7 +64,10 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
      * of this set of the Entity user sets
      */
     private List<String> contributor;
-    
+
+    public BaseUserSet() {
+    }
+
     /**
      * depiction, primarily used y Galleries
      */
@@ -74,6 +86,7 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
      * A reference to the user agent that gathers objects together following
      * implicit or explicit criteria or accrual policy.
      */
+    @JsonDeserialize(using = AgentDeserializer.class)
     private Agent creator;
 
     /**
@@ -106,9 +119,19 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     
     private Provider provider;
 
+    /**
+     * Adding @JsonGetter, as this field is ignored in the json responses. Will build the identifier value from the field "id"
+     *  exmaple : 'id' : http://data.europeana.eu/set/xyz , identifier : xyz
+     * @return identifier of the set
+     */
+    @JsonGetter(WebUserSetModelFields.ID)
     public String getIdentifier() {
+        if (identifier != null) {
+            return StringUtils.substringAfterLast(identifier, "/");
+        }
 	return identifier;
     }
+
 
     public void setIdentifier(String sequenceIdentifier) {
 	this.identifier = sequenceIdentifier;
@@ -285,6 +308,11 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     }
 
     @Override
+    public void setBaseUrl(String baseUrl) {
+        //used only for web userset
+    }
+
+    @Override
     public boolean isBookmarksFolder() {
 	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(getType());
     }
@@ -320,6 +348,11 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     @Override
     public Provider getProvider() {
       return provider;
+    }
+
+    @Override
+    public boolean hasItem(String itemId) {
+       return getItems() != null && getItems().contains(itemId);
     }
 
     @Override

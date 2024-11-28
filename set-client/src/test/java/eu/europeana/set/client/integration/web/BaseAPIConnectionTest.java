@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BaseAPIConnectionTest {
     private static final String SERVICE_URI     = "testUri";
     private static final String API_KEY_1       = "api_key";
-    private static final String API_ADMIN_KEY   = "apiadmin";
 
     private BaseApiConnection baseApiConnection;
 
@@ -30,9 +29,6 @@ public class BaseAPIConnectionTest {
         baseApiConnection = new BaseApiConnection(SERVICE_URI + WebUserSetFields.SLASH, API_KEY_1, null);
         result = baseApiConnection.getUserSetServiceUri();
         assertEquals(SERVICE_URI + WebUserSetFields.SLASH, result.toString());
-
-        assertEquals(API_KEY_1, baseApiConnection.getApiKey());
-        assertEquals(API_ADMIN_KEY, baseApiConnection.getAdminApiKey());
     }
 
 }

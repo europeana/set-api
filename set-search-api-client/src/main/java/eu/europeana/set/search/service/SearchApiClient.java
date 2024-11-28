@@ -3,7 +3,6 @@ package eu.europeana.set.search.service;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.set.definitions.model.BaseWebResource;

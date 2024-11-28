@@ -1,8 +1,11 @@
 package eu.europeana.set.client.connection;
 
 import java.io.IOException;
+
+import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.definitions.model.UserSet;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.ResponseEntity;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
@@ -25,19 +28,16 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> createUserSet(String set, String profile) throws IOException {
-
+  public UserSet createUserSet(String set, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     if (StringUtils.isNotEmpty(profile)) {
       urlBuilder.append(WebUserSetFields.PAR_CHAR);
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-
     String resUrl = urlBuilder.toString();
-
-    logger.trace("Ivoking create set: {} ", resUrl);
-    return postURL(resUrl, set, regularUserAuthorizationValue);
+    LOGGER.trace("Ivoking create set: {} ", resUrl);
+    return getCreateUserSetResponse(resUrl, set, regularUserAuthorizationValue);
   }
 
   /**
@@ -46,12 +46,11 @@ public class UserSetApiConnection extends BaseApiConnection {
    *
    * @param identifier
    * @param profile
-   * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> getUserSet(String identifier, String profile) throws IOException {
+  public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile));
-    return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
+    return getUserSetResponse(urlBuilder.toString(),  regularUserAuthorizationValue);
   }
 
   /**
@@ -65,9 +64,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> updateUserSet(String identifier, String updateUserSet,
-      String profile) throws IOException {
-
+  public UserSet updateUserSet(String identifier, String updateUserSet, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
     if (StringUtils.isNotEmpty(profile)) {
@@ -75,7 +72,7 @@ public class UserSetApiConnection extends BaseApiConnection {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-    return putURL(urlBuilder.toString(), updateUserSet, regularUserAuthorizationValue);
+    return getUpdateUserSetResponse(urlBuilder.toString(), updateUserSet, regularUserAuthorizationValue);
   }
 
   /**
@@ -86,8 +83,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return response entity that comprises response headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> deleteUserSet(String identifier) throws IOException {
-
+  public String deleteUserSet(String identifier) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
@@ -107,11 +103,11 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return
    * @throws IOException
    */
-  public ResponseEntity<String> searchUserSet(String query, String[] qf, String sort, int page,
-                                              int pageSize, String facet, int facetLimit,
-                                              String profile) throws IOException {
+  public ResultsPageImpl<? extends UserSet> searchUserSet(String query, String[] qf, String sort, int page,
+                                                          int pageSize, String facet, int facetLimit,
+                                                          String profile) throws SetApiClientException {
 
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
-    return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
+    return getSearchUserSetResponse(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 }

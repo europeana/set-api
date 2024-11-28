@@ -1,14 +1,18 @@
 package eu.europeana.set.client.model.result;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author GrafR
  *
  */
-public abstract class AbstractUserSetApiResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AbstractUserSetApiResponse {
 
 	private String action;
 	private String success;
 	private String error;
+	private String message;
 
 	public String getAction() {
 		return action;
@@ -34,4 +38,11 @@ public abstract class AbstractUserSetApiResponse {
 		this.error = error;
 	}
 
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
 }

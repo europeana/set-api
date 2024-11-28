@@ -3,12 +3,13 @@ package eu.europeana.set.client;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.connection.UserSetApiConnection;
 import eu.europeana.set.client.exception.SetApiClientException;
-import eu.europeana.set.client.exception.TechnicalRuntimeException;
 import eu.europeana.set.common.http.HttpConnection;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 
@@ -25,8 +26,8 @@ public class BaseUserSetApi {
 
     protected BaseUserSetApi(ClientConfiguration configuration) throws SetApiClientException {
         this.configuration = configuration;
-        if (this.configuration.getServiceUri() == null && this.configuration.getApiKey() == null) {
-            throw new SetApiClientException(" Set Api Endpoint not provide !!!");
+        if (this.configuration.getServiceUri() == null) {
+            throw new SetApiClientException(" Set Api Endpoint not provided !!!");
         }
 
         if (this.configuration.getOauthServiceUri() == null || this.configuration.getOauthRequestParams() == null) {
@@ -43,27 +44,27 @@ public class BaseUserSetApi {
 	this(new ClientConfiguration());
     }
 
-    private String getOauthToken(String oauthServiceUri, String oauthRequestParams ) {
+    private String getOauthToken(String oauthServiceUri, String oauthRequestParams ) throws SetApiClientException{
         try {
             String ACCESS_TOKEN = "access_token";
             HttpConnection connection = new HttpConnection();
-            ResponseEntity<String> response;
-            response = connection.post(oauthServiceUri, oauthRequestParams, "application/x-www-form-urlencoded");
 
-            if (HttpStatus.OK == response.getStatusCode()) {
-                String body = response.getBody();
+            CloseableHttpResponse response = connection.post(oauthServiceUri, oauthRequestParams, "application/x-www-form-urlencoded", null);
+            String body = EntityUtils.toString(response.getEntity());
+
+            System.out.println(body);
+            if (HttpStatus.SC_OK == response.getCode()) {
                 JSONObject json = new JSONObject(body);
                 if (json.has(ACCESS_TOKEN)) {
                     return "Bearer " + json.getString(ACCESS_TOKEN);
                 } else {
-                    throw new TechnicalRuntimeException(
-                            "Cannot extract authentication token from reponse:" + body);
+                    throw new SetApiClientException("Cannot extract authentication token from reponse:" + body);
                 }
             } else {
-                throw new TechnicalRuntimeException("Error occured when calling oath service! " + response);
+                throw new SetApiClientException("Error occured when calling oath service! " + response);
             }
-        } catch (IOException | JSONException e) {
-            throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);
+        } catch (IOException | JSONException | ParseException e) {
+            throw new SetApiClientException("Cannot retrieve authentication token!", 0 ,  e);
         }
     }
 

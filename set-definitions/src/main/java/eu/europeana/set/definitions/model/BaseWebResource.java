@@ -1,7 +1,10 @@
 package eu.europeana.set.definitions.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseWebResource {
 
   public static final String TYPE = "WebResource";

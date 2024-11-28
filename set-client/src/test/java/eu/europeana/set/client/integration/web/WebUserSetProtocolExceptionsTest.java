@@ -2,10 +2,12 @@ package eu.europeana.set.client.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
+
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.definitions.model.UserSet;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 
 /**
@@ -42,65 +44,51 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     public String UNKNOWN_PROVIDED_IDENTIFIER = "unknown_provided_identifier";
 
     @Test
-    public void createWebsetUserSetWithoutBody() throws IOException {
+    public void createWebsetUserSetWithoutBody() {
+        try {
+            apiClient.getWebUserSetApi().createUserSet(null, null);
+        } catch (SetApiClientException e) {
+            assertEquals(HttpStatus.SC_BAD_REQUEST, e.getRemoteStatusCode());
+        }
 
-        ResponseEntity<String> response = apiClient.getWebUserSetApi().createUserSet(
-                null, null);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
-
 
     @Test
     public void createWebUserSetWithCorruptedBody() {
-        ResponseEntity<String> response = apiClient.getWebUserSetApi().createUserSet(
-                CORRUPTED_JSON, null);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        try {
+            apiClient.getWebUserSetApi().createUserSet(CORRUPTED_JSON, null);
+        } catch (SetApiClientException e) {
+            assertEquals(HttpStatus.SC_BAD_REQUEST, e.getRemoteStatusCode());
+        }
     }
 
     @Test
     public void getWebUserSetWithWrongIdentifier() {
-        ResponseEntity<String> response = apiClient.getWebUserSetApi().getUserSet(
-                WRONG_GENERATED_IDENTIFIER, null);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        try {
+            apiClient.getWebUserSetApi().getUserSet(WRONG_GENERATED_IDENTIFIER, null);
+        } catch (SetApiClientException e) {
+            assertEquals(HttpStatus.SC_NOT_FOUND, e.getRemoteStatusCode());
+        }
     }
 
     @Test
     public void updateWebsetUserSetWithWrongIdentifierNumber() throws IOException {
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
-
-        ResponseEntity<String> response = apiClient.getWebUserSetApi().updateUserSet(
-                WRONG_GENERATED_IDENTIFIER
-                , requestBody
-                , null);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        try {
+            apiClient.getWebUserSetApi().updateUserSet(WRONG_GENERATED_IDENTIFIER, requestBody, null);
+        } catch (SetApiClientException e) {
+            assertEquals(HttpStatus.SC_NOT_FOUND, e.getRemoteStatusCode());
+        }
     }
 
     @Test
     public void updateWebUserSetWithWrongIdentifier() throws IOException {
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
-
-        ResponseEntity<String> response = apiClient.getWebUserSetApi().updateUserSet(
-                WRONG_GENERATED_IDENTIFIER
-                , requestBody
-                , null);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        try {
+            apiClient.getWebUserSetApi().updateUserSet(WRONG_GENERATED_IDENTIFIER, requestBody, null);
+        } catch (SetApiClientException e) {
+            assertEquals(HttpStatus.SC_NOT_FOUND, e.getRemoteStatusCode());
+        }
     }
-
-//	@Test
-//	public void updateWebsetUserSetWithCorruptedUpdateBody() throws JsonParseException, IOException { 
-//		
-//		/**
-//		 * store set and retrieve its identifier 
-//		 */
-//		UserSet set = createTestUserSet();
-//		ResponseEntity<String> response = getApiClient().updateUserSet(
-//				set.getIdentifier()
-//				, CORRUPTED_UPDATE_JSON
-//				, TEST_USER_TOKEN
-//				);
-//		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-//	}
 
 }

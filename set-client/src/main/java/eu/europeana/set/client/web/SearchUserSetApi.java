@@ -1,6 +1,8 @@
 package eu.europeana.set.client.web;
 
-import org.springframework.http.ResponseEntity;
+import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.definitions.model.UserSet;
 
 /**
  * Search Client API interface
@@ -21,6 +23,6 @@ public interface SearchUserSetApi {
      * @param profile
      * @return
      */
-    ResponseEntity<String> searchUserSet(String query, String[] qf, String sort, int page, int pageSize,
-                                                String facet, int facetLimit, String profile);
+    ResultsPageImpl<? extends UserSet> searchUserSet(String query, String[] qf, String sort, int page, int pageSize,
+                                                     String facet, int facetLimit, String profile) throws SetApiClientException;
 }

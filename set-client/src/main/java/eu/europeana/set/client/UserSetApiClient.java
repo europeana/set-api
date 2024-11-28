@@ -1,14 +1,11 @@
 package eu.europeana.set.client;
 
-import java.io.IOException;
-
+import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.web.SearchUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApi;
-import org.springframework.http.ResponseEntity;
-
-import eu.europeana.set.client.exception.TechnicalRuntimeException;
+import eu.europeana.set.definitions.model.UserSet;
 
 /**
  * Implementation of client api
@@ -40,70 +37,33 @@ public class UserSetApiClient extends BaseUserSetApi {
 	 */
 	private class WebUserSetClient implements  WebUserSetApi {
 		@Override
-		public ResponseEntity<String> createUserSet(String set, String profile) {
-			ResponseEntity<String> res;
-			try {
-				res = getApiConnection().createUserSet(set, profile);
-			} catch (IOException e) {
-				throw new TechnicalRuntimeException(
-						"Exception occured when invoking the UserSetJsonApi createUserSet method", e);
-			}
-			return res;
+		public UserSet createUserSet(String set, String profile) throws SetApiClientException {
+			return getApiConnection().createUserSet(set, profile);
+
 		}
 
 		@Override
-		public ResponseEntity<String> deleteUserSet(String identifier) {
-			ResponseEntity<String> res;
-			try {
-				res = getApiConnection().deleteUserSet(identifier);
-			} catch (IOException e) {
-				throw new TechnicalRuntimeException(
-						"Exception occured when invoking the UserSetJsonApi deleteUserSet method", e);
-			}
-
-			return res;
+		public String deleteUserSet(String identifier) throws SetApiClientException {
+			return getApiConnection().deleteUserSet(identifier);
 		}
 
 		@Override
-		public ResponseEntity<String> getUserSet(String identifier, String profile) {
-			ResponseEntity<String> res;
-			try {
-				res = getApiConnection().getUserSet(identifier, profile);
-			} catch (IOException e) {
-				throw new TechnicalRuntimeException("Exception occured when invoking the UserSetJsonApi getUserSet method",
-						e);
-			}
-
-			return res;
+		public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
+			return getApiConnection().getUserSet(identifier, profile);
 		}
 
 		@Override
-		public ResponseEntity<String> updateUserSet(String identifier, String set, String profile) {
-			ResponseEntity<String> res;
-			try {
-				res = getApiConnection().updateUserSet(identifier, set, profile);
-			} catch (IOException e) {
-				throw new TechnicalRuntimeException(
-						"Exception occured when invoking the UserSetJsonApi updateUserSet method", e);
-			}
-
-			return res;
+		public UserSet updateUserSet(String identifier, String set, String profile) throws SetApiClientException {
+			return getApiConnection().updateUserSet(identifier, set, profile);
 		}
 	}
 
 	private class SearchUserSetClient implements SearchUserSetApi {
 
 		@Override
-		public ResponseEntity<String> searchUserSet(String query, String[] qf,
-													String sort, int page, int pageSize, String facet, int facetLimit, String profile) {
-			ResponseEntity<String> res;
-			try {
-				res = getApiConnection().searchUserSet(query, qf, sort, page, pageSize, facet, facetLimit, profile);
-			} catch (IOException e) {
-				throw new TechnicalRuntimeException(
-						"Exception occured when invoking the UserSetSearch API searchUserSet method", e);
-			}
-			return  res;
+		public ResultsPageImpl<? extends UserSet> searchUserSet(String query, String[] qf,
+																String sort, int page, int pageSize, String facet, int facetLimit, String profile) throws SetApiClientException{
+			return getApiConnection().searchUserSet(query, qf, sort, page, pageSize, facet, facetLimit, profile);
 		}
 	}
 

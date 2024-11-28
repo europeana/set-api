@@ -5,6 +5,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.logging.log4j.LogManager;
@@ -165,20 +168,20 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   @Override
   public JSONObject searchItems(String uri, String postBody) throws SearchApiClientException {
-    String jsonResponse;
+    CloseableHttpResponse jsonResponse;
     try {
       if (postBody != null) {
-        jsonResponse = createHttpConnection().getURLContentWithBody(uri, postBody);
+        jsonResponse = createHttpConnection().post(uri, postBody, null, null);
       } else {
-        jsonResponse = createHttpConnection().getJsonResponse(uri);
+        jsonResponse = createHttpConnection().get(uri, null, null);
       }
       if (jsonResponse == null) {
         // HTTP Error Code
         throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
             null);
       }
-      return new JSONObject(jsonResponse);
-    } catch (IOException e) {
+      return new JSONObject(EntityUtils.toString(jsonResponse.getEntity()));
+    } catch (IOException | ParseException e) {
       throw new SearchApiClientException(
           SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
     } catch (JSONException e) {
