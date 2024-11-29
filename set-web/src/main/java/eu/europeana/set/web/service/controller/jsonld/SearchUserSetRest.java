@@ -61,9 +61,9 @@ public class SearchUserSetRest extends BaseRest {
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sort,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false,
-          defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
+          defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) String page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
-          defaultValue = "" + CommonApiConstants.DEFAULT_PAGE_SIZE) int pageSize,
+          defaultValue = "" + CommonApiConstants.DEFAULT_PAGE_SIZE) String pageSize,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_FACET, required = false) String facet,
       @RequestParam(value = "facet.limit", required = false, defaultValue = "50") int facetLimit,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
@@ -79,10 +79,11 @@ public class SearchUserSetRest extends BaseRest {
       List<SetPageProfile> profiles = getProfilesFromRequest(profileStr, request);
       validateMultipleProfiles(profiles, profileStr);
    // get profile for pagination urls and item Page
-      SetPageProfile profile = getUserSetService().getProfileForPagination(profiles);
-      if(profile == null) {
+      SetPageProfile serializationProfile = getUserSetService().getProfileForPagination(profiles);
+      if(serializationProfile == null) {
         //if only technical profiles included in request, append the default profile
-        profiles.add(SetPageProfile.ITEMS_META);
+        serializationProfile = SetPageProfile.ITEMS_META;
+        profiles.add(serializationProfile);
       }
 
       // create facet query and validate facet - if profile is facets
@@ -90,9 +91,18 @@ public class SearchUserSetRest extends BaseRest {
       if (profiles.contains(SetPageProfile.FACETS)) {
         facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
       }
+      
+      Integer pageNr = WeUserSetRequestUtils.parsePageNumber(page, -1);
+      
+      int maxPageSize =
+          getConfiguration().getMaxPageSize(serializationProfile.getProfileParamValue());
+      
+      Integer pageItems = WeUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+
+      
       //validate the search params and build the search query
       UserSetQuery searchQuery =
-          getQueryBuilder().buildUserSetQuery(query, qf, sort, page, pageSize, getConfiguration());
+          getQueryBuilder().buildUserSetQuery(query, qf, sort, pageNr, pageItems, getConfiguration());
       ResultSet<? extends UserSet> results =
           getUserSetService().search(searchQuery, facetQuery, profiles, authentication);
       String requestURL = request.getRequestURL().toString();
@@ -140,9 +150,9 @@ public class SearchUserSetRest extends BaseRest {
           defaultValue = UserSetQueryBuilder.SEARCH_ALL) String query,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE, required = false,
-          defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) int page,
+          defaultValue = "" + WebUserSetFields.DEFAULT_PAGE) String page,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PAGE_SIZE, required = false,
-          defaultValue = "" + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) int pageSize,
+          defaultValue = "" + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) String pageSize,
        @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
        defaultValue = ProfileConstants.VALUE_PARAM_ITEMS) String profileStr,
       HttpServletRequest request) throws HttpException {
@@ -165,7 +175,8 @@ public class SearchUserSetRest extends BaseRest {
       SetPageProfile profile = getUserSetService().getProfileForPagination(profiles);
       if(profile == null) {
         //if only technical profiles included in request, append the default profile
-        profiles.add(SetPageProfile.ITEMS);
+        profile = SetPageProfile.ITEMS;
+        profiles.add(profile);
       }
 
       // parses and validates qf
@@ -193,8 +204,15 @@ public class SearchUserSetRest extends BaseRest {
         filtered = Collections.emptyList();
       }
  
+      Integer pageNr = WeUserSetRequestUtils.parsePageNumber(page, -1);
+      
+      int maxPageSize =
+          getConfiguration().getMaxPageSize(profile.getProfileParamValue());
+      
+      Integer pageItems = WeUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+      
       BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecodsResultsPage(identifier,
-          filtered, page, pageSize, profile, request);
+          filtered, pageNr, pageItems, profile, request);
       
       UserSetLdSerializer serializer = new UserSetLdSerializer();
       String jsonLd = serializer.serialize(resultPage);

@@ -364,7 +364,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     final String requestedPageSize = "200";
     MockHttpServletResponse response = mockMvc
         .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS.getProfileParamValue())
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, SetPageProfile.ITEMS_META.getProfileParamValue())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, String.valueOf(WebUserSetFields.DEFAULT_PAGE))
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, requestedPageSize)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)

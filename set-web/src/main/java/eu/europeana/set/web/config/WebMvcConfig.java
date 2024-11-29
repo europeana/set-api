@@ -72,13 +72,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .allowCredentials(false).maxAge(600L); // in seconds
 
 
+     // insert/remove multiple items
+    registry.addMapping("/set/*/items").allowedOrigins("*").allowedMethods("PUT", "DELETE")
+        .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.ETAG,
+            HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
+        .allowCredentials(false).maxAge(600L); // in seconds
+    
     // publish/unpublish
     registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
         .exposedHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
             HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.ALLOW, HttpHeaders.ETAG,
             HttpHeaders.VARY, HttpHeaders.PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
-
+    
     // add,remove,exists item in set
     registry.addMapping("/set/*/*/*").allowedOrigins("*")
         .allowedMethods("GET", "HEAD", "PUT", "DELETE")
