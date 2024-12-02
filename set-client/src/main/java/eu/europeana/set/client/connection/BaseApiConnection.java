@@ -161,7 +161,6 @@ public class BaseApiConnection {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
             CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
             String responseBody = EntityUtils.toString(response.getEntity());
-            System.out.println(responseBody);
             if (response.getCode() == HttpStatus.SC_OK) {
                if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
                     TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
