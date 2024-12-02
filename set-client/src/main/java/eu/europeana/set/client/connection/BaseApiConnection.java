@@ -8,8 +8,10 @@ import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.impl.BaseUserSet;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import jakarta.ws.rs.core.UriBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.ParseException;
@@ -146,20 +148,35 @@ public class BaseApiConnection {
     /**
      * Fetches the user Set search api response
      *
+     * Check profile for the deserialization
+     * META - empty page (no items) ,  ITEMS_META - only set descriptions, not item descriptions , ITEMS - items set as set ids
+     * ITEMS_META is the default profile value
      * @param url
      * @param authorizationHeaderValue
      * @return
      * @throws SetApiClientException
      */
-    protected List<? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue) throws SetApiClientException {
+    protected List< ? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
             CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
             String responseBody = EntityUtils.toString(response.getEntity());
+            System.out.println(responseBody);
             if (response.getCode() == HttpStatus.SC_OK) {
-                TypeReference<ResultsPageImpl<BaseUserSet>> typeRef = new TypeReference<>() {
-                };
+               if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
+                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
+                    List<String> setIds  = mapper.readValue(responseBody, typeRef).getItems();
+                    List<UserSet> userSets = new ArrayList<>();
+                   for (String id: setIds) {
+                       BaseUserSet userSet = new BaseUserSet();
+                       userSet.setIdentifier(StringUtils.substringAfterLast(id, "/"));
+                       userSets.add(userSet);
+                   }
+                   return userSets;
+                }
+                TypeReference<ResultsPageImpl<BaseUserSet>> typeRef = new TypeReference<>() {};
                 return mapper.readValue(responseBody, typeRef).getItems();
+
             } else {
                 AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
                 if (LOGGER.isDebugEnabled()) {

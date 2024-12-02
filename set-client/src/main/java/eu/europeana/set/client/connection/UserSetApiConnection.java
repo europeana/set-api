@@ -108,6 +108,6 @@ public class UserSetApiConnection extends BaseApiConnection {
                                                String profile) throws SetApiClientException {
 
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
-    return getSearchUserSetResponse(urlBuilder.toString(), regularUserAuthorizationValue);
+    return getSearchUserSetResponse(urlBuilder.toString(), regularUserAuthorizationValue, profile);
   }
 }
