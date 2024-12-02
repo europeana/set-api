@@ -59,7 +59,7 @@ import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.SearchApiUtils;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
-import eu.europeana.set.web.service.controller.jsonld.WeUserSetRequestUtils;
+import eu.europeana.set.web.service.controller.jsonld.WebUserSetRequestUtils;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
@@ -327,7 +327,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     List<String> fullUriItems = validateItemsStrings(items);
     List<String> duplicatedItems = computeDuplicateList(existingUserSet, fullUriItems);
-    boolean isPinnRequest = WeUserSetRequestUtils.isPinnRequest(position);
+    boolean isPinnRequest = WebUserSetRequestUtils.isPinnRequest(position);
 
     if (duplicatedItems != null) {
       processDuplicates(existingUserSet, fullUriItems, duplicatedItems, isPinnRequest);
@@ -460,7 +460,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // insert the item at the 0 position
     UserSet userSet;
 
-    if (WeUserSetRequestUtils.isPinnRequest(position) && existingUserSet.isEntityBestItemsSet()) {
+    if (WebUserSetRequestUtils.isPinnRequest(position) && existingUserSet.isEntityBestItemsSet()) {
       userSet = insertItem(existingUserSet, newItem, 0, true);
     } else {
       // validate position

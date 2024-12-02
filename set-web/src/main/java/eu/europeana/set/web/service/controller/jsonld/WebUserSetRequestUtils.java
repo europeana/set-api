@@ -7,12 +7,26 @@ import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
-public class WeUserSetRequestUtils {
+public class WebUserSetRequestUtils {
 
+  /**
+   * Verify if the position is the pin keyword
+   * @param position request parameter value
+   * @return true if equals "pin"
+   */
   public static boolean isPinnRequest(String position) {
     return WebUserSetModelFields.PINNED_POSITION.equals(position);
   }
   
+  /**
+   * Parses the request parameter and verifies if the value is in the expected range 
+   * @param paramName the name of the request parameter (e.g. page, pageSize)
+   * @param paramValue the request paramter value
+   * @param maxValue max allowed value
+   * @param minValue min allowed value (negative value will be ignored)
+   * @return the parsed value or null 
+   * @throws ParamValidationException is the value is not in the expected range 
+   */
   public static Integer parseIntegerParam(String paramName, String paramValue, int maxValue, int minValue)
       throws ParamValidationException {
     if (paramValue != null) {
@@ -31,24 +45,36 @@ public class WeUserSetRequestUtils {
     return null;
   }
   
+  /**
+   * Parse the value of the request parameter page
+   * @param page the value of the request param
+   * @param maxPageNumber the mx value for the page number, negative value is ignored
+   * @return
+   * @throws ParamValidationException
+   */
   public static Integer parsePageNumber(String page, int maxPageNumber) throws ParamValidationException {
     Integer pageNr;
     //
     pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, maxPageNumber,
         WebUserSetFields.DEFAULT_PAGE);
-    pageNr = (pageNr == null) ? Integer.valueOf(WebUserSetFields.DEFAULT_PAGE) : pageNr;
-    return pageNr;
+    return (pageNr == null) ? Integer.valueOf(WebUserSetFields.DEFAULT_PAGE) : pageNr;
   }
   
+  /**
+   * Parses the page size, if not provided the default will be returned 
+   * @param pageSize request param value
+   * @param maxPageSize maximum pageSize value (depends on requested profile)
+   * @param defaultItemsPerPage default value to return if the param value is empty 
+   * @return the value parsed from the param or the default
+   * @throws ParamValidationException if ti is out of range
+   */
   public static Integer getPageSizeOrDefault(String pageSize, int maxPageSize,
       final int defaultItemsPerPage) throws ParamValidationException {
     Integer pageItems;
 
     pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize,
         UserSetConfigurationImpl.MIN_ITEMS_PER_PAGE);
-    pageItems =
-        (pageItems == null) ? Integer.valueOf(defaultItemsPerPage)
+    return (pageItems == null) ? Integer.valueOf(defaultItemsPerPage)
             : pageItems;
-    return pageItems;
   }
 }

@@ -92,12 +92,12 @@ public class SearchUserSetRest extends BaseRest {
         facetQuery = getQueryBuilder().buildUserSetFacetQuery(facet, facetLimit);
       }
       
-      Integer pageNr = WeUserSetRequestUtils.parsePageNumber(page, -1);
+      Integer pageNr = WebUserSetRequestUtils.parsePageNumber(page, -1);
       
       int maxPageSize =
           getConfiguration().getMaxPageSize(serializationProfile.getProfileParamValue());
       
-      Integer pageItems = WeUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+      Integer pageItems = WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 
       
       //validate the search params and build the search query
@@ -204,12 +204,12 @@ public class SearchUserSetRest extends BaseRest {
         filtered = Collections.emptyList();
       }
  
-      Integer pageNr = WeUserSetRequestUtils.parsePageNumber(page, -1);
+      Integer pageNr = WebUserSetRequestUtils.parsePageNumber(page, -1);
       
       int maxPageSize =
           getConfiguration().getMaxPageSize(profile.getProfileParamValue());
       
-      Integer pageItems = WeUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+      Integer pageItems = WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
       
       BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecodsResultsPage(identifier,
           filtered, pageNr, pageItems, profile, request);
