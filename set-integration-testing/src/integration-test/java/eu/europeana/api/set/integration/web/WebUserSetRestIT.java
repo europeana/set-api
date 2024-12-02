@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -153,7 +154,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().isBadRequest());
   }
 
-  @Test
+  //@Test
+  //@Disabled("Items are now ignored in the create request")
   public void create_UserSet_InvalidItems() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_INVALID_ITEMS);
     mockMvc
@@ -176,7 +178,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
   
-  @Test
+  //@Test
+//  @Disabled("Items are now ignored in the create request")
   void create_Collection_numberOfItemsLimit() throws Exception {
     String setJsonInit = getJsonStringInput(USER_SET_LARGE);
     JSONObject setJson=new JSONObject(setJsonInit);
@@ -271,7 +274,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().isBadRequest());
   }
   
-  @Test
+  //@Test
+  @Disabled("Update does not suport item list anymore. This test sould be migrated to insertMultipleItems tests")
   public void updateUserSet_InvalidItems() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 

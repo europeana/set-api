@@ -544,14 +544,24 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   //items can be either a uri or a record identifier (e.g. "/1234/XPTO_2")
-  protected void validateItemsStrings(List<String> items) throws ItemValidationException {
-    if(items==null || items.isEmpty()) {
-      return;
+  protected List<String> validateItemsStrings(List<String> items) throws ItemValidationException {
+    List<String> itemsWithFullUrls = new ArrayList<String>(); 
+    if(items==null) {
+      return null;
     }
+    
     List<String> invalidItems = new ArrayList<>();
+    String fullUrl;
     for(String item : items) {
       try {
         validateItem(item);
+        //convert to fullUrl if needed
+        fullUrl = (item.startsWith(getConfiguration().getItemDataEndpoint())) ? 
+            item : UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item);
+        //do not include duplicates
+        if(!itemsWithFullUrls.contains(fullUrl)) {
+          itemsWithFullUrls.add(fullUrl);
+        }
       } catch (ItemValidationException ex) {
         logger.trace("Invalid item: {}", item);
         invalidItems.add(item);
@@ -560,6 +570,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     if(!invalidItems.isEmpty()) {
       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
     }
+    return itemsWithFullUrls; 
   }
 
   private void validateItem(String item) throws ItemValidationException {

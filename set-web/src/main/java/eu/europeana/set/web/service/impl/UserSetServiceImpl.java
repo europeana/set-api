@@ -59,6 +59,7 @@ import eu.europeana.set.web.model.search.ItemIdsResultPage;
 import eu.europeana.set.web.model.search.SearchApiUtils;
 import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
+import eu.europeana.set.web.service.controller.jsonld.WebUserSetRequestUtils;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
@@ -232,6 +233,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   public UserSet deleteItem(String item, UserSet existingUserSet) {
+    if(existingUserSet.getItems() == null) {
+      //nothing to delete, do not update the set
+      return existingUserSet;
+    }
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
       int currentPosition = existingUserSet.getItems().indexOf(item);
@@ -250,53 +255,59 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   private void updateIsShownBy(UserSet userSet, String firstItemOld) {
-    String firstItemNew=null;
-    if(userSet.getItems()!=null && !userSet.getItems().isEmpty()) {
-      firstItemNew=userSet.getItems().get(0);
+    String firstItemNew = null;
+    if (userSet.getItems() != null && !userSet.getItems().isEmpty()) {
+      firstItemNew = userSet.getItems().get(0);
     }
-    if(!StringUtils.equals(firstItemOld, firstItemNew)) {
+    if (!StringUtils.equals(firstItemOld, firstItemNew)) {
       try {
         final WebResource isShownBy = generateDepiction(userSet);
         userSet.setIsShownBy(isShownBy);
       } catch (SearchApiClientException e) {
-        if(getLogger().isInfoEnabled()) {
-          getLogger().info("Cannot generate depiciton for set: {}. Exception: {}.", userSet.getIdentifier(), e.getMessage());
+        if (getLogger().isInfoEnabled()) {
+          getLogger().info("Cannot generate depiciton for set: {}. Exception: {}.",
+              userSet.getIdentifier(), e.getMessage());
         }
       }
     }
   }
-  
-  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) {
-    if(existingUserSet.getItems()==null || existingUserSet.getItems().isEmpty()) {
+
+  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet)
+      throws ItemValidationException {
+    if (existingUserSet.getItems() == null || existingUserSet.getItems().isEmpty()) {
       return existingUserSet;
     }
-    
-    //keep the first item to check if it is changed, for the re-creation of the isShownBy field
-    String firstItemOld=existingUserSet.getItems().get(0);
 
-    boolean itemsRemoved=false;
+    // keep the first item to check if it is changed, for the re-creation of the isShownBy field
+    String firstItemOld = existingUserSet.getItems().get(0);
+    // convert to full URIs if needed
+    List<String> fullUriItems = validateItemsStrings(items);
+
+    boolean itemsRemoved = false;
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
-      for (String item : items) {
+      for (String item : fullUriItems) {
         int currentPosition = existingUserSet.getItems().indexOf(item);
-        if (currentPosition >= 0) {
-          itemsRemoved = true;
+        if (currentPosition > -1) {
           if (currentPosition < existingUserSet.getPinned()) {
-            existingUserSet.setPinned(existingUserSet.getPinned() - 1);
+            // decrease counter when removing pinned items
+            existingUserSet.descreasePinned(1);
           }
           existingUserSet.getItems().remove(item);
+          itemsRemoved = true;
         }
       }
     } else {
+      // remove
       itemsRemoved = existingUserSet.getItems().removeAll(items);
     }
 
-    UserSet updatedUserSet=existingUserSet;
-    if(itemsRemoved) {
-      //update isShownBy
+    UserSet updatedUserSet = existingUserSet;
+    if (itemsRemoved) {
+      // update isShownBy
       updateIsShownBy(updatedUserSet, firstItemOld);
 
-      // update a user set in db
+      // update a user set in db (including modified and total)
       updatedUserSet = writeUserSetToDb(updatedUserSet);
     }
 
@@ -308,87 +319,123 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
       UserSet existingUserSet) throws ItemValidationException {
 
-    validateItemsStrings(items);
-    
-    //keep the first item to check if it is changed, for the re-creation of the isShownBy field
-    String firstItemOld=null;
-    if(existingUserSet.getItems()!=null && !existingUserSet.getItems().isEmpty()) {
-      firstItemOld=existingUserSet.getItems().get(0);
+    // keep the first item to check if it is changed, for the re-creation of the isShownBy field
+    String firstItemOld = null;
+    if (existingUserSet.getItems() != null && !existingUserSet.getItems().isEmpty()) {
+      firstItemOld = existingUserSet.getItems().get(0);
     }
 
-    UserSet userSet; 
-    //update items
-    if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
-      updateItemsFromPinned(existingUserSet, items);
-    } else {
-      updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+    List<String> fullUriItems = validateItemsStrings(items);
+    List<String> duplicatedItems = computeDuplicateList(existingUserSet, fullUriItems);
+    boolean isPinnRequest = WebUserSetRequestUtils.isPinnRequest(position);
+
+    if (duplicatedItems != null) {
+      processDuplicates(existingUserSet, fullUriItems, duplicatedItems, isPinnRequest);
     }
-    
-    //update isShownBy
+
+    addItems(existingUserSet, fullUriItems, itemsPosition, isPinnRequest);
+    if (existingUserSet.isGallery()) {
+      // 7. check that gallery size is smaller than the predefined limit
+      validateGallerySize(existingUserSet, 0);
+    }
+
+    // UserSet userSet;
+    // //update items
+    // if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
+    // updateItemsFromPinned(existingUserSet, items);
+    // } else {
+    // updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
+    // }
+
+    // update isShownBy
     updateIsShownBy(existingUserSet, firstItemOld);
-    
+
     UserSet updatedSet = writeUserSetToDb(existingUserSet);
     updatePagination(updatedSet, getConfiguration());
     return updatedSet;
-  }  
-  
-  private void updateItemsFromPinned(UserSet existingUserSet, List<String> items) {
-    List<String> usersetItems=existingUserSet.getItems();
-    if(usersetItems==null) {
-      usersetItems=new ArrayList<>();
-      existingUserSet.setItems(usersetItems);
-    }
-    else {    
-      /*remove all duplicate items from the set and count the number 
-      of removed pinned items, to change the pinned field
-      */
-      for(String newItem : items) {
-        int itemindex=usersetItems.indexOf(newItem);
-        if(itemindex>=0) {
-          if(itemindex < existingUserSet.getPinned()) {
-            existingUserSet.setPinned(existingUserSet.getPinned() - 1);
-          }
-          usersetItems.remove(newItem);
-        }
-      }
-    }
-
-    usersetItems.addAll(0, items);
-    existingUserSet.setPinned(existingUserSet.getPinned() + items.size());
   }
-  
-  private void updateItemsFromUnpinned(UserSet existingUserSet, List<String> items, int position) throws ItemValidationException {
-    List<String> usersetItems=existingUserSet.getItems();
-    List<String> newItemsCopy=new ArrayList<>(items);
-    if(usersetItems==null) {
-      usersetItems=new ArrayList<>();
-      existingUserSet.setItems(usersetItems);
+
+  private void processDuplicates(UserSet existingUserSet, List<String> items,
+      List<String> duplicatedItems, boolean isPinnRequest) {
+    if (isPinnRequest) {
+      // compute number of already pinned items
+      int duplicatedPinned = 0;
+      if (existingUserSet.getPinned() > 0) {
+        final List<String> pinnedItems =
+            existingUserSet.getItems().subList(0, existingUserSet.getPinned());
+        duplicatedPinned = countDupplicatedItems(duplicatedItems, pinnedItems);
+      }
+      // remove all duplicates from the set
+      existingUserSet.getItems().removeAll(duplicatedItems);
+      // and decrease the “pinned” field with the number of items that were already pinned
+      existingUserSet.descreasePinned(duplicatedPinned);
     } else {
-      /*
-       * remove from the new items the ones that were pinned before and from the user set the ones
-       * that are duplicates
-       */
-      for (String newItem : newItemsCopy) {
-        int itemindex = usersetItems.indexOf(newItem);
-        if (itemindex >= 0) {
-          if (itemindex < existingUserSet.getPinned()) {
-            items.remove(newItem);
-          } else {
-            usersetItems.remove(newItem);
-          }
-        }
+      // not pin request
+      if (existingUserSet.getPinned() > 0) {
+        // remove from the submitted list all items that were pinned before
+        final List<String> pinedItems =
+            existingUserSet.getItems().subList(0, existingUserSet.getPinned());
+        items.removeAll(pinedItems);
+        // not duplicated anymore, after removing from set
+        duplicatedItems.removeAll(pinedItems);
       }
-      // validation of the number of items for type Gallery
-      if (existingUserSet.isGallery()
-          && (usersetItems.size() + items.size()) > getConfiguration().getGalleryMaxSize()) {
-        throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED,
-            new String[] {String.valueOf(getConfiguration().getGalleryMaxSize())});
-      }
+      // remove from the set, the ones that were not pinned
+      existingUserSet.getItems().removeAll(duplicatedItems);
     }
 
-    int positionFinal = calculatePosition(position, usersetItems);
-    usersetItems.addAll(positionFinal, items);
   }
+
+  private int countDupplicatedItems(List<String> duplicatedItems, final List<String> pinnedItems) {
+    int counter = 0;
+    for (String pinnedItem : pinnedItems) {
+      if (duplicatedItems.contains(pinnedItem)) {
+        counter++;
+      }
+    }
+    return counter;
+  }
+
+  private void addItems(UserSet existingUserSet, List<String> items, int position,
+      boolean isPinnRequest) {
+    //init items list if needed
+    if(existingUserSet.getItems() == null) {
+      existingUserSet.setItems(new ArrayList<String>());
+    }
+    
+    if (isPinnRequest) {
+      // append pinned at the beginning
+      existingUserSet.getItems().addAll(0, items);
+      existingUserSet.increasePinned(items.size());
+    } else {
+      final boolean insertAtFixPosition = position > -1 && existingUserSet.getItems() != null
+          && position < existingUserSet.getItems().size();
+      if (insertAtFixPosition) {
+        // append at given position
+        existingUserSet.getItems().addAll(position, items);
+      } else {
+        // append to the end
+        existingUserSet.getItems().addAll(items);
+      }
+    }
+  }
+
+  private List<String> computeDuplicateList(@NonNull UserSet existingUserSet,
+      @NonNull List<String> newItems) {
+    if (existingUserSet.getItems() == null || existingUserSet.getItems().isEmpty()) {
+      return null;
+    }
+    // new items should not be empty at this stage.
+    // create a copy of the list
+    List<String> res = new ArrayList<String>(newItems);
+    // compute duplicates
+    res.retainAll(existingUserSet.getItems());
+    if (res.isEmpty()) {
+      return null;
+    }
+    return res;
+  }
+
+
 
   /*
    * (non-Javadoc)
@@ -405,7 +452,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
 
     // check max number of items for the sets of type Collection
-    if (existingUserSet.isCollection() && !existingUserSet.hasItem(newItem)) {
+    if (existingUserSet.isGallery() && !existingUserSet.hasItem(newItem)) {
       validateGallerySize(existingUserSet, 1);
     }
 
@@ -413,8 +460,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // insert the item at the 0 position
     UserSet userSet;
 
-    if (WebUserSetModelFields.PINNED_POSITION.equals(position)
-        && existingUserSet.isEntityBestItemsSet()) {
+    if (WebUserSetRequestUtils.isPinnRequest(position) && existingUserSet.isEntityBestItemsSet()) {
       userSet = insertItem(existingUserSet, newItem, 0, true);
     } else {
       // validate position
@@ -837,6 +883,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       int startIndex, final int endIndex) {
     CollectionPage page;
     page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
+    if(userSet.getItems() == null ) {
+      //return immediately if the set has no items
+      return page;
+    }
     List<String> items = userSet.getItems().subList(startIndex, endIndex);
     page.setItems(items);
     page.setTotalInPage(items.size());
@@ -848,7 +898,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     CollectionPage page;
     page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
     ((ItemDescriptionsCollectionPage) page).setItemList(userSet.getItems());
-    page.setTotalInPage(userSet.getItems().size());
+    if(userSet.getItems() != null) {
+      page.setTotalInPage(userSet.getItems().size());
+    }
     return page;
   }
 
@@ -910,7 +962,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         result = createItemDescriptionsResultPage(lastPage, pageSize, totalnCollection, profile,
             collectionUrl);
         List<String> dereferencedItems = dereferenceItems(pageItems, profile);
-        ((ItemDescriptionsResultPage)result).setItemList(dereferencedItems);
+        ((ItemDescriptionsResultPage) result).setItemList(dereferencedItems);
         result.setTotalInPage(dereferencedItems.size());
         break;
       case FACETS:
@@ -934,7 +986,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return result;
   }
 
-  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile) throws HttpException {
+  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile)
+      throws HttpException {
     UserSet itemsSet = new WebUserSetImpl();
     itemsSet.setItems(pageItems);
     UserSet dereferenced = fetchUserSetItems(itemsSet, null, null, WebUserSetFields.DEFAULT_PAGE,
@@ -1103,10 +1156,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     String itemId = userSet.getItems().get(0);
-    String url = SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
-        getConfiguration().getItemDataEndpoint(), itemId, getConfiguration().getSearchApiKey(), 
-        getConfiguration().getSearchApiProfileForItemDescriptions());
-    
+    String url =
+        SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
+            getConfiguration().getItemDataEndpoint(), itemId, getConfiguration().getSearchApiKey(),
+            getConfiguration().getSearchApiProfileForItemDescriptions());
+
     WebResource depiction = new WebResource();
     getSearchApiClient().fillDepiction(url, itemId, depiction);
     return depiction;
