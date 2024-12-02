@@ -186,12 +186,12 @@ public class WebUserSetRest extends BaseRest {
     validateMultipleProfiles(profiles, profile);
     SetPageProfile searializationProfile = getUserSetService().getProfileForPagination(profiles);
 
-    pageNr = WeUserSetRequestUtils.parsePageNumber(page, -1);
+    pageNr = WebUserSetRequestUtils.parsePageNumber(page, -1);
     
     int maxPageSize =
         getConfiguration().getMaxPageSize(searializationProfile.getProfileParamValue());
     
-    pageItems = WeUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+    pageItems = WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
 
     return getUserSetPage(profiles, identifier, sortField, sortOrderField, pageNr, pageItems,
         authentication, request);
@@ -563,7 +563,7 @@ public class WebUserSetRest extends BaseRest {
       }
 
       // 9. verify if position is higher than pinned
-      if (!WeUserSetRequestUtils.isPinnRequest(position) && itemsPosition > -1
+      if (!WebUserSetRequestUtils.isPinnRequest(position) && itemsPosition > -1
           && itemsPosition < existingUserSet.getPinned()) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Position smaller than pinned is not allowed for non pin request!",
