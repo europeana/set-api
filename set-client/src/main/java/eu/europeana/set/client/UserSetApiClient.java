@@ -2,6 +2,7 @@ package eu.europeana.set.client;
 
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.client.web.SearchUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.definitions.model.UserSet;
@@ -57,6 +58,11 @@ public class UserSetApiClient extends BaseUserSetApi {
         @Override
         public UserSet updateUserSet(String identifier, String set, String profile) throws SetApiClientException {
             return getApiConnection().updateUserSet(identifier, set, profile);
+        }
+
+        @Override
+        public List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, int page, int pageSize, String profile) throws SetApiClientException {
+            return getApiConnection().getPaginationUserSet(identifier, sort, sortOrder, page, pageSize, profile);
         }
     }
 

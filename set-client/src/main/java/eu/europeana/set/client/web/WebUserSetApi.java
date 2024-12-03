@@ -1,7 +1,10 @@
 package eu.europeana.set.client.web;
 
 import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;
+
+import java.util.List;
 
 /**
  * Client API interface
@@ -44,5 +47,16 @@ public interface WebUserSetApi {
 	 */
 	UserSet updateUserSet(String identifier, String requestBody, String profile) throws SetApiClientException;
 
-
+	/**
+	 * This method fetches the user set pagination request
+	 * @param identifier set id
+	 * @param sort sort fields
+	 * @param sortOrder order of sort
+	 * @param page page number
+	 * @param pageSize size of the page
+	 * @param profile profile requested
+	 * @return
+	 * @throws SetApiClientException
+	 */
+	List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, int page, int pageSize, String profile) throws SetApiClientException;
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
+import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.impl.BaseUserSet;
@@ -13,6 +14,7 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import jakarta.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.*;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.PARAM_SORT_ORDER;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
 
 public class BaseApiConnection {
@@ -86,7 +89,7 @@ public class BaseApiConnection {
     protected UserSet getCreateUserSetResponse(String url, String requestBody, String authorizationHeaderValue) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Create UserSet API (POST) : {}.", url);
-            return parseSetApiResponse(getHttpConnection().post(url, requestBody,"application/json",  authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
+            return parseSetApiResponse(getHttpConnection().post(url, requestBody, ContentType.APPLICATION_JSON.getMimeType(),  authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
         } catch (IOException | ParseException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
@@ -152,6 +155,48 @@ public class BaseApiConnection {
     }
 
     /**
+     * Fetches the get user Set pagination response
+     *
+     * Check profile for the deserialization
+     * META - empty page (no items) ,  ITEMS_META - only set descriptions, not item descriptions , ITEMS - items set as set ids
+     * ITEMS is the default profile value
+     * @param url
+     * @param authorizationHeaderValue
+     * @return
+     * @throws SetApiClientException
+     */
+    protected List<RecordPreview> getUserSetPaginatedResponse(String url, String authorizationHeaderValue, String profile) throws SetApiClientException {
+        try {
+            LOGGER.trace("Call to Get UserSet API (Paginated): {} ", url);
+            CloseableHttpResponse response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), authorizationHeaderValue);
+            String responseBody = EntityUtils.toString(response.getEntity());
+            if (response.getCode() == HttpStatus.SC_OK) {
+                if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
+                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
+                    List<String> recordIds  = mapper.readValue(responseBody, typeRef).getItems();
+                    List<RecordPreview> records = new ArrayList<>();
+                    for (String id: recordIds) {
+                       records.add(new RecordPreview(id));
+                    }
+                    return records;
+                }
+                TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
+                return mapper.readValue(responseBody, typeRef).getItems();
+
+            } else {
+                AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(ERROR_MESSAGE + " {} ", errorResponse.getMessage());
+                }
+                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getCode());
+            }
+        } catch (IOException | ParseException e) {
+            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
+        }
+    }
+
+
+    /**
      * Fetches the user Set search api response
      *
      * Check profile for the deserialization
@@ -162,7 +207,7 @@ public class BaseApiConnection {
      * @return
      * @throws SetApiClientException
      */
-    protected List< ? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue, String profile) throws SetApiClientException {
+    protected List<? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
             CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
@@ -215,6 +260,34 @@ public class BaseApiConnection {
      */
     public static URI buildGetUrls(String path, String profile) {
         UriBuilder builder = UriBuilder.newInstance().path(path);
+        if (profile != null) {
+            builder.queryParam(QUERY_PARAM_PROFILE, profile);
+        }
+        return builder.build();
+    }
+
+    /**
+     * Build paginated user set get url
+     * @param path
+     * @param sort
+     * @param sortOrder
+     * @param page
+     * @param pageSize
+     * @param profile
+     * @return
+     */
+    public static URI buildPaginatedGetUrls(String path, String sort,
+                                            String sortOrder, int page, int pageSize, String profile) {
+        UriBuilder builder = UriBuilder.newInstance().path(path)
+                .queryParam(QUERY_PARAM_PAGE, page)
+                .queryParam(QUERY_PARAM_PAGE_SIZE, pageSize);
+
+        if (sort != null) {
+            builder.queryParam(QUERY_PARAM_SORT, sort);
+        }
+        if (sortOrder != null) {
+            builder.queryParam(PARAM_SORT_ORDER, sortOrder);
+        }
         if (profile != null) {
             builder.queryParam(QUERY_PARAM_PROFILE, profile);
         }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
@@ -90,6 +91,24 @@ public class UserSetApiConnection extends BaseApiConnection {
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 
+  /**
+   * This method fetches the get user set pagination results
+   * @param identifier
+   * @param sort
+   * @param sortOrder
+   * @param page
+   * @param pageSize
+   * @param profile
+   * @return
+   * @throws SetApiClientException
+   */
+  public List<RecordPreview> getPaginationUserSet(String identifier, String sort,
+                                                  String sortOrder, int page, int pageSize, String profile) throws SetApiClientException {
+    StringBuilder urlBuilder = getUserSetServiceUri().append(
+            buildPaginatedGetUrls(identifier + WebUserSetFields.JSON_LD_REST, sort, sortOrder, page, pageSize, profile));
+    return getUserSetPaginatedResponse(urlBuilder.toString(),  regularUserAuthorizationValue, profile);
+
+  }
   /**
    * This method searches usersets for the given queries and params
    * Example : /set/search?query=visibility:published&pageSize=1000
