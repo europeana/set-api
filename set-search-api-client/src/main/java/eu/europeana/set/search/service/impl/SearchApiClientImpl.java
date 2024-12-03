@@ -171,9 +171,9 @@ public class SearchApiClientImpl implements SearchApiClient {
     CloseableHttpResponse jsonResponse;
     try {
       if (postBody != null) {
-        jsonResponse = createHttpConnection().post(uri, postBody, null, null);
+        jsonResponse = createHttpConnection().post(uri, postBody, "application/json", null);
       } else {
-        jsonResponse = createHttpConnection().get(uri, null, null);
+        jsonResponse = createHttpConnection().get(uri, "application/json", null);
       }
       if (jsonResponse == null) {
         // HTTP Error Code
