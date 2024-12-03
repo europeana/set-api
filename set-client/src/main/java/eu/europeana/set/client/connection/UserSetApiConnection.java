@@ -24,7 +24,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * http://localhost:8080/set/?profile=minimal
    *
    * @param set The UserSet body
-   * @param profile
+   * @param profile profile requested
    * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
@@ -44,9 +44,10 @@ public class UserSetApiConnection extends BaseApiConnection {
    * This method retrieves UserSet object. Example HTTP request for tag object:
    * http://localhost:8080/set/{identifier}.jsonld?profile=minimal where identifier is: 496
    *
-   * @param identifier
-   * @param profile
+   * @param identifier set id
+   * @param profile profile requested
    * @throws IOException
+   * @return userset
    */
   public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile));

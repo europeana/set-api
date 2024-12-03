@@ -23,16 +23,24 @@ public final class ClientConfiguration {
 
     private Properties properties;
 
+    /**
+     * Creates ClientConfiguration instance with set client properties
+     */
     public ClientConfiguration() {
         loadProperties(SET_CLIENT_PROPERTIES_FILE);
     }
 
+    /**
+     * CConstructor to inject properties
+     * @param properties
+     */
     public ClientConfiguration(Properties properties) {
         this.properties = properties;
     }
 
     private Properties loadProperties(String propertiesFile) {
-        try { properties = new Properties();
+        try {
+            properties = new Properties();
             properties.load(getClass().getResourceAsStream(propertiesFile));
         } catch (IOException e) {
             LOGGER.error("Error loading the properties file {}", propertiesFile);

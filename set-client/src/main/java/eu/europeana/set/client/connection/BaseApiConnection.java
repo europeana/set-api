@@ -30,17 +30,23 @@ import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEA
 
 public class BaseApiConnection {
 
-    Logger LOGGER = LogManager.getLogger(getClass().getName());
+    protected static final Logger LOGGER = LogManager.getLogger(BaseApiConnection.class);
 
     private static final String DELETE_URL_RESPONSE = ". Returns status code.";
     private static final String ERROR_MESSAGE = "Set API Client call failed - ";
 
-    private HttpConnection httpConnection = new HttpConnection();
-    private String apiKey;
-    private String setServiceUri;
+    private final HttpConnection httpConnection = new HttpConnection();
+    private final String apiKey;
+    private final String setServiceUri;
     String regularUserAuthorizationValue;
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * BaseApiConnection constructor
+     * @param setServiceUri set api service url
+     * @param apiKey apikey
+     * @param regularUserAuthorizationValue auth value
+     */
     public BaseApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
         this.setServiceUri = setServiceUri;
         this.apiKey = apiKey;
@@ -65,7 +71,7 @@ public class BaseApiConnection {
             LOGGER.trace("Call to Get UserSet API (GET) : {}.", url);
             return parseSetApiResponse(getHttpConnection().get(url, null, authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_NOT_MODIFIED)));
         } catch (IOException | ParseException e) {
-            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage());
+            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -80,9 +86,9 @@ public class BaseApiConnection {
     protected UserSet getCreateUserSetResponse(String url, String requestBody, String authorizationHeaderValue) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Create UserSet API (POST) : {}.", url);
-            return parseSetApiResponse(getHttpConnection().post(url, requestBody,null,  authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
+            return parseSetApiResponse(getHttpConnection().post(url, requestBody,"application/json",  authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
         } catch (IOException | ParseException e) {
-            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage());
+            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -97,10 +103,10 @@ public class BaseApiConnection {
      */
     protected UserSet getUpdateUserSetResponse(String url, String requestBody, String authorizationHeaderValue) throws SetApiClientException {
         try {
-            LOGGER.trace("Call to Update UserSet API : {PUT}.", url);
+            LOGGER.trace("Call to Update UserSet API : {PUT}. {} ", url);
             return parseSetApiResponse(getHttpConnection().put(url, requestBody, authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK)));
         } catch (IOException | ParseException e) {
-            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage());
+            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(),  HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -127,7 +133,7 @@ public class BaseApiConnection {
             }
             return String.valueOf(response.getCode());
         } catch (IOException | ParseException e) {
-            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage());
+            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -184,7 +190,7 @@ public class BaseApiConnection {
                 throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getCode());
             }
         } catch (IOException | ParseException e) {
-            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage());
+            throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -226,7 +232,7 @@ public class BaseApiConnection {
      * @param facet
      * @param facetLimit
      * @param profile
-     * @return
+     * @return search url
      */
     public static URI buildSearchUrl(String query, String[] qf, String sort, int page,
                                      int pageSize, String facet, int facetLimit,

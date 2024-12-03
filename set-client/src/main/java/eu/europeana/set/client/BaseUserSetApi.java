@@ -24,6 +24,12 @@ public class BaseUserSetApi {
     private final ClientConfiguration configuration;
     private UserSetApiConnection apiConnection;
 
+    /**
+     * Creates BaseUserSetApi instance with client configuration
+     * This allows user to insert property file
+     * @param configuration
+     * @throws SetApiClientException
+     */
     protected BaseUserSetApi(ClientConfiguration configuration) throws SetApiClientException {
         this.configuration = configuration;
         if (this.configuration.getServiceUri() == null) {
@@ -40,21 +46,25 @@ public class BaseUserSetApi {
                 getOauthToken(this.configuration.getOauthServiceUri(), this.configuration.getOauthRequestParams()));
     }
 
+    /**
+     * Constructor
+     * @throws SetApiClientException
+     */
     public BaseUserSetApi() throws SetApiClientException {
 	this(new ClientConfiguration());
     }
 
     private String getOauthToken(String oauthServiceUri, String oauthRequestParams ) throws SetApiClientException{
         try {
-            String ACCESS_TOKEN = "access_token";
+            String accessToken = "access_token";
             HttpConnection connection = new HttpConnection();
 
             CloseableHttpResponse response = connection.post(oauthServiceUri, oauthRequestParams, "application/x-www-form-urlencoded", null);
             String body = EntityUtils.toString(response.getEntity());
             if (HttpStatus.SC_OK == response.getCode()) {
                 JSONObject json = new JSONObject(body);
-                if (json.has(ACCESS_TOKEN)) {
-                    return "Bearer " + json.getString(ACCESS_TOKEN);
+                if (json.has(accessToken)) {
+                    return "Bearer " + json.getString(accessToken);
                 } else {
                     throw new SetApiClientException("Cannot extract authentication token from reponse:" + body);
                 }
