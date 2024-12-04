@@ -54,6 +54,10 @@ public class RecordPreview {
 		}
 	}
 
+	public boolean hasDescription() {
+		return description != null && !description.isEmpty();
+	}
+
 	public Map<String, List<String>> getTitle() {
 		return title;
 	}
@@ -66,6 +70,9 @@ public class RecordPreview {
 		}
 	}
 
+	public boolean hasTitle() {
+		return title != null && !title.isEmpty();
+	}
 
 	public List<String> getEdmPreview() {
 		return edmPreview;
@@ -73,5 +80,9 @@ public class RecordPreview {
 
 	public void setEdmPreview(List<String> edmPreview) {
 		this.edmPreview = edmPreview;
+	}
+
+	public boolean hasPreview() {
+		return edmPreview != null && !edmPreview.isEmpty();
 	}
 }
