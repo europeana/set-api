@@ -58,5 +58,5 @@ public interface WebUserSetApi {
 	 * @return
 	 * @throws SetApiClientException
 	 */
-	List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, int page, int pageSize, String profile) throws SetApiClientException;
+	List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, String page, String pageSize, String profile) throws SetApiClientException;
 }

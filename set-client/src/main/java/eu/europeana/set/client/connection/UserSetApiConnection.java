@@ -103,7 +103,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @throws SetApiClientException
    */
   public List<RecordPreview> getPaginationUserSet(String identifier, String sort,
-                                                  String sortOrder, int page, int pageSize, String profile) throws SetApiClientException {
+                                                  String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri().append(
             buildPaginatedGetUrls(identifier + WebUserSetFields.JSON_LD_REST, sort, sortOrder, page, pageSize, profile));
     return getUserSetPaginatedResponse(urlBuilder.toString(),  regularUserAuthorizationValue, profile);
@@ -123,8 +123,8 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return
    * @throws IOException
    */
-  public List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, int page,
-                                               int pageSize, String facet, int facetLimit,
+  public List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, String page,
+                                               String pageSize, String facet, int facetLimit,
                                                String profile) throws SetApiClientException {
 
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));

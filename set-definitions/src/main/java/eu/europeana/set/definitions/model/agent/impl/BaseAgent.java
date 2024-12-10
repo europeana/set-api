@@ -1,10 +1,8 @@
 package eu.europeana.set.definitions.model.agent.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BaseAgent implements Agent {
 
     private String httpUrl;

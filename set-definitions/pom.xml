@@ -29,19 +29,5 @@
 			<artifactId>commons-definitions</artifactId>
 			<version>${version.commonsApi}</version>
 		</dependency>
-
-        <!-- We need to add jackson databind for Deserializer, hence to be in sync
-           Override the jackson version present in api-commons-->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
 	</dependencies>
 </project>

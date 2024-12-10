@@ -24,6 +24,6 @@ public interface SearchUserSetApi {
      * @param profile
      * @return
      */
-    List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, int page, int pageSize,
+    List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, String page, String pageSize,
                                           String facet, int facetLimit, String profile) throws SetApiClientException;
 }

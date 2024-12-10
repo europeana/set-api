@@ -61,7 +61,7 @@ public class UserSetApiClient extends BaseUserSetApi {
         }
 
         @Override
-        public List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, int page, int pageSize, String profile) throws SetApiClientException {
+        public List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
             return getApiConnection().getPaginationUserSet(identifier, sort, sortOrder, page, pageSize, profile);
         }
     }
@@ -70,7 +70,7 @@ public class UserSetApiClient extends BaseUserSetApi {
 
         @Override
         public List<? extends UserSet> searchUserSet(String query, String[] qf,
-                                                     String sort, int page, int pageSize, String facet, int facetLimit, String profile) throws SetApiClientException {
+                                                     String sort, String page, String pageSize, String facet, int facetLimit, String profile) throws SetApiClientException {
             return getApiConnection().searchUserSet(query, qf, sort, page, pageSize, facet, facetLimit, profile);
         }
     }

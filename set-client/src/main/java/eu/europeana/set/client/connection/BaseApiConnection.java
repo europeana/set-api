@@ -1,28 +1,34 @@
 package eu.europeana.set.client.connection;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.client.json.RecordPreviewDeserializer;
+import eu.europeana.set.client.json.UserSetDeserializer;
 import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
 import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.impl.BaseUserSet;
+import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.client.json.AgentDeserializer;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import jakarta.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +60,16 @@ public class BaseApiConnection {
         this.setServiceUri = setServiceUri;
         this.apiKey = apiKey;
         this.regularUserAuthorizationValue = regularUserAuthorizationValue;
+
+        // set object mapper
+        SimpleModule module = new SimpleModule();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        module.addDeserializer(Agent.class, new AgentDeserializer());
+        module.addDeserializer(UserSet.class, new UserSetDeserializer());
+        module.addDeserializer(RecordPreview.class, new RecordPreviewDeserializer());
+
+        mapper.registerModule(module);
+        mapper.findAndRegisterModules();
     }
 
     public HttpConnection getHttpConnection() {
@@ -143,7 +159,7 @@ public class BaseApiConnection {
     private UserSet parseSetApiResponse(CloseableHttpResponse response, List<Integer> statusToCheckList) throws SetApiClientException, IOException, ParseException {
         String responseBody = EntityUtils.toString(response.getEntity());
         if (statusToCheckList.contains(response.getCode())) {
-            return mapper.readValue(responseBody, BaseUserSet.class);
+            return mapper.readValue(responseBody, UserSet.class);
         } else {
             AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
             if (LOGGER.isDebugEnabled()) {
@@ -171,15 +187,15 @@ public class BaseApiConnection {
             CloseableHttpResponse response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), authorizationHeaderValue);
             String responseBody = EntityUtils.toString(response.getEntity());
             if (response.getCode() == HttpStatus.SC_OK) {
-                if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
-                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
-                    List<String> recordIds  = mapper.readValue(responseBody, typeRef).getItems();
-                    List<RecordPreview> records = new ArrayList<>();
-                    for (String id: recordIds) {
-                       records.add(new RecordPreview(id));
-                    }
-                    return records;
-                }
+//                if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
+//                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
+//                    List<String> recordIds  = mapper.readValue(responseBody, typeRef).getItems();
+//                    List<RecordPreview> records = new ArrayList<>();
+//                    for (String id: recordIds) {
+//                       records.add(new RecordPreview(id));
+//                    }
+//                    return records;
+//                }
                 TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
                 return mapper.readValue(responseBody, typeRef).getItems();
 
@@ -199,9 +215,6 @@ public class BaseApiConnection {
     /**
      * Fetches the user Set search api response
      *
-     * Check profile for the deserialization
-     * META - empty page (no items) ,  ITEMS_META - only set descriptions, not item descriptions , ITEMS - items set as set ids
-     * ITEMS_META is the default profile value
      * @param url
      * @param authorizationHeaderValue
      * @return
@@ -213,18 +226,7 @@ public class BaseApiConnection {
             CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
             String responseBody = EntityUtils.toString(response.getEntity());
             if (response.getCode() == HttpStatus.SC_OK) {
-               if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
-                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
-                    List<String> setIds  = mapper.readValue(responseBody, typeRef).getItems();
-                    List<UserSet> userSets = new ArrayList<>();
-                   for (String id: setIds) {
-                       BaseUserSet userSet = new BaseUserSet();
-                       userSet.setIdentifier(StringUtils.substringAfterLast(id, "/"));
-                       userSets.add(userSet);
-                   }
-                   return userSets;
-                }
-                TypeReference<ResultsPageImpl<BaseUserSet>> typeRef = new TypeReference<>() {};
+                TypeReference<ResultsPageImpl<UserSet>> typeRef = new TypeReference<>() {};
                 return mapper.readValue(responseBody, typeRef).getItems();
 
             } else {
@@ -258,12 +260,16 @@ public class BaseApiConnection {
      * @param profile
      * @return
      */
-    public static URI buildGetUrls(String path, String profile) {
-        UriBuilder builder = UriBuilder.newInstance().path(path);
-        if (profile != null) {
-            builder.queryParam(QUERY_PARAM_PROFILE, profile);
+    public static URI buildGetUrls(String path, String profile) throws SetApiClientException{
+        try {
+            URIBuilder builder = new URIBuilder(path);
+            if (profile != null) {
+                builder.addParameter(QUERY_PARAM_PROFILE, profile);
+            }
+            return builder.build();
+        } catch (URISyntaxException e) {
+            throw  new SetApiClientException("Error creating Get url for " +path);
         }
-        return builder.build();
     }
 
     /**
@@ -277,21 +283,25 @@ public class BaseApiConnection {
      * @return
      */
     public static URI buildPaginatedGetUrls(String path, String sort,
-                                            String sortOrder, int page, int pageSize, String profile) {
-        UriBuilder builder = UriBuilder.newInstance().path(path)
-                .queryParam(QUERY_PARAM_PAGE, page)
-                .queryParam(QUERY_PARAM_PAGE_SIZE, pageSize);
+                                            String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
+        try {
+            URIBuilder builder = new URIBuilder(path)
+                    .addParameter(QUERY_PARAM_PAGE, page)
+                    .addParameter(QUERY_PARAM_PAGE_SIZE, pageSize);
 
-        if (sort != null) {
-            builder.queryParam(QUERY_PARAM_SORT, sort);
+            if (sort != null) {
+                builder.addParameter(QUERY_PARAM_SORT, sort);
+            }
+            if (sortOrder != null) {
+                builder.addParameter(PARAM_SORT_ORDER, sortOrder);
+            }
+            if (profile != null) {
+                builder.addParameter(QUERY_PARAM_PROFILE, profile);
+            }
+            return builder.build();
+        } catch (URISyntaxException e) {
+            throw  new SetApiClientException("Error creating Paginated Get Urls url for " +path);
         }
-        if (sortOrder != null) {
-            builder.queryParam(PARAM_SORT_ORDER, sortOrder);
-        }
-        if (profile != null) {
-            builder.queryParam(QUERY_PARAM_PROFILE, profile);
-        }
-        return builder.build();
     }
 
     /**
@@ -307,27 +317,32 @@ public class BaseApiConnection {
      * @param profile
      * @return search url
      */
-    public static URI buildSearchUrl(String query, String[] qf, String sort, int page,
-                                     int pageSize, String facet, int facetLimit,
-                                     String profile) {
-        UriBuilder builder = UriBuilder.newInstance().path(SEARCH_PATH)
-                .queryParam(QUERY_PARAM_QUERY, query)
-                .queryParam(QUERY_PARAM_PAGE, page)
-                .queryParam(QUERY_PARAM_PAGE_SIZE, pageSize);
-        if (qf != null) {
-            builder.queryParam(QUERY_PARAM_QF, qf);
+    public static URI buildSearchUrl(String query, String[] qf, String sort, String page,
+                                     String pageSize, String facet, int facetLimit,
+                                     String profile) throws SetApiClientException {
+        try {
+            URIBuilder builder = new URIBuilder(SEARCH_PATH)
+                    .addParameter(QUERY_PARAM_QUERY, query)
+                    .addParameter(QUERY_PARAM_PAGE, page)
+                    .addParameter(QUERY_PARAM_PAGE_SIZE, pageSize);
+
+            if (qf != null) {
+                builder.addParameter(QUERY_PARAM_QF, String.valueOf(qf));
+            }
+            if (sort != null) {
+                builder.addParameter(QUERY_PARAM_SORT, sort);
+            }
+            if (facet != null) {
+                builder.addParameter(QUERY_PARAM_FACET, facet);
+                builder.addParameter("facet.limit", String.valueOf(facetLimit));
+            }
+            if (profile != null) {
+                builder.addParameter(QUERY_PARAM_PROFILE, profile);
+            }
+            return builder.build();
+        } catch (URISyntaxException e) {
+            throw  new SetApiClientException("Error creating Search Urls url for " +SEARCH_PATH);
         }
-        if (sort != null) {
-            builder.queryParam(QUERY_PARAM_SORT, sort);
-        }
-        if (facet != null) {
-            builder.queryParam(QUERY_PARAM_FACET, facet);
-            builder.queryParam("facet.limit", facetLimit);
-        }
-        if (profile != null) {
-            builder.queryParam(QUERY_PARAM_PROFILE, profile);
-        }
-        return builder.build();
     }
 
     public String getApiKey() {

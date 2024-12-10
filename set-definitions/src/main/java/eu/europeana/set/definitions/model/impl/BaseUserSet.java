@@ -4,26 +4,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import eu.europeana.set.definitions.json.AgentDeserializer;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Europeana Sets API Specification
  *
- * @JsonIgnoreProperties - to ignore "@context" while parsing the results in the Client side code
- *
- * @author GrafR Modified by Srishti Singh 2-2-2021
+ * @author GrafR
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseUserSet extends BasePageInfo implements UserSet {
 
     // EDM Collection Profile
@@ -82,11 +74,6 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
 
     // Provenance information
 
-    /**
-     * A reference to the user agent that gathers objects together following
-     * implicit or explicit criteria or accrual policy.
-     */
-    @JsonDeserialize(using = AgentDeserializer.class)
     private Agent creator;
 
     /**
@@ -119,23 +106,7 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     
     private Provider provider;
 
-    /**
-     * For deserialization -
-     *        Adding @JsonGetter, as this field is ignored in the json responses.
-     *        Will build the identifier value from the field "id".
-     *
-     *  Only if identifier is present and has a baseUrl (which means it is fetched via ID, during deserialization)
-     *  In other cases, return the actual identifier value
-     *
-     *  exmaple : 'id' : http://data.europeana.eu/set/xyz , identifier : xyz
-     *
-     * @return identifier of the set
-     */
-    @JsonGetter(WebUserSetModelFields.ID)
     public String getIdentifier() {
-        if (identifier != null && StringUtils.contains(identifier, "/")) {
-            return StringUtils.substringAfterLast(identifier, "/");
-        }
 	return identifier;
     }
 
