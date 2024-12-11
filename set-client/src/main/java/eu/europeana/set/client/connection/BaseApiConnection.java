@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.exception.SetApiClientException;
-import eu.europeana.set.client.json.RecordPreviewDeserializer;
 import eu.europeana.set.client.json.UserSetDeserializer;
 import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
 import eu.europeana.set.client.model.result.RecordPreview;
@@ -14,6 +13,7 @@ import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.client.json.AgentDeserializer;
+import eu.europeana.set.definitions.model.impl.BaseUserSet;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.apache.commons.lang3.StringUtils;
@@ -66,7 +66,6 @@ public class BaseApiConnection {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         module.addDeserializer(Agent.class, new AgentDeserializer());
         module.addDeserializer(UserSet.class, new UserSetDeserializer());
-        module.addDeserializer(RecordPreview.class, new RecordPreviewDeserializer());
 
         mapper.registerModule(module);
         mapper.findAndRegisterModules();
@@ -187,15 +186,6 @@ public class BaseApiConnection {
             CloseableHttpResponse response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), authorizationHeaderValue);
             String responseBody = EntityUtils.toString(response.getEntity());
             if (response.getCode() == HttpStatus.SC_OK) {
-//                if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
-//                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
-//                    List<String> recordIds  = mapper.readValue(responseBody, typeRef).getItems();
-//                    List<RecordPreview> records = new ArrayList<>();
-//                    for (String id: recordIds) {
-//                       records.add(new RecordPreview(id));
-//                    }
-//                    return records;
-//                }
                 TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
                 return mapper.readValue(responseBody, typeRef).getItems();
 
@@ -226,6 +216,17 @@ public class BaseApiConnection {
             CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
             String responseBody = EntityUtils.toString(response.getEntity());
             if (response.getCode() == HttpStatus.SC_OK) {
+                if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
+                    TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
+                    List<String> items = mapper.readValue(responseBody, typeRef).getItems();
+                    List<UserSet> sets = new ArrayList<>();
+                    for (String id: items) {
+                        UserSet set = new BaseUserSet();
+                        set.setIdentifier(StringUtils.substringAfterLast(id, "/"));
+                        sets.add(set);
+                    }
+                    return  sets;
+                }
                 TypeReference<ResultsPageImpl<UserSet>> typeRef = new TypeReference<>() {};
                 return mapper.readValue(responseBody, typeRef).getItems();
 

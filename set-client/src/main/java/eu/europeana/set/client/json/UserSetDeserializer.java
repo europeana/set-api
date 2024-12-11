@@ -27,25 +27,15 @@ public class UserSetDeserializer extends JsonDeserializer<UserSet> {
     @Override
     public UserSet deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
-        if (mapper.readTree(jsonParser).isObject()) {
-            ObjectNode root = mapper.readTree(jsonParser);
-            BaseUserSet set = mapper.readValue(root.toString(), BaseUserSet.class);
-            if (root.has("id")) {
-                String id = root.get("id").asText();
-                String identifier = set.getIdentifier();
-                if (identifier == null) {
-                    set.setIdentifier(StringUtils.substringAfterLast(id, "/"));
-                }
+        ObjectNode root = mapper.readTree(jsonParser);
+        BaseUserSet set = mapper.readValue(root.toString(), BaseUserSet.class);
+        if (root.has("id")) {
+            String id = root.get("id").asText();
+            String identifier = set.getIdentifier();
+            if (identifier == null) {
+                set.setIdentifier(StringUtils.substringAfterLast(id, "/"));
             }
-            return set;
-        } else {
-            // there are profiles where only id value is returned instead of UserSet object
-           //  hence we will form a userset object with 'id' value and return that
-            JsonNode root = mapper.readTree(jsonParser);
-            String id = mapper.readValue(root.toString(), String.class);
-            UserSet set = new BaseUserSet();
-            set.setIdentifier(StringUtils.substringAfterLast(id, "/"));
-            return set;
         }
+        return set;
     }
 }
