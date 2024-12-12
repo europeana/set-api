@@ -63,7 +63,7 @@ public class BaseWebUserSetProtocol {
 
 	protected void deleteUserSet(String identifier) throws SetApiClientException {
 		String re = apiClient.getWebUserSetApi().deleteUserSet(identifier);
-		assertEquals(HttpStatus.SC_OK, re);
+		assertEquals(String.valueOf(HttpStatus.SC_OK), re);
 		log.trace("User set deleted: /" + identifier);
 	}
 

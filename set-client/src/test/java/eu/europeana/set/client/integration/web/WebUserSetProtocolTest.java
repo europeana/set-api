@@ -65,7 +65,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 		assertNotNull(testSetId);
 		// delete user set by identifier URL
 		String deleteResponse = apiClient.getWebUserSetApi().deleteUserSet(testSetId);
-		assertEquals(HttpStatus.SC_NO_CONTENT, deleteResponse);
+		assertEquals(String.valueOf(HttpStatus.SC_NO_CONTENT), deleteResponse);
 	}
 
 	/**

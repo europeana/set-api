@@ -219,7 +219,7 @@ public class BaseApiConnection {
                 if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
                     TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
                     List<String> items = mapper.readValue(responseBody, typeRef).getItems();
-                    List<UserSet> sets = new ArrayList<>();
+                    List<UserSet> sets = new ArrayList<>(items.size());
                     for (String id: items) {
                         UserSet set = new BaseUserSet();
                         set.setIdentifier(StringUtils.substringAfterLast(id, "/"));
@@ -269,7 +269,7 @@ public class BaseApiConnection {
             }
             return builder.build();
         } catch (URISyntaxException e) {
-            throw  new SetApiClientException("Error creating Get url for " +path);
+            throw  new SetApiClientException("Error creating Get url -  " + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -301,7 +301,7 @@ public class BaseApiConnection {
             }
             return builder.build();
         } catch (URISyntaxException e) {
-            throw  new SetApiClientException("Error creating Paginated Get Urls url for " +path);
+            throw  new SetApiClientException("Error creating Paginated Get Urls " +e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -342,7 +342,7 @@ public class BaseApiConnection {
             }
             return builder.build();
         } catch (URISyntaxException e) {
-            throw  new SetApiClientException("Error creating Search Urls url for " +SEARCH_PATH);
+            throw  new SetApiClientException("Error creating Search Urls ", HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 

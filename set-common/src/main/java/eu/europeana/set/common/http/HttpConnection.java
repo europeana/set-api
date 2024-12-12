@@ -103,10 +103,9 @@ public class HttpConnection {
 
 	}
 
-	private <T extends HttpUriRequestBase> T addHeaders(T url, String headerName, String headerValue) {
+	private <T extends HttpUriRequestBase> void addHeaders(T url, String headerName, String headerValue) {
 		if (StringUtils.isNotBlank(headerValue)) {
 			url.setHeader(headerName, headerValue);
 		}
-		return url;
 	}
 }
