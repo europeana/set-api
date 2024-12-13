@@ -1,16 +1,13 @@
 package eu.europeana.set.client.connection;
 
 import java.io.IOException;
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import java.util.List;
 
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.client.model.result.RecordPreview;
+import eu.europeana.set.definitions.model.UserSet;
+import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.set.client.config.ClientConfiguration;
-import eu.europeana.set.client.exception.TechnicalRuntimeException;
-import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 /**
@@ -18,109 +15,44 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
  */
 public class UserSetApiConnection extends BaseApiConnection {
 
-  String regularUserAuthorizationValue = null;
-
-  /**
-   * Create a new connection to the UserSet Service (REST API).
-   *
-   * @param apiKey API Key required to access the API
-   */
-  public UserSetApiConnection(String setServiceUri, String apiKey) {
-    super(setServiceUri, apiKey);
-    initConfigurations();
+  public UserSetApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
+   super(setServiceUri, apiKey, regularUserAuthorizationValue);
   }
 
-  public UserSetApiConnection() {
-    this(ClientConfiguration.getInstance().getServiceUri(),
-        ClientConfiguration.getInstance().getApiKey());
-    initConfigurations();
-  }
-
-  private void initConfigurations() {
-    // regularUserAuthorizationValue =
-    // ClientConfiguration.getInstance().getAuthorizationHeaderValue();
-    regularUserAuthorizationValue = getOauthToken();
-  }
-
-  public String getOauthToken() {
-    try {
-
-      String ACCESS_TOKEN = "access_token";
-      String oauthUri = ClientConfiguration.getInstance().getOauthServiceUri();
-      String oauthParams = ClientConfiguration.getInstance().getOauthRequestParams();
-      HttpConnection connection = new HttpConnection();
-      ResponseEntity<String> response;
-      response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded");
-
-      if (HttpStatus.OK == response.getStatusCode()) {
-        String body = response.getBody();
-        JSONObject json = new JSONObject(body);
-        if (json.has(ACCESS_TOKEN)) {
-          return "Bearer " + json.getString(ACCESS_TOKEN);
-        } else {
-          throw new TechnicalRuntimeException(
-              "Cannot extract authentication token from reponse:" + body);
-        }
-      } else {
-        throw new TechnicalRuntimeException("Error occured when calling oath service! " + response);
-      }
-    } catch (IOException | JSONException e) {
-      throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);
-    }
-
-  }
 
   /**
    * This method creates UserSet object from Json string. Example HTTP request for tag object:
    * http://localhost:8080/set/?profile=minimal
    *
    * @param set The UserSet body
-   * @param profile
+   * @param profile profile requested
    * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> createUserSet(String set, String profile) throws IOException {
-
+  public UserSet createUserSet(String set, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     if (StringUtils.isNotEmpty(profile)) {
       urlBuilder.append(WebUserSetFields.PAR_CHAR);
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-
     String resUrl = urlBuilder.toString();
-
-    logger.trace("Ivoking create set: {} ", resUrl);
-
-    /**
-     * Execute Europeana API request
-     */
-    return postURL(resUrl, set, regularUserAuthorizationValue);
+    LOGGER.trace("Ivoking create set: {} ", resUrl);
+    return getCreateUserSetResponse(resUrl, set, regularUserAuthorizationValue);
   }
 
   /**
    * This method retrieves UserSet object. Example HTTP request for tag object:
    * http://localhost:8080/set/{identifier}.jsonld?profile=minimal where identifier is: 496
    *
-   * @param identifier
-   * @param profile
-   * @return response entity that comprises response body, headers and status code.
+   * @param identifier set id
+   * @param profile profile requested
    * @throws IOException
+   * @return userset
    */
-  public ResponseEntity<String> getUserSet(String identifier, String profile) throws IOException {
-
-    StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
-    if (StringUtils.isNotEmpty(profile)) {
-      urlBuilder.append(WebUserSetFields.PAR_CHAR);
-      urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
-          .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
-    }
-
-    /**
-     * Execute Europeana API request
-     */
-    return getURL(urlBuilder.toString(), regularUserAuthorizationValue);
+  public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
+    StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile));
+    return getUserSetResponse(urlBuilder.toString(),  regularUserAuthorizationValue);
   }
 
   /**
@@ -134,9 +66,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> updateUserSet(String identifier, String updateUserSet,
-      String profile) throws IOException {
-
+  public UserSet updateUserSet(String identifier, String updateUserSet, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
     if (StringUtils.isNotEmpty(profile)) {
@@ -144,11 +74,7 @@ public class UserSetApiConnection extends BaseApiConnection {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-
-    /**
-     * Execute Europeana API request
-     */
-    return putURL(urlBuilder.toString(), updateUserSet, regularUserAuthorizationValue);
+    return getUpdateUserSetResponse(urlBuilder.toString(), updateUserSet, regularUserAuthorizationValue);
   }
 
   /**
@@ -159,15 +85,49 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return response entity that comprises response headers and status code.
    * @throws IOException
    */
-  public ResponseEntity<String> deleteUserSet(String identifier) throws IOException {
-
+  public String deleteUserSet(String identifier) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
-
-    /**
-     * Execute Europeana API request
-     */
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 
+  /**
+   * This method fetches the get user set pagination results
+   * @param identifier
+   * @param sort
+   * @param sortOrder
+   * @param page
+   * @param pageSize
+   * @param profile
+   * @return
+   * @throws SetApiClientException
+   */
+  public List<RecordPreview> getPaginationUserSet(String identifier, String sort,
+                                                  String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
+    StringBuilder urlBuilder = getUserSetServiceUri().append(
+            buildPaginatedGetUrls(identifier + WebUserSetFields.JSON_LD_REST, sort, sortOrder, page, pageSize, profile));
+    return getUserSetPaginatedResponse(urlBuilder.toString(),  regularUserAuthorizationValue, profile);
+
+  }
+  /**
+   * This method searches usersets for the given queries and params
+   * Example : /set/search?query=visibility:published&pageSize=1000
+   * @param query
+   * @param qf
+   * @param sort
+   * @param page
+   * @param pageSize
+   * @param facet
+   * @param facetLimit
+   * @param profile
+   * @return
+   * @throws IOException
+   */
+  public List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, String page,
+                                               String pageSize, String facet, int facetLimit,
+                                               String profile) throws SetApiClientException {
+
+    StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
+    return getSearchUserSetResponse(urlBuilder.toString(), regularUserAuthorizationValue, profile);
+  }
 }

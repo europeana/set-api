@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import eu.europeana.set.client.config.ClientConfiguration;
+import eu.europeana.set.client.exception.SetApiClientException;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import eu.europeana.set.client.web.WebUserSetApi;
-import eu.europeana.set.client.web.WebUserSetApiImpl;
+import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.definitions.model.UserSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,15 +25,11 @@ public class BaseWebUserSetProtocol {
 	String START = "{";
 	String END = "}";
 
-	private WebUserSetApi apiClient;
+	protected UserSetApiClient apiClient;
 
 	@BeforeEach
-	public void initObjects() {
-		apiClient = new WebUserSetApiImpl();
-	}
-
-	public WebUserSetApi getApiClient() {
-		return apiClient;
+	public void initObjects() throws SetApiClientException {
+		apiClient = new UserSetApiClient(new ClientConfiguration());
 	}
 
 	/**
@@ -45,15 +40,9 @@ public class BaseWebUserSetProtocol {
 	 * @return response entity that contains response body, headers and status code.
 	 * @throws IOException
 	 */
-	protected ResponseEntity<String> storeTestUserSet(String resource, String profile) throws IOException {
-
+	protected UserSet storeTestUserSet(String resource, String profile) throws SetApiClientException, IOException {
 		String requestBody = getJsonStringInput(resource);
-
-		/**
-		 * store set
-		 */
-		ResponseEntity<String> storedResponse = getApiClient().createUserSet(requestBody, profile);
-		return storedResponse;
+		return apiClient.getWebUserSetApi().createUserSet(requestBody, profile);
 	}
 
 	protected String getJsonStringInput(String resource) throws IOException {
@@ -68,22 +57,18 @@ public class BaseWebUserSetProtocol {
 
 	}
 
-	/**
-	 * @param user set
-	 */
-	protected void deleteUserSet(UserSet set) {
+	protected void deleteUserSet(UserSet set) throws SetApiClientException {
 		deleteUserSet(set.getIdentifier());
 	}
 
-	protected void deleteUserSet(String identifier) {
-		WebUserSetApi webUserSetApi = new WebUserSetApiImpl();
-		ResponseEntity<String> re = webUserSetApi.deleteUserSet(identifier);
-		assertEquals(HttpStatus.OK, re.getStatusCode());
+	protected void deleteUserSet(String identifier) throws SetApiClientException {
+		String re = apiClient.getWebUserSetApi().deleteUserSet(identifier);
+		assertEquals(String.valueOf(HttpStatus.SC_OK), re);
 		log.trace("User set deleted: /" + identifier);
 	}
 
-	protected ResponseEntity<String> getUserSet(UserSet set) {
-		return getApiClient().getUserSet(set.getIdentifier(), null);
+	protected UserSet getUserSet(UserSet set) throws SetApiClientException {
+		return apiClient.getWebUserSetApi().getUserSet(set.getIdentifier(), null);
 	}
 	
 	

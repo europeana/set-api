@@ -1,0 +1,29 @@
+package eu.europeana.set.client.web;
+
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.definitions.model.UserSet;
+
+import java.util.List;
+
+/**
+ * Search Client API interface
+ * @author Srishti singh
+ * @since 20 Nov 2024
+ */
+public interface SearchUserSetApi {
+
+    /**
+     * This methods retrieves the search results from the db
+     * @param query
+     * @param qf
+     * @param sort
+     * @param page
+     * @param pageSize
+     * @param facet
+     * @param facetLimit
+     * @param profile
+     * @return
+     */
+    List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, String page, String pageSize,
+                                          String facet, int facetLimit, String profile) throws SetApiClientException;
+}

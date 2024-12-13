@@ -3,6 +3,7 @@ package eu.europeana.set.definitions.model.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
@@ -13,9 +14,9 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 /**
  * Europeana Sets API Specification
  *
- * @author GrafR Modified by Srishti Singh 2-2-2021
+ * @author GrafR
  */
-public abstract class BaseUserSet extends BasePageInfo implements UserSet {
+public class BaseUserSet extends BasePageInfo implements UserSet {
 
     // EDM Collection Profile
 
@@ -55,7 +56,10 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
      * of this set of the Entity user sets
      */
     private List<String> contributor;
-    
+
+    public BaseUserSet() {
+    }
+
     /**
      * depiction, primarily used y Galleries
      */
@@ -70,10 +74,6 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
 
     // Provenance information
 
-    /**
-     * A reference to the user agent that gathers objects together following
-     * implicit or explicit criteria or accrual policy.
-     */
     private Agent creator;
 
     /**
@@ -109,6 +109,7 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     public String getIdentifier() {
 	return identifier;
     }
+
 
     public void setIdentifier(String sequenceIdentifier) {
 	this.identifier = sequenceIdentifier;
@@ -285,6 +286,11 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     }
 
     @Override
+    public void setBaseUrl(String baseUrl) {
+        //used only for web userset
+    }
+
+    @Override
     public boolean isBookmarksFolder() {
 	return UserSetTypes.BOOKMARKSFOLDER.getJsonValue().equals(getType());
     }
@@ -320,6 +326,11 @@ public abstract class BaseUserSet extends BasePageInfo implements UserSet {
     @Override
     public Provider getProvider() {
       return provider;
+    }
+
+    @Override
+    public boolean hasItem(String itemId) {
+       return getItems() != null && getItems().contains(itemId);
     }
 
     @Override
