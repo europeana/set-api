@@ -1,16 +1,14 @@
 package eu.europeana.set.client.json;
 
+import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.impl.BaseUserSet;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.IOException;
 
 /**
  * Used for Deserializing UserSet.

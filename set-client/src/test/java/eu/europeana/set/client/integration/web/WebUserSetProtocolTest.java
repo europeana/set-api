@@ -3,15 +3,11 @@ package eu.europeana.set.client.integration.web;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import eu.europeana.set.client.exception.SetApiClientException;
-import eu.europeana.set.definitions.model.UserSet;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.definitions.model.UserSet;
 
 /**
  * This class aims at testing of the annotation methods.
@@ -21,8 +17,6 @@ import org.junit.jupiter.api.Test;
 @Disabled
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
-    private static final String USER_SET_PATH = "http://data.europeana.eu/set/";
-		
     @Test
     public void createUserSet() throws SetApiClientException, IOException {
 	String setId = createTestUserSet(USER_SET_CONTENT, null);

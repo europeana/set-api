@@ -2,12 +2,10 @@ package eu.europeana.set.client.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
-
-import eu.europeana.set.client.exception.SetApiClientException;
-import eu.europeana.set.definitions.model.UserSet;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import eu.europeana.set.client.exception.SetApiClientException;
 
 
 /**
