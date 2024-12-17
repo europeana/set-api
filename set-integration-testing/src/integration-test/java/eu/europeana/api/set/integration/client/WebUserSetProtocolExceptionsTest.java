@@ -1,4 +1,4 @@
-package eu.europeana.set.client.integration.web;
+package eu.europeana.api.set.integration.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import eu.europeana.set.client.exception.SetApiClientException;
  *
  * @author GrafR
  */
-@Disabled
 public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     public String CORRUPTED_JSON =

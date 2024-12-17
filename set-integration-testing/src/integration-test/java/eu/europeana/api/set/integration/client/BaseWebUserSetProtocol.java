@@ -1,4 +1,4 @@
-package eu.europeana.set.client.integration.web;
+package eu.europeana.api.set.integration.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;

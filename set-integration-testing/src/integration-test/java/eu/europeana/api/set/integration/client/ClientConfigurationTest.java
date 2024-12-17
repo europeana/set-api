@@ -1,4 +1,4 @@
-package eu.europeana.set.client.integration.web;
+package eu.europeana.api.set.integration.client;
 
 import eu.europeana.set.client.config.ClientConfiguration;
 import org.apache.commons.lang3.StringUtils;

@@ -1,4 +1,4 @@
-package eu.europeana.set.client.integration.web;
+package eu.europeana.api.set.integration.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,12 +14,11 @@ import eu.europeana.set.definitions.model.UserSet;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-@Disabled
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     @Test
     public void createUserSet() throws SetApiClientException, IOException {
-	String setId = createTestUserSet(USER_SET_CONTENT, null);
+	String setId = createTestUserSet(BaseWebUserSetProtocol.USER_SET_CONTENT, null);
 	assertNotNull(setId);
 	apiClient.getWebUserSetApi().deleteUserSet(setId);
     }
@@ -31,7 +30,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 	 */
 	@Test
 	public void retrieveUserSet() throws IllegalArgumentException, IOException, SetApiClientException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
+		String testSetId = createTestUserSet(BaseWebUserSetProtocol.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
 		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, null);
@@ -41,10 +40,10 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
 	@Test
 	public void updateUserSet() throws IOException, SetApiClientException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
+		String testSetId = createTestUserSet(BaseWebUserSetProtocol.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// updated user set value
-		String requestBody = getJsonStringInput(USER_SET_UPDATE_CONTENT);
+		String requestBody = getJsonStringInput(BaseWebUserSetProtocol.USER_SET_UPDATE_CONTENT);
 		assertNotNull(requestBody);
 		// update user set by identifier URL
 		UserSet updateResponse = apiClient.getWebUserSetApi().updateUserSet(
@@ -55,7 +54,7 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
 	@Test
 	public void deleteUserSet() throws IOException, SetApiClientException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT,null);
+		String testSetId = createTestUserSet(BaseWebUserSetProtocol.USER_SET_CONTENT,null);
 		assertNotNull(testSetId);
 		// delete user set by identifier URL
 		String deleteResponse = apiClient.getWebUserSetApi().deleteUserSet(testSetId);
