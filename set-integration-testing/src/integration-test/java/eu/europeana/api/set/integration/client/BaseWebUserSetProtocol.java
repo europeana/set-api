@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import org.apache.hc.core5.http.HttpStatus;
@@ -15,7 +16,7 @@ import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.definitions.model.UserSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BaseWebUserSetProtocol {
+public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
 	protected Logger log = LogManager.getLogger(getClass());
 
