@@ -15,7 +15,7 @@ import eu.europeana.set.definitions.model.UserSet;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-public class WebUserSetProtocolTest extends BaseWebUserSetProtocol{
+public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     @Test
     public void createUserSet() throws SetApiClientException, IOException {

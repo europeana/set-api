@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 import eu.europeana.api.set.integration.IntegrationTestSetup;
+import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import org.apache.hc.core5.http.HttpStatus;
@@ -30,7 +32,21 @@ public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
 	@BeforeEach
 	public void initObjects() throws SetApiClientException {
-		apiClient = new UserSetApiClient(new ClientConfiguration());
+		apiClient = new UserSetApiClient( new ClientConfiguration(loadProperties()));
+	}
+
+	/**
+	 * Create properties for set api localhost and regilar user token
+	 * @return
+	 */
+	private Properties loadProperties() {
+		Properties properties = new Properties();
+		properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, "localhost:8080/set");
+		properties.put(ClientConfiguration.PROP_SET_API_KEY, "test");
+		properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, SetIntegrationConfiguration.getInstance().getOauthServiceUri());
+		properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular());
+
+		return properties;
 	}
 
 	/**

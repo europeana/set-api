@@ -1,23 +1,21 @@
 package eu.europeana.api.set.integration.client;
 
-import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.client.connection.BaseApiConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BaseAPIConnectionTest extends IntegrationTestSetup {
+public class BaseAPIConnectionTest {
     private static final String SERVICE_URI     = "testUri";
     private static final String API_KEY_1       = "api_key";
 
     private BaseApiConnection baseApiConnection;
 
-    @BeforeAll
+    @BeforeEach
     void setup() {
-     initRegularUserToken();
-     baseApiConnection = new BaseApiConnection(SERVICE_URI, API_KEY_1, regularUserToken);
+     baseApiConnection = new BaseApiConnection(SERVICE_URI, API_KEY_1, null);
     }
 
     @Test
