@@ -16,14 +16,10 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.definitions.model.UserSet;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
+
 public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
 	protected Logger log = LogManager.getLogger(getClass());

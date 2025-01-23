@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.definitions.model.UserSet;
+import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * This class aims at testing of the annotation methods.
@@ -17,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author GrafR
  */
 @SpringBootTest
+@RunWith(SpringRunner.class)
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     @Test
