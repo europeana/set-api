@@ -1,9 +1,6 @@
 package eu.europeana.api.set.integration.client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Properties;
 
 import eu.europeana.api.set.integration.IntegrationTestSetup;
@@ -16,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.definitions.model.UserSet;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
@@ -34,6 +31,8 @@ public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
 	@BeforeEach
 	public void initObjects() throws SetApiClientException {
+		Mockito.when(ClientConfiguration.class.getResourceAsStream(Mockito.anyString()))
+				.thenReturn(InputStream.nullInputStream());
 		apiClient = new UserSetApiClient(new ClientConfiguration(loadProperties()));
 	}
 
