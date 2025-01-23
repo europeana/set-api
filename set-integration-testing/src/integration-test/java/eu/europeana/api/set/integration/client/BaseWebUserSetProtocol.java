@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.definitions.model.UserSet;
-import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,8 +30,6 @@ public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
 	@BeforeEach
 	public void initObjects() throws SetApiClientException {
-		Mockito.when(ClientConfiguration.class.getResourceAsStream(Mockito.anyString()))
-				.thenReturn(InputStream.nullInputStream());
 		apiClient = new UserSetApiClient(new ClientConfiguration(loadProperties()));
 	}
 
