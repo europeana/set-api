@@ -32,7 +32,7 @@ public class BaseWebUserSetProtocol extends IntegrationTestSetup {
 
 	@BeforeEach
 	public void initObjects() throws SetApiClientException {
-		apiClient = new UserSetApiClient( new ClientConfiguration(loadProperties()));
+		apiClient = new UserSetApiClient(new ClientConfiguration(loadProperties()));
 	}
 
 	/**

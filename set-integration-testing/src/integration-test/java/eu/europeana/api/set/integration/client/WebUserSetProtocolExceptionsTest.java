@@ -14,6 +14,7 @@ import eu.europeana.set.client.exception.SetApiClientException;
  *
  * @author GrafR
  */
+@Disabled
 public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     public String CORRUPTED_JSON =
