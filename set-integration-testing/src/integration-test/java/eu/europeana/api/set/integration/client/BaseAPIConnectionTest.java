@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
 public class BaseAPIConnectionTest {
     private static final String SERVICE_URI     = "testUri";
     private static final String API_KEY_1       = "api_key";
