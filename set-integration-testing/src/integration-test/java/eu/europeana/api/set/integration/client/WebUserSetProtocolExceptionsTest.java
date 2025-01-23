@@ -3,9 +3,9 @@ package eu.europeana.api.set.integration.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import eu.europeana.set.client.exception.SetApiClientException;
+import org.springframework.boot.test.context.SpringBootTest;
 
 
 /**
@@ -14,7 +14,7 @@ import eu.europeana.set.client.exception.SetApiClientException;
  *
  * @author GrafR
  */
-@Disabled
+@SpringBootTest
 public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
 
     public String CORRUPTED_JSON =

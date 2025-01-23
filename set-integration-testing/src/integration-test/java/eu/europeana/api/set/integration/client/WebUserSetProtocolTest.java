@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.definitions.model.UserSet;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * This class aims at testing of the annotation methods.
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
+@SpringBootTest
 public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 
     @Test

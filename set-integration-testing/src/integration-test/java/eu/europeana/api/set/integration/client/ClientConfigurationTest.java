@@ -3,11 +3,13 @@ package eu.europeana.api.set.integration.client;
 import eu.europeana.set.client.config.ClientConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
 public class ClientConfigurationTest {
 
     @Test

@@ -4,9 +4,11 @@ import eu.europeana.set.client.connection.BaseApiConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest
 public class BaseAPIConnectionTest {
     private static final String SERVICE_URI     = "testUri";
     private static final String API_KEY_1       = "api_key";
