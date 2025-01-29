@@ -75,8 +75,8 @@ public class SearchUserSetRest extends BaseRest {
       Authentication authentication = verifyReadAccess(request);
 
       //TODO: temporary fix to remove later
-      if(ProfileConstants.VALUE_PARAM_STANDARD.equals(profileStr)) {
-        profileStr=ProfileConstants.VALUE_PARAM_ITEMS_META;
+      if(profileStr.contains(ProfileConstants.VALUE_PARAM_STANDARD)) {
+        profileStr=profileStr.replace(ProfileConstants.VALUE_PARAM_STANDARD, ProfileConstants.VALUE_PARAM_ITEMS_META);
       }
       
       // validate params - profile
