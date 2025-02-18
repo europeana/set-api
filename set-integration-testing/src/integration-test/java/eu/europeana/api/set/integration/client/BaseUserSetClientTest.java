@@ -93,6 +93,8 @@ public class BaseUserSetClientTest {
   protected UserSetApiClient apiClient;
   public static final String USER_REGULAR = "userid1:username1:USER";
   protected static String regularUserToken = OAuthUtils.TYPE_BEARER + " " + USER_REGULAR;
+  protected static String oauthServiceUri = "test";
+  protected static String oauthRequestParams = "test";
   
   protected static boolean DISABLE_AUTH = true;
   protected static String START = "{";
@@ -108,6 +110,8 @@ public class BaseUserSetClientTest {
     }
     else {
       regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+      oauthServiceUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
+      oauthRequestParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
     }
 
     apiClient = new UserSetApiClient(new ClientConfiguration(loadClientProperties(port)));
@@ -136,8 +140,8 @@ public class BaseUserSetClientTest {
     properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, "http://localhost:" + port + "/set");
     properties.put(ClientConfiguration.PROP_SET_API_KEY, "test");
     properties.put(ClientConfiguration.PROP_OAUTH_REGULAR_USER_TOKEN, regularUserToken);
-    properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, SetIntegrationConfiguration.getInstance().getOauthServiceUri());
-    properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular());
+    properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, oauthServiceUri);
+    properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, oauthRequestParams);
 
     return properties;
   }
