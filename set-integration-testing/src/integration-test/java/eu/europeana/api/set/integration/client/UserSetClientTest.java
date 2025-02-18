@@ -24,7 +24,7 @@ public class UserSetClientTest extends BaseUserSetClientTest {
   private int port;
     
   @BeforeAll
-  private void initObjects() throws SetApiClientException {
+  void initObjects() throws SetApiClientException {
     initObjects(port);
   }
   

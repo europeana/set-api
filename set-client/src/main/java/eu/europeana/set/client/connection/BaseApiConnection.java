@@ -18,12 +18,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
@@ -91,7 +92,7 @@ public class BaseApiConnection {
         try {
             LOGGER.trace("Call to Get UserSet API (GET) : {}.", url);
             return parseSetApiResponse(getHttpConnection().get(url, null, authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_NOT_MODIFIED)));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -108,7 +109,7 @@ public class BaseApiConnection {
         try {
             LOGGER.trace("Call to Create UserSet API (POST) : {}.", url);
             return parseSetApiResponse(getHttpConnection().post(url, requestBody, ContentType.APPLICATION_JSON.getMimeType(),  authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -126,7 +127,7 @@ public class BaseApiConnection {
         try {
             LOGGER.trace("Call to Update UserSet API : {PUT}. {} ", url);
             return parseSetApiResponse(getHttpConnection().put(url, requestBody, authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK)));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(),  HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -158,7 +159,7 @@ public class BaseApiConnection {
         }
     }
 
-    private UserSet parseSetApiResponse(HttpResponseHandler response, List<Integer> statusToCheckList) throws SetApiClientException, IOException, ParseException {
+    private UserSet parseSetApiResponse(HttpResponseHandler response, List<Integer> statusToCheckList) throws SetApiClientException, JsonMappingException, JsonProcessingException {
         String responseBody = response.getResponse();
         if (statusToCheckList.contains(response.getStatus())) {
             return mapper.readValue(responseBody, UserSet.class);
