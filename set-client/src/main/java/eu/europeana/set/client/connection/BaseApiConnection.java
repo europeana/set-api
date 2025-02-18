@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
@@ -159,7 +158,7 @@ public class BaseApiConnection {
         }
     }
 
-    private UserSet parseSetApiResponse(HttpResponseHandler response, List<Integer> statusToCheckList) throws SetApiClientException, JsonMappingException, JsonProcessingException {
+    private UserSet parseSetApiResponse(HttpResponseHandler response, List<Integer> statusToCheckList) throws SetApiClientException, JsonProcessingException {
         String responseBody = response.getResponse();
         if (statusToCheckList.contains(response.getStatus())) {
             return mapper.readValue(responseBody, UserSet.class);
