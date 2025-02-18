@@ -1,17 +1,13 @@
 package eu.europeana.api.set.integration.connection.http;
 
 import java.io.IOException;
-
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
 import eu.europeana.set.common.http.HttpConnection;
+import eu.europeana.set.common.http.HttpResponseHandler;
 
 /**
  * @author GrafR
@@ -55,10 +51,10 @@ public class EuropeanaOauthClient {
 	    }
 	    
 	    HttpConnection connection = new HttpConnection();
-	    CloseableHttpResponse response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded", null);
+	    HttpResponseHandler response = connection.post(oauthUri, oauthParams, "application/x-www-form-urlencoded", null);
 
-	    if (HttpStatus.SC_OK == response.getCode()) {
-		String body = EntityUtils.toString(response.getEntity());
+	    if (HttpStatus.SC_OK == response.getStatus()) {
+		String body = response.getResponse();
 		JSONObject json = new JSONObject(body);
 		if (json.has(accessToken)) {
 		    return "Bearer " + json.getString(accessToken);
@@ -68,7 +64,7 @@ public class EuropeanaOauthClient {
 	    } else {
 		throw new TechnicalRuntimeException("Error occured when calling oath service! " + response);
 	    }
-	} catch (IOException | JSONException | ParseException e) {
+	} catch (IOException | JSONException e) {
 	    throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);
 	}
     }

@@ -1,17 +1,14 @@
 package eu.europeana.set.client;
 
+import java.io.IOException;
+import org.apache.hc.core5.http.HttpStatus;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.connection.UserSetApiConnection;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.common.http.HttpConnection;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
-import java.io.IOException;
+import eu.europeana.set.common.http.HttpResponseHandler;
 
 /**
  * Base class for client API
@@ -40,10 +37,15 @@ public class BaseUserSetApi {
             throw new SetApiClientException("Oauth uri and param not provided !!!");
         }
 
+        //get the real token in case the one is not provided
+        String regularUserTokenProvided=this.configuration.getOauthRegularUserToken();
+        String regularUserToken = regularUserTokenProvided!=null ? regularUserTokenProvided 
+            : getOauthToken(this.configuration.getOauthServiceUri(), this.configuration.getOauthRequestParams());
+
         this.apiConnection = new UserSetApiConnection(
                 this.configuration.getServiceUri(),
                 this.configuration.getApiKey(),
-                getOauthToken(this.configuration.getOauthServiceUri(), this.configuration.getOauthRequestParams()));
+                regularUserToken);
     }
 
     /**
@@ -59,19 +61,18 @@ public class BaseUserSetApi {
             String accessToken = "access_token";
             HttpConnection connection = new HttpConnection();
 
-            CloseableHttpResponse response = connection.post(oauthServiceUri, oauthRequestParams, "application/x-www-form-urlencoded", null);
-            String body = EntityUtils.toString(response.getEntity());
-            if (HttpStatus.SC_OK == response.getCode()) {
-                JSONObject json = new JSONObject(body);
+            HttpResponseHandler response = connection.post(oauthServiceUri, oauthRequestParams, "application/x-www-form-urlencoded", null);
+            if (HttpStatus.SC_OK == response.getStatus()) {
+                JSONObject json = new JSONObject(response.getResponse());
                 if (json.has(accessToken)) {
                     return "Bearer " + json.getString(accessToken);
                 } else {
-                    throw new SetApiClientException("Cannot extract authentication token from reponse:" + body);
+                    throw new SetApiClientException("Cannot extract authentication token from reponse:" + response.getResponse());
                 }
             } else {
                 throw new SetApiClientException("Error occured when calling oath service! " + response);
             }
-        } catch (IOException | JSONException | ParseException e) {
+        } catch (IOException | JSONException e) {
             throw new SetApiClientException("Cannot retrieve authentication token!", 0 ,  e);
         }
     }

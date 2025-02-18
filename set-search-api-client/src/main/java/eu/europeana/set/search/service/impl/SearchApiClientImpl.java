@@ -5,9 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +13,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.set.common.http.HttpConnection;
+import eu.europeana.set.common.http.HttpResponseHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
@@ -168,20 +166,20 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   @Override
   public JSONObject searchItems(String uri, String postBody) throws SearchApiClientException {
-    CloseableHttpResponse jsonResponse;
+    HttpResponseHandler resp;
     try {
       if (postBody != null) {
-        jsonResponse = createHttpConnection().post(uri, postBody, "application/json", null);
+        resp = createHttpConnection().post(uri, postBody, "application/json", null);
       } else {
-        jsonResponse = createHttpConnection().get(uri, "application/json", null);
+        resp = createHttpConnection().get(uri, "application/json", null);
       }
-      if (jsonResponse == null) {
+      if (resp == null) {
         // HTTP Error Code
         throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
             null);
       }
-      return new JSONObject(EntityUtils.toString(jsonResponse.getEntity()));
-    } catch (IOException | ParseException e) {
+      return new JSONObject(resp.getResponse());
+    } catch (IOException e) {
       throw new SearchApiClientException(
           SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
     } catch (JSONException e) {

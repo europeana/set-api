@@ -3,11 +3,12 @@ package eu.europeana.api.set.integration.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import org.apache.hc.core5.http.HttpStatus;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import eu.europeana.set.client.exception.SetApiClientException;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.web.server.LocalServerPort;
+import eu.europeana.set.client.exception.SetApiClientException;
 
 
 /**
@@ -16,9 +17,16 @@ import org.springframework.test.context.junit4.SpringRunner;
  *
  * @author GrafR
  */
-@SpringBootTest
-@RunWith(SpringRunner.class)
-public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class UserSetClientExceptionsTest extends BaseUserSetClientTest {
+
+  @LocalServerPort
+  private int port;
+    
+  @BeforeAll
+  private void initObjects() throws SetApiClientException {
+    initObjects(port);
+  }
 
     public String CORRUPTED_JSON =
             START +
@@ -45,7 +53,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     public String UNKNOWN_PROVIDED_IDENTIFIER = "unknown_provided_identifier";
 
     @Test
-    public void createWebsetUserSetWithoutBody() {
+    public void createUserSetWithoutBody() {
         try {
             apiClient.getWebUserSetApi().createUserSet(null, null);
         } catch (SetApiClientException e) {
@@ -55,7 +63,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     }
 
     @Test
-    public void createWebUserSetWithCorruptedBody() {
+    public void createUserSetWithCorruptedBody() {
         try {
             apiClient.getWebUserSetApi().createUserSet(CORRUPTED_JSON, null);
         } catch (SetApiClientException e) {
@@ -64,7 +72,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     }
 
     @Test
-    public void getWebUserSetWithWrongIdentifier() {
+    public void getUserSetWithWrongIdentifier() {
         try {
             apiClient.getWebUserSetApi().getUserSet(WRONG_GENERATED_IDENTIFIER, null);
         } catch (SetApiClientException e) {
@@ -73,17 +81,7 @@ public class WebUserSetProtocolExceptionsTest extends BaseWebUserSetProtocol {
     }
 
     @Test
-    public void updateWebsetUserSetWithWrongIdentifierNumber() throws IOException {
-        String requestBody = getJsonStringInput(USER_SET_CONTENT);
-        try {
-            apiClient.getWebUserSetApi().updateUserSet(WRONG_GENERATED_IDENTIFIER, requestBody, null);
-        } catch (SetApiClientException e) {
-            assertEquals(HttpStatus.SC_NOT_FOUND, e.getRemoteStatusCode());
-        }
-    }
-
-    @Test
-    public void updateWebUserSetWithWrongIdentifier() throws IOException {
+    public void updateUserSetWithWrongIdentifier() throws IOException {
         String requestBody = getJsonStringInput(USER_SET_CONTENT);
         try {
             apiClient.getWebUserSetApi().updateUserSet(WRONG_GENERATED_IDENTIFIER, requestBody, null);

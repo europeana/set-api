@@ -134,7 +134,7 @@ public abstract class BaseUserSetTestUtils {
     if (mockMvc == null) {
       this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
-
+    
     disableOauth();
     changeProperiesForTests();
   }
