@@ -336,7 +336,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${version.maven-surefire-plugin}</version>
 					<configuration>
-        				<argLine>${java.17.addopens}</argLine>
+        				<argLine>${argLine} ${java.17.addopens}</argLine>
     				</configuration>
 				</plugin>
 				<plugin>
@@ -344,7 +344,7 @@
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${version.maven-failsafe-plugin}</version>
 					<configuration>
-        				<argLine>${java.17.addopens}</argLine>
+        				<argLine>${argLine} ${java.17.addopens}</argLine>
     				</configuration>
 				</plugin>
 				
