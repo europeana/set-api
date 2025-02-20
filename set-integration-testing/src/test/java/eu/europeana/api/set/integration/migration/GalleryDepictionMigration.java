@@ -26,8 +26,8 @@ import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 
-@SpringBootTest
-@Disabled
+//@SpringBootTest
+//@Disabled
 public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   @Resource
