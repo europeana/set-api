@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.ResultSet;
+import eu.europeana.api.commons.definitions.utils.LoggingUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
@@ -199,7 +200,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       }
     }
     getMongoPersistance().removeAll(userSets);
-    getLogger().info("User sets deleted for user {}. Sets deleted are : {} ", creatorId,
+    getLogger().info("User sets deleted for user {}. Sets deleted are : {} ", LoggingUtils.sanitizeUserInput(creatorId),
         setsToBeDeleted);
   }
 

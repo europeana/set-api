@@ -1,11 +1,14 @@
-package eu.europeana.set.client.integration.web;
+package eu.europeana.api.set.integration.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.web.server.LocalServerPort;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.definitions.model.UserSet;
 
@@ -14,15 +17,23 @@ import eu.europeana.set.definitions.model.UserSet;
  * This is an integration test, and it is ignored for unit testing
  * @author GrafR
  */
-@Disabled
-public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
-
-    @Test
-    public void createUserSet() throws SetApiClientException, IOException {
-	String setId = createTestUserSet(USER_SET_CONTENT, null);
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class UserSetClientTest extends BaseUserSetClientTest {
+    
+  @LocalServerPort
+  private int port;
+    
+  @BeforeAll
+  void initObjects() throws SetApiClientException {
+    initObjects(port);
+  }
+  
+  @Test
+  public void createUserSet() throws SetApiClientException, IOException {
+    String setId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);
 	assertNotNull(setId);
-	apiClient.getWebUserSetApi().deleteUserSet(setId);
-    }
+	deleteCreatedSets();
+  }
 
 	/**
 	 * This method creates and retrieves user set
@@ -31,46 +42,37 @@ public class WebUserSetProtocolTest extends BaseWebUserSetProtocol {
 	 */
 	@Test
 	public void retrieveUserSet() throws IllegalArgumentException, IOException, SetApiClientException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
+		String testSetId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
 		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, null);
 		assertNotNull(userSet);
 		assertEquals(testSetId, userSet.getIdentifier());
+		deleteCreatedSets();
 	}
 
 	@Test
 	public void updateUserSet() throws IOException, SetApiClientException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT, null);
+		String testSetId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// updated user set value
-		String requestBody = getJsonStringInput(USER_SET_UPDATE_CONTENT);
+		String requestBody = getJsonStringInput(BaseUserSetClientTest.USER_SET_UPDATE_CONTENT);
 		assertNotNull(requestBody);
 		// update user set by identifier URL
 		UserSet updateResponse = apiClient.getWebUserSetApi().updateUserSet(
 			testSetId, requestBody, null);
 		assertNotNull(updateResponse);
 		assertEquals(testSetId, updateResponse.getIdentifier());
+		deleteCreatedSets();
 	}
 
 	@Test
 	public void deleteUserSet() throws IOException, SetApiClientException {
-		String testSetId = createTestUserSet(USER_SET_CONTENT,null);
+		String testSetId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT,null);
 		assertNotNull(testSetId);
 		// delete user set by identifier URL
 		String deleteResponse = apiClient.getWebUserSetApi().deleteUserSet(testSetId);
 		assertEquals(String.valueOf(HttpStatus.SC_NO_CONTENT), deleteResponse);
 	}
 
-	/**
-	 * This method creates test user set object
-	 * @param content
-	 * @param profile
-	 * @return id of created user set
-	 * @throws IOException
-	 */
-	private String createTestUserSet(String content, String profile) throws SetApiClientException, IOException {
-		UserSet response = storeTestUserSet(content, profile);
-		return response.getIdentifier();
-	}
 }

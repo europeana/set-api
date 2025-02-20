@@ -75,7 +75,7 @@ public class WebUserSetRest extends BaseRest {
   public WebUserSetRest() {
     super();
   }
-
+  
   @PostMapping(value = "/set/",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
   @Operation(summary = "Create user set", description = SwaggerConstants.SAMPLES_JSONLD)

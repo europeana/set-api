@@ -2,12 +2,11 @@ package eu.europeana.set.client.connection;
 
 import java.io.IOException;
 import java.util.List;
-
+import org.apache.commons.lang3.StringUtils;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;
-import org.apache.commons.lang3.StringUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 /**
@@ -68,7 +67,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    */
   public UserSet updateUserSet(String identifier, String updateUserSet, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
+    urlBuilder.append(identifier);
     if (StringUtils.isNotEmpty(profile)) {
       urlBuilder.append(WebUserSetFields.PAR_CHAR);
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
@@ -87,7 +86,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    */
   public String deleteUserSet(String identifier) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(identifier).append(WebUserSetFields.JSON_LD_REST);
+    urlBuilder.append(identifier);
     return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
   }
 

@@ -1,41 +1,44 @@
 package eu.europeana.set.client.connection;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
-import eu.europeana.set.client.exception.SetApiClientException;
-import eu.europeana.set.client.json.UserSetDeserializer;
-import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
-import eu.europeana.set.client.model.result.RecordPreview;
-import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.agent.Agent;
-import eu.europeana.set.client.json.AgentDeserializer;
-import eu.europeana.set.definitions.model.impl.BaseUserSet;
-import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.net.URIBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_FACET;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PAGE;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PAGE_SIZE;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_QF;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_QUERY;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_SORT;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.PARAM_SORT_ORDER;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.*;
-import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.PARAM_SORT_ORDER;
-import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
+import eu.europeana.set.client.exception.SetApiClientException;
+import eu.europeana.set.client.json.AgentDeserializer;
+import eu.europeana.set.client.json.UserSetDeserializer;
+import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
+import eu.europeana.set.client.model.result.RecordPreview;
+import eu.europeana.set.common.http.HttpConnection;
+import eu.europeana.set.common.http.HttpResponseHandler;
+import eu.europeana.set.definitions.model.UserSet;
+import eu.europeana.set.definitions.model.agent.Agent;
+import eu.europeana.set.definitions.model.impl.BaseUserSet;
+import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 public class BaseApiConnection {
 
@@ -88,7 +91,7 @@ public class BaseApiConnection {
         try {
             LOGGER.trace("Call to Get UserSet API (GET) : {}.", url);
             return parseSetApiResponse(getHttpConnection().get(url, null, authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_NOT_MODIFIED)));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -105,7 +108,7 @@ public class BaseApiConnection {
         try {
             LOGGER.trace("Call to Create UserSet API (POST) : {}.", url);
             return parseSetApiResponse(getHttpConnection().post(url, requestBody, ContentType.APPLICATION_JSON.getMimeType(),  authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -123,7 +126,7 @@ public class BaseApiConnection {
         try {
             LOGGER.trace("Call to Update UserSet API : {PUT}. {} ", url);
             return parseSetApiResponse(getHttpConnection().put(url, requestBody, authorizationHeaderValue), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK)));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(),  HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -140,31 +143,31 @@ public class BaseApiConnection {
     protected String deleteURL(String url, String authorizationHeaderValue) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (DELETE): {} {} ", url, DELETE_URL_RESPONSE);
-            CloseableHttpResponse response = getHttpConnection().deleteURL(url, authorizationHeaderValue);
-            if (response.getCode() != HttpStatus.SC_NO_CONTENT) {
-                String responseBody = EntityUtils.toString(response.getEntity());
+            HttpResponseHandler response = getHttpConnection().deleteURL(url, authorizationHeaderValue);
+            if (response.getStatus() != HttpStatus.SC_NO_CONTENT) {
+                String responseBody = response.getResponse();
                 AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(ERROR_MESSAGE + " {} ", errorResponse.getMessage());
                 }
-                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getCode());
+                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getStatus());
             }
-            return String.valueOf(response.getCode());
-        } catch (IOException | ParseException e) {
+            return String.valueOf(response.getStatus());
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
-    private UserSet parseSetApiResponse(CloseableHttpResponse response, List<Integer> statusToCheckList) throws SetApiClientException, IOException, ParseException {
-        String responseBody = EntityUtils.toString(response.getEntity());
-        if (statusToCheckList.contains(response.getCode())) {
+    private UserSet parseSetApiResponse(HttpResponseHandler response, List<Integer> statusToCheckList) throws SetApiClientException, JsonProcessingException {
+        String responseBody = response.getResponse();
+        if (statusToCheckList.contains(response.getStatus())) {
             return mapper.readValue(responseBody, UserSet.class);
         } else {
             AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(ERROR_MESSAGE + " {} ", errorResponse.getMessage());
             }
-            throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getCode());
+            throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getStatus());
         }
 
     }
@@ -183,9 +186,9 @@ public class BaseApiConnection {
     protected List<RecordPreview> getUserSetPaginatedResponse(String url, String authorizationHeaderValue, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Get UserSet API (Paginated): {} ", url);
-            CloseableHttpResponse response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), authorizationHeaderValue);
-            String responseBody = EntityUtils.toString(response.getEntity());
-            if (response.getCode() == HttpStatus.SC_OK) {
+            HttpResponseHandler response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), authorizationHeaderValue);
+            String responseBody = response.getResponse();
+            if (response.getStatus() == HttpStatus.SC_OK) {
                 TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
                 return mapper.readValue(responseBody, typeRef).getItems();
 
@@ -194,9 +197,9 @@ public class BaseApiConnection {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(ERROR_MESSAGE + " {} ", errorResponse.getMessage());
                 }
-                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getCode());
+                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getStatus());
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -213,9 +216,9 @@ public class BaseApiConnection {
     protected List<? extends UserSet> getSearchUserSetResponse(String url, String authorizationHeaderValue, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
-            CloseableHttpResponse response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
-            String responseBody = EntityUtils.toString(response.getEntity());
-            if (response.getCode() == HttpStatus.SC_OK) {
+            HttpResponseHandler response = getHttpConnection().get(url, "application/json", authorizationHeaderValue);
+            String responseBody = response.getResponse();
+            if (response.getStatus() == HttpStatus.SC_OK) {
                 if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
                     TypeReference<ResultsPageImpl<String>> typeRef = new TypeReference<>() {};
                     List<String> items = mapper.readValue(responseBody, typeRef).getItems();
@@ -235,9 +238,9 @@ public class BaseApiConnection {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(ERROR_MESSAGE + " {} ", errorResponse.getMessage());
                 }
-                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getCode());
+                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getStatus());
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }

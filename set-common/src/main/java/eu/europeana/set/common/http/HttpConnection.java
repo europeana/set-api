@@ -4,14 +4,17 @@
  */
 package eu.europeana.set.common.http;
 
+import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.classic.methods.*;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import java.io.IOException;
 
 
 /**
@@ -34,14 +37,18 @@ public class HttpConnection {
 	 * @param url
 	 * @param acceptHeaderValue
 	 * @param authorizationHeaderValue
-	 * @return
+	 * @return HttpResponseHandler that comprises response body as String and status code.
 	 * @throws IOException
 	 */
 
-	public CloseableHttpResponse get(String url, String acceptHeaderValue, String authorizationHeaderValue) throws IOException {
+	public HttpResponseHandler get(String url, String acceptHeaderValue, String authorizationHeaderValue) throws IOException {
 		HttpGet get = new HttpGet(url);
-		addHeaders(get, HttpHeaders.ACCEPT, acceptHeaderValue);
-		addHeaders(get, HEADER_AUTHORIZATION,authorizationHeaderValue);
+		if(StringUtils.isNotBlank(acceptHeaderValue)) {
+		  addHeaders(get, HttpHeaders.ACCEPT, acceptHeaderValue);
+		}
+		if(StringUtils.isNotBlank(authorizationHeaderValue)) {
+		  addHeaders(get, HEADER_AUTHORIZATION,authorizationHeaderValue);
+		}
 		return executeHttpClient(get);
 	}
 
@@ -51,15 +58,20 @@ public class HttpConnection {
      * @param url
      * @param requestBody
      * @param contentType
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     * and status code.
+     * @return HttpResponseHandler that comprises response body as String and status code.
      * @throws IOException
      */
-    public CloseableHttpResponse post(String url, String requestBody, String contentType, String authorizationHeaderValue) throws IOException {
+    public HttpResponseHandler post(String url, String requestBody, String contentType, String authorizationHeaderValue) throws IOException {
         HttpPost post = new HttpPost(url);
-        addHeaders(post, HttpHeaders.CONTENT_TYPE, contentType);
-        addHeaders(post, HEADER_AUTHORIZATION, authorizationHeaderValue);
-        post.setEntity(new StringEntity(requestBody));
+        if(StringUtils.isNotBlank(contentType)) {
+          addHeaders(post, HttpHeaders.CONTENT_TYPE, contentType);
+        }
+        if(StringUtils.isNotBlank(authorizationHeaderValue)) {
+          addHeaders(post, HEADER_AUTHORIZATION, authorizationHeaderValue);
+        }
+        if(requestBody!=null) {
+          post.setEntity(new StringEntity(requestBody));
+        }
 		return executeHttpClient(post);
 	}
 
@@ -70,13 +82,14 @@ public class HttpConnection {
      *
      * @param url
      * @param jsonParamValue
-     * @return ResponseEntity that comprises response body in JSON format, headers
-     * and status code.
+     * @return HttpResponseHandler that comprises response body as String and status code.
      * @throws IOException
      */
-    public CloseableHttpResponse put(String url, String jsonParamValue, String authorizationHeaderValue) throws IOException {
+    public HttpResponseHandler put(String url, String jsonParamValue, String authorizationHeaderValue) throws IOException {
 		HttpPut put = new HttpPut(url);
-		addHeaders(put, HEADER_AUTHORIZATION,authorizationHeaderValue);
+		if(StringUtils.isNotBlank(authorizationHeaderValue)) {
+		  addHeaders(put, HEADER_AUTHORIZATION,authorizationHeaderValue);
+		}
 		put.setEntity(new StringEntity(jsonParamValue));
 
 		return executeHttpClient(put);
@@ -88,19 +101,22 @@ public class HttpConnection {
      *
      * @param url                       The identifier URL
      * @param authorizationtHeaderValue
-     * @return ResponseEntity that comprises response headers and status code.
+     * @return HttpResponseHandler that comprises response body as String and status code.
      * @throws IOException
      */
-    public CloseableHttpResponse deleteURL(String url, String authorizationtHeaderValue) throws IOException {
+    public HttpResponseHandler deleteURL(String url, String authorizationtHeaderValue) throws IOException {
 		HttpDelete delete = new HttpDelete(url);
-		addHeaders(delete,HEADER_AUTHORIZATION, authorizationtHeaderValue);
+		if(StringUtils.isNotBlank(authorizationtHeaderValue)) {
+		  addHeaders(delete,HEADER_AUTHORIZATION, authorizationtHeaderValue);
+		}
 		return executeHttpClient(delete);
 	}
 
 
-    private <T extends HttpUriRequestBase> CloseableHttpResponse executeHttpClient(T url) throws IOException {
-		return httpClient.execute(url);
-
+    private <T extends HttpUriRequestBase> HttpResponseHandler executeHttpClient(T url) throws IOException {
+      HttpResponseHandler responseHandler = new HttpResponseHandler();      
+      httpClient.execute(url, responseHandler); 
+      return responseHandler;
 	}
 
 	private <T extends HttpUriRequestBase> void addHeaders(T url, String headerName, String headerValue) {

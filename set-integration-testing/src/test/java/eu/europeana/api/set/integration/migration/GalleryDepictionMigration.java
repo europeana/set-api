@@ -1,8 +1,11 @@
 package eu.europeana.api.set.integration.migration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import eu.europeana.api.commons.definitions.search.ResultSet;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
+import eu.europeana.set.UserSetApp;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
@@ -30,6 +34,8 @@ import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 @Disabled
 public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
+  private static final Logger LOG = LogManager.getLogger(UserSetApp.class);
+  
   @Resource
   UserSetConfiguration configuration;
 
@@ -102,13 +108,15 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       //results = null;
     } while (hasItems(results));
     
-    System.out.println("Completed Depiction Generation for result pages: " + page);
+    LOG.info("Completed Depiction Generation for result pages: {}", page);
     
-    System.out.println("Generated depictions: " + report.getGenerated());
-    System.out.println("Skipped sets: " + report.getSkipped());
-    System.out.println("Not generated: " + report.getNotGenerated()); 
+    LOG.info("Generated depictions: {}", report.getGenerated());
+    LOG.info("Skipped sets: {}", report.getSkipped());
+    LOG.info("Not generated: {}", report.getNotGenerated());
     
+    assertTrue(page > 0); 
   }
+  
 
   private boolean hasItems(ResultSet<? extends UserSet> results) {
     return !hasNoItems(results);
@@ -143,9 +151,9 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
         report.increaseNotGenerated();
       }
     }
-    System.out.println("Generated depictions: " + report.getGenerated());
-    System.out.println("Skipped sets: " + report.getSkipped());
-    System.out.println("Not generated: " + report.getNotGenerated());  
+    LOG.info("Generated depictions: {}", report.getGenerated());
+    LOG.info("Skipped sets: {}", report.getSkipped());
+    LOG.info("Not generated: {}", report.getNotGenerated());
   }
 
   private WebResource generateGalleryDepiction(UserSet userSet){
@@ -154,7 +162,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       return getUserSetService().generateDepiction(userSet);
     } catch (SearchApiClientException e) {
       //work with best user effort
-      System.out.println("Cannot generate depiciton for set: "+ userSet.getIdentifier() + ", " + e.getMessage());
+      LOG.info("Cannot generate depiciton for set: {}, {}", userSet.getIdentifier(), e.getMessage());
       //e.printStackTrace();
       return null;
     }

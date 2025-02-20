@@ -1,13 +1,12 @@
 package eu.europeana.set.client;
 
+import java.util.List;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.client.web.SearchUserSetApi;
 import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.definitions.model.UserSet;
-
-import java.util.List;
 
 /**
  * Implementation of client api
