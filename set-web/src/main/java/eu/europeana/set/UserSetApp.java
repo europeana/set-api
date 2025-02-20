@@ -35,7 +35,7 @@ import org.springframework.context.annotation.ImportResource;
 @ImportResource("classpath:set-web-context.xml")
 public class UserSetApp extends SpringBootServletInitializer {
 
-  private static final Logger logger = LogManager.getLogger(UserSetApp.class);
+  private static final Logger LOG = LogManager.getLogger(UserSetApp.class);
   /**
    * Main entry point of this application
    *
@@ -44,7 +44,7 @@ public class UserSetApp extends SpringBootServletInitializer {
   public static void main(String[] args) {
     ApplicationContext ctx = SpringApplication.run(UserSetApp.class, args);
 
-    if (logger.isDebugEnabled()) {
+    if (LOG.isDebugEnabled()) {
       printRegisteredBeans(ctx);
     }
   }
@@ -53,7 +53,7 @@ public class UserSetApp extends SpringBootServletInitializer {
     String[] beanNames = ctx.getBeanDefinitionNames();
 
     Arrays.sort(beanNames);
-    logger.debug("Instantiated beans:");
-    logger.debug(StringUtils.join(beanNames, "\n"));
+    LOG.debug("Instantiated beans:");
+    LOG.debug(StringUtils.join(beanNames, "\n"));
   }    
 }
