@@ -155,30 +155,30 @@ public abstract class BaseUserSetTestUtils {
     if (DISABLE_AUTH) {
       return;
     }
-    regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+    regularUserToken = retrieveOauthToken(EuropeanaOauthClient.REGULAR_USER);
   }
 
   public static void initPublisherUserToken() {
     if (DISABLE_AUTH) {
       return;
     }
-    publisherUserToken = retrieveOatuhToken(EuropeanaOauthClient.PUBLISHER_USER);
+    publisherUserToken = retrieveOauthToken(EuropeanaOauthClient.PUBLISHER_USER);
   }
 
   public static void initEntitySetTokens() {
     if (DISABLE_AUTH) {
       return;
     }
-    editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
-    editor2UserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR2_USER);
-    creatorEntitySetUserToken = retrieveOatuhToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
+    editorUserToken = retrieveOauthToken(EuropeanaOauthClient.EDITOR_USER);
+    editor2UserToken = retrieveOauthToken(EuropeanaOauthClient.EDITOR2_USER);
+    creatorEntitySetUserToken = retrieveOauthToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
   }
 
   public static void initAdminUserToken() {
     if (DISABLE_AUTH) {
       return;
     }
-    adminUserToken = retrieveOatuhToken(EuropeanaOauthClient.ADMIN_USER);
+    adminUserToken = retrieveOauthToken(EuropeanaOauthClient.ADMIN_USER);
   }
 
   protected void deleteCreatedSets() {
@@ -194,7 +194,7 @@ public abstract class BaseUserSetTestUtils {
     return configuration;
   }
 
-  public static String retrieveOatuhToken(String user) {
+  public static String retrieveOauthToken(String user) {
     EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
     return oauthClient.getOauthToken(user);
   }

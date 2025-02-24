@@ -3,7 +3,8 @@ package eu.europeana.api.set.integration.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
 
 public class SetIntegrationConfiguration {
@@ -16,6 +17,7 @@ public class SetIntegrationConfiguration {
     protected static final String PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET = "oauth.token.request.params.creator.entityset";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_PUBLISHER = "oauth.token.request.params.publisher";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_ADMIN = "oauth.token.request.params.admin";
+    protected static final Logger LOG = LogManager.getLogger(SetIntegrationConfiguration.class);
 
     private static Properties properties = null;
     private static SetIntegrationConfiguration singleton;
@@ -47,8 +49,8 @@ public class SetIntegrationConfiguration {
 	    properties = new Properties();
 	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_INTEGRATION_TESTING_PROPERTIES_FILE);
 	    if (resourceAsStream == null) {
-		throw new TechnicalRuntimeException(
-			"No properties file found in classpath! " + SET_INTEGRATION_TESTING_PROPERTIES_FILE);
+	      LOG.warn("No properties file found for initialization of integration tests!");
+	      return;
 	    }
 	    
 	    getProperties().load(resourceAsStream);
@@ -100,7 +102,7 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsEditor() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR, "");
     }
     
     /**
@@ -118,7 +120,7 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsCreatorEntitySet() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET, "");
     }
     
     /**
@@ -127,11 +129,11 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsPublisher() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_PUBLISHER);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_PUBLISHER, "");
     }
     
     public String getOauthRequestParamsAdmin() {
-      return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_ADMIN);
+      return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_ADMIN, "");
     }
 
 }
