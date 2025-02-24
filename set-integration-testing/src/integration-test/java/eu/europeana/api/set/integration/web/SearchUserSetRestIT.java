@@ -59,7 +59,7 @@ public class SearchUserSetRestIT extends BaseUserSetTestUtils {
       return;
     }
     initRegularUserToken();
-    editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+    editorUserToken = retrieveOauthToken(EuropeanaOauthClient.EDITOR_USER);
     initPublisherUserToken();
   }
 

@@ -91,7 +91,7 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsRegular() {
-	return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_REGULAR);
+	return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_REGULAR, "");
     }
 
     /**
@@ -100,7 +100,7 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsEditor() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR, "");
     }
     
     /**
@@ -109,7 +109,7 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsEditor2() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR2);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_EDITOR2, "");
     }
     
     /**
@@ -118,7 +118,7 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsCreatorEntitySet() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_CREATOR_ENTITYSET, "");
     }
     
     /**
@@ -127,11 +127,11 @@ public class SetIntegrationConfiguration {
      * @return
      */
     public String getOauthRequestParamsPublisher() {
-        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_PUBLISHER);
+        return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_PUBLISHER, "");
     }
     
     public String getOauthRequestParamsAdmin() {
-      return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_ADMIN);
+      return getProperties().getProperty(PROP_OAUTH_REQUEST_PARAMS_ADMIN, "");
     }
 
 }
