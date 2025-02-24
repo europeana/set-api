@@ -51,7 +51,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       return;
     }
     initRegularUserToken();
-    editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+    editorUserToken = retrieveOauthToken(EuropeanaOauthClient.EDITOR_USER);
     initPublisherUserToken();
   }
 

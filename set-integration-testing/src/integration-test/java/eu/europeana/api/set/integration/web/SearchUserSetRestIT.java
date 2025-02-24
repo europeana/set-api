@@ -61,7 +61,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
       return;
     }
     initRegularUserToken();
-    editorUserToken = retrieveOatuhToken(EuropeanaOauthClient.EDITOR_USER);
+    editorUserToken = retrieveOauthToken(EuropeanaOauthClient.EDITOR_USER);
     initPublisherUserToken();
   }
 
