@@ -14,8 +14,8 @@ public class WebUserSetRequestUtils {
    * @param position request parameter value
    * @return true if equals "pin"
    */
-  public static boolean isPinnRequest(String position) {
-    return WebUserSetModelFields.PINNED_POSITION.equals(position);
+  public static boolean isPinPosition(String position) {
+    return WebUserSetModelFields.POSITION_PIN.equals(position);
   }
   
   /**

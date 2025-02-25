@@ -194,7 +194,7 @@ public class WriteLockIT extends IntegrationTestSetup {
         .andExpect(status().is(HttpStatus.OK.value()));
 
     //test delete item after unlock
-    getUserSetService().insertItem("02", "123_test", WebUserSetModelFields.PINNED_POSITION, userSet);
+    getUserSetService().insertItem("02", "123_test", WebUserSetModelFields.POSITION_PIN, userSet);
     mockMvc
       .perform(
           delete(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(), "02", "123_test")

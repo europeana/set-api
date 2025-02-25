@@ -328,7 +328,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     List<String> fullUriItems = validateItemsStrings(items);
     List<String> duplicatedItems = computeDuplicateList(existingUserSet, fullUriItems);
-    boolean isPinnRequest = WebUserSetRequestUtils.isPinnRequest(position);
+    boolean isPinnRequest = WebUserSetRequestUtils.isPinPosition(position);
 
     if (duplicatedItems != null) {
       processDuplicates(existingUserSet, fullUriItems, duplicatedItems, isPinnRequest);
@@ -461,7 +461,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // insert the item at the 0 position
     UserSet userSet;
 
-    if (WebUserSetRequestUtils.isPinnRequest(position) && existingUserSet.isEntityBestItemsSet()) {
+    if (WebUserSetRequestUtils.isPinPosition(position) && existingUserSet.isEntityBestItemsSet()) {
       userSet = insertItem(existingUserSet, newItem, 0, true);
     } else {
       // validate position

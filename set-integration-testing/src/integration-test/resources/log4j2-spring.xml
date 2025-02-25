@@ -20,17 +20,18 @@
 	
 	<logger name="eu.europeana" level="INFO">
 	</logger>	
-	<logger name="org.mongodb.driver" level="DEBUG">
+	<logger name="org.mongodb.driver" level="WARN">
 	</logger>
 	<logger name="com.mongodb.diagnostics" level="WARN">
 	</logger>
 	<!-- To enable logging of Mongo queries, set log level to debug -->	
-    <logger name="org.mongodb.morphia" level="DEBUG"/>
+    <logger name="org.mongodb.morphia" level="WARN"/>
+    
     
     <!-- To enable logging of Mongo queries, set log level to debug -->	
     <logger name="dev.morphia" level="WARN"/>
     <!-- Supress Mapper logs (e.g. entity caching disabled) -->
-    <logger name="dev.morphia.Mapper" level="WARN"/> 
+    <logger name="dev.morphia.mapping.Mapper" level="WARN"/> 
     
     <!-- To enable logging of test contaners, set log level to debug -->	
     <logger name="org.testcontainers" level="DEBUG"/>
