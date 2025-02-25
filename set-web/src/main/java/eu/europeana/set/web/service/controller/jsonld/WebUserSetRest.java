@@ -1,7 +1,6 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
 import static eu.europeana.api.commons.web.definitions.WebFields.FORMAT_JSONLD;
-import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields.PINNED_POSITION;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -46,7 +45,6 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
@@ -478,7 +476,7 @@ public class WebUserSetRest extends BaseRest {
 
       // if set is not entity set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
-          && StringUtils.equals(position, PINNED_POSITION)) {
+          && WebUserSetRequestUtils.isPinPosition(position)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
@@ -557,13 +555,13 @@ public class WebUserSetRest extends BaseRest {
       // 8. pinned is available only for entityBestItemsSet
       // if set is not entity best item set and position is "pin", throw exception
       if (!existingUserSet.isEntityBestItemsSet()
-          && StringUtils.equals(position, PINNED_POSITION)) {
+          && WebUserSetRequestUtils.isPinPosition(position)) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Pinning item ", existingUserSet.getType()});
       }
 
       // 9. verify if position is higher than pinned
-      if (!WebUserSetRequestUtils.isPinnRequest(position) && itemsPosition > -1
+      if (!WebUserSetRequestUtils.isPinPosition(position) && itemsPosition > -1
           && itemsPosition < existingUserSet.getPinned()) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
             new String[] {"Position smaller than pinned is not allowed for non pin request!",
@@ -615,7 +613,7 @@ public class WebUserSetRest extends BaseRest {
   private int parseAndValidateItemPosition(String position, UserSet existingUserSet)
       throws ParamValidationException, RequestValidationException {
     int itemsPosition = parseItemsPosition(position);
-    if (!StringUtils.equals(position, WebUserSetModelFields.PINNED) && itemsPosition >= 0
+    if (!WebUserSetRequestUtils.isPinPosition(position) && itemsPosition >= 0
         && itemsPosition < existingUserSet.getPinned()) {
       throw new RequestValidationException(UserSetI18nConstants.INVALID_UNPINNED_ITEMS_POSITION,
           null);
@@ -625,7 +623,7 @@ public class WebUserSetRest extends BaseRest {
 
   // returns -1 if not provided
   private int parseItemsPosition(String position) throws ParamValidationException {
-    if (StringUtils.equals(position, PINNED_POSITION)) {
+    if (WebUserSetRequestUtils.isPinPosition(position)) {
       return 0;
     }
     int positionFinal = -1;

@@ -45,7 +45,7 @@ public class WebUserSetModelFields {
   public static final String IS_SHOWN_BY = "isShownBy";
 
   // Pinned items constants
-  public static final String PINNED_POSITION = "pin";
+  public static final String POSITION_PIN = "pin";
 
 
   public static final String VALUE_CONTEXT_EUROPEANA_COLLECTION =

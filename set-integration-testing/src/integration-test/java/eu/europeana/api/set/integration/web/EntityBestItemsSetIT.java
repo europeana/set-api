@@ -361,7 +361,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(
             put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinnedItem")
                 .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
-                    WebUserSetModelFields.PINNED_POSITION)
+                    WebUserSetModelFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
@@ -376,11 +376,11 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     assertEquals(3, existingUserSet.getItems().size());
 
     // add more pinned items
-    getUserSetService().insertItem("02", "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("02", "123_pinnedItem", WebUserSetModelFields.POSITION_PIN,
         existingUserSet);
-    getUserSetService().insertItem("03", "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("03", "123_pinnedItem", WebUserSetModelFields.POSITION_PIN,
         existingUserSet);
-    getUserSetService().insertItem("04", "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("04", "123_pinnedItem", WebUserSetModelFields.POSITION_PIN,
         existingUserSet);
 
     // check if item is present
@@ -395,7 +395,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     assertEquals(6, existingUserSet.getItems().size()); // total 6
 
     // add existing pinned item
-    getUserSetService().insertItem("04", "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("04", "123_pinnedItem", WebUserSetModelFields.POSITION_PIN,
         existingUserSet);
     assertEquals(4, existingUserSet.getPinned()); // pinned remains same
     assertEquals(6, existingUserSet.getItems().size()); // total remains same
@@ -470,7 +470,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
             put(BASE_URL + "{identifier}/items", identifier)
                 .content(newItemsJson.toString())
                 .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
-                    WebUserSetModelFields.PINNED_POSITION)
+                    WebUserSetModelFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value()))
@@ -494,7 +494,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item4Existing=existingUserSet.getItems().get(2);
     newItems.add(item4Existing);
     newItems.add(item3);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.PINNED_POSITION, -1, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, -1, existingUserSet);
      
     //check the new items
     assertEquals(0, existingUserSet.getItems().indexOf(item2FullUrl));
@@ -557,13 +557,13 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
     String identifier = userSet.getIdentifier();
     // add 3 pinned items
-    getUserSetService().insertItem("01", "123_pinUnpinItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("01", "123_pinUnpinItem", WebUserSetModelFields.POSITION_PIN,
         userSet);
-    getUserSetService().insertItem("02", "123_pinUnpinItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("02", "123_pinUnpinItem", WebUserSetModelFields.POSITION_PIN,
         userSet);
-    getUserSetService().insertItem("03", "123_pinnedItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("03", "123_pinnedItem", WebUserSetModelFields.POSITION_PIN,
         userSet);
-    getUserSetService().insertItem("04", "123_pinUnpinItem", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("04", "123_pinUnpinItem", WebUserSetModelFields.POSITION_PIN,
         userSet);
     // check if pinned item is present
     assertTrue(userSet.getItems().contains(UserSetUtils
@@ -644,7 +644,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     // add 1 entity item
     getUserSetService().insertItem("02", "normal_item", null, userSet);
     // add 1 pinned item
-    getUserSetService().insertItem("01", "123_pinned", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("01", "123_pinned", WebUserSetModelFields.POSITION_PIN,
         userSet);
 
     // check if pinned item is present
@@ -662,7 +662,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     mockMvc
         .perform(
             put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02", "normal_item")
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION, WebUserSetFields.PINNED_POSITION)
+                .queryParam(WebUserSetFields.PATH_PARAM_POSITION, WebUserSetFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
@@ -681,9 +681,9 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
   @Test
   void deletePinnedItems_EntityUserSets_withEditorUser() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(ENTITY_USER_SET_REGULAR, editorUserToken);
-    getUserSetService().insertItem("01", "123_test", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("01", "123_test", WebUserSetModelFields.POSITION_PIN,
         userSet);
-    getUserSetService().insertItem("02", "123_test", WebUserSetModelFields.PINNED_POSITION,
+    getUserSetService().insertItem("02", "123_test", WebUserSetModelFields.POSITION_PIN,
         userSet);
 
     assertEquals(2, userSet.getPinned());
@@ -712,7 +712,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item2="/02/123_pinnedItem";
     newItems.add(item1);
     newItems.add(item2);    
-    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.PINNED_POSITION, 0, userSet);
+    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, 0, userSet);
 
     assertEquals(2, userSet.getPinned());
     String identifier = userSet.getIdentifier();
