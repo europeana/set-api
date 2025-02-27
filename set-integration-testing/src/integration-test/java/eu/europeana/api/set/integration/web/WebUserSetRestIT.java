@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -431,6 +432,48 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     assertTrue(result.contains("limit") && result.contains("reached"));
 
   }
+  
+  @Test
+  void insertAndDeleteMultipleItems() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+    
+    //inserting items with both full and partial url
+    String item1="http://data.europeana.eu/item/01/123_newItem";
+    String item2="/02/223_newItem";
+    JSONArray newItemsJson = new JSONArray();
+    newItemsJson.put(item1);
+    newItemsJson.put(item2);
+    
+    mockMvc.perform(
+        put(BASE_URL + "{identifier}/items", userSet.getIdentifier())
+          .content(newItemsJson.toString())
+          .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value()))
+        .andReturn().getResponse()
+        .getContentAsString();
+
+    UserSet updatedUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    //check for the new items
+    assertTrue(updatedUserSet.getItems().contains(item1));
+    String item2FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item2);
+    assertTrue(updatedUserSet.getItems().contains(item2FullUrl));
+
+    //deleting new items
+    mockMvc
+        .perform(
+            delete(BASE_URL + "{identifier}/items", userSet.getIdentifier())
+                .content(newItemsJson.toString())
+                .header(HttpHeaders.AUTHORIZATION, adminUserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
+
+    //check items are deleted
+    updatedUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+    assertFalse(updatedUserSet.getItems().contains(item1));
+    assertFalse(updatedUserSet.getItems().contains(item2FullUrl));
+  }
+  
 
 
 }

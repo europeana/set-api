@@ -300,7 +300,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       }
     } else {
       // remove
-      itemsRemoved = existingUserSet.getItems().removeAll(items);
+      itemsRemoved = existingUserSet.getItems().removeAll(fullUriItems);
     }
 
     UserSet updatedUserSet = existingUserSet;
