@@ -1,5 +1,6 @@
 package eu.europeana.set.web.model;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -220,7 +221,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
       resBuilder.append(", Total items: ");
       resBuilder.append(getTotal());
     }
-    if (!getItems().isEmpty()) {
+    if (getItems() != null &&  !getItems().isEmpty()) {
       resBuilder.append(", Items: ");
       resBuilder.append(getItems().size());
     }

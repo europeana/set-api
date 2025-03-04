@@ -2,7 +2,7 @@ package eu.europeana.set.search.service;
 
 
 import java.io.IOException;
-
+import java.util.List;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.set.definitions.model.BaseWebResource;
@@ -42,5 +42,8 @@ public interface SearchApiClient {
     JSONObject searchItems(String uri, String postBody) throws SearchApiClientException;
 
     void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction) throws SearchApiClientException;
+
+    void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds,
+        String itemDataEndpoint, BaseWebResource depiction) throws SearchApiClientException;
     
 }

@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +16,7 @@ import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.common.http.HttpResponseHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
+import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.search.exception.SearchApiClientException;
@@ -166,25 +168,50 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   @Override
   public JSONObject searchItems(String uri, String postBody) throws SearchApiClientException {
+    String responseBodyAsString = searchItemDescriptionsAsString(uri, postBody);
+    
+    try {
+      return new JSONObject(responseBodyAsString);
+    }catch (JSONException e) {
+      throw new SearchApiClientException(
+          SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Fires the search request and returns the body
+   * @param url the search api URL
+   * @param postBody for search request
+   * @return response body
+   * @throws SearchApiClientException
+   */
+  public String searchItemDescriptionsAsString(String url, String postBody)
+      throws SearchApiClientException {
     HttpResponseHandler resp;
     try {
       if (postBody != null) {
-        resp = createHttpConnection().post(uri, postBody, "application/json", null);
+        resp = createHttpConnection().post(url, postBody, "application/json", null);
       } else {
-        resp = createHttpConnection().get(uri, "application/json", null);
+        resp = createHttpConnection().get(url, "application/json", null);
       }
       if (resp == null) {
-        // HTTP Error Code
-        throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
+          // HTTP Error Code
+          throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
+              null);
+      }
+      
+      if(resp.getStatus() != HttpStatus.SC_OK) {
+        //search request failed
+        throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS +
+            " Response status: " + resp.getStatus() + " Response body: " + resp.getResponse(),
             null);
       }
-      return new JSONObject(resp.getResponse());
+      //return response body
+      return resp.getResponse();
     } catch (IOException e) {
       throw new SearchApiClientException(
           SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
-    } catch (JSONException e) {
-      throw new SearchApiClientException(
-          SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(), e);
     } catch (RuntimeException e) {
       throw new SearchApiClientException(
           SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS + e.getMessage(), e);
@@ -202,6 +229,53 @@ public class SearchApiClientImpl implements SearchApiClient {
     return searchItems(uri, searchPostBody, apiKey, true);
   }
 
+  
+  @Override
+  public void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds, String itemDataEndpoint, BaseWebResource depiction)
+      throws SearchApiClientException {
+
+    String firstFoundLocalId = null;
+    String firstFoundItemlId = null;
+    String searchResult = null;
+    try {
+      searchResult = searchItemDescriptionsAsString(searchApiFullUrl, searchPostBody);
+      JSONArray itemsArray = new JSONObject(searchResult).getJSONArray("items");
+      if(itemsArray == null || itemsArray.length() < 1) {
+        //no results found
+        return;
+      }
+      //search the first found itemId in the search results
+      for (String itemId : itemIds) {
+        String localId =
+            UserSetUtils.extractItemIdentifier(itemId, itemDataEndpoint);
+        String recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, false, false);
+        if(searchResult.contains(recordIdJsonString)) {
+          firstFoundLocalId = localId;
+          firstFoundItemlId = itemId;
+          break;
+        }
+      }
+      
+      if(firstFoundLocalId == null) {
+        //none found
+        return;
+      }
+      
+      //find the json node of the first found item and fill depiction
+      for (int i = 0; i < itemsArray.length(); i++) {
+        JSONObject recordJsonObject = itemsArray.getJSONObject(i);
+        //process
+        if(firstFoundLocalId.equals(recordJsonObject.getString("id"))) { 
+          fillDepictionFromRecord(firstFoundItemlId, recordJsonObject, depiction);
+          break;
+        }
+      }
+     } catch (JSONException e) {
+      throw new SearchApiClientException(
+          "Cannot extract depiction data from search Api response: " + searchResult, null);
+    }
+  }
+  
   @Override
   public void fillDepiction(String searchApiFullUrl, String itemId, BaseWebResource depiction)
       throws SearchApiClientException {
@@ -210,16 +284,25 @@ public class SearchApiClientImpl implements SearchApiClient {
     try {
       searchResult = searchItems(searchApiFullUrl, null);
       JSONArray items = searchResult.getJSONArray("items");
-      String thumbnail = items.getJSONObject(0).getJSONArray("edmPreview").getString(0);
-      String resourceId = getResourceId(thumbnail);
-
-      depiction.setId(resourceId);
-      depiction.setSource(itemId);
-      depiction.setThumbnail(thumbnail);
+      if(items == null || items.length() < 1) {
+        return;
+      }
+      fillDepictionFromRecord(itemId, items.getJSONObject(0), depiction);
     } catch (JSONException e) {
       throw new SearchApiClientException(
           "Cannot extract depiction data from search Api response: " + searchResult, null);
     }
+  }
+
+
+  private void fillDepictionFromRecord(String itemId, final JSONObject recordJsonObject,
+      BaseWebResource depiction) throws JSONException, SearchApiClientException {
+    String thumbnail = recordJsonObject.getJSONArray("edmPreview").getString(0);
+    String resourceId = getResourceId(thumbnail);
+
+    depiction.setId(resourceId);
+    depiction.setSource(itemId);
+    depiction.setThumbnail(thumbnail);
   }
 
 

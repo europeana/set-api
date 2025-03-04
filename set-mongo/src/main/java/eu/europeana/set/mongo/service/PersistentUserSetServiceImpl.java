@@ -88,11 +88,18 @@ public class PersistentUserSetServiceImpl extends
     }
 
     // check creator
-    if (object.getCreator() == null)
+    if (object.getCreator() == null) {
       throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);
+    }
 
-    long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER);
-    object.setIdentifier("" + sequenceId);
+    if(object.getIdentifier()== null) {
+      long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER);
+      object.setIdentifier("" + sequenceId);
+    } else {
+      throw new UserSetValidationException(
+          "UserSet.identifier must not be set when creating new user sets, for updating user set use the update method!"); 
+    }
+    
 
     String notInitializedLongId = "-1";
 
@@ -100,7 +107,7 @@ public class PersistentUserSetServiceImpl extends
     if (StringUtils.isBlank(object.getIdentifier())
         || notInitializedLongId.equals(object.getIdentifier()))
       throw new UserSetValidationException(
-          "UserSet.UserSetId.identifier must be a valid alpha-numeric value or a positive number!");
+          "UserSet.identifier must be a valid alpha-numeric value or a positive number!");
   }
 
   /*
