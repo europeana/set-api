@@ -5,6 +5,8 @@ import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelField
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields.THUMBNAIL;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields.TYPE;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -70,4 +72,8 @@ public class WebResource extends BaseWebResource {
     return result;
   }
 
+  @JsonIgnore
+  public boolean hasThumbnail() {
+    return super.hasThumbnail();
+  }
 }

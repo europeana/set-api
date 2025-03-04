@@ -131,7 +131,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       searchQuery.setPageNr(page);
       results = getUserSetService().search(searchQuery, null, profiles, adminAuth);
       final int found = results.getResults() == null ? 0 : results.getResults().size();
-      System.out.println(found + " Items found on page: " + page);
+      LOG.info(found + " Items found on page: " + page);
 
       if (hasNoItems(results)) {
         break; // stop if no results found anymore
@@ -165,14 +165,14 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
         report.increaseSkipped();
         continue;
       }
-      if (userSet.getIsShownBy() != null) {
+      if (userSet.getIsShownBy() != null && userSet.getIsShownBy().hasThumbnail()) {
         report.increaseSkipped();
         continue;
       }
 
       final WebResource isShownBy = generateGalleryDepiction(userSet);
       // do not update set if the depiction cannot be generated
-      final boolean shouldSkip = (isShownBy == null && !userSet.isCollection());
+      final boolean shouldSkip = (isShownBy == null && !userSet.isCollection()) || (isShownBy != null && !isShownBy.hasThumbnail());
       if (shouldSkip) {
         report.increaseNotGenerated();
         LOG.debug("Skip update for set with id:type:collectionType - {}:{}:{}",
@@ -181,11 +181,12 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       }
 
       userSet.setIsShownBy(isShownBy);
-      if (userSet.isCollection()) {
-        // update collection type to gallery if needed
+      if (userSet.isCollection() && (userSet.getItems() == null || userSet.getItems().size() < 100)) {
+        // update collection type to gallery if the collection has less than 100 items
         userSet.setCollectionType(WebUserSetFields.TYPE_GALLERY);
         report.increaseUpdatedCollectionType();
       }
+      
       UserSet updatedSet = mongoPersistanceService.update((PersistentUserSet) userSet);
       if(isShownBy != null) {
         //updated is shownBy
