@@ -498,7 +498,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
-      throws ApplicationAuthenticationException {
+      throws ApplicationAuthenticationException, ItemValidationException {
     // no validation of items for open sets, they are retrieved dynamically
     if (storedUserSet.isOpenSet()) {
       return;
@@ -517,6 +517,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     
     if(userSetUpdates.getItems()!=null && userSetUpdates.getItems().size()>0) { 
       storedUserSet.setItems(userSetUpdates.getItems());
+    }
+    else {
+      // when we change the type to Gallery, we need to check the items size
+      if (userSetUpdates.isGallery()) {
+        validateGallerySize(storedUserSet, 0);
+      }
     }
   }
 
@@ -647,9 +653,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
     }
     
-    //validate number of items for the sets of type Collection
-    validateGallerySize(webUserSet, 0);
-
+    //validate number of items for the sets of type Gallery
+    if (webUserSet.isGallery()) {
+      validateGallerySize(webUserSet, 0);
+    }
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
@@ -661,10 +668,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   @Override
   public void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException {
     final int galleryMaxSize = getConfiguration().getGalleryMaxSize();
-    if(webUserSet.isGallery() 
-        && webUserSet.getItems()!=null 
+    if(webUserSet.getItems()!=null 
         && webUserSet.getItems().size() + newItems > galleryMaxSize) {
-      
       String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;   
       throw new ItemValidationException(messageKey, 
           new String[] {String.valueOf(galleryMaxSize)} );
