@@ -203,7 +203,7 @@ public class UserSetUtils {
     if(includeSpace) {
       builder.append(' ');
     }
-    builder.append("\"");
+    builder.append('"');
     if(escapeSlashes) {
       builder.append(StringUtils.replace(localId, "/", "\\/"));
     } else {
