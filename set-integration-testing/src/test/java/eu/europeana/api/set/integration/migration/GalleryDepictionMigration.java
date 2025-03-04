@@ -60,13 +60,10 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   @DynamicPropertySource
   static void setProperties(DynamicPropertyRegistry registry) {
-    // registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
-    // registry.add("mongodb.set.connectionUrl", () -> "mongodb://127.0.0.1:27017/set_test");
-    registry.add("mongodb.set.connectionUrl",
-        () -> "mongodb://admin:7c3ff48e3ff790a6be359e2c62e296955a8a18c3ab0031c1830c@eece072b-13b8-4e98-b61f-befbd980aeea-0.b9366f7fcf0b43acb51a70da08153291.databases.appdomain.cloud:30442,eece072b-13b8-4e98-b61f-befbd980aeea-1.b9366f7fcf0b43acb51a70da08153291.databases.appdomain.cloud:30442,eece072b-13b8-4e98-b61f-befbd980aeea-2.b9366f7fcf0b43acb51a70da08153291.databases.appdomain.cloud:30442/set-api-migration?ssl=true&retryWrites=true&loadBalanced=false&replicaSet=replset&readPreference=primary&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1");
-
-    registry.add("mongodb.set.truststore", () -> "/opt/app/config/ibm-databases-truststore.jks");
-    registry.add("mongodb.set.truststorepass", () -> "AsRgzVh3JXRTKE0fTB02Nkbo");
+//    registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
+    registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test");
+    //registry.add("mongodb.set.truststore", () -> "");
+    //registry.add("mongodb.set.truststorepass", () -> "");
   }
 
   /*

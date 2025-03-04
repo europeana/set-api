@@ -671,10 +671,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       itemUri = itemIds.get(i);
       boolean found = false;
       localId = UserSetUtils.extractItemIdentifier(itemUri, itemDataEndpoint);
-      recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, false);
+      //json serialization with JSONObject escapes forward slashes (which is optional according to the specs)
+      recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, true, true);
       //search description for current item
       for (String description : itemDescriptions) {
         // match record's id in json string
+        System.out.println(description);
+        
         if (description.contains(recordIdJsonString)) {
           orderedItemDescriptions.add(description);
           found = true;

@@ -248,7 +248,7 @@ public class SearchApiClientImpl implements SearchApiClient {
       for (String itemId : itemIds) {
         String localId =
             UserSetUtils.extractItemIdentifier(itemId, itemDataEndpoint);
-        String recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, false);
+        String recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, false, false);
         if(searchResult.contains(recordIdJsonString)) {
           firstFoundLocalId = localId;
           firstFoundItemlId = itemId;

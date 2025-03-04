@@ -105,7 +105,7 @@ public class SearchApiUtils {
         if (userSet.isOpenSet()) {
           return buildSearchApiPostBodyForOpenSets(userSet, sort, sortOrder, pageNr, pageSize, profile);
         } else {
-          return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageSize, pageNr, profile);
+          return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageNr, pageSize, profile);
         }
     }
 
@@ -138,12 +138,17 @@ public class SearchApiUtils {
      * start=1, rows=5, sort=europeana_id desc}
      *
      * @param userSet the user set
+     * @param itemDataEndpoint the base URL for the item ids
+     * @param pageNr the results page to retrieve
+     * @param pageSize the number of results to retrieve per page
+     * @param profile the profile used for record descriptions
+     
      * @param pageSize the number of retrieved results
      * @return the SearchApi request 
      */
-    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, String itemDataEndpoint, int pageSize, int pageNr, String profile) {
+    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, String itemDataEndpoint, int pageNr, int pageSize, String profile) {
         final List<String> items = userSet.getItems();
-        return buildSearchApiPostBodyForItemIds(items, itemDataEndpoint, pageSize, pageNr, profile);
+        return buildSearchApiPostBodyForItemIds(items, itemDataEndpoint, pageNr, pageSize, profile);
     }
 
 
