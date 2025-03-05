@@ -11,20 +11,12 @@ public class ClientConfigurationTest {
     @Test
     public void clientConfiguration_loadProperties() {
         ClientConfiguration configuration = new ClientConfiguration(loadProperties());
-        assertTrue(StringUtils.isNotEmpty(configuration.getOauthRequestParams()));
-        assertTrue(StringUtils.isNotEmpty(configuration.getOauthRegularUserToken()));
         assertTrue(StringUtils.isNotEmpty(configuration.getServiceUri()));
-        assertTrue(StringUtils.isNotEmpty(configuration.getOauthServiceUri()));
     }
 
     private Properties loadProperties() {
         Properties properties = new Properties();
         properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, "service-ur-test");
-        properties.put(ClientConfiguration.PROP_SET_API_KEY, "test");
-        properties.put(ClientConfiguration.PROP_OAUTH_REGULAR_USER_TOKEN, "oauth-token");
-        properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, "outh-test");
-        properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, "params-test");
-
         return properties;
     }
 }

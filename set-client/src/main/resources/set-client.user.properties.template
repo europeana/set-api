@@ -2,12 +2,3 @@
 # for testing within the development environment a local URI can be used e.g. localhost:8080/set-web/sets  
 set.service.uri = http://localhost:8080/set
 
-# the user key used to access Europeana API. For more information see http://pro.europeana.eu/api 
-set.api.key =
-
-#the URL for the endpoint of OAuth service  
-oauth.service.uri=
-
-#The parameters sent for retrieving a new ticket   
-oauth.token.request.params=username=
-

@@ -9,13 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClientAPIConnectionTest {
     private static final String SERVICE_URI     = "testUri";
-    private static final String API_KEY_1       = "api_key";
 
     private BaseApiConnection baseApiConnection;
 
     @BeforeEach
     void setup() {
-     baseApiConnection = new BaseApiConnection(SERVICE_URI, API_KEY_1, null);
+     baseApiConnection = new BaseApiConnection(SERVICE_URI);
     }
 
     @Test
@@ -24,7 +23,7 @@ public class ClientAPIConnectionTest {
         assertEquals(SERVICE_URI + WebUserSetFields.SLASH, result.toString());
 
         result = new StringBuilder();
-        baseApiConnection = new BaseApiConnection(SERVICE_URI + WebUserSetFields.SLASH, API_KEY_1, null);
+        baseApiConnection = new BaseApiConnection(SERVICE_URI + WebUserSetFields.SLASH);
         result = baseApiConnection.getUserSetServiceUri();
         assertEquals(SERVICE_URI + WebUserSetFields.SLASH, result.toString());
     }

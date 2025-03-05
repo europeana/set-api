@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import org.apache.hc.core5.http.HttpStatus;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +28,11 @@ public class UserSetClientTest extends BaseUserSetClientTest {
   void initObjects() throws SetApiClientException {
     initObjects(port);
   }
-  
+
+  @AfterAll
+  void close() {
+	  apiClient.close();
+  }
   @Test
   public void createUserSet() throws SetApiClientException, IOException {
     String setId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);

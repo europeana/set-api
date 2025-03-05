@@ -110,11 +110,10 @@ public class BaseUserSetClientTest {
     }
     else {
       regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
-      oauthServiceUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
-      oauthRequestParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
     }
 
     apiClient = new UserSetApiClient(new ClientConfiguration(loadClientProperties(port)));
+    apiClient.setAuthToken(regularUserToken);
   }
 
   /**
@@ -138,11 +137,6 @@ public class BaseUserSetClientTest {
   protected Properties loadClientProperties(int port) {
     Properties properties = new Properties();
     properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, "http://localhost:" + port + "/set");
-    properties.put(ClientConfiguration.PROP_SET_API_KEY, "test");
-    properties.put(ClientConfiguration.PROP_OAUTH_REGULAR_USER_TOKEN, regularUserToken);
-    properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, oauthServiceUri);
-    properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, oauthRequestParams);
-
     return properties;
   }
 

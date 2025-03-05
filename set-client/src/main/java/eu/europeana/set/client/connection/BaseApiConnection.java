@@ -48,21 +48,15 @@ public class BaseApiConnection {
     private static final String ERROR_MESSAGE = "Set API Client call failed - ";
 
     private final HttpConnection httpConnection = new HttpConnection();
-    private final String apiKey;
     private final String setServiceUri;
-    String regularUserAuthorizationValue;
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * BaseApiConnection constructor
      * @param setServiceUri set api service url
-     * @param apiKey apikey
-     * @param regularUserAuthorizationValue auth value
      */
-    public BaseApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
+    public BaseApiConnection(String setServiceUri) {
         this.setServiceUri = setServiceUri;
-        this.apiKey = apiKey;
-        this.regularUserAuthorizationValue = regularUserAuthorizationValue;
 
         // set object mapper
         SimpleModule module = new SimpleModule();
@@ -347,10 +341,6 @@ public class BaseApiConnection {
         } catch (URISyntaxException e) {
             throw  new SetApiClientException("Error creating Search Urls ", HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
-    }
-
-    public String getApiKey() {
-        return apiKey;
     }
 
     public String getSetServiceUri() {

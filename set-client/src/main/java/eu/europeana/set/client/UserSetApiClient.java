@@ -17,6 +17,8 @@ import eu.europeana.set.definitions.model.UserSet;
 
 public class UserSetApiClient extends BaseUserSetApi {
 
+    public static final ThreadLocal<String> token = new ThreadLocal<>();
+
     private final WebUserSetClient webUserSetClient;
     private final SearchUserSetClient searchUserSetClient;
 
@@ -35,33 +37,49 @@ public class UserSetApiClient extends BaseUserSetApi {
     }
 
     /**
+     * Authentication token for the Translation api requests.
+     * @param authToken
+     */
+    public void setAuthToken(String authToken) {
+        token.set(authToken);
+    }
+
+    /**
+     * Close / purge the token from memory
+     */
+    public void close() {
+        token.remove();
+    }
+
+
+    /**
      * Web User Set Client class
      */
     private class WebUserSetClient implements WebUserSetApi {
         @Override
         public UserSet createUserSet(String set, String profile) throws SetApiClientException {
-            return getApiConnection().createUserSet(set, profile);
+            return getApiConnection().createUserSet(set, profile, UserSetApiClient.token.get());
 
         }
 
         @Override
         public String deleteUserSet(String identifier) throws SetApiClientException {
-            return getApiConnection().deleteUserSet(identifier);
+            return getApiConnection().deleteUserSet(identifier,  UserSetApiClient.token.get());
         }
 
         @Override
         public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
-            return getApiConnection().getUserSet(identifier, profile);
+            return getApiConnection().getUserSet(identifier, profile, UserSetApiClient.token.get());
         }
 
         @Override
         public UserSet updateUserSet(String identifier, String set, String profile) throws SetApiClientException {
-            return getApiConnection().updateUserSet(identifier, set, profile);
+            return getApiConnection().updateUserSet(identifier, set, profile, UserSetApiClient.token.get());
         }
 
         @Override
         public List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
-            return getApiConnection().getPaginationUserSet(identifier, sort, sortOrder, page, pageSize, profile);
+            return getApiConnection().getPaginationUserSet(identifier, sort, sortOrder, page, pageSize, profile, UserSetApiClient.token.get());
         }
     }
 
@@ -70,7 +88,7 @@ public class UserSetApiClient extends BaseUserSetApi {
         @Override
         public List<? extends UserSet> searchUserSet(String query, String[] qf,
                                                      String sort, String page, String pageSize, String facet, int facetLimit, String profile) throws SetApiClientException {
-            return getApiConnection().searchUserSet(query, qf, sort, page, pageSize, facet, facetLimit, profile);
+            return getApiConnection().searchUserSet(query, qf, sort, page, pageSize, facet, facetLimit, profile, UserSetApiClient.token.get());
         }
     }
 }
