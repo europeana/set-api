@@ -210,16 +210,17 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)"});
     }
+    
+    // when we change the type to Gallery, check the items size of the existing set
+    if (webUserSet.isGallery()) {
+      validateGallerySize(persistentUserSet, 0);
+    }
+
     // validate input
     validateWebUserSet(webUserSet, persistentUserSet.isPublished());
 
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
-
-    // validate new items
-    validateAndSetItems(persistentUserSet, webUserSet);
-    // remove duplicated items
-    removeItemDuplicates(persistentUserSet);
 
     // update modified date
     persistentUserSet.setModified(new Date());
