@@ -39,6 +39,7 @@ import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   private static final Logger LOG = LogManager.getLogger(UserSetApp.class);
+  private boolean migrateToGallery = false;
 
   @Resource
   UserSetConfiguration configuration;
@@ -186,7 +187,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       }
 
       
-      final WebResource isShownBy = generateGalleryDepiction(userSet);
+      final WebResource isShownBy = generateDepiction(userSet);
       // do not update set if the depiction cannot be generated
       final boolean shouldSkip = (isShownBy == null && !userSet.isCollection()) || (isShownBy != null && !isShownBy.hasThumbnail());
       if (shouldSkip) {
@@ -199,7 +200,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       if(hasDepiction(isShownBy)) {
         userSet.setIsShownBy(isShownBy);
       }
-      final boolean hasCollectionTypeUpdate = hasCollectionTypeUpdate(userSet);
+      final boolean hasCollectionTypeUpdate = migrateToGallery && hasCollectionTypeUpdate(userSet);
       if (hasCollectionTypeUpdate) {
         // update collection type to gallery if the collection has less than 100 items
         userSet.setCollectionType(WebUserSetFields.TYPE_GALLERY);
@@ -215,6 +216,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
           LOG.debug("Generated depiction for set with id {}: {}", updatedSet.getIdentifier(),
               updatedSet.toString());
         }else {
+          //note the migrateToGallery to enable/disable promotion to galleries
           LOG.debug("Updated collection type, but didn't Generated depiction for set with id {}: {}", updatedSet.getIdentifier(),
               updatedSet.toString());
           report.increaseNotGenerated();
@@ -243,7 +245,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     return isShownBy != null && isShownBy.hasThumbnail();
   }
 
-  private WebResource generateGalleryDepiction(UserSet userSet) {
+  private WebResource generateDepiction(UserSet userSet) {
 
     try {
       return getUserSetService().generateDepiction(userSet);
