@@ -498,35 +498,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return null;
   }
 
-  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
-      throws ApplicationAuthenticationException, ItemValidationException {
-    // no validation of items for open sets, they are retrieved dynamically
-    if (storedUserSet.isOpenSet()) {
-      return;
-    }
-
-    /* for entity sets update there must not be any items present in new user set
-     * only metadata can be update for entity sets
-     */
-    if (storedUserSet.isEntityBestItemsSet() && userSetUpdates.getItems()!=null 
-        && !userSetUpdates.getItems().isEmpty()) {
-      throw new ApplicationAuthenticationException(
-          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
-          HttpStatus.BAD_REQUEST, null);
-    }
-    
-    if(userSetUpdates.getItems()!=null && userSetUpdates.getItems().size()>0) { 
-      storedUserSet.setItems(userSetUpdates.getItems());
-    }
-    else {
-      // when we change the type to Gallery, we need to check the items size
-      if (userSetUpdates.isGallery()) {
-        validateGallerySize(storedUserSet, 0);
-      }
-    }
-  }
-
   /**
    * Validate conformity of item URLs
    * @param items
