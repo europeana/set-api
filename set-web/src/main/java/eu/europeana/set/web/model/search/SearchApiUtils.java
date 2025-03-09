@@ -2,8 +2,10 @@ package eu.europeana.set.web.model.search;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -103,30 +105,33 @@ public class SearchApiUtils {
      */
     public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String itemDataEndpoint,String sort, String sortOrder, int pageNr, int pageSize, String profile) {
         if (userSet.isOpenSet()) {
-          return buildSearchApiPostBodyForOpenSets(userSet, sort, sortOrder, pageNr, pageSize, profile);
+          return buildSearchApiPostBodyForOpenSets(userSet, pageNr, pageSize, profile);
         } else {
           return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageSize, pageNr, profile);
         }
     }
 
-    private SearchApiRequest buildSearchApiPostBodyForOpenSets(UserSet userSet, String sort,
-        String sortOrder, int pageNr, int pageSize, String profile) {
+    private SearchApiRequest buildSearchApiPostBodyForOpenSets(UserSet userSet, int pageNr, int pageSize, String profile) {
       SearchApiRequest searchApiRequest = new SearchApiRequest();
       
-      // remove pagination and ordering
+      //overwrite pagination (do no use the one from isDefinedBy)
       Integer start = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize + 1;
-
-      searchApiRequest.setQuery(getQueryParamFromURL(userSet.getIsDefinedBy()));
-      
-      if(sort != null && sortOrder == null) {
-          searchApiRequest.setSort(new String[]{sort});
-      }
-      if (sort != null && sortOrder != null) {
-          searchApiRequest.setSort(new String[]{sort + " " + sortOrder});
-      }
-      
       searchApiRequest.setStart(start);
       searchApiRequest.setRows(pageSize);
+      
+      final MultiValueMap<String, String> queryParams = getQueryParamsFromUrl(userSet.getIsDefinedBy());
+      
+      //query has cardinality 1 
+      searchApiRequest.setQuery(queryParams.getFirst(CommonApiConstants.QUERY_PARAM_QUERY));
+      //QF has cardinality 0..n
+      List<String> qf = queryParams.get(WebUserSetFields.REQUEST_PARAM_QF);
+      searchApiRequest.setQf(qf);
+      //reusability has cardinality 1
+      searchApiRequest.setReusability(queryParams.get(WebUserSetFields.REQUEST_PARAM_REUSABILITY));
+      
+      List<String> sort = queryParams.get(CommonApiConstants.QUERY_PARAM_SORT);
+      searchApiRequest.setSort(sort);
+      
       setProfile(searchApiRequest, profile);
       return searchApiRequest;
     }
@@ -177,7 +182,7 @@ public class SearchApiUtils {
     private void setProfile(SearchApiRequest searchApiRequest, String profile) {
       if(!StringUtils.isEmpty(profile)) {
         String[] searchApiProfile = profile.split(","); 
-        searchApiRequest.setProfile(searchApiProfile);
+        searchApiRequest.setProfile(List.of(searchApiProfile));
       }
     }
 
@@ -197,25 +202,17 @@ public class SearchApiUtils {
         return res;
     }
 
-    /**
-     * Returns the query param value from the url passed
-     * @param url
-     * @return
-     */
-    private static String getQueryParamFromURL(String url) {
-        // decode the url
-        String decodedUrl = java.net.URLDecoder.decode(url, StandardCharsets.UTF_8);
-        // get the query param value from the getIsDefinedBy
-        List<String> queryParam = UriComponentsBuilder.fromUriString(decodedUrl).build().getQueryParams()
-                .get(CommonApiConstants.QUERY_PARAM_QUERY);
 
-        StringBuilder query = new StringBuilder();
-        if(queryParam != null && !queryParam.isEmpty()) {
-            // form the query param for Search
-            for(String queryValue : queryParam) {
-                query.append(queryValue);
-            }
-        }
-        return query.toString();
+    /**
+     * Decodes the URL params and extracts the parameter map
+     * @param url the string representation of the URL  
+     * @return the parameters
+     */
+    public static MultiValueMap<String, String> getQueryParamsFromUrl(String url) {
+      // decode the url
+      String decodedUrl = java.net.URLDecoder.decode(url, StandardCharsets.UTF_8);
+      // get the query param value from the getIsDefinedBy
+      final MultiValueMap<String, String> queryParams = UriComponentsBuilder.fromUriString(decodedUrl).build().getQueryParams();
+      return queryParams;
     }
 }

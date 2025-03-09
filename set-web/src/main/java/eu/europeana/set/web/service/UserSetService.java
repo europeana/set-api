@@ -18,6 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.exception.SearchApiClientException;
+import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -277,5 +278,8 @@ public interface UserSetService {
   void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
 
   WebResource generateDepiction(UserSet userSet) throws SearchApiClientException;
+
+  SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet)
+      throws ParamValidationException, RequestBodyValidationException;
 
 }

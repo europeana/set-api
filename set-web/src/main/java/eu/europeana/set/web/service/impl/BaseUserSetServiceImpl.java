@@ -795,37 +795,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throws ParamValidationException, RequestBodyValidationException {
 
     if (webUserSet.isOpenSet()) {
-      String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
-      StringBuilder queryUrl =
-          new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
-      if (!searchUrl.equals(queryUrl.toString())) {
-        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-                " the access to api endpoint is not allowed: " + queryUrl});
-      }
-
-      String apiKey = getConfiguration().getSearchApiKey();
-      SearchApiResponse apiResult;
-      try {
-        queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
-        // the items are not required for validation, hence pageSize =0
-        // form the minimal post body
-        SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet,
-            getConfiguration().getItemDataEndpoint(), null, null, 0, 0, null);
-        String jsonBody = serializeSearchApiRequest(searchApiRequest);
-
-        apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);
-      } catch (SearchApiClientException e) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-                "an error occured when calling " + webUserSet.getIsDefinedBy()},
-            e);
-      } catch (IOException e) {
-        throw new RequestBodyValidationException(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID,
-            null, e);
-      }
+      SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet);
       if (apiResult.getTotal() <= 0) {
         throw new RequestBodyValidationException(
             UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
@@ -833,6 +803,42 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
                 "no items returned when calling " + webUserSet.getIsDefinedBy()});
       }
     }
+  }
+
+  @Override
+  public SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet)
+      throws ParamValidationException, RequestBodyValidationException {
+    String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
+    StringBuilder queryUrl =
+        new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
+    if (!searchUrl.equals(queryUrl.toString())) {
+      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] {WebUserSetModelFields.IS_DEFINED_BY,
+              " the access to api endpoint is not allowed: " + queryUrl});
+    }
+
+    String apiKey = getConfiguration().getSearchApiKey();
+    try {
+      queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+      // the items are not required for validation, hence pageSize =0
+      // form the minimal post body
+      SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet,
+          getConfiguration().getItemDataEndpoint(), null, null, 0, 0, null);
+      String jsonBody = serializeSearchApiRequest(searchApiRequest);
+
+      return getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);
+    } catch (SearchApiClientException e) {
+      throw new RequestBodyValidationException(
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] {WebUserSetModelFields.IS_DEFINED_BY,
+              "an error occured when calling " + webUserSet.getIsDefinedBy()},
+          e);
+    } catch (IOException e) {
+      throw new RequestBodyValidationException(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID,
+          null, e);
+    }
+   
   }
 
 

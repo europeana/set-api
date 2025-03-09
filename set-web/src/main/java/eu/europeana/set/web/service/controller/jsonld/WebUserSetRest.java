@@ -46,6 +46,8 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.SearchApiRequest;
+import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
@@ -204,6 +206,10 @@ public class WebUserSetRest extends BaseRest {
     // if the Set is disabled respond with HTTP 410
     try {
       UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
+      if(userSet.isOpenSet()) {
+        SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(userSet);
+        userSet.setTotal(apiResponse.getTotal());
+      }
       return buildResponseEntity(userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
     } catch (IOException e) {
       throw new InternalServerException(e);

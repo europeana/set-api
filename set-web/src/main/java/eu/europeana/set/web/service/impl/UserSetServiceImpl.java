@@ -619,9 +619,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
         int total = apiResult.getTotal();
         if (!userSet.isOpenSet()) {
-          // dereferenciation of closed sets is limited to 100
-          // use the count of item ids
-          // TODO: SG consider improving
+          //for closed sets, total is the total in set
           total = userSet.getItems().size();
         }
         List<String> sortedItemDescriptions =
@@ -803,8 +801,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           items.add(id);
         }
       }
+    
+      
       // Apply META Profile for Sets
       applyProfile(userSet, SetResourceProfile.META);
+      //TODO: SG: should HIDE or retrieve the total for open sets?
+      if(userSet.isOpenSet()) {
+        userSet.setTotal(-1);
+      }
     }
     resPage.setItems(items);
     resPage.setTotalInPage(items.size());
@@ -1070,11 +1074,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         setSerializedItemIds(userSet);
         break;
       case META:
-        // for the open sets with minimal profile we set the value to -1
-        // so that the total will not be serialized
-        if (userSet.isOpenSet()) {
-          userSet.setTotal(-1);
-        }
         userSet.setItems(null);
         break;
       default:
@@ -1176,11 +1175,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // presented
     switch (profile) {
       case META:
-        // for the open sets with minimal profile we set the value to -1
-        // so that the total will not be serialized
-        if (userSet.isOpenSet()) {
-          userSet.setTotal(-1);
-        }
         userSet.setItems(null);
         break;
       default:
