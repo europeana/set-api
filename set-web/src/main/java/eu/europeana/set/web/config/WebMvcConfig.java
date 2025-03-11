@@ -80,6 +80,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
             VARY, PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
     
+    //search items in set
+   registry.addMapping("/set/*/search").allowedOrigins("*").allowedMethods("GET")
+       .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
+           ACCESS_CONTROL_ALLOW_HEADERS, ALLOW, ETAG,
+           VARY, PREFERENCE_APPLIED)
+       .allowCredentials(false).maxAge(600L); // in seconds
+    
     // publish/unpublish
     registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
