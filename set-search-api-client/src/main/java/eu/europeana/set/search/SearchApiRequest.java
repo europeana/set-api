@@ -1,5 +1,6 @@
 package eu.europeana.set.search;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -7,11 +8,12 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class SearchApiRequest {
 
     private String query;
-    private String[] qf;
+    private List<String> qf;
+    private List<String> reusability;
     private int start = 1;
     private int rows ;
-    private String[] sort;
-    private String[] profile;
+    private List<String> sort;
+    private List<String> profile;
 
 
     public String getQuery() {
@@ -22,11 +24,11 @@ public class SearchApiRequest {
         this.query = query;
     }
 
-    public String[] getQf() {
+    public List<String> getQf() {
         return qf;
     }
 
-    public void setQf(String[] qf) {
+    public void setQf(List<String> qf) {
         this.qf = qf;
     }
 
@@ -38,11 +40,11 @@ public class SearchApiRequest {
         this.rows = rows;
     }
 
-    public String[] getSort() {
+    public List<String> getSort() {
         return sort;
     }
 
-    public void setSort(String[] sort) {
+    public void setSort(List<String> sort) {
         this.sort = sort;
     }
 
@@ -54,11 +56,19 @@ public class SearchApiRequest {
         this.start = start;
     }
 
-    public String[] getProfile() {
+    public List<String> getProfile() {
       return profile;
     }
 
-    public void setProfile(String[] profile) {
+    public void setProfile(List<String> profile) {
       this.profile = profile;
+    }
+
+    public List<String> getReusability() {
+      return reusability;
+    }
+
+    public void setReusability(List<String> reusability) {
+      this.reusability = reusability;
     }
 }

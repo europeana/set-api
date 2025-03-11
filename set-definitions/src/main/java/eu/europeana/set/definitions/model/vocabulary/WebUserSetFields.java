@@ -88,5 +88,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String PROJECT_EUROPEANA_BASE_URL      = "https://pro.europeana.eu/project/";
     public static final String ENTITY_URI_BASE      = "/base";
 
+    //search API params
+    public static final String REQUEST_PARAM_QF      = "qf";
+    public static final String REQUEST_PARAM_REUSABILITY = "reusability";
+    
     WebUserSetFields() {}
 }

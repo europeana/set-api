@@ -25,6 +25,8 @@ import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
+import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
@@ -237,6 +239,64 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
+  @Test
+  public void getOpenUserSetWithFilters_firstPage() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_OPEN_WITH_FILTERS, regularUserToken);
+
+    // get the identifier
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE, ""+WebUserSetFields.DEFAULT_PAGE)
+                .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+            .andReturn().getResponse();
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    //verify results
+    String result = response.getContentAsString();
+    assertNotNull(result);
+    //verify total in page
+    assertEquals("10", getvalueOfkey(result, "total"));
+    //total in set and total in page
+    assertEquals(2, noOfOccurance(result, "total"));
+    
+  }
+
+  @Test
+  public void getOpenUserSetWithFilters_metadata() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_OPEN_WITH_FILTERS, regularUserToken);
+
+    // get the identifier
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+                .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
+                    SetPageProfile.ITEMS_META.getProfileParamValue())
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+            .andReturn().getResponse();
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    //verify results
+    String result = response.getContentAsString();
+    assertNotNull(result);
+    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, "type"));
+    assertEquals(VisibilityTypes.PUBLIC.getJsonValue(), getvalueOfkey(result, "visibility"));
+    //verify that total is set
+    assertTrue(1 <  Integer.valueOf(getvalueOfkey(result, "total")));
+    //total in set and total in page
+    assertTrue(getvalueOfkey(result, "title").contains("\"en\""));
+    assertTrue(getvalueOfkey(result, "description").contains("\"en\""));
+    assertEquals(1, noOfOccurance(result, "total"));
+    
+    
+  }
+
+  
   // this test is to verify item search for large queries using POST Search API
   @Test
   public void getOpenUserSetLargeQuery_ItemDescriptions_DefaultPageSize() throws Exception {
