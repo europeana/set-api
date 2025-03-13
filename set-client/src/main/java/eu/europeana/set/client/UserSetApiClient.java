@@ -1,6 +1,8 @@
 package eu.europeana.set.client;
 
 import java.util.List;
+
+import eu.europeana.auth.AuthenticationHandler;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
@@ -20,8 +22,16 @@ public class UserSetApiClient extends BaseUserSetApi {
     private final WebUserSetClient webUserSetClient;
     private final SearchUserSetClient searchUserSetClient;
 
-    public UserSetApiClient(ClientConfiguration configuration) throws SetApiClientException {
+    public UserSetApiClient(ClientConfiguration configuration) 
+            throws SetApiClientException {
         super(configuration);
+        this.webUserSetClient = new WebUserSetClient();
+        this.searchUserSetClient = new SearchUserSetClient();
+    }
+
+    public UserSetApiClient(String serviceUri, AuthenticationHandler auth) 
+            throws SetApiClientException {
+        super(serviceUri, auth);
         this.webUserSetClient = new WebUserSetClient();
         this.searchUserSetClient = new SearchUserSetClient();
     }

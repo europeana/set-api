@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.auth.AuthenticationHandler;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;
@@ -14,8 +15,8 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
  */
 public class UserSetApiConnection extends BaseApiConnection {
 
-  public UserSetApiConnection(String setServiceUri, String apiKey, String regularUserAuthorizationValue) {
-   super(setServiceUri, apiKey, regularUserAuthorizationValue);
+  public UserSetApiConnection(String setServiceUri, AuthenticationHandler auth) {
+      super(setServiceUri, auth);
   }
 
 
@@ -28,16 +29,18 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return response entity that comprises response body, headers and status code.
    * @throws IOException
    */
-  public UserSet createUserSet(String set, String profile) throws SetApiClientException {
-    StringBuilder urlBuilder = getUserSetServiceUri();
-    if (StringUtils.isNotEmpty(profile)) {
-      urlBuilder.append(WebUserSetFields.PAR_CHAR);
-      urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
-          .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
-    }
-    String resUrl = urlBuilder.toString();
-    LOGGER.trace("Ivoking create set: {} ", resUrl);
-    return getCreateUserSetResponse(resUrl, set, regularUserAuthorizationValue);
+  public UserSet createUserSet(String set, String profile) 
+         throws SetApiClientException {
+      StringBuilder urlBuilder = getUserSetServiceUri();
+      if (StringUtils.isNotEmpty(profile)) {
+          urlBuilder.append(WebUserSetFields.PAR_CHAR)
+                    .append(CommonApiConstants.QUERY_PARAM_PROFILE)
+                    .append(WebUserSetFields.EQUALS_PARAMETER)
+                    .append(profile);
+      }
+      String resUrl = urlBuilder.toString();
+      LOGGER.trace("Ivoking create set: {} ", resUrl);
+      return getCreateUserSetResponse(resUrl, set);
   }
 
   /**
@@ -49,9 +52,10 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @throws IOException
    * @return userset
    */
-  public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
-    StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile));
-    return getUserSetResponse(urlBuilder.toString(),  regularUserAuthorizationValue);
+  public UserSet getUserSet(String identifier, String profile) 
+         throws SetApiClientException {
+      StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile));
+      return getUserSetResponse(urlBuilder.toString());
   }
 
   /**
@@ -73,7 +77,7 @@ public class UserSetApiConnection extends BaseApiConnection {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
-    return getUpdateUserSetResponse(urlBuilder.toString(), updateUserSet, regularUserAuthorizationValue);
+    return getUpdateUserSetResponse(urlBuilder.toString(), updateUserSet);
   }
 
   /**
@@ -87,7 +91,7 @@ public class UserSetApiConnection extends BaseApiConnection {
   public String deleteUserSet(String identifier) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
     urlBuilder.append(identifier);
-    return deleteURL(urlBuilder.toString(), regularUserAuthorizationValue);
+    return deleteURL(urlBuilder.toString());
   }
 
   /**
@@ -105,7 +109,7 @@ public class UserSetApiConnection extends BaseApiConnection {
                                                   String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri().append(
             buildPaginatedGetUrls(identifier + WebUserSetFields.JSON_LD_REST, sort, sortOrder, page, pageSize, profile));
-    return getUserSetPaginatedResponse(urlBuilder.toString(),  regularUserAuthorizationValue, profile);
+    return getUserSetPaginatedResponse(urlBuilder.toString(), profile);
 
   }
   /**
@@ -122,11 +126,13 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @return
    * @throws IOException
    */
-  public List<? extends UserSet> searchUserSet(String query, String[] qf, String sort, String page,
-                                               String pageSize, String facet, int facetLimit,
-                                               String profile) throws SetApiClientException {
+  public List<? extends UserSet> searchUserSet(String query, String[] qf
+                                             , String sort
+                                             , String page, String pageSize
+                                             , String facet, int facetLimit
+                                             , String profile) throws SetApiClientException {
 
     StringBuilder urlBuilder = getUserSetServiceUri().append(buildSearchUrl(query, qf, sort, page, pageSize, facet, facetLimit, profile));
-    return getSearchUserSetResponse(urlBuilder.toString(), regularUserAuthorizationValue, profile);
+    return getSearchUserSetResponse(urlBuilder.toString(), profile);
   }
 }
