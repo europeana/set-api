@@ -6,6 +6,6 @@
   "description": {
     "en": "From tennis ensemble to golf uniforms, browse Europeana Fashion wide collection of historical sportswear and activewear designs!"
   },
-  "isDefinedBy": "https://api.europeana.eu/record/v2/search.json?query=fishing+boat&qf=TYPE:\"IMAGE\"&reusability=open",
+  "isDefinedBy": "https://api.europeana.eu/record/v2/search.json?query=fishing+boat&qf=TYPE:\"IMAGE\"&reusability=open&wskey=apidemo",
   "visibility": "public"
 }  

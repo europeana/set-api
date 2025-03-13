@@ -269,11 +269,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return apiUrl;
   }
 
-  protected String removeParam(final String queryParam, String queryParams) {
+  protected String removeParam(final String queryParam, String queryString) {
     String tmp;
     // avoid name conflicts search "queryParam="
-    int startPos = queryParams.indexOf(queryParam + "=");
-    int startEndPos = queryParams.indexOf('&', startPos + 1);
+    int startPos = queryString.indexOf(queryParam + "=");
+    int startEndPos = queryString.indexOf('&', startPos + 1);
 
     if (startPos >= 0) {
       // make sure to remove the "&" if not the first param
@@ -281,14 +281,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         startPos--;
       }
 
-      tmp = queryParams.substring(0, startPos);
+      tmp = queryString.substring(0, startPos);
 
       if (startEndPos > 0) {
         // tmp += queryParams.substring(startEndPos);
-        tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
+        tmp = (new StringBuilder(tmp)).append(queryString.substring(startEndPos)).toString();
       }
     } else {
-      tmp = queryParams;
+      tmp = queryString;
     }
     return tmp;
   }
@@ -632,7 +632,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
-    validateIsDefinedBy(webUserSet);
+    validateAndSanitizeIsDefinedBy(webUserSet);
     validateEntityBestItemsSet(webUserSet);
     validateItems(webUserSet.getItems());
   }
@@ -763,15 +763,19 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * https://api.europeana.eu/record/search.json?) to point to the Search API. We make a GET request
    * upon creation to see if the request total items returns more then 0 and success is true
    * (meaning is valid).
+   * The URL from isDefinedBy is sanitized to remove API Keys if included
    * 
-   * @param webUserSet
-   * @throws ParamValidationException
-   * @throws RequestBodyValidationException
+   * @param webUserSet the user set
+   * @throws ParamValidationException if invalid isDefinedBy url
+   * @throws RequestBodyValidationException if invocation of isDefinedBy doesn't return results
    */
-  void validateIsDefinedBy(UserSet webUserSet)
+  void validateAndSanitizeIsDefinedBy(UserSet webUserSet)
       throws ParamValidationException, RequestBodyValidationException {
 
     if (webUserSet.isOpenSet()) {
+      //remove the apikey provided by the user from the isDefinedBy field
+      String isDefinedByWithoutApikey = removeParam(CommonApiConstants.PARAM_WSKEY, webUserSet.getIsDefinedBy());
+      webUserSet.setIsDefinedBy(isDefinedByWithoutApikey);
       SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet);
       if (apiResult.getTotal() <= 0) {
         throw new RequestBodyValidationException(
