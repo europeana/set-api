@@ -291,6 +291,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     //total in set and total in page
     assertTrue(getvalueOfkey(result, "title").contains("\"en\""));
     assertTrue(getvalueOfkey(result, "description").contains("\"en\""));
+    assertFalse(result.contains(CommonApiConstants.PARAM_WSKEY));
     assertEquals(1, noOfOccurance(result, "total"));
     
     
