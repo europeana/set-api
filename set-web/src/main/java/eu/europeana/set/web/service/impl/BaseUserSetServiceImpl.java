@@ -653,7 +653,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
-    validateIsDefinedBy(webUserSet);
+    validateAndSanitizeIsDefinedBy(webUserSet);
     validateEntityBestItemsSet(webUserSet);
     validateItems(webUserSet.getItems());
   }
@@ -786,12 +786,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * https://api.europeana.eu/record/search.json?) to point to the Search API. We make a GET request
    * upon creation to see if the request total items returns more then 0 and success is true
    * (meaning is valid).
+   * The URL from isDefinedBy is sanitized to remove API Keys if included
    * 
-   * @param webUserSet
-   * @throws ParamValidationException
-   * @throws RequestBodyValidationException
+   * @param webUserSet the user set
+   * @throws ParamValidationException if invalid isDefinedBy url
+   * @throws RequestBodyValidationException if invocation of isDefinedBy doesn't return results
    */
-  void validateIsDefinedBy(UserSet webUserSet)
+  void validateAndSanitizeIsDefinedBy(UserSet webUserSet)
       throws ParamValidationException, RequestBodyValidationException {
 
     if (webUserSet.isOpenSet()) {
