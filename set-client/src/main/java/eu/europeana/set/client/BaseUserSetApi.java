@@ -1,7 +1,7 @@
 package eu.europeana.set.client;
 
-import eu.europeana.auth.AuthenticationBuilder;
-import eu.europeana.auth.AuthenticationHandler;
+import eu.europeana.api.commons.auth.AuthenticationBuilder;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.connection.UserSetApiConnection;
 import eu.europeana.set.client.exception.SetApiClientException;
@@ -19,7 +19,7 @@ public class BaseUserSetApi {
     /**
      * Creates BaseUserSetApi instance with client configuration
      * This allows user to insert property file
-     * @param configuration
+     * @param config
      * @throws SetApiClientException
      */
     protected BaseUserSetApi(ClientConfiguration config) 

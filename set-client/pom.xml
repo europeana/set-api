@@ -16,6 +16,7 @@
 	<properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<log4j.version>2.24.3</log4j.version>
 	</properties>
 
 	<dependencies>
@@ -24,11 +25,27 @@
 			<artifactId>set-definitions</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-common</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-clientutils</artifactId>
+			<version>0.4.5-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -37,15 +54,16 @@
 			<version>${version.jettison}</version>
 		</dependency>
 
-<!--	To fix : "Provider for jakarta.ws.rs.ext.RuntimeDelegate cannot be found error"
-        This issue is tagged with version 2.30 but it doesn't look like it was ever fixed in newer versions as well-->
-		<!--
 		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-common</artifactId>
-			<version>3.1.2</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
 		</dependency>
-		-->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 
 		<!-- test dependencies --> 
 		<dependency>

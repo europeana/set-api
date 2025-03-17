@@ -2,12 +2,16 @@
 # for testing within the development environment a local URI can be used e.g. localhost:8080/set-web/sets  
 set.service.uri = http://localhost:8080/set
 
-# the user key used to access Europeana API. For more information see http://pro.europeana.eu/api 
-set.api.key =
 
-#the URL for the endpoint of OAuth service  
-oauth.service.uri=
+## Authentication endpoints ( @See eu.europeana.api.commons.auth#AuthenticationConfig )
 
-#The parameters sent for retrieving a new ticket   
-oauth.token.request.params=username=
+## url and params for generating a Long Lasting token that refresh itself.
+token_endpoint=
+grant_params=
+
+# Apikey to access the client. Generates the Apikey Based Authentication.
+apikey=
+
+# for generating static token for the client to use. Only pass the token value (without Bearer)
+access_token=
 

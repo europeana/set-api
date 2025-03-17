@@ -15,6 +15,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons.http.HttpConnection;
+import eu.europeana.api.commons.http.HttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
@@ -27,14 +31,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
-import eu.europeana.auth.AuthenticationHandler;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.json.AgentDeserializer;
 import eu.europeana.set.client.json.UserSetDeserializer;
 import eu.europeana.set.client.model.result.AbstractUserSetApiResponse;
 import eu.europeana.set.client.model.result.RecordPreview;
-import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.common.http.HttpResponseHandler;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.impl.BaseUserSet;
@@ -57,8 +58,7 @@ public class BaseApiConnection {
     /**
      * BaseApiConnection constructor
      * @param setServiceUri set api service url
-     * @param apiKey apikey
-     * @param regularUserAuthorizationValue auth value
+     * @param auth Authentication Handler for the client
      */
     public BaseApiConnection(String setServiceUri, AuthenticationHandler auth) {
         this.setServiceUri = setServiceUri;
@@ -91,7 +91,6 @@ public class BaseApiConnection {
      * Fetches the get user set response (GET request)
      *
      * @param url
-     * @param authorizationHeaderValue
      * @return
      * @throws SetApiClientException
      */
@@ -108,7 +107,6 @@ public class BaseApiConnection {
      * Fetches the create user set response (GET request)
      *
      * @param url
-     * @param authorizationHeaderValue
      * @return
      * @throws SetApiClientException
      */
@@ -128,7 +126,6 @@ public class BaseApiConnection {
      *
      * @param url                      url to be executed
      * @param requestBody              request body for POST and PUT request
-     * @param authorizationHeaderValue authorisation value
      * @return
      * @throws SetApiClientException
      */
@@ -193,7 +190,6 @@ public class BaseApiConnection {
      * META - empty page (no items) ,  ITEMS_META - only set descriptions, not item descriptions , ITEMS - items set as set ids
      * ITEMS is the default profile value
      * @param url
-     * @param authorizationHeaderValue
      * @return
      * @throws SetApiClientException
      */
@@ -223,7 +219,6 @@ public class BaseApiConnection {
      * Fetches the user Set search api response
      *
      * @param url
-     * @param authorizationHeaderValue
      * @return
      * @throws SetApiClientException
      */

@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import eu.europeana.api.commons.auth.service.GrantConstants;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,10 +140,10 @@ public class BaseUserSetClientTest {
   protected Properties loadClientProperties(int port) {
     Properties properties = new Properties();
     properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, "http://localhost:" + port + "/set");
-    properties.put(ClientConfiguration.PROP_SET_API_KEY, "test");
-    properties.put(ClientConfiguration.PROP_OAUTH_REGULAR_USER_TOKEN, regularUserToken);
-    properties.put(ClientConfiguration.PROP_OAUTH_SERVICE_URI, oauthServiceUri);
-    properties.put(ClientConfiguration.PROP_OAUTH_REQUEST_PARAMS, oauthRequestParams);
+    properties.put(ClientConfiguration.CONFIG_APIKEY, "test");
+    properties.put(GrantConstants.access_token, regularUserToken);
+    properties.put(ClientConfiguration.CONFIG_TOKEN_ENDPOINT, oauthServiceUri);
+    properties.put(ClientConfiguration.CONFIG_GRANT_PARAMS, oauthRequestParams);
 
     return properties;
   }
