@@ -124,50 +124,6 @@
 
 	</dependencies>
 
-
-	<build>
-		<!-- set fixed name for easy deployment -->
-		<finalName>${project.artifactId}</finalName>
-
-		<plugins>
-			<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<!--
-				<configuration>
-					<reportsDirectory>${sonar.coverage.jacoco.xmlReportPaths}</reportsDirectory>
-				</configuration>
-				-->
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<!--
-				<configuration>
-					<reportsDirectory>${sonar.coverage.jacoco.xmlReportPaths}</reportsDirectory>
-				</configuration>
-				-->
-			</plugin>
-
-			<!--  sonar coverage report aggregation -->
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>report</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>report-aggregate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-		</plugins>
-	</build>
-
 	<profiles>
 		<profile>
 			<id>coverage</id>
@@ -199,6 +155,31 @@
 							</execution>
 						</executions>
 					</plugin>
+					
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<version>${version.maven-failsafe-plugin}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
+								</goals>
+							</execution>
+						</executions>
+
+						<!-- useModulePath = false Fixes Integration test not
+						finding beans. May
+							be
+					removed with 3.0.0-M6 is available
+                    See: https://stackoverflow.com/a/65806777/14530159 -->
+						<configuration>
+							<useModulePath>false</useModulePath>
+						</configuration>
+
+					</plugin>
+
 				</plugins>
 			</build>
 		</profile>
