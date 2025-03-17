@@ -34,25 +34,31 @@ public class WebMvcConfig implements WebMvcConfigurer {
    */
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/v3/api-docs").allowedOrigins("*").allowedMethods("GET")
+    final String get = "GET";
+    final String post = "POST";
+    final String delete = "DELETE";
+    final String put = "PUT";
+    
+    
+    registry.addMapping("/v3/api-docs").allowedOrigins("*").allowedMethods(get)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS)
         .allowCredentials(false).maxAge(600L); // in seconds
 
-    registry.addMapping("/v3/api-docs/**").allowedOrigins("*").allowedMethods("GET")
+    registry.addMapping("/v3/api-docs/**").allowedOrigins("*").allowedMethods(get)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS)
         .allowCredentials(false).maxAge(600L); // in seconds
 
 
-    registry.addMapping("/actuator/**").allowedOrigins("*").allowedMethods("GET")
+    registry.addMapping("/actuator/**").allowedOrigins("*").allowedMethods(get)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // create method
     // delete user's sets by admin, delete by user's sets by
-    registry.addMapping("/set/").allowedOrigins("*").allowedMethods("POST", "DELETE")
+    registry.addMapping("/set/").allowedOrigins("*").allowedMethods(post, delete)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_HEADERS,
             ACCESS_CONTROL_ALLOW_ORIGIN, ALLOW, LINK,
             ETAG, VARY, CACHE_CONTROL,
@@ -60,35 +66,35 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // get, delete, update
-    registry.addMapping("/set/*").allowedOrigins("*").allowedMethods("GET", "PUT", "DELETE")
+    registry.addMapping("/set/*").allowedOrigins("*").allowedMethods(get, put, delete)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS, ALLOW, LINK,
             ETAG, VARY, PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
 
     // lock/unlock
-    registry.addMapping("/set/admin/lock").allowedOrigins("*").allowedMethods("POST", "DELETE")
+    registry.addMapping("/set/admin/lock").allowedOrigins("*").allowedMethods(post, delete)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS, ALLOW)
         .allowCredentials(false).maxAge(MAX_AGE); // in seconds
 
 
      // insert/remove multiple items
-    registry.addMapping("/set/*/items").allowedOrigins("*").allowedMethods("PUT", "DELETE")
+    registry.addMapping("/set/*/items").allowedOrigins("*").allowedMethods(put, delete)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS, ALLOW, ETAG,
             VARY, PREFERENCE_APPLIED)
         .allowCredentials(false).maxAge(600L); // in seconds
     
     //search items in set
-   registry.addMapping("/set/*/search").allowedOrigins("*").allowedMethods("GET")
+   registry.addMapping("/set/*/search").allowedOrigins("*").allowedMethods(get)
        .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
            ACCESS_CONTROL_ALLOW_HEADERS, ALLOW, ETAG,
            VARY, PREFERENCE_APPLIED)
        .allowCredentials(false).maxAge(600L); // in seconds
     
     // publish/unpublish
-    registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods("PUT")
+    registry.addMapping("/set/*/*").allowedOrigins("*").allowedMethods(put)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS, ALLOW, ETAG,
             VARY, PREFERENCE_APPLIED)
@@ -96,7 +102,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     
     // add,remove,exists item in set
     registry.addMapping("/set/*/*/*").allowedOrigins("*")
-        .allowedMethods("GET", "HEAD", "PUT", "DELETE")
+        .allowedMethods(get, "HEAD", put, delete)
         .exposedHeaders(ACCESS_CONTROL_ALLOW_ORIGIN,
             ACCESS_CONTROL_ALLOW_HEADERS, ALLOW,
             PREFERENCE_APPLIED)

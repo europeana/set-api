@@ -14,16 +14,16 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
 @Entity("userset")
-@Indexes({@Index(fields = {@Field(WebUserSetFields.IDENTIFIER)},options = @IndexOptions(unique = true)),
-    @Index(fields = {@Field(WebUserSetFields.CREATOR)}),
-    @Index(fields = {@Field(WebUserSetFields.TYPE)}),
-    @Index(fields = {@Field(WebUserSetFields.COLLECTION_TYPE)}),
-    @Index(fields = {@Field(WebUserSetFields.VISIBILITY)}),
-    @Index(fields = {@Field(WebUserSetFields.CONTRIBUTOR)}),
-    @Index(fields = {@Field(WebUserSetFields.SUBJECT)}),
-    @Index(fields = {@Field(WebUserSetFields.ITEMS)}),
+@Indexes({@Index(fields = {@Field(WebUserSetModelFields.IDENTIFIER)},options = @IndexOptions(unique = true)),
+    @Index(fields = {@Field(WebUserSetModelFields.CREATOR)}),
+    @Index(fields = {@Field(WebUserSetModelFields.TYPE)}),
+    @Index(fields = {@Field(WebUserSetModelFields.COLLECTION_TYPE)}),
+    @Index(fields = {@Field(WebUserSetModelFields.VISIBILITY)}),
+    @Index(fields = {@Field(WebUserSetModelFields.CONTRIBUTOR)}),
+    @Index(fields = {@Field(WebUserSetModelFields.SUBJECT)}),
+    @Index(fields = {@Field(WebUserSetModelFields.ITEMS)}),
     @Index(fields = {@Field(WebUserSetModelFields.MODIFIED)}),
-    @Index(fields = {@Field(WebUserSetFields.PROVIDER)}),
+    @Index(fields = {@Field(WebUserSetModelFields.PROVIDER)}),
     @Index(options = @IndexOptions(name = "text", disableValidation=true), fields = {
 			@Field(value = WebUserSetFields.TITLE+".en", type = IndexType.TEXT),
 			@Field(value = WebUserSetFields.TITLE+".nl", type = IndexType.TEXT),

@@ -264,17 +264,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     boolean itemsRemoved = false;
     // check if it is a pinned item, decrease the counter by 1 for entity sets
     if (existingUserSet.isEntityBestItemsSet()) {
-      for (String item : fullUriItems) {
-        int currentPosition = existingUserSet.getItems().indexOf(item);
-        if (currentPosition > -1) {
-          if (currentPosition < existingUserSet.getPinned()) {
-            // decrease counter when removing pinned items
-            existingUserSet.descreasePinned(1);
-          }
-          existingUserSet.getItems().remove(item);
-          itemsRemoved = true;
-        }
-      }
+      itemsRemoved = removeItemsForEntityBestItemsSet(existingUserSet, fullUriItems);
     } else {
       // remove
       itemsRemoved = existingUserSet.getItems().removeAll(fullUriItems);
@@ -290,6 +280,23 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     return updatedUserSet;
+  }
+
+  private boolean removeItemsForEntityBestItemsSet(UserSet existingUserSet,
+      List<String> fullUriItems) {
+    boolean itemsRemoved = false;
+    for (String item : fullUriItems) {
+      int currentPosition = existingUserSet.getItems().indexOf(item);
+      if (currentPosition > -1) {
+        if (currentPosition < existingUserSet.getPinned()) {
+          // decrease counter when removing pinned items
+          existingUserSet.descreasePinned(1);
+        }
+        existingUserSet.getItems().remove(item);
+        itemsRemoved = true;
+      }
+    }
+    return itemsRemoved;
   }
 
   public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
