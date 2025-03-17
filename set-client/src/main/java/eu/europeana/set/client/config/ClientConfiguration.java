@@ -3,7 +3,7 @@ package eu.europeana.set.client.config;
 import java.io.IOException;
 import java.util.Properties;
 
-import eu.europeana.api.commons.auth.AuthenticationConfig;
+import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

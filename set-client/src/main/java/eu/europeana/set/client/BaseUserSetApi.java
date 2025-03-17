@@ -1,7 +1,7 @@
 package eu.europeana.set.client;
 
-import eu.europeana.api.commons.auth.AuthenticationBuilder;
-import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.connection.UserSetApiConnection;
 import eu.europeana.set.client.exception.SetApiClientException;

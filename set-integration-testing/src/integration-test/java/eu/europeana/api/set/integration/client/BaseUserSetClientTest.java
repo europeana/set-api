@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import eu.europeana.api.commons.auth.service.GrantConstants;
+import eu.europeana.api.commons_sb3.auth.service.GrantConstants;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

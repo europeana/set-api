@@ -26,10 +26,11 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 
+        <!--Client is using api-commons-sb3 -->
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-clientutils</artifactId>
-			<version>0.4.5-SNAPSHOT</version>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>commons-sb3-clientutils</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
