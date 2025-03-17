@@ -9,7 +9,6 @@ import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexes;
 import dev.morphia.utils.IndexType;
 import eu.europeana.set.definitions.model.impl.BaseUserSet;
-import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 
