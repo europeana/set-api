@@ -38,9 +38,20 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- add all modules as dependeny for coverage computation -->
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-mongo</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-definitions</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -53,6 +64,8 @@
 			<artifactId>set-client</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -144,10 +157,10 @@
 				<executions>
 					<execution>
 						<id>report</id>
+						<phase>verify</phase>
 						<goals>
 							<goal>report-aggregate</goal>
 						</goals>
-						<phase>verify</phase>
 					</execution>
 				</executions>
 			</plugin>
@@ -167,10 +180,22 @@
 						<executions>
 							<execution>
 								<id>report</id>
+								<phase>verify</phase>
 								<goals>
 									<goal>report-aggregate</goal>
 								</goals>
-								<phase>verify</phase>
+								<!-- include the reports from all modules -->
+								<configuration>
+									<dataFileIncludes>
+										<dataFileInclude>**/jacoco.exec</dataFileInclude>
+										<!-- should switch to xml reports instead of exec
+										<dataFileInclude>**/jacoco.xml</dataFileInclude>
+										-->
+									</dataFileIncludes>
+									<outputDirectory>
+										${project.reporting.outputDirectory}/jacoco-aggregate
+									</outputDirectory>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -180,3 +205,4 @@
 	</profiles>
 
 </project>
+
