@@ -192,4 +192,25 @@ public class UserSetUtils {
     return '/'+ parts[collectionIndex] + '/' + parts[itemIndex];  
   }
 
+  /**
+   * Build the json string used to quickly verify recordId in json string (e.g "id": "\/collection_id\/item_id")
+   * @param The local record id (e.g "/collection_id/item_id")
+   * @return the json string for representing the record id in json string representations 
+   */
+  public static String buildRecordIdJsonString(String localId, boolean escapeSlashes, boolean includeSpace) {
+    // escape "/" to "\/" to match json string
+    StringBuilder builder = new StringBuilder("\"id\":");
+    if(includeSpace) {
+      builder.append(' ');
+    }
+    builder.append('"');
+    if(escapeSlashes) {
+      builder.append(StringUtils.replace(localId, "/", "\\/"));
+    } else {
+      builder.append(localId);
+    }
+    builder.append('"');
+    return builder.toString();
+  }
+
 }

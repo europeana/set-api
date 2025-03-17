@@ -65,29 +65,7 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see eu.europeana.UserSet.web.service.UserSetService#storeUserSet(eu.
-   * europeana.UserSet.definitions.model.UserSet)
-   */
-  @Override
-  public UserSet storeUserSet(UserSet newUserSet, Authentication authentication)
-      throws HttpException {
-    setDefaults(newUserSet, authentication);
-    if (newUserSet.isEntityBestItemsSet()) {
-      verifyPermissionToUpdate(newUserSet, authentication, true);
-    }
 
-    // new sets are not yet published
-    validateWebUserSet(newUserSet, false);
-
-    // store in mongo database
-    updateTotal(newUserSet);
-    UserSet updatedUserSet = getMongoPersistence().store(newUserSet);
-    getUserSetUtils().updatePagination(updatedUserSet, getConfiguration());
-    return updatedUserSet;
-  }
 
   @Override
   public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
@@ -96,7 +74,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
           UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
     }
-    getUserSetUtils().updatePagination(userSet, getConfiguration());
+    //update total/first/last
+    updatePagination(userSet, getConfiguration());
     return userSet;
   }
 
@@ -249,9 +228,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     existingUserSet.getItems().remove(item);
 
     // update an existing user set
-    UserSet updatedUserSet = writeUserSetToDb(existingUserSet);
+    UserSet updatedUserSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
     // update pagination fields (used only for the response serialization)
-    updatePagination(updatedUserSet, getConfiguration());
+    //moved to serializeUserSet
+    //updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
   }
 
@@ -309,11 +289,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       updateIsShownBy(updatedUserSet, firstItemOld);
 
       // update a user set in db (including modified and total)
-      updatedUserSet = writeUserSetToDb(updatedUserSet);
+      updatedUserSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
     }
 
-    // update pagination fields (used only for the response serialization)
-    updatePagination(updatedUserSet, getConfiguration());
     return updatedUserSet;
   }
 
@@ -340,19 +318,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       validateGallerySize(existingUserSet, 0);
     }
 
-    // UserSet userSet;
-    // //update items
-    // if (WebUserSetModelFields.PINNED_POSITION.equals(position)) {
-    // updateItemsFromPinned(existingUserSet, items);
-    // } else {
-    // updateItemsFromUnpinned(existingUserSet, items, itemsPosition);
-    // }
-
     // update isShownBy
     updateIsShownBy(existingUserSet, firstItemOld);
 
-    UserSet updatedSet = writeUserSetToDb(existingUserSet);
-    updatePagination(updatedSet, getConfiguration());
+    UserSet updatedSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
+    //redundant will be updated during serialization
+    //updatePagination(updatedSet, getConfiguration());
     return updatedSet;
   }
 
@@ -470,6 +441,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           validatePosition(position, existingUserSet.getItems(), existingUserSet.getPinned());
       userSet = insertItem(existingUserSet, newItem, positionInt, false);
     }
+    //redundant will be updated during serialization by applying the profile
     updatePagination(userSet, getConfiguration());
 
     return userSet;
@@ -495,13 +467,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       boolean pinnedItem) {
     UserSet extUserSet = null;
     int finalPosition = (existingUserSet.getItems() == null) ? -1 : positionInt;
-    final boolean insertOrReplace =
+    final boolean insert =
         existingUserSet.getItems() == null || !existingUserSet.getItems().contains(newItem);
-    if (insertOrReplace) {
+    if (insert) {
       // add item && create item list if needed
       addNewItemToList(existingUserSet, finalPosition, newItem);
       updatePinCount(existingUserSet, pinnedItem, -1);
-      extUserSet = writeUserSetToDb(existingUserSet);
+      extUserSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
     } else {
       // replace item
       int oldPosition = existingUserSet.getItems().indexOf(newItem);
@@ -512,7 +484,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       } else {
         replaceItem(existingUserSet, finalPosition, newItem);
         updatePinCount(existingUserSet, pinnedItem, oldPosition);
-        extUserSet = writeUserSetToDb(existingUserSet);
+        extUserSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
       }
     }
 
@@ -801,7 +773,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           items.add(id);
         }
       }
-    
+      //set 
+      updatePagination(userSet, configuration);
       
       // Apply META Profile for Sets
       applyProfile(userSet, SetResourceProfile.META);
@@ -1038,6 +1011,37 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return hasEditorRights(authentication);
   }
 
+  @Override
+  /**
+   * This methods applies Linked Data profile to a user set, preparing the set for serialization
+   * It adds the pagination information and processes the items according to the profile
+   * 
+   * @param userSet The given user set
+   * @param profile Provided Linked Data profile
+   * @return profiled user set value
+   */
+  public void applyProfile(UserSet userSet, SetResourceProfile profile) {
+    //ensure pagination set 
+    if(hasNoPagination(userSet)){
+      //update pagination before reseting items
+      //sets also the base URL
+      updatePagination(userSet, getConfiguration());
+    }
+    
+    // set unnecessary fields to null - the empty fields will not be
+    // presented
+    switch (profile) {
+      // currently only one profile for SetResource
+      // update when needed
+      case META:
+        userSet.setItems(null);
+        break;
+      default:
+        userSet.setItems(null);
+        break;
+    }
+  }
+  
   /**
    * This methods applies Linked Data profile to a user set
    * 
@@ -1045,9 +1049,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @param profile Provided Linked Data profile
    * @return profiled user set value
    */
+  @Override
   public void applyProfile(UserSet userSet, SetPageProfile profile) {
-    // update
-    userSet.setBaseUrl(getConfiguration().getSetDataEndpoint());
+    //ensure pagination set
+    if(hasNoPagination(userSet)){
+      //update pagination before reseting items
+      //sets also the base URL
+      updatePagination(userSet, getConfiguration());
+    }
 
     // check that not more then maximal allowed number of items are
     // presented
@@ -1080,6 +1089,10 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         userSet.setItems(null);
         break;
     }
+  }
+
+  private boolean hasNoPagination(UserSet userSet) {
+    return StringUtils.isEmpty(userSet.getFirst());
   }
 
   /**
@@ -1167,22 +1180,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public void applyProfile(UserSet userSet, SetResourceProfile profile) {
-    // update
-    userSet.setBaseUrl(getConfiguration().getSetDataEndpoint());
-
-    // set unnecessary fields to null - the empty fields will not be
-    // presented
-    switch (profile) {
-      case META:
-        userSet.setItems(null);
-        break;
-      default:
-        // currently only one profile for SetResource
-        // update when needed
-        userSet.setItems(null);
-        break;
+  public UserSet createUserSet(UserSet userSet, Authentication authentication)
+      throws HttpException, IOException {
+    setDefaults(userSet, authentication);
+    if (userSet.isEntityBestItemsSet()) {
+      verifyPermissionToUpdate(userSet, authentication, true);
     }
 
+    // new sets are not yet published
+    validateWebUserSet(userSet, false);
+
+    // store in mongo database
+    UserSet updatedUserSet = getMongoPersistence().create(userSet);
+    updatePagination(updatedUserSet, getConfiguration());
+    return updatedUserSet;
   }
+
 }

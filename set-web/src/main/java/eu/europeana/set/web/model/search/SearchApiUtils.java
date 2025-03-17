@@ -107,7 +107,7 @@ public class SearchApiUtils {
         if (userSet.isOpenSet()) {
           return buildSearchApiPostBodyForOpenSets(userSet, pageNr, pageSize, profile);
         } else {
-          return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageSize, pageNr, profile);
+          return buildSearchApiPostBodyForClosedSets(userSet, itemDataEndpoint, pageNr, pageSize, profile);
         }
     }
 
@@ -137,34 +137,48 @@ public class SearchApiUtils {
     }
 
     /**
-     * This method retrieves item ids from the closed userSet to build SearchApiRequest.
+     * This method builds the body of the post request to search API to retireve the descriptions of the records included in user set 
      * e.g.
      * {query='europeana_id:("/165/https___bibdigital_rjb_csic_es_idviewer_11929_40" OR "/2020903/KKSgb2947_97")',
      * start=1, rows=5, sort=europeana_id desc}
      *
-     * @param userSet
-     * @param pageSize
-     * @return
-     * @throws HttpException
+     * @param userSet the user set
+     * @param itemDataEndpoint the base URL for the item ids
+     * @param pageNr the results page to retrieve
+     * @param pageSize the number of results to retrieve per page
+     * @param profile the profile used for record descriptions
+     
+     * @param pageSize the number of retrieved results
+     * @return the SearchApi request 
      */
-    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, String itemDataEndpoint, int pageSize, int pageNr, String profile) {
-        // use them to build the search query for retrieving item descriptions
-        // europeana_id is in format /collectionId/recordId, this can be easily
-        // extracted from the
-        // full record ID by removing the base URL http://data.europeana.eu/item
-        // e.g. europeana_id:("/08641/1037479000000476635" OR
-        // "/08641/1037479000000476943")
+    SearchApiRequest buildSearchApiPostBodyForClosedSets(UserSet userSet, String itemDataEndpoint, int pageNr, int pageSize, String profile) {
+        final List<String> items = userSet.getItems();
+        return buildSearchApiPostBodyForItemIds(items, itemDataEndpoint, pageNr, pageSize, profile);
+    }
+
+
+    /**
+     * This method builds the body of the post request to the search API for retrieving the item descriptions
+     * @param items list of item ids
+     * @param itemDataEndpoint the base URL for the item ids
+     * @param pageNr the results page to retrieve
+     * @param pageSize the number of results to retrieve per page
+     * @param profile the profile used for record descriptions
+     * @return the search api request
+     */
+    public SearchApiRequest buildSearchApiPostBodyForItemIds(final List<String> items,
+        String itemDataEndpoint, int pageNr, int pageSize, String profile) {
         SearchApiRequest searchApiRequest = new SearchApiRequest();
         String id;
         String fullId;
-        // calculate the index of from and uptill where items for query will be sent
+      // calculate the indices for the start and end of the items page
         Integer start = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
-        Integer till = Math.min((start +  pageSize), userSet.getItems().size()); // should not exceed the size of item list
+      Integer end = Math.min((start +  pageSize), items.size()); // should not exceed the size of item list
 
         StringBuilder query = new StringBuilder(100);
         query.append("europeana_id:(");
-        for (int i = start; i < till; i++) {
-            fullId = userSet.getItems().get(i);
+      for (int i = start; i < end; i++) {
+          fullId = items.get(i);
             if (i != start) {
                 query.append(" OR ");
             }

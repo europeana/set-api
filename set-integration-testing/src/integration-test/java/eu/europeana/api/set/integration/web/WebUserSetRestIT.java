@@ -434,6 +434,40 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
   }
   
   @Test
+  void changeTypeToGallery_itemsLimit() throws Exception {
+    WebUserSetImpl userSet = createTestUserSet(USER_SET_LARGE, regularUserToken);
+    String identifier = userSet.getIdentifier();
+
+    //update type to Collection, to add items over the limit (for Galleries)
+    String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
+    mockMvc
+        .perform(put(BASE_URL + "{identifier}", identifier)
+            .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andReturn().getResponse();
+
+    //insert one item over the limit
+    mockMvc
+        .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
+            .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
+        .getContentAsString();
+
+    //change type to Gallery
+    JSONObject updatedGallery = new JSONObject(updatedRequestJson);
+    updatedGallery.put(WebUserSetModelFields.COLLECTION_TYPE, WebUserSetModelFields.TYPE_GALLERY);
+    String response = mockMvc
+        .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
+            .content(updatedGallery.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+        .andReturn().getResponse().getContentAsString();
+    assertTrue(response.contains("items") && response.contains("above") && response.contains("limit"));
+  }
+
+  @Test
   void insertAndDeleteMultipleItems() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     

@@ -220,7 +220,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
       resBuilder.append(", Total items: ");
       resBuilder.append(getTotal());
     }
-    if (!getItems().isEmpty()) {
+    if (getItems() != null &&  !getItems().isEmpty()) {
       resBuilder.append(", Items: ");
       resBuilder.append(getItems().size());
     }
@@ -283,7 +283,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
   }
 
   @JsonIgnore
-  String getBaseUrl() {
+  public String getBaseUrl() {
     return baseUrl;
   }
 

@@ -22,7 +22,6 @@ import dev.morphia.query.Query;
 import dev.morphia.query.QueryResults;
 import dev.morphia.query.Sort;
 import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
@@ -77,30 +76,18 @@ public class PersistentUserSetServiceImpl extends
    */
   private void validatePersistentUserSet(PersistentUserSet object) {
 
-    if (object.getCreated() == null) {
-      Date now = new Date();
-      object.setCreated(now);
-    }
-
-    if (object.getModified() == null) {
-      Date now = new Date();
-      object.setModified(now);
-    }
-
     // check creator
-    if (object.getCreator() == null)
+    if (object.getCreator() == null) {
       throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);
-
-    long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER);
-    object.setIdentifier("" + sequenceId);
-
+    }
+    
     String notInitializedLongId = "-1";
 
     // validate user set ID
     if (StringUtils.isBlank(object.getIdentifier())
         || notInitializedLongId.equals(object.getIdentifier()))
       throw new UserSetValidationException(
-          "UserSet.UserSetId.identifier must be a valid alpha-numeric value or a positive number!");
+          "UserSet.identifier must be a valid alpha-numeric value or a positive number!");
   }
 
   /*
@@ -190,6 +177,20 @@ public class PersistentUserSetServiceImpl extends
   }
 
   @Override
+  public UserSet create(UserSet userSet) {
+    
+    if(userSet.getIdentifier()== null) {
+      long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER);
+      userSet.setIdentifier("" + sequenceId);
+    }  else {
+      throw new UserSetValidationException(
+          "UserSet.identifier must not be set when creating new user sets, for updating user set use the store method!"); 
+    }
+    
+    return this.store(userSet);
+  }
+  
+  @Override
   public UserSet store(UserSet userSet) {
 
     PersistentUserSet persistentObject = null;
@@ -199,9 +200,41 @@ public class PersistentUserSetServiceImpl extends
     } else {
       throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);
     }
-
-    validatePersistentUserSet(persistentObject);
     return this.store(persistentObject);
+  }
+
+  @Override
+  public PersistentUserSet store(PersistentUserSet persistentUserSet) {
+
+    Date now = new Date();
+    //allways update the modified date
+    persistentUserSet.setModified(now);
+    
+    if (persistentUserSet.getCreated() == null) {
+      persistentUserSet.setCreated(now);
+    }
+    
+    validatePersistentUserSet(persistentUserSet);
+    resetTransientFields(persistentUserSet);
+    updateTotal(persistentUserSet);
+    return super.store(persistentUserSet);
+  }
+  
+  void updateTotal(UserSet existingUserSet) {
+    if(existingUserSet.isOpenSet()) {
+      //for dynamic collections the total needs to be retrieved on the fly
+      existingUserSet.setTotal(-1);
+    } else if (existingUserSet.getItems() != null) {
+      existingUserSet.setTotal(existingUserSet.getItems().size());
+    } else {
+      existingUserSet.setTotal(0);
+    }
+  }
+  
+  private void resetTransientFields(PersistentUserSet persistentObject) {
+    //pagination fields are transient fields
+    persistentObject.setFirst(null);
+    persistentObject.setLast(null);
   }
 
   protected PersistentUserSetDao<PersistentUserSet, String> getUserSetDao() {
@@ -539,18 +572,6 @@ public class PersistentUserSetServiceImpl extends
       }
     }
     getUserSetDao().deleteByIdentifier(identifiers);
-  }
-
-  /**
-   *      
-   * 
-   * @deprecated     
-   */
-  @Override
-  @Deprecated(since = "", forRemoval = true)
-  // TODO: use store instead
-  public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException {
-    return store(userSet);
   }
 
   /**

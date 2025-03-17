@@ -4,6 +4,8 @@ public class DepictionGenerationReport {
   int skipped = 0;
   int notGenerated = 0;
   int generated = 0;
+  int updatedCollectionType = 0;
+  
   int getSkipped() {
     return skipped;
   }
@@ -31,5 +33,17 @@ public class DepictionGenerationReport {
   }
   void increaseGenerated() {
     this.generated++;
+  }
+  
+  int getUpdatedCollectionType() {
+    return updatedCollectionType;
+  }
+  
+  void setUpdatedCollectionType(int updatedCollectionType) {
+    this.updatedCollectionType = updatedCollectionType;
+  }
+  
+  void increaseUpdatedCollectionType() {
+    this.updatedCollectionType++;
   }
 }

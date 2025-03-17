@@ -1,6 +1,7 @@
 package eu.europeana.set.definitions.model;
 
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 public class BaseWebResource {
 
@@ -76,4 +77,7 @@ public class BaseWebResource {
     return result;
   }
 
+  public boolean hasThumbnail() {
+    return StringUtils.isNotEmpty(getThumbnail());
+  }
 }
