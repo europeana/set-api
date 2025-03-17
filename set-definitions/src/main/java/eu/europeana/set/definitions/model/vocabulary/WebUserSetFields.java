@@ -43,11 +43,6 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // JsonLd Constants
     public static final String CONTEXT                    = "https://api.europeana.eu/schema/context/set.jsonld";
     public static final String CONTEXT_FIELD              = "@context";
-    public static final String IDENTIFIER                 = "identifier";
-    public static final String TITLE                      = "title";
-    public static final String DESCRIPTION                = "description";
-    public static final String TYPE                       = "type";
-    public static final String ITEMS                      = "items";
     public static final String LANG                      = "lang";
 
     public static final String FIRST                     = "first";
