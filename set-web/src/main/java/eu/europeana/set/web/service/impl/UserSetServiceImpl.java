@@ -179,8 +179,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       }
     }
     getMongoPersistance().removeAll(userSets);
-    getLogger().info("User sets deleted for user {}. Sets deleted are : {} ", LoggingUtils.sanitizeUserInput(creatorId),
-        setsToBeDeleted);
+    getLogger().info("User sets deleted for user {}. Sets deleted are : {} ",
+        LoggingUtils.sanitizeUserInput(creatorId), setsToBeDeleted);
   }
 
   /**
@@ -213,8 +213,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   public UserSet deleteItem(String item, UserSet existingUserSet) {
-    if(existingUserSet.getItems() == null) {
-      //nothing to delete, do not update the set
+    if (existingUserSet.getItems() == null) {
+      // nothing to delete, do not update the set
       return existingUserSet;
     }
     // check if it is a pinned item, decrease the counter by 1 for entity sets
@@ -369,11 +369,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   private void addItems(UserSet existingUserSet, List<String> items, int position,
       boolean isPinnRequest) {
-    //init items list if needed
-    if(existingUserSet.getItems() == null) {
+    // init items list if needed
+    if (existingUserSet.getItems() == null) {
       existingUserSet.setItems(new ArrayList<String>());
     }
-    
+
     if (isPinnRequest) {
       // append pinned at the beginning
       existingUserSet.getItems().addAll(0, items);
@@ -617,37 +617,44 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       int pageNr, int pageSize) {
 
     if (userSet.getItems() != null) {
-      return reorderItemDescriptions(userSet, itemDescriptions, pageNr, pageSize);
+      return reorderItemDescriptions(userSet.getItems(), itemDescriptions, pageNr, pageSize);
     }
     // if open set OR userSet.getItems == null , return the same order as retrieved
     return itemDescriptions;
   }
 
-  private List<String> reorderItemDescriptions(UserSet userSet, List<String> itemDescriptions,
+  private List<String> reorderItemDescriptions(List<String> itemIds, List<String> itemDescriptions,
       int pageNr, int pageSize) {
-    List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
-    String localId;
 
-    // calculate the index of from and until to get the right page of items
+    List<String> orderedItemDescriptions = new ArrayList<String>(itemDescriptions.size());
+
+    // calculate the index of "start" and "end" to get the right page of items
     Integer start = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
-    Integer till = Math.min((start + pageSize), userSet.getItems().size()); // should not exceed
-                                                                            // the size of item
-                                                                            // list
-    for (int i = start; i < till; i++) {
-      String itemUri = userSet.getItems().get(i);
+    // should not exceed the size of item list
+    Integer end = Math.min((start + pageSize), itemIds.size());
+    final String itemDataEndpoint = getConfiguration().getItemDataEndpoint();
+    String itemUri;
+    String localId;
+    String recordIdJsonString;
+    
+    for (int i = start; i < end; i++) {
+      itemUri = itemIds.get(i);
       boolean found = false;
-      localId =
-          UserSetUtils.extractItemIdentifier(itemUri, getConfiguration().getItemDataEndpoint());
-      // escape "/" to "\/" to match json string
-      localId = StringUtils.replace(localId, "/", "\\/");
-      String idWithSpace = "\"id\": \"" + localId + '"';
+      localId = UserSetUtils.extractItemIdentifier(itemUri, itemDataEndpoint);
+      //json serialization with JSONObject escapes forward slashes (which is optional according to the specs)
+      recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, true, true);
+      //search description for current item
       for (String description : itemDescriptions) {
-        if (description.contains(idWithSpace)) {
+        // match record's id in json string
+        System.out.println(description);
+        
+        if (description.contains(recordIdJsonString)) {
           orderedItemDescriptions.add(description);
           found = true;
           break;
         }
       }
+      //
       if (!found) {
         orderedItemDescriptions.add("{\"id\":\"" + localId + "\"}");
       }
@@ -861,8 +868,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       int startIndex, final int endIndex) {
     CollectionPage page;
     page = new ItemIdsCollectionPage(userSet, partOf, startIndex);
-    if(userSet.getItems() == null ) {
-      //return immediately if the set has no items
+    if (userSet.getItems() == null) {
+      // return immediately if the set has no items
       return page;
     }
     List<String> items = userSet.getItems().subList(startIndex, endIndex);
@@ -876,7 +883,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     CollectionPage page;
     page = new ItemDescriptionsCollectionPage(userSet, partOf, startIndex);
     ((ItemDescriptionsCollectionPage) page).setItemList(userSet.getItems());
-    if(userSet.getItems() != null) {
+    if (userSet.getItems() != null) {
       page.setTotalInPage(userSet.getItems().size());
     }
     return page;
@@ -1169,6 +1176,26 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     String itemId = userSet.getItems().get(0);
+    WebResource depiction = fillDepictionByItemId(itemId);
+    // depiction found by first item, or not found but no more items to search for 
+    if (depiction.hasThumbnail() || userSet.getItems().size() == 1) {
+      return depiction;
+    }
+
+    //search in first 10 items
+    final int shortListSize = 10;
+    depiction = fillDepictionByItemList(userSet, shortListSize);
+    
+    if(!depiction.hasThumbnail() && userSet.getItems().size() > shortListSize) {
+      //search in first 100 items
+      final int longListSize = 100;
+      depiction = fillDepictionByItemList(userSet, longListSize);
+    }
+
+    return depiction;
+  }
+
+  private WebResource fillDepictionByItemId(String itemId) throws SearchApiClientException {
     String url =
         SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
             getConfiguration().getItemDataEndpoint(), itemId, getConfiguration().getSearchApiKey(),
@@ -1176,6 +1203,35 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     WebResource depiction = new WebResource();
     getSearchApiClient().fillDepiction(url, itemId, depiction);
+    return depiction;
+  }
+
+  private WebResource fillDepictionByItemList(UserSet userSet, int pageSize)
+      throws SearchApiClientException {
+
+    WebResource depiction = new WebResource();
+    String apiKey = getConfiguration().getSearchApiKey();
+    String searchApiProfile = getConfiguration().getSearchApiProfileForItemDescriptions();
+
+    String url = getSearchApiUtils().buildSearchApiUrl(userSet, apiKey,
+        getConfiguration().getSearchApiUrl(), searchApiProfile);
+
+    //first "pageSize" items
+    final List<String> itemsToSearch =
+        userSet.getItems().subList(0, Math.min(userSet.getItems().size(), pageSize));
+    
+    SearchApiRequest searchApiRequest = getSearchApiUtils()
+        .buildSearchApiPostBodyForItemIds(itemsToSearch, getConfiguration().getItemDataEndpoint(), 1, pageSize, searchApiProfile);
+    
+    try {
+      String jsonBody = serializeSearchApiRequest(searchApiRequest);
+      //SearchApiResponse apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
+      getSearchApiClient().fillDepiction( url, jsonBody, itemsToSearch, getConfiguration().getItemDataEndpoint(), depiction);
+    } catch (SearchApiClientException | IOException e) {
+      if(logger.isInfoEnabled()) {
+        logger.info("Cannot retrieve depiction using the first {} items of set with id: {} ", pageSize, userSet.getIdentifier(), e);
+      }
+    } 
     return depiction;
   }
 

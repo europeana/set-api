@@ -156,7 +156,6 @@ public class SearchApiUtils {
         return buildSearchApiPostBodyForItemIds(items, itemDataEndpoint, pageNr, pageSize, profile);
     }
 
-
     /**
      * This method builds the body of the post request to the search API for retrieving the item descriptions
      * @param items list of item ids
@@ -168,29 +167,29 @@ public class SearchApiUtils {
      */
     public SearchApiRequest buildSearchApiPostBodyForItemIds(final List<String> items,
         String itemDataEndpoint, int pageNr, int pageSize, String profile) {
-        SearchApiRequest searchApiRequest = new SearchApiRequest();
-        String id;
-        String fullId;
+      SearchApiRequest searchApiRequest = new SearchApiRequest();
+      String id;
+      String fullId;
       // calculate the indices for the start and end of the items page
-        Integer start = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
+      Integer start = (pageNr - WebUserSetFields.DEFAULT_PAGE) * pageSize;
       Integer end = Math.min((start +  pageSize), items.size()); // should not exceed the size of item list
 
-        StringBuilder query = new StringBuilder(100);
-        query.append("europeana_id:(");
+      StringBuilder query = new StringBuilder(100);
+      query.append("europeana_id:(");
       for (int i = start; i < end; i++) {
           fullId = items.get(i);
-            if (i != start) {
-                query.append(" OR ");
-            }
-            id = fullId.replace(itemDataEndpoint, ""); // replace "/" with "%2F"
-            query.append('"').append('/').append(id).append('"');
-        }
-        // close bracket
-        query.append(')');
-        searchApiRequest.setQuery(query.toString());
-        searchApiRequest.setRows(pageSize);
-        setProfile(searchApiRequest, profile);
-        return searchApiRequest;
+          if (i != start) {
+              query.append(" OR ");
+          }
+          id = fullId.replace(itemDataEndpoint, ""); // replace "/" with "%2F"
+          query.append('"').append('/').append(id).append('"');
+      }
+      // close bracket
+      query.append(')');
+      searchApiRequest.setQuery(query.toString());
+      searchApiRequest.setRows(pageSize);
+      setProfile(searchApiRequest, profile);
+      return searchApiRequest;
     }
 
     private void setProfile(SearchApiRequest searchApiRequest, String profile) {

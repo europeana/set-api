@@ -42,6 +42,9 @@ public interface SearchApiClient {
     JSONObject searchItems(String uri, String postBody) throws SearchApiClientException;
 
     void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction) throws SearchApiClientException;
+
+    void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds,
+        String itemDataEndpoint, BaseWebResource depiction) throws SearchApiClientException;
     
     void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds,
         String itemDataEndpoint, BaseWebResource depiction) throws SearchApiClientException;

@@ -197,20 +197,19 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)"});
     }
+    
+    // when we change the type to Gallery, check the items size of the existing set
+    if (webUserSet.isGallery()) {
+      validateGallerySize(persistentUserSet, 0);
+    }
+
     // validate input
     validateWebUserSet(webUserSet, persistentUserSet.isPublished());
 
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
-//    // validate new items
-//    validateAndSetItems(persistentUserSet, webUserSet);
-//    // remove duplicated items
-//    removeItemDuplicates(persistentUserSet);
-
-    // update modified date
-//    persistentUserSet.setModified(new Date());
-//    updateTotal(persistentUserSet);
+    //total and modified are updated in persistence layer
     return getMongoPersistence().store(persistentUserSet);
   }
 
@@ -484,29 +483,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return null;
   }
 
-  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
-      throws ApplicationAuthenticationException {
-    // no validation of items for open sets, they are retrieved dynamically
-    if (storedUserSet.isOpenSet()) {
-      return;
-    }
-
-    /* for entity sets update there must not be any items present in new user set
-     * only metadata can be update for entity sets
-     */
-    if (storedUserSet.isEntityBestItemsSet() && userSetUpdates.getItems()!=null 
-        && !userSetUpdates.getItems().isEmpty()) {
-      throw new ApplicationAuthenticationException(
-          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
-          HttpStatus.BAD_REQUEST, null);
-    }
-    
-    if(userSetUpdates.getItems()!=null && userSetUpdates.getItems().size()>0) { 
-      storedUserSet.setItems(userSetUpdates.getItems());
-    }
-  }
-
   /**
    * Validate conformity of item URLs
    * @param items
@@ -634,9 +610,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
     }
     
-    //validate number of items for the sets of type Collection
-    validateGallerySize(webUserSet, 0);
-
+    //validate number of items for the sets of type Gallery
+    if (webUserSet.isGallery()) {
+      validateGallerySize(webUserSet, 0);
+    }
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
@@ -648,10 +625,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   @Override
   public void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException {
     final int galleryMaxSize = getConfiguration().getGalleryMaxSize();
-    if(webUserSet.isGallery() 
-        && webUserSet.getItems()!=null 
+    if(webUserSet.getItems()!=null 
         && webUserSet.getItems().size() + newItems > galleryMaxSize) {
-      
       String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;   
       throw new ItemValidationException(messageKey, 
           new String[] {String.valueOf(galleryMaxSize)} );

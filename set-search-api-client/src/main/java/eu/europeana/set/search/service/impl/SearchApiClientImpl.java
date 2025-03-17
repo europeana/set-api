@@ -196,9 +196,9 @@ public class SearchApiClientImpl implements SearchApiClient {
         resp = createHttpConnection().get(url, "application/json", null);
       }
       if (resp == null) {
-        // HTTP Error Code
-        throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
-            null);
+          // HTTP Error Code
+          throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
+              null);
       }
       
       if(resp.getStatus() != HttpStatus.SC_OK) {
@@ -228,7 +228,7 @@ public class SearchApiClientImpl implements SearchApiClient {
       throws SearchApiClientException {
     return searchItems(uri, searchPostBody, apiKey, true);
   }
-
+  
   @Override
   public void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds, String itemDataEndpoint, BaseWebResource depiction)
       throws SearchApiClientException {

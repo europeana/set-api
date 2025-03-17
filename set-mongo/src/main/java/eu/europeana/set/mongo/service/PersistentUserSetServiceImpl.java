@@ -80,7 +80,7 @@ public class PersistentUserSetServiceImpl extends
     if (object.getCreator() == null) {
       throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);
     }
-    
+
     String notInitializedLongId = "-1";
 
     // validate user set ID

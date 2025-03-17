@@ -41,13 +41,12 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   private static final Logger LOG = LogManager.getLogger(UserSetApp.class);
   private boolean migrateToGallery = false;
-  
   @Resource
   UserSetConfiguration configuration;
 
   @Resource
-  private UserSetService userSetService; 
-  
+  private UserSetService userSetService;
+
   @Resource(name = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistanceService;
 
@@ -63,14 +62,13 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   @DynamicPropertySource
   static void setProperties(DynamicPropertyRegistry registry) {
-//    registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
-    registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test");
-    //registry.add("mongodb.set.truststore", () -> "");
-    //registry.add("mongodb.set.truststorepass", () -> "");
-    
+    // registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
+    registry.add("mongodb.set.connectionUrl", () -> "mongodb://127.0.0.1:27017/set_test");
+    // registry.add("mongodb.set.truststore", () -> "");
+    // registry.add("mongodb.set.truststorepass", () -> "");
 
   }
-  
+
   /*
    * Generate isShownBy field for all sets of type collection
    */
@@ -97,15 +95,15 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
   @Test
   // @Disabled
   public void generateDepictionForEntityBestItemsSet() throws Exception {
-//    createTestUserSet(USER_SET_REGULAR, regularUserToken);
-    final String collectionsQuery = "type:"+UserSetTypes.ENTITYBESTITEMSSET.getJsonValue();
-    
+    // createTestUserSet(USER_SET_REGULAR, regularUserToken);
+    final String collectionsQuery = "type:" + UserSetTypes.ENTITYBESTITEMSSET.getJsonValue();
+
     DepictionGenerationReport report = generateDepictionsAndUpdateCollectionType(collectionsQuery);
 
     LOG.info("Generated depictions: {}", report.getGenerated());
     LOG.info("Skipped sets: {}", report.getSkipped());
     LOG.info("Not generated: {}", report.getNotGenerated());
-    
+
     assertTrue(report.getGenerated() > 0);
   }
 
@@ -114,44 +112,43 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       throws AuthorizationExtractionException, ParamValidationException {
     // create object in database
     UserSetQueryBuilder queryBuilder = new UserSetQueryBuilder();
-    
+
     Authentication adminAuth = UserSetAuthorizationUtils.createAuthentication(adminUserToken);
-    
+
     final int pageSize = 200;
-    //int page = Integer.valueOf(UserSetUtils.DEFAULT_PAGE);
+    // int page = Integer.valueOf(UserSetUtils.DEFAULT_PAGE);
     String sort = WebUserSetModelFields.CREATED + " asc";
     UserSetQuery searchQuery = queryBuilder.buildUserSetQuery(collectionsQuery, null, sort, 0,
         pageSize, getConfiguration());
     final ArrayList<SetPageProfile> profiles = new ArrayList<>();
     profiles.add(SetPageProfile.ITEMS);
     DepictionGenerationReport report = new DepictionGenerationReport();
-    
+
     ResultSet<? extends UserSet> results = null;
-    //page index startw with 1, but that is set at the beginning of the 
-    int page= 0;
+    // page index startw with 1, but that is set at the beginning of the
+    int page = 0;
     do {
-      //move to first/next page
+      // move to first/next page
       page++;
       searchQuery.setPageNr(page);
       results = getUserSetService().search(searchQuery, null, profiles, adminAuth);
-      final int found = results.getResults() == null? 0 : results.getResults().size();
+      final int found = results.getResults() == null ? 0 : results.getResults().size();
       LOG.info(found + " Items found on page: " + page);
-      
-      if(hasNoItems(results)) {
+
+      if (hasNoItems(results)) {
         break; // stop if no results found anymore
       }
       generateDepictions(results.getResults(), report);
-      
+
       LOG.info("Completed Depiction Generation for result pages: {}", page);
 
       searchQuery.setPageNr(page);
-      
-      //brake
-      //results = null;
+
+      // brake
+      // results = null;
     } while (hasItems(results));
     return report;
   }
-  
 
   private boolean hasItems(ResultSet<? extends UserSet> results) {
     return !hasNoItems(results);
@@ -167,42 +164,43 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     for (UserSet userSet : results) {
       if (userSet.isOpenSet() || userSet.isBookmarksFolder()) {
         // bookmarks is redundant, but we keep it for future
-        //open/dynamic sets must not be migrated
+        // open/dynamic sets must not be migrated
         report.increaseSkipped();
         continue;
       }
-      
+
       final boolean hasNoItems = userSet.getItems() == null || userSet.getItems().isEmpty();
-      if(hasNoItems) {
+      if (hasNoItems) {
         LOG.debug("Skip update for set without items id: {}",
             userSet.getIdentifier());
         report.increaseSkipped();
         continue;
       }
-      
+
       if (hasDepiction(userSet.getIsShownBy())) {
         report.increaseSkipped();
         continue;
       }
-      
-      if(userSet.getItems().size()==1) {
+
+      if (userSet.getItems().size() == 1) {
         LOG.debug("Set has only 1 item id:{}", userSet.getIdentifier());
-      }else {
+      } else {
         LOG.debug("Set has no depiction and more items id:{}", userSet.getIdentifier());
       }
 
-      
       final WebResource isShownBy = generateDepiction(userSet);
-      //do not update set if the depiction cannot be generated
-      final boolean shouldSkip = (isShownBy == null && !userSet.isCollection()) || (isShownBy != null && !isShownBy.hasThumbnail());
+      // do not update set if the depiction cannot be generated
+      final boolean shouldSkip = (isShownBy == null && !userSet.isCollection())
+          || (isShownBy != null && !isShownBy.hasThumbnail());
       if (shouldSkip) {
         report.increaseNotGenerated();
-        LOG.debug("Skip update, could not generate depiction for set with id:type:collectionType - {}:{}:{}",
+        LOG.debug(
+            "Skip update, could not generate depiction for set with id:type:collectionType - {}:{}:{}",
             userSet.getIdentifier(), userSet.getType(), userSet.getCollectionType());
         continue;
       }
 
-      if(hasDepiction(isShownBy)) {
+      if (hasDepiction(isShownBy)) {
         userSet.setIsShownBy(isShownBy);
       }
       final boolean hasCollectionTypeUpdate = migrateToGallery && hasCollectionTypeUpdate(userSet);
@@ -211,29 +209,28 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
         userSet.setCollectionType(WebUserSetFields.TYPE_GALLERY);
         report.increaseUpdatedCollectionType();
       }
-      
-      //update into database
-      if(hasCollectionTypeUpdate || hasDepiction(isShownBy)) {
+
+      // update into database
+      if (hasCollectionTypeUpdate || hasDepiction(isShownBy)) {
         UserSet updatedSet = mongoPersistanceService.store((PersistentUserSet) userSet);
-        if(hasDepiction(updatedSet.getIsShownBy())) {
-          //updated is shownBy
-        report.increaseGenerated();
+        if (hasDepiction(updatedSet.getIsShownBy())) {
+          // updated is shownBy
+          report.increaseGenerated();
           LOG.debug("Generated depiction for set with id {}: {}", updatedSet.getIdentifier(),
               updatedSet.toString());
-      } else {
-          //note the migrateToGallery to enable/disable promotion to galleries
-          LOG.debug("Updated collection type, but didn't Generated depiction for set with id {}: {}", updatedSet.getIdentifier(),
-              updatedSet.toString());
-        report.increaseNotGenerated();
-      }
+        } else {
+          // note the migrateToGallery to enable/disable promotion to galleries
+          LOG.debug(
+              "Updated collection type, but didn't Generated depiction for set with id {}: {}",
+              updatedSet.getIdentifier(), updatedSet.toString());
+          report.increaseNotGenerated();
+        }
       } else {
         //should probably not come here, but if it happens, the set was not updated
         LOG.debug("The set was not updated into the database, depiction and collection type were not updated for set with id: {}", userSet.getIdentifier());
-    }
-      
-
-      
-    }
+      }
+    }//end for 
+    
     LOG.info("Generated depictions: {}", report.getGenerated());
     LOG.info("Skipped sets: {}", report.getSkipped());
     LOG.info("Not generated: {}", report.getNotGenerated());
@@ -241,7 +238,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
   }
 
   private boolean hasCollectionTypeUpdate(UserSet userSet) {
-    return userSet.isCollection() 
+    return userSet.isCollection()
         && !WebUserSetFields.TYPE_GALLERY.equals(userSet.getCollectionType())
         && (userSet.getItems() == null || userSet.getItems().size() < 100);
   }
@@ -255,10 +252,10 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     try {
       return getUserSetService().generateDepiction(userSet);
     } catch (SearchApiClientException e) {
-      //work with best user effort
+      // work with best user effort
       LOG.info("Cannot generate depiction for set: {}, {}", userSet.getIdentifier(),
           e.getMessage());
-      //e.printStackTrace();
+      // e.printStackTrace();
       return null;
     }
   }
