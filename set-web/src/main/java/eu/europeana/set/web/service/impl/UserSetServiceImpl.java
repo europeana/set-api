@@ -75,7 +75,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
     }
     //update total/first/last
-    updatePagination(userSet, getConfiguration());
+    //updatePagination(userSet, getConfiguration());
+    getUserSetUtils().updatedTotal(userSet);
+    
     return userSet;
   }
 
