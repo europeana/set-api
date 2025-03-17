@@ -73,20 +73,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   protected UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
     return userSetUtils.updatePagination(userSet, config);
   }
-  
-  protected UserSet writeUserSetToDb(UserSet existingUserSet) {
-    // update total
-    updateTotal(existingUserSet);
-    // generate and add a created and modified timestamp to the Set
-    existingUserSet.setModified(new Date());
-
-    // Respond with HTTP 200
-    // update an existing user set. merge user sets - insert new fields in existing
-    // object
-    return getMongoPersistence().update((PersistentUserSet) existingUserSet);
-  }
-
-
+ 
   protected PersistentUserSetService getMongoPersistence() {
     return mongoPersistance;
   }
@@ -222,10 +209,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
-    // update modified date
-    persistentUserSet.setModified(new Date());
-    updateTotal(persistentUserSet);
-    return getMongoPersistence().update(persistentUserSet);
+    //total and modified are updated in persistence layer
+    return getMongoPersistence().store(persistentUserSet);
   }
 
   private void resetImmutableFields(UserSet webUserSet, PersistentUserSet persistentUserSet) {
@@ -896,14 +881,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  void updateTotal(UserSet existingUserSet) {
-    if (existingUserSet.getItems() != null) {
-      existingUserSet.setTotal(existingUserSet.getItems().size());
-    } else {
-      existingUserSet.setTotal(0);
-    }
-  }
-
   PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication){
     // update the visibility to publish
     if (isOwner(userSet, authentication)) {
@@ -919,7 +896,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     userSet.setIssued(issued);
     userSet.setModified(now);
-    return getMongoPersistence().update(userSet);
+    return getMongoPersistence().store(userSet);
   }
 
   private Agent buildEuropeanaPublisherUser() {
@@ -942,7 +919,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
     userSet.setIssued(null);
     userSet.setModified(new Date());
-    return getMongoPersistence().update(userSet);
+    return getMongoPersistence().store(userSet);
   }
 
   private boolean hasPublisherAsOwner(PersistentUserSet userSet) {

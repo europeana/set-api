@@ -228,7 +228,7 @@ public abstract class BaseUserSetTestUtils {
     //for the time being we still allow items in the store method but not in the create rest method 
     //
     WebUserSetImpl createdSet =
-        (WebUserSetImpl) getUserSetService().storeUserSet(set, authentication);
+        (WebUserSetImpl) getUserSetService().createUserSet(set, authentication);
     // keep the list of created sets to delete in the end
     createdUserSets.add(createdSet);
     return createdSet;

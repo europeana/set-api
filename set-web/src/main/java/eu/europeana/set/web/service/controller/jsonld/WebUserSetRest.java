@@ -46,7 +46,6 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
@@ -84,7 +83,7 @@ public class WebUserSetRest extends BaseRest {
     // validate user - check user credentials (all registered users can create)
     // if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
     Authentication authentication = verifyWriteAccess(Operations.CREATE, request);
-    return storeUserSet(userSet, authentication, request);
+    return createUserSet(userSet, authentication, request);
   }
 
   /**
@@ -97,7 +96,7 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
-  protected ResponseEntity<String> storeUserSet(String userSetJsonLdStr,
+  protected ResponseEntity<String> createUserSet(String userSetJsonLdStr,
       Authentication authentication, HttpServletRequest request) throws HttpException {
     try {
 
@@ -118,7 +117,7 @@ public class WebUserSetRest extends BaseRest {
       // generate and add a created and modified timestamp to the Set
       // type should be saved now in the database and not generated on the fly during
       // serialization
-      UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
+      UserSet storedUserSet = getUserSetService().createUserSet(webUserSet, authentication);
 
       // add specific headers
       Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
@@ -253,8 +252,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet.getModified(), profile, pageNr, pageSize,
-          request);
+      return buildSetPageResponse(itemPage, userSet.getModified(), profile, request);
 
     } catch (HttpException e) {
       // avoid wrapping http exception

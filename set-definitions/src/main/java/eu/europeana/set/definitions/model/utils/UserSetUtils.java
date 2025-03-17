@@ -84,8 +84,7 @@ public class UserSetUtils {
     // set base URL for set.id
     userSet.setBaseUrl(config.getSetDataEndpoint());
     if (userSet.getItems() != null) {
-      int total = userSet.getItems().size();
-      userSet.setTotal(total);
+      int total = updatedTotal(userSet);
       // NOTE: the first and last properties are not used now and might be deprecated, they should
       // not be stored in the database
       if (total > 0) {
@@ -113,6 +112,20 @@ public class UserSetUtils {
     }
 
     return userSet;
+  }
+
+  /**
+   * Update the total field based on the number of items in the set 
+   * @param userSet the user set
+   * @return the total numbers of items in set
+   */
+  public int updatedTotal(UserSet userSet) {
+    int total = 0;
+    if(userSet.getItems() != null) {
+      total = userSet.getItems().size();  
+    }
+    userSet.setTotal(total);
+    return total;
   }
 
 
@@ -192,6 +205,7 @@ public class UserSetUtils {
     return '/'+ parts[collectionIndex] + '/' + parts[itemIndex];  
   }
   
+
   /**
    * Build the json string used to quickly verify recordId in json string (e.g "id": "\/collection_id\/item_id")
    * @param The local record id (e.g "/collection_id/item_id")

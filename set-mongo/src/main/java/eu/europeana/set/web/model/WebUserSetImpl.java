@@ -284,7 +284,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
   }
 
   @JsonIgnore
-  String getBaseUrl() {
+  public String getBaseUrl() {
     return baseUrl;
   }
 

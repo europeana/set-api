@@ -47,7 +47,7 @@
 		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
         	--add-opens java.base/java.lang=ALL-UNNAMED
 		</java.17.addopens>
-		<version.commonsApi>0.4.3-SNAPSHOT</version.commonsApi>
+		<version.commonsApi>0.4.4</version.commonsApi>
 		<version.springBoot>2.5.14</version.springBoot>
 		
 		<!-- overwrite version defined in spring boot parent pom -->
@@ -91,7 +91,12 @@
 		<!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
 		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
+		<!--
 		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		-->
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.basedir}/../${aggregate.report.xml}
+		</sonar.coverage.jacoco.xmlReportPaths>
 
 
 	</properties>
@@ -373,11 +378,28 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>${jacoco-plugin.version}</version>
+						<configuration>
+							<excludes>
+								<!-- see also sonar sonar.coverage.exclusions -->
+								<!-- exclude serch api client eventually -->
+								<!--
+								<exclude>eu/europeana/set/search/**/*.*</exclude>
+								-->
+								<!-- exclude annotation client package as client tests are not executed -->
+								<exclude>**/UsageStatsService.class</exclude>
+							</excludes>
+						</configuration>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
 								<goals>
 									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<goals>
+									<goal>report</goal>
 								</goals>
 							</execution>
 						</executions>

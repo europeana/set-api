@@ -30,14 +30,15 @@ import eu.europeana.set.web.service.controller.exception.SetUniquenessValidation
 public interface UserSetService {
 
   /**
-   * This method stores UserSet object in database and in Solr.
+   * This method validates, generates the id and UserSet object in database
    *
    * @param userSet
    * @return UserSet object
    * @throws HttpException
    */
-  UserSet storeUserSet(UserSet userSet, Authentication authentication)
+  UserSet createUserSet(UserSet userSet, Authentication authentication)
       throws HttpException, IOException;
+  
 
   /**
    * This method converts close set to open set by updating respective items

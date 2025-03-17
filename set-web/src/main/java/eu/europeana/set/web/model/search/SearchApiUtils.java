@@ -156,7 +156,6 @@ public class SearchApiUtils {
         return buildSearchApiPostBodyForItemIds(items, itemDataEndpoint, pageNr, pageSize, profile);
     }
 
-
     /**
      * This method builds the body of the post request to the search API for retrieving the item descriptions
      * @param items list of item ids

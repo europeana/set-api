@@ -102,45 +102,6 @@ public class BasePageInfo implements PageInfo{
 	this.collectionPage = collectionPage;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.europeana.set.definitions.model.PageInfo#getNext()
-     */
-//    @Override
-//    public int getNext() {
-//	return next;
-//    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.europeana.set.definitions.model.PageInfo#setNext(int)
-     */
-//    @Override
-//    public void setNext(int next) {
-//	this.next = next;
-//    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see eu.europeana.set.definitions.model.PageInfo#getPrev()
-     */
-//    @Override
-//    public int getPrev() {
-//	return prev;
-//    }
-//
-//    /*
-//     * (non-Javadoc)
-//     * 
-//     * @see eu.europeana.set.definitions.model.PageInfo#setPrev(int)
-//     */
-//    @Override
-//    public void setPrev(int prev) {
-//	this.prev = prev;
-//    }
 
     /*
      * (non-Javadoc)
