@@ -214,16 +214,6 @@ public class BaseRest extends BaseRestController {
     return serializer.serialize(itemPage);
   }
 
-// note used anymore
-//  protected String serializeResultPage(SetPageProfile profile, UserSet storedUserSet)
-//      throws IOException {
-//    // prepare data for serialization according to the profile
-//    getUserSetService().applyProfile(storedUserSet, profile);
-//
-//    UserSetLdSerializer serializer = new UserSetLdSerializer();
-//    return serializer.serialize(storedUserSet);
-//  }
-
   /**
    * This method parses prefer header in keys and values
    *
@@ -280,7 +270,7 @@ public class BaseRest extends BaseRestController {
   }
 
   protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, Date modified,
-      SetPageProfile profile, Integer pageNr, Integer pageSize, HttpServletRequest request)
+      SetPageProfile profile,HttpServletRequest request)
       throws IOException, HttpException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);

@@ -1,11 +1,11 @@
-/**
- * 
- */
 package eu.europeana.set.search.service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * Base class defining common fields of API response
+ */
 @JsonInclude(Include.NON_NULL)
 public abstract class ApiResponse {
 

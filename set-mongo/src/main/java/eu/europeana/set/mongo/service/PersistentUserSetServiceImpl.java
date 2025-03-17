@@ -103,13 +103,13 @@ public class PersistentUserSetServiceImpl extends
   }
 
   @Override
-  public long getDistinct(String field, boolean fieldIsArray, String collectionType)
+  public long getDistinct(String field, boolean fieldIsArray, String type)
       throws UserSetServiceException {
     long count = 0;
     AggregationOptions aggregationOptions =
         AggregationOptions.builder().allowDiskUse(Boolean.TRUE).build();
     Cursor cursor = getDao().getCollection().aggregate(
-        getDistinctCountPipeline(field, fieldIsArray, collectionType), aggregationOptions);
+        getDistinctCountPipeline(field, fieldIsArray, type), aggregationOptions);
     if (cursor.hasNext()) {
       // ideally there should be only one value present.
       count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
@@ -224,10 +224,11 @@ public class PersistentUserSetServiceImpl extends
     if(existingUserSet.isOpenSet()) {
       //for dynamic collections the total needs to be retrieved on the fly
       existingUserSet.setTotal(-1);
-    } else if (existingUserSet.getItems() != null) {
-      existingUserSet.setTotal(existingUserSet.getItems().size());
-    } else {
+    } else if (existingUserSet.getItems() == null) {
       existingUserSet.setTotal(0);
+    } else {
+      //set total to the number of items
+      existingUserSet.setTotal(existingUserSet.getItems().size());
     }
   }
   

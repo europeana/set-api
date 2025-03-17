@@ -222,7 +222,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
           // note the migrateToGallery to enable/disable promotion to galleries
           LOG.debug(
               "Updated collection type, but didn't Generated depiction for set with id {}: {}",
-              updatedSet.getIdentifier(), updatedSet.toString());
+              updatedSet.getIdentifier(), updatedSet);
           report.increaseNotGenerated();
         }
       } else {

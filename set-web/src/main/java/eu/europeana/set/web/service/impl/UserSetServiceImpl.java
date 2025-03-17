@@ -75,9 +75,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
           UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
     }
     //update total/first/last
-    //updatePagination(userSet, getConfiguration());
     getUserSetUtils().updatedTotal(userSet);
-    
     return userSet;
   }
 
@@ -230,11 +228,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     existingUserSet.getItems().remove(item);
 
     // update an existing user set
-    UserSet updatedUserSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
-    // update pagination fields (used only for the response serialization)
-    //moved to serializeUserSet
-    //updatePagination(updatedUserSet, getConfiguration());
-    return updatedUserSet;
+    // update pagination fields is done during the serialization
+    return getMongoPersistence().store((PersistentUserSet) existingUserSet);
   }
 
   private void updateIsShownBy(UserSet userSet, String firstItemOld) {
@@ -323,10 +318,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // update isShownBy
     updateIsShownBy(existingUserSet, firstItemOld);
 
-    UserSet updatedSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
-    //redundant will be updated during serialization
-    //updatePagination(updatedSet, getConfiguration());
-    return updatedSet;
+    //pagination will be updated during serialization
+    return getMongoPersistence().store((PersistentUserSet) existingUserSet);
   }
 
   private void processDuplicates(UserSet existingUserSet, List<String> items,

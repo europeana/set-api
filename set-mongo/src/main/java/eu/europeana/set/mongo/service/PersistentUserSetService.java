@@ -83,10 +83,13 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
   /**
    * Retrieve distinct objects present in the DB.
    * 
-   * @return
-   * @throws UserSetServiceException
+   * @param field the name of the fields
+   * @param fieldIsArray indicates if the field is array or not
+   * @param type the type of the user set 
+   * @return the count of distinct values 
+   * @throws UserSetServiceException if the count cannot be computed
    */
-  long getDistinct(String field, boolean fieldIsArray, String collectionType)
+  long getDistinct(String field, boolean fieldIsArray, String type)
       throws UserSetServiceException;
 
   /**

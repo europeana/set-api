@@ -46,7 +46,6 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
@@ -253,8 +252,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet.getModified(), profile, pageNr, pageSize,
-          request);
+      return buildSetPageResponse(itemPage, userSet.getModified(), profile, request);
 
     } catch (HttpException e) {
       // avoid wrapping http exception
