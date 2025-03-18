@@ -251,7 +251,7 @@ public class BaseApiConnection {
     public StringBuilder getUserSetServiceUri() {
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(this.setServiceUri);
-        if (!this.setServiceUri.endsWith(WebUserSetFields.SLASH))
+        if (!this.setServiceUri.endsWith(String.valueOf(WebUserSetFields.SLASH)))
             urlBuilder.append(WebUserSetFields.SLASH);
 
         return urlBuilder;

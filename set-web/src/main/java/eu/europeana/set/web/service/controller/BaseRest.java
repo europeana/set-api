@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +73,7 @@ public class BaseRest extends BaseRestController {
   @Resource
   protected BuildProperties buildInfo;
 
-  @Autowired
+  @Resource
   private RequestPathMethodService requestMethodService;
 
   SetProfileHelper profileHelper = new SetProfileHelper();

@@ -312,14 +312,14 @@ public class BaseUserSet extends BasePageInfo implements UserSet {
     
     @Override
     public String toString() {
-	StringBuilder res = new StringBuilder("\t### User set ###\n");
+	StringBuilder res = new StringBuilder("### User set ###\n");
 
 	if (getType() != null)
-	    res.append("\t\t").append("user set type:").append(getType()).append("\n");
+	    res.append('\t').append("user set type:").append(getType()).append('\n');
 	if (getTitle() != null)
-	    res.append("\t\t" + "name:").append(getTitle()).append("\n");
+	    res.append('\t' + "name:").append(getTitle()).append('\n');
 	if (getItems() != null)
-	    res.append("\t\t").append("number of items:").append(getItems().size()).append("\n");
+	    res.append('\t').append("number of items:").append(getItems().size()).append('\n');
 	return res.toString();
     }
 

@@ -224,7 +224,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
       resBuilder.append(", Items: ");
       resBuilder.append(getItems().size());
     }
-    resBuilder.append("]");
+    resBuilder.append(']');
     return resBuilder.toString();
   }
 

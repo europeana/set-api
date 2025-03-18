@@ -8,7 +8,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";
     public static final String USER_SET_APPLICATION_NAME  = "webuserset";
-    public static final String SLASH                      = "/";
+    public static final char SLASH                      = '/';
     public static final String PAR_CHAR                   = "?";
     public static final String AND                        = "&";
     public static final String COMMA                      = ",";

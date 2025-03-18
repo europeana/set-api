@@ -132,13 +132,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       // set item list, as effect of profiles, the parser sends
       removeItemDuplicates(userSet);
       return userSet;
-    } catch (UserSetAttributeInstantiationException e) {
+    } catch (UserSetAttributeInstantiationException | IOException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           new String[] {e.getMessage()}, e);
-    } catch (JsonParseException e) {
-      throw new UserSetInstantiationException("Json formating exception! " + e.getMessage(), e);
-    } catch (IOException e) {
-      throw new UserSetInstantiationException("Json reading exception! " + e.getMessage(), e);
     }
   }
 
@@ -369,6 +365,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return counter;
   }
 
+  @SuppressWarnings("external_fbcontrib:CE_CLASS_ENVY")
   private void addItems(UserSet existingUserSet, List<String> items, int position,
       boolean isPinnRequest) {
     // init items list if needed
@@ -817,6 +814,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // build Collection Page object
     CollectionPage page = createCollectionPageWithItems(userSet, profile, pageNr, pageSize,
         totalInCollection, partOf);
+    
+    if(page == null) {
+      //avoid NPE, should still not happen at runtime  
+      return null;
+    }
 
     // add pagination URLs
     page.setCurrentPageUri(buildPageUrl(paginationBaseUrl, pageNr, pageSize, profile));
@@ -1047,7 +1049,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         break;
       default:
         userSet.setItems(null);
-        break;
     }
   }
   

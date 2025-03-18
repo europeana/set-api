@@ -67,12 +67,7 @@ public class PersistentUserSetImpl extends BaseUserSet implements PersistentUser
 	public String toString() {
 		return "PersistentUserSet [Title:" + getTitle() + ", created:" + getCreated() + 
 				", Id:" + getObjectId() + ", Identifier:" + getIdentifier() + 
-				", modified: " + getModified() + "]";
-	}
-
-	@Override
-	public void setBaseUrl(String baseUrl) {
-	    //used only for web userset	    
+				", modified: " + getModified() + ']';
 	}
 
   @Override
