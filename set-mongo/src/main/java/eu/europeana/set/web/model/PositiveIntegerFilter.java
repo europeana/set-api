@@ -19,7 +19,7 @@ public class PositiveIntegerFilter {
 	}
 
 	//avoid critical sonar cube issue
-	if(!(other instanceof Number)) {
+	if(!(other instanceof Integer)) {
 	    //true means filter out	
 	    return true;
 	}

@@ -70,8 +70,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   
   
   //update the pagination fields of the set (used only for the serialization to the output)
-  protected UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
-    return userSetUtils.updatePagination(userSet, config);
+  protected void updatePagination(UserSet userSet, UserSetConfiguration config) {
+    userSetUtils.updatePagination(userSet, config);
   }
  
   protected PersistentUserSetService getMongoPersistence() {
@@ -330,7 +330,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     } else {
       builder.append('?');
     }
-    builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
+    builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append('=').append(page);
     builder.append('&').append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append('=')
         .append(pageSize);
     // add the profile param if profile is not null (search items in set doesn't use a profile)
@@ -476,7 +476,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   @Override
   public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
     for (SetPageProfile profile : profiles) {
-      if (!SetPageProfile.FACETS.equals(profile)) {
+      if (SetPageProfile.FACETS != profile) {
         return profile;
       }
     }

@@ -171,7 +171,7 @@ public class WebUserSetRest extends BaseRest {
   private ResponseEntity<String> processRetrieveSetPageRequest(String identifier, String sortField,
       String sortOrderField, String page, String pageSize, String profile,
       Authentication authentication, HttpServletRequest request)
-      throws HttpException, ParamValidationException {
+      throws HttpException {
     Integer pageNr;
     Integer pageItems;
     // validate params - profile
@@ -216,7 +216,7 @@ public class WebUserSetRest extends BaseRest {
   }
 
   private UserSet getSetAndVerifyAccess(String identifier, Authentication authentication)
-      throws UserSetNotFoundException, HttpException {
+      throws HttpException {
     UserSet userSet = getUserSetService().getUserSetById(identifier);
 
     // check visibility level for given user
@@ -642,7 +642,7 @@ public class WebUserSetRest extends BaseRest {
       } catch (RuntimeException e) {
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
             I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
+            new String[] {WebUserSetFields.PATH_PARAM_POSITION, position}, e);
       }
     }
     return positionFinal;

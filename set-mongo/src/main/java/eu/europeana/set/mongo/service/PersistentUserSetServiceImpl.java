@@ -313,7 +313,7 @@ public class PersistentUserSetServiceImpl extends
       List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
       for (DBObject o : facet) {
         valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)),
-            Long.parseLong(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
+            Long.valueOf(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
       }
     }
 
@@ -392,6 +392,7 @@ public class PersistentUserSetServiceImpl extends
       Map<String, DBObject> groupFieldsAdditional) {
     DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
+    //NOSONAR
     DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
     for (Map.Entry<String, DBObject> field : groupFieldsAdditional.entrySet()) {
       groupFields.put(field.getKey(), field.getValue());

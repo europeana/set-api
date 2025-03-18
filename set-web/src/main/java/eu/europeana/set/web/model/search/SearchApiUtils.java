@@ -225,7 +225,6 @@ public class SearchApiUtils {
       // decode the url
       String decodedUrl = java.net.URLDecoder.decode(url, StandardCharsets.UTF_8);
       // get the query param value from the getIsDefinedBy
-      final MultiValueMap<String, String> queryParams = UriComponentsBuilder.fromUriString(decodedUrl).build().getQueryParams();
-      return queryParams;
+      return UriComponentsBuilder.fromUriString(decodedUrl).build().getQueryParams();
     }
 }

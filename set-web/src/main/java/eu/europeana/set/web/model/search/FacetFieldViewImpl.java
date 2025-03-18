@@ -13,47 +13,47 @@ import eu.europeana.api.commons.definitions.search.FacetFieldView;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
-@JsonPropertyOrder({ WebUserSetModelFields.TYPE, WebUserSetFields.FIELD, WebUserSetFields.VALUES})
+@JsonPropertyOrder({WebUserSetModelFields.TYPE, WebUserSetFields.FIELD, WebUserSetFields.VALUES})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-//TODO: add extends  commons.FacetFieldViewImpl, only after removing dependency on solr
+// TODO: add extends commons.FacetFieldViewImpl, only after removing dependency on solr
 public class FacetFieldViewImpl implements FacetFieldView {
 
-    private String type = WebUserSetFields.FACET_TYPE;
-    private String field;
-    @JsonIgnore
-    private Map<String, Long> valueCountMap;
-    private List<FacetValue> facetValues;
+  private String type = WebUserSetFields.FACET_TYPE;
+  private String field;
+  @JsonIgnore
+  private Map<String, Long> valueCountMap;
+  private List<FacetValue> facetValues;
 
-    public FacetFieldViewImpl(String field, Map<String, Long> valueCountMap) {
-        this.field = field;
-        this.valueCountMap = valueCountMap;
-	if (valueCountMap != null && !valueCountMap.isEmpty()) {
-	    facetValues = new ArrayList<FacetValue>();
-	    for (Map.Entry<String, Long> entry : valueCountMap.entrySet()) {
-		facetValues.add(new FacetValue(entry.getKey(), entry.getValue()));
-	    }
-	}        
+  public FacetFieldViewImpl(String field, Map<String, Long> valueCountMap) {
+    this.field = field;
+    this.valueCountMap = valueCountMap;
+    if (valueCountMap != null && !valueCountMap.isEmpty()) {
+      facetValues = new ArrayList<FacetValue>(valueCountMap.size());
+      for (Map.Entry<String, Long> entry : valueCountMap.entrySet()) {
+        facetValues.add(new FacetValue(entry.getKey(), entry.getValue()));
+      }
     }
+  }
 
-    @Override
-    @JsonGetter(WebUserSetFields.FIELD)
-    public String getName() {
-        return field;
-    }
+  @Override
+  @JsonGetter(WebUserSetFields.FIELD)
+  public String getName() {
+    return field;
+  }
 
-    @Override
-    public Map<String, Long> getValueCountMap() {
-        return valueCountMap;
-    }
+  @Override
+  public Map<String, Long> getValueCountMap() {
+    return valueCountMap;
+  }
 
-    @JsonGetter(WebUserSetFields.TYPE)
-    String getType() {
-        return type;
-    }
-    
-    @JsonGetter(WebUserSetFields.VALUES)
-    public List<FacetValue> facetValues() {
-    	return facetValues;
-    }
+  @JsonGetter(WebUserSetFields.TYPE)
+  String getType() {
+    return type;
+  }
+
+  @JsonGetter(WebUserSetFields.VALUES)
+  public List<FacetValue> facetValues() {
+    return facetValues;
+  }
 }
 
