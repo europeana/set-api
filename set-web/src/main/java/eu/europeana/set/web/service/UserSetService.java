@@ -18,6 +18,7 @@ import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.exception.SearchApiClientException;
+import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
@@ -29,14 +30,15 @@ import eu.europeana.set.web.service.controller.exception.SetUniquenessValidation
 public interface UserSetService {
 
   /**
-   * This method stores UserSet object in database and in Solr.
+   * This method validates, generates the id and UserSet object in database
    *
    * @param userSet
    * @return UserSet object
    * @throws HttpException
    */
-  UserSet storeUserSet(UserSet userSet, Authentication authentication)
+  UserSet createUserSet(UserSet userSet, Authentication authentication)
       throws HttpException, IOException;
+  
 
   /**
    * This method converts close set to open set by updating respective items
@@ -277,5 +279,8 @@ public interface UserSetService {
   void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
 
   WebResource generateDepiction(UserSet userSet) throws SearchApiClientException;
+
+  SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet)
+      throws ParamValidationException, RequestBodyValidationException;
 
 }

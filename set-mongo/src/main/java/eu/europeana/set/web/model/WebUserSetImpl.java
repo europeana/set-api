@@ -1,6 +1,5 @@
 package eu.europeana.set.web.model;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -43,12 +42,12 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
   String baseUrl = "/set/";
 
   @Override
-  @JsonProperty(WebUserSetFields.ITEMS)
+  @JsonProperty(WebUserSetModelFields.ITEMS)
   public void setItems(List<String> items) {
     super.setItems(items);
   }
 
-  @JsonProperty(WebUserSetFields.ITEMS)
+  @JsonProperty(WebUserSetModelFields.ITEMS)
   @JsonRawValue
   public List<String> getSerializedItems() {
     return serializedItems;
@@ -86,7 +85,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
     super.setVisibility(visibility);
   }
 
-  @JsonProperty(WebUserSetFields.TITLE)
+  @JsonProperty(WebUserSetModelFields.TITLE)
   public Map<String, String> getTitle() {
     return super.getTitle();
   }
@@ -225,7 +224,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
       resBuilder.append(", Items: ");
       resBuilder.append(getItems().size());
     }
-    resBuilder.append("]");
+    resBuilder.append(']');
     return resBuilder.toString();
   }
 
@@ -284,7 +283,7 @@ public class WebUserSetImpl extends PersistentUserSetImpl {
   }
 
   @JsonIgnore
-  String getBaseUrl() {
+  public String getBaseUrl() {
     return baseUrl;
   }
 

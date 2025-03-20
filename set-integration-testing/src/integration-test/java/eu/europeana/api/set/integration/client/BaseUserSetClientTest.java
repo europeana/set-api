@@ -44,7 +44,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 @ComponentScan(basePackageClasses = UserSetApp.class)
 @ContextConfiguration(locations = {"classpath:set-web-context.xml"})
 @EnableAutoConfiguration
-public class BaseUserSetClientTest {
+public abstract class BaseUserSetClientTest {
 
   private static MongoContainer MONGO_CONTAINER;
   static {

@@ -13,83 +13,90 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
 import java.util.List;
 
-@JsonPropertyOrder({ WebUserSetModelFields.AT_CONTEXT, WebUserSetModelFields.ID, WebUserSetModelFields.TYPE, WebUserSetFields.PART_OF,
-    WebUserSetFields.START_INDEX, WebUserSetModelFields.TOTAL, WebUserSetFields.ITEMS, WebUserSetFields.PREV, WebUserSetFields.NEXT, WebUserSetFields.FACETS })
+@JsonPropertyOrder({WebUserSetModelFields.AT_CONTEXT, WebUserSetModelFields.ID,
+    WebUserSetModelFields.TYPE, WebUserSetFields.PART_OF, WebUserSetFields.START_INDEX,
+    WebUserSetModelFields.TOTAL, WebUserSetFields.ITEMS, WebUserSetFields.PREV,
+    WebUserSetFields.NEXT, WebUserSetFields.FACETS})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BaseUserSetResultPage<T> extends ResultsPageImpl<T>{
+public class BaseUserSetResultPage<T> extends ResultsPageImpl<T> {
 
-    CollectionOverview partOf;
-    String type = CommonLdConstants.RESULT_PAGE;
+  CollectionOverview partOf;
+  String type = CommonLdConstants.RESULT_PAGE;
 
-    @JsonProperty(WebUserSetFields.TYPE)
-    public String getType() {
-        return type;
-    }
-    public void setType(String type) {
-        this.type = type;
-    }
+  @JsonProperty(WebUserSetFields.TYPE)
+  public String getType() {
+    return type;
+  }
 
-    @JsonProperty(WebUserSetFields.PART_OF)
-    public CollectionOverview getPartOf() {
-        return partOf;
-    }
+  public void setType(String type) {
+    this.type = type;
+  }
 
-    public void setPartOf(CollectionOverview partOf) {
-        this.partOf = partOf;
-    }
+  @JsonProperty(WebUserSetFields.PART_OF)
+  public CollectionOverview getPartOf() {
+    return partOf;
+  }
 
-    @Override
-    @JsonProperty(WebUserSetModelFields.TOTAL)
-    public long getTotalInPage() {
-        return super.getTotalInPage();
-    }
+  public void setPartOf(CollectionOverview partOf) {
+    this.partOf = partOf;
+  }
 
-    @Override
-    @JsonIgnore
-    public long getTotalInCollection() {
-        return super.getTotalInCollection();
-    }
+  @Override
+  @JsonProperty(WebUserSetModelFields.TOTAL)
+  public long getTotalInPage() {
+    return super.getTotalInPage();
+  }
 
-    @Override
-    @JsonIgnore
-    public int getCurrentPage() {
-        return super.getCurrentPage();
-    }
+  @Override
+  @JsonIgnore
+  public long getTotalInCollection() {
+    // remove from serialization
+    return super.getTotalInCollection();
+  }
 
-    @Override
-    @JsonIgnore
-    public String getResultCollectionUri() {
-        return super.getResultCollectionUri();
-    }
+  @Override
+  @JsonIgnore
+  public int getCurrentPage() {
+    // remove from serialization
+    return super.getCurrentPage();
+  }
 
-    @Override
-    @JsonIgnore
-    public String getCollectionUri() {
-        return super.getCollectionUri();
-    }
+  @Override
+  @JsonIgnore
+  public String getResultCollectionUri() {
+    // remove from serialization
+    return super.getResultCollectionUri();
+  }
 
-    @Override
-    @JsonProperty(WebUserSetModelFields.ID)
-    public String getCurrentPageUri() {
-        return super.getCurrentPageUri();
-    }
+  @Override
+  @JsonIgnore
+  public String getCollectionUri() {
+    // remove from serialization
+    return super.getCollectionUri();
+  }
 
-    @Override
-    @JsonProperty(WebUserSetFields.NEXT)
-    public String getNextPageUri() {
-        return super.getNextPageUri();
-    }
+  @Override
+  @JsonProperty(WebUserSetModelFields.ID)
+  public String getCurrentPageUri() {
+    return super.getCurrentPageUri();
+  }
 
-    @Override
-    @JsonProperty(WebUserSetFields.PREV)
-    public String getPrevPageUri() {
-        return super.getPrevPageUri();
-    }
+  @Override
+  @JsonProperty(WebUserSetFields.NEXT)
+  public String getNextPageUri() {
+    return super.getNextPageUri();
+  }
 
-    @Override
-    @JsonProperty(WebUserSetFields.FACETS)
-    public List<FacetFieldView> getFacetFields() {
-        return super.getFacetFields();
-    }
+  @Override
+  @JsonProperty(WebUserSetFields.PREV)
+  public String getPrevPageUri() {
+    return super.getPrevPageUri();
+  }
+
+  @Override
+  @JsonProperty(WebUserSetFields.FACETS)
+  public List<FacetFieldView> getFacetFields() {
+    return super.getFacetFields();
+  }
 
 }

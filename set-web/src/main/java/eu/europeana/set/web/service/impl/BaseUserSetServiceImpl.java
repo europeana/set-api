@@ -70,23 +70,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   
   
   //update the pagination fields of the set (used only for the serialization to the output)
-  protected UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
-    return userSetUtils.updatePagination(userSet, config);
+  protected void updatePagination(UserSet userSet, UserSetConfiguration config) {
+    userSetUtils.updatePagination(userSet, config);
   }
-  
-  protected UserSet writeUserSetToDb(UserSet existingUserSet) {
-    // update total
-    updateTotal(existingUserSet);
-    // generate and add a created and modified timestamp to the Set
-    existingUserSet.setModified(new Date());
-
-    // Respond with HTTP 200
-    // update an existing user set. merge user sets - insert new fields in existing
-    // object
-    return getMongoPersistence().update((PersistentUserSet) existingUserSet);
-  }
-
-
+ 
   protected PersistentUserSetService getMongoPersistence() {
     return mongoPersistance;
   }
@@ -210,21 +197,20 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
           new String[] {WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)"});
     }
+    
+    // when we change the type to Gallery, check the items size of the existing set
+    if (webUserSet.isGallery()) {
+      validateGallerySize(persistentUserSet, 0);
+    }
+
     // validate input
     validateWebUserSet(webUserSet, persistentUserSet.isPublished());
 
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
 
-    // validate new items
-    validateAndSetItems(persistentUserSet, webUserSet);
-    // remove duplicated items
-    removeItemDuplicates(persistentUserSet);
-
-    // update modified date
-    persistentUserSet.setModified(new Date());
-    updateTotal(persistentUserSet);
-    return getMongoPersistence().update(persistentUserSet);
+    //total and modified are updated in persistence layer
+    return getMongoPersistence().store(persistentUserSet);
   }
 
   private void resetImmutableFields(UserSet webUserSet, PersistentUserSet persistentUserSet) {
@@ -268,11 +254,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return apiUrl;
   }
 
-  protected String removeParam(final String queryParam, String queryParams) {
+  protected String removeParam(final String queryParam, String queryString) {
     String tmp;
     // avoid name conflicts search "queryParam="
-    int startPos = queryParams.indexOf(queryParam + "=");
-    int startEndPos = queryParams.indexOf('&', startPos + 1);
+    int startPos = queryString.indexOf(queryParam + "=");
+    int startEndPos = queryString.indexOf('&', startPos + 1);
 
     if (startPos >= 0) {
       // make sure to remove the "&" if not the first param
@@ -280,14 +266,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         startPos--;
       }
 
-      tmp = queryParams.substring(0, startPos);
+      tmp = queryString.substring(0, startPos);
 
       if (startEndPos > 0) {
         // tmp += queryParams.substring(startEndPos);
-        tmp = (new StringBuilder(tmp)).append(queryParams.substring(startEndPos)).toString();
+        tmp = (new StringBuilder(tmp)).append(queryString.substring(startEndPos)).toString();
       }
     } else {
-      tmp = queryParams;
+      tmp = queryString;
     }
     return tmp;
   }
@@ -344,7 +330,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     } else {
       builder.append('?');
     }
-    builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append("=").append(page);
+    builder.append(CommonApiConstants.QUERY_PARAM_PAGE).append('=').append(page);
     builder.append('&').append(CommonApiConstants.QUERY_PARAM_PAGE_SIZE).append('=')
         .append(pageSize);
     // add the profile param if profile is not null (search items in set doesn't use a profile)
@@ -490,34 +476,11 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   @Override
   public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
     for (SetPageProfile profile : profiles) {
-      if (!SetPageProfile.FACETS.equals(profile)) {
+      if (SetPageProfile.FACETS != profile) {
         return profile;
       }
     }
     return null;
-  }
-
-  private void validateAndSetItems(UserSet storedUserSet, UserSet userSetUpdates) 
-      throws ApplicationAuthenticationException {
-    // no validation of items for open sets, they are retrieved dynamically
-    if (storedUserSet.isOpenSet()) {
-      return;
-    }
-
-    /* for entity sets update there must not be any items present in new user set
-     * only metadata can be update for entity sets
-     */
-    if (storedUserSet.isEntityBestItemsSet() && userSetUpdates.getItems()!=null 
-        && !userSetUpdates.getItems().isEmpty()) {
-      throw new ApplicationAuthenticationException(
-          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE,
-          UserSetI18nConstants.USERSET_MINIMAL_UPDATE_PROFILE, new String[] {},
-          HttpStatus.BAD_REQUEST, null);
-    }
-    
-    if(userSetUpdates.getItems()!=null && userSetUpdates.getItems().size()>0) { 
-      storedUserSet.setItems(userSetUpdates.getItems());
-    }
   }
 
   /**
@@ -647,13 +610,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
           new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
     }
     
-    //validate number of items for the sets of type Collection
-    validateGallerySize(webUserSet, 0);
-
+    //validate number of items for the sets of type Gallery
+    if (webUserSet.isGallery()) {
+      validateGallerySize(webUserSet, 0);
+    }
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
-    validateIsDefinedBy(webUserSet);
+    validateAndSanitizeIsDefinedBy(webUserSet);
     validateEntityBestItemsSet(webUserSet);
     validateItems(webUserSet.getItems());
   }
@@ -661,10 +625,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   @Override
   public void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException {
     final int galleryMaxSize = getConfiguration().getGalleryMaxSize();
-    if(webUserSet.isGallery() 
-        && webUserSet.getItems()!=null 
+    if(webUserSet.getItems()!=null 
         && webUserSet.getItems().size() + newItems > galleryMaxSize) {
-      
       String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;   
       throw new ItemValidationException(messageKey, 
           new String[] {String.valueOf(galleryMaxSize)} );
@@ -786,46 +748,20 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * https://api.europeana.eu/record/search.json?) to point to the Search API. We make a GET request
    * upon creation to see if the request total items returns more then 0 and success is true
    * (meaning is valid).
+   * The URL from isDefinedBy is sanitized to remove API Keys if included
    * 
-   * @param webUserSet
-   * @throws ParamValidationException
-   * @throws RequestBodyValidationException
+   * @param webUserSet the user set
+   * @throws ParamValidationException if invalid isDefinedBy url
+   * @throws RequestBodyValidationException if invocation of isDefinedBy doesn't return results
    */
-  void validateIsDefinedBy(UserSet webUserSet)
+  void validateAndSanitizeIsDefinedBy(UserSet webUserSet)
       throws ParamValidationException, RequestBodyValidationException {
 
     if (webUserSet.isOpenSet()) {
-      String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
-      StringBuilder queryUrl =
-          new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
-      if (!searchUrl.equals(queryUrl.toString())) {
-        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-                " the access to api endpoint is not allowed: " + queryUrl});
-      }
-
-      String apiKey = getConfiguration().getSearchApiKey();
-      SearchApiResponse apiResult;
-      try {
-        queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
-        // the items are not required for validation, hence pageSize =0
-        // form the minimal post body
-        SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet,
-            getConfiguration().getItemDataEndpoint(), null, null, 0, 0, null);
-        String jsonBody = serializeSearchApiRequest(searchApiRequest);
-
-        apiResult = getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);
-      } catch (SearchApiClientException e) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-                "an error occured when calling " + webUserSet.getIsDefinedBy()},
-            e);
-      } catch (IOException e) {
-        throw new RequestBodyValidationException(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID,
-            null, e);
-      }
+      //remove the apikey provided by the user from the isDefinedBy field
+      String isDefinedByWithoutApikey = removeParam(CommonApiConstants.PARAM_WSKEY, webUserSet.getIsDefinedBy());
+      webUserSet.setIsDefinedBy(isDefinedByWithoutApikey);
+      SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet);
       if (apiResult.getTotal() <= 0) {
         throw new RequestBodyValidationException(
             UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
@@ -833,6 +769,42 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
                 "no items returned when calling " + webUserSet.getIsDefinedBy()});
       }
     }
+  }
+
+  @Override
+  public SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet)
+      throws ParamValidationException, RequestBodyValidationException {
+    String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
+    StringBuilder queryUrl =
+        new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
+    if (!searchUrl.equals(queryUrl.toString())) {
+      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] {WebUserSetModelFields.IS_DEFINED_BY,
+              " the access to api endpoint is not allowed: " + queryUrl});
+    }
+
+    String apiKey = getConfiguration().getSearchApiKey();
+    try {
+      queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
+      // the items are not required for validation, hence pageSize =0
+      // form the minimal post body
+      SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet,
+          getConfiguration().getItemDataEndpoint(), null, null, 0, 0, null);
+      String jsonBody = serializeSearchApiRequest(searchApiRequest);
+
+      return getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);
+    } catch (SearchApiClientException e) {
+      throw new RequestBodyValidationException(
+          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+          new String[] {WebUserSetModelFields.IS_DEFINED_BY,
+              "an error occured when calling " + webUserSet.getIsDefinedBy()},
+          e);
+    } catch (IOException e) {
+      throw new RequestBodyValidationException(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID,
+          null, e);
+    }
+   
   }
 
 
@@ -909,14 +881,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
-  void updateTotal(UserSet existingUserSet) {
-    if (existingUserSet.getItems() != null) {
-      existingUserSet.setTotal(existingUserSet.getItems().size());
-    } else {
-      existingUserSet.setTotal(0);
-    }
-  }
-
   PersistentUserSet updateUserSetForPublish(PersistentUserSet userSet, Date issued, Authentication authentication){
     // update the visibility to publish
     if (isOwner(userSet, authentication)) {
@@ -932,7 +896,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
     userSet.setIssued(issued);
     userSet.setModified(now);
-    return getMongoPersistence().update(userSet);
+    return getMongoPersistence().store(userSet);
   }
 
   private Agent buildEuropeanaPublisherUser() {
@@ -955,7 +919,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
     userSet.setIssued(null);
     userSet.setModified(new Date());
-    return getMongoPersistence().update(userSet);
+    return getMongoPersistence().store(userSet);
   }
 
   private boolean hasPublisherAsOwner(PersistentUserSet userSet) {

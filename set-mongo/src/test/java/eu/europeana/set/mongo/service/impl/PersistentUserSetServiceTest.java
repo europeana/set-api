@@ -224,7 +224,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
   private UserSet createUserSet(boolean isCollection) {
     UserSet userSet = new WebUserSetImpl();
     UserSet persistentUserSet = getObjectBuilder().buildUserSet(userSet, isCollection);
-    UserSet storedUserSet = userSetService.store(persistentUserSet);
+    UserSet storedUserSet = userSetService.create(persistentUserSet);
     checkUserSet(persistentUserSet, storedUserSet);
     return storedUserSet;
   }

@@ -19,7 +19,7 @@ public class UserSetUtils {
 
   public static final String EUROPEANA_ID_FIELD_REGEX = "^[a-zA-Z0-9_]*$";
   public static final Pattern EUROPEANA_ID = Pattern.compile("^/[a-zA-Z0-9_]*/[a-zA-Z0-9_]*$");
-  
+
   /**
    * This method converts string value to Map<String,String> values for given key - language.
    *
@@ -43,7 +43,7 @@ public class UserSetUtils {
    * @return identifier URL
    */
   public static String buildItemUrl(String itemDataEndpoint, String recordId) {
-    if (recordId.startsWith(WebUserSetFields.SLASH)) {
+    if (recordId.startsWith(String.valueOf(WebUserSetFields.SLASH))) {
       return itemDataEndpoint + recordId.substring(1);
     } else {
       return itemDataEndpoint + recordId;
@@ -61,7 +61,7 @@ public class UserSetUtils {
    */
   public static String buildItemUrl(String itemDataEndpoint, String dataset, String id) {
     StringBuilder builder = new StringBuilder(itemDataEndpoint);
-    if (!itemDataEndpoint.endsWith(WebUserSetFields.SLASH)) {
+    if (!itemDataEndpoint.endsWith(String.valueOf(WebUserSetFields.SLASH))) {
       builder.append(WebUserSetFields.SLASH);
     }
     builder.append(dataset);
@@ -76,16 +76,15 @@ public class UserSetUtils {
    * 
    * @return user set object with updated pagination values
    */
-  public UserSet updatePagination(UserSet userSet, UserSetConfiguration config) {
+  public void updatePagination(UserSet userSet, UserSetConfiguration config) {
     if (userSet == null) {
-      return null;
+      return;
     }
 
     // set base URL for set.id
     userSet.setBaseUrl(config.getSetDataEndpoint());
     if (userSet.getItems() != null) {
-      int total = userSet.getItems().size();
-      userSet.setTotal(total);
+      int total = updatedTotal(userSet);
       // NOTE: the first and last properties are not used now and might be deprecated, they should
       // not be stored in the database
       if (total > 0) {
@@ -111,8 +110,21 @@ public class UserSetUtils {
       userSet.setFirst(null);
       userSet.setLast(null);
     }
+  }
 
-    return userSet;
+  /**
+   * Update the total field based on the number of items in the set
+   * 
+   * @param userSet the user set
+   * @return the total numbers of items in set
+   */
+  public int updatedTotal(UserSet userSet) {
+    int total = 0;
+    if (userSet.getItems() != null) {
+      total = userSet.getItems().size();
+    }
+    userSet.setTotal(total);
+    return total;
   }
 
 
@@ -139,8 +151,8 @@ public class UserSetUtils {
   public static String buildUserSetId(String baseUrl, String identifier) {
     StringBuilder urlBuilder = new StringBuilder();
     urlBuilder.append(baseUrl);
-    if (!baseUrl.endsWith("/")) {
-      urlBuilder.append("/");
+    if (!baseUrl.endsWith(String.valueOf(WebUserSetFields.SLASH))) {
+      urlBuilder.append(WebUserSetFields.SLASH);
     }
     urlBuilder.append(identifier);
     return urlBuilder.toString();
@@ -169,15 +181,15 @@ public class UserSetUtils {
    */
   public static String extractItemIdentifier(String dataEuropeanaUri, String itemDataEndpoint) {
     // preserve the first / in the item id
-    if(itemDataEndpoint == null) {
-     return extractItemIdentifier(dataEuropeanaUri); 
-    } else if (itemDataEndpoint.endsWith("/")) {
+    if (itemDataEndpoint == null) {
+      return extractItemIdentifier(dataEuropeanaUri);
+    } else if (itemDataEndpoint.endsWith(String.valueOf(WebUserSetFields.SLASH))) {
       return StringUtils.substring(dataEuropeanaUri, itemDataEndpoint.length() - 1);
     } else {
       return StringUtils.substring(dataEuropeanaUri, itemDataEndpoint.length());
     }
   }
-  
+
   /**
    * extract item local id from data.europeana URI
    * 
@@ -185,26 +197,31 @@ public class UserSetUtils {
    * @return
    */
   public static String extractItemIdentifier(String dataEuropeanaItemUri) {
-    String[] parts = StringUtils.split(dataEuropeanaItemUri, '/');
+    String[] parts = StringUtils.split(dataEuropeanaItemUri, WebUserSetFields.SLASH);
     assert parts.length > 2;
-    final int collectionIndex = parts.length-2;
-    final int itemIndex = parts.length-1;
-    return '/'+ parts[collectionIndex] + '/' + parts[itemIndex];  
+    final int collectionIndex = parts.length - 2;
+    final int itemIndex = parts.length - 1;
+    return String.valueOf(WebUserSetFields.SLASH) + parts[collectionIndex]
+        + String.valueOf(WebUserSetFields.SLASH) + parts[itemIndex];
   }
-  
+
+
   /**
-   * Build the json string used to quickly verify recordId in json string (e.g "id": "\/collection_id\/item_id")
+   * Build the json string used to quickly verify recordId in json string (e.g "id":
+   * "\/collection_id\/item_id")
+   * 
    * @param The local record id (e.g "/collection_id/item_id")
-   * @return the json string for representing the record id in json string representations 
+   * @return the json string for representing the record id in json string representations
    */
-  public static String buildRecordIdJsonString(String localId, boolean escapeSlashes, boolean includeSpace) {
+  public static String buildRecordIdJsonString(String localId, boolean escapeSlashes,
+      boolean includeSpace) {
     // escape "/" to "\/" to match json string
     StringBuilder builder = new StringBuilder("\"id\":");
-    if(includeSpace) {
+    if (includeSpace) {
       builder.append(' ');
     }
     builder.append('"');
-    if(escapeSlashes) {
+    if (escapeSlashes) {
       builder.append(StringUtils.replace(localId, "/", "\\/"));
     } else {
       builder.append(localId);

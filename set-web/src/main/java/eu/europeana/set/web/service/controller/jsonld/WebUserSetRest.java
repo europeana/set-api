@@ -46,6 +46,7 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
@@ -82,7 +83,7 @@ public class WebUserSetRest extends BaseRest {
     // validate user - check user credentials (all registered users can create)
     // if invalid respond with HTTP 401 or if unauthorized respond with HTTP 403;
     Authentication authentication = verifyWriteAccess(Operations.CREATE, request);
-    return storeUserSet(userSet, authentication, request);
+    return createUserSet(userSet, authentication, request);
   }
 
   /**
@@ -95,7 +96,7 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws HttpException
    */
-  protected ResponseEntity<String> storeUserSet(String userSetJsonLdStr,
+  protected ResponseEntity<String> createUserSet(String userSetJsonLdStr,
       Authentication authentication, HttpServletRequest request) throws HttpException {
     try {
 
@@ -116,7 +117,7 @@ public class WebUserSetRest extends BaseRest {
       // generate and add a created and modified timestamp to the Set
       // type should be saved now in the database and not generated on the fly during
       // serialization
-      UserSet storedUserSet = getUserSetService().storeUserSet(webUserSet, authentication);
+      UserSet storedUserSet = getUserSetService().createUserSet(webUserSet, authentication);
 
       // add specific headers
       Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
@@ -170,7 +171,7 @@ public class WebUserSetRest extends BaseRest {
   private ResponseEntity<String> processRetrieveSetPageRequest(String identifier, String sortField,
       String sortOrderField, String page, String pageSize, String profile,
       Authentication authentication, HttpServletRequest request)
-      throws HttpException, ParamValidationException {
+      throws HttpException {
     Integer pageNr;
     Integer pageItems;
     // validate params - profile
@@ -204,6 +205,10 @@ public class WebUserSetRest extends BaseRest {
     // if the Set is disabled respond with HTTP 410
     try {
       UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
+      if(userSet.isOpenSet()) {
+        SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(userSet);
+        userSet.setTotal(apiResponse.getTotal());
+      }
       return buildResponseEntity(userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
     } catch (IOException e) {
       throw new InternalServerException(e);
@@ -211,7 +216,7 @@ public class WebUserSetRest extends BaseRest {
   }
 
   private UserSet getSetAndVerifyAccess(String identifier, Authentication authentication)
-      throws UserSetNotFoundException, HttpException {
+      throws HttpException {
     UserSet userSet = getUserSetService().getUserSetById(identifier);
 
     // check visibility level for given user
@@ -247,8 +252,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet.getModified(), profile, pageNr, pageSize,
-          request);
+      return buildSetPageResponse(itemPage, userSet.getModified(), profile, request);
 
     } catch (HttpException e) {
       // avoid wrapping http exception
@@ -638,7 +642,7 @@ public class WebUserSetRest extends BaseRest {
       } catch (RuntimeException e) {
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
             I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
+            new String[] {WebUserSetFields.PATH_PARAM_POSITION, position}, e);
       }
     }
     return positionFinal;

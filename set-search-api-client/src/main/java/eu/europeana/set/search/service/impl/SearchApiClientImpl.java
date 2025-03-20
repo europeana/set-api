@@ -228,7 +228,6 @@ public class SearchApiClientImpl implements SearchApiClient {
       throws SearchApiClientException {
     return searchItems(uri, searchPostBody, apiKey, true);
   }
-
   
   @Override
   public void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds, String itemDataEndpoint, BaseWebResource depiction)
@@ -298,11 +297,11 @@ public class SearchApiClientImpl implements SearchApiClient {
   private void fillDepictionFromRecord(String itemId, final JSONObject recordJsonObject,
       BaseWebResource depiction) throws JSONException, SearchApiClientException {
     String thumbnail = recordJsonObject.getJSONArray("edmPreview").getString(0);
-    String resourceId = getResourceId(thumbnail);
+      String resourceId = getResourceId(thumbnail);
 
-    depiction.setId(resourceId);
-    depiction.setSource(itemId);
-    depiction.setThumbnail(thumbnail);
+      depiction.setId(resourceId);
+      depiction.setSource(itemId);
+      depiction.setThumbnail(thumbnail);
   }
 
 

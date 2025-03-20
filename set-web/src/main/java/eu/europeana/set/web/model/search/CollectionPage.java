@@ -24,4 +24,8 @@ public class CollectionPage extends BaseUserSetResultPage<String>{
     public void setStartIndex(int startIndex) {
         this.startIndex = startIndex;
     }
+
+    UserSet getSet() {
+      return set;
+    }
 }

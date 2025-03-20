@@ -22,7 +22,6 @@ import dev.morphia.query.Query;
 import dev.morphia.query.QueryResults;
 import dev.morphia.query.Sort;
 import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
@@ -77,29 +76,10 @@ public class PersistentUserSetServiceImpl extends
    */
   private void validatePersistentUserSet(PersistentUserSet object) {
 
-    if (object.getCreated() == null) {
-      Date now = new Date();
-      object.setCreated(now);
-    }
-
-    if (object.getModified() == null) {
-      Date now = new Date();
-      object.setModified(now);
-    }
-
     // check creator
     if (object.getCreator() == null) {
       throw new UserSetValidationException(UserSetValidationException.ERROR_NULL_CREATOR);
     }
-
-    if(object.getIdentifier()== null) {
-      long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER);
-      object.setIdentifier("" + sequenceId);
-    } else {
-      throw new UserSetValidationException(
-          "UserSet.identifier must not be set when creating new user sets, for updating user set use the update method!"); 
-    }
-    
 
     String notInitializedLongId = "-1";
 
@@ -123,13 +103,13 @@ public class PersistentUserSetServiceImpl extends
   }
 
   @Override
-  public long getDistinct(String field, boolean fieldIsArray, String collectionType)
+  public long getDistinct(String field, boolean fieldIsArray, String type)
       throws UserSetServiceException {
     long count = 0;
     AggregationOptions aggregationOptions =
         AggregationOptions.builder().allowDiskUse(Boolean.TRUE).build();
     Cursor cursor = getDao().getCollection().aggregate(
-        getDistinctCountPipeline(field, fieldIsArray, collectionType), aggregationOptions);
+        getDistinctCountPipeline(field, fieldIsArray, type), aggregationOptions);
     if (cursor.hasNext()) {
       // ideally there should be only one value present.
       count = Long.parseLong(cursor.next().get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString());
@@ -197,6 +177,20 @@ public class PersistentUserSetServiceImpl extends
   }
 
   @Override
+  public UserSet create(UserSet userSet) {
+    
+    if(userSet.getIdentifier()== null) {
+      long sequenceId = generateUserSetId(WebUserSetFields.USER_SET_PROVIDER);
+      userSet.setIdentifier("" + sequenceId);
+    }  else {
+      throw new UserSetValidationException(
+          "UserSet.identifier must not be set when creating new user sets, for updating user set use the store method!"); 
+    }
+    
+    return this.store(userSet);
+  }
+  
+  @Override
   public UserSet store(UserSet userSet) {
 
     PersistentUserSet persistentObject = null;
@@ -206,9 +200,42 @@ public class PersistentUserSetServiceImpl extends
     } else {
       throw new IllegalArgumentException(NOT_PERSISTENT_OBJECT);
     }
-
-    validatePersistentUserSet(persistentObject);
     return this.store(persistentObject);
+  }
+
+  @Override
+  public PersistentUserSet store(PersistentUserSet persistentUserSet) {
+
+    Date now = new Date();
+    //allways update the modified date
+    persistentUserSet.setModified(now);
+    
+    if (persistentUserSet.getCreated() == null) {
+      persistentUserSet.setCreated(now);
+    }
+    
+    validatePersistentUserSet(persistentUserSet);
+    resetTransientFields(persistentUserSet);
+    updateTotal(persistentUserSet);
+    return super.store(persistentUserSet);
+  }
+  
+  void updateTotal(UserSet existingUserSet) {
+    if(existingUserSet.isOpenSet()) {
+      //for dynamic collections the total needs to be retrieved on the fly
+      existingUserSet.setTotal(-1);
+    } else if (existingUserSet.getItems() == null) {
+      existingUserSet.setTotal(0);
+    } else {
+      //set total to the number of items
+      existingUserSet.setTotal(existingUserSet.getItems().size());
+    }
+  }
+  
+  private void resetTransientFields(PersistentUserSet persistentObject) {
+    //pagination fields are transient fields
+    persistentObject.setFirst(null);
+    persistentObject.setLast(null);
   }
 
   protected PersistentUserSetDao<PersistentUserSet, String> getUserSetDao() {
@@ -286,7 +313,7 @@ public class PersistentUserSetServiceImpl extends
       List<DBObject> facet = (List<DBObject>) object.get(facetQuery.getOutputField());
       for (DBObject o : facet) {
         valueCountMap.put(String.valueOf(o.get(UserSetMongoConstants.MONGO_ID)),
-            Long.parseLong(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
+            Long.valueOf(o.get(UserSetMongoConstants.MONGO_FIELD_COUNT).toString()));
       }
     }
 
@@ -365,6 +392,7 @@ public class PersistentUserSetServiceImpl extends
       Map<String, DBObject> groupFieldsAdditional) {
     DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
+    //NOSONAR
     DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
     for (Map.Entry<String, DBObject> field : groupFieldsAdditional.entrySet()) {
       groupFields.put(field.getKey(), field.getValue());
@@ -546,18 +574,6 @@ public class PersistentUserSetServiceImpl extends
       }
     }
     getUserSetDao().deleteByIdentifier(identifiers);
-  }
-
-  /**
-   *      
-   * 
-   * @deprecated     
-   */
-  @Override
-  @Deprecated(since = "", forRemoval = true)
-  // TODO: use store instead
-  public PersistentUserSet update(PersistentUserSet userSet) throws UserSetValidationException {
-    return store(userSet);
   }
 
   /**

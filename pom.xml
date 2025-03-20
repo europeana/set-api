@@ -76,7 +76,7 @@
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
 		<!-- sonar - jacoco properties -->
-		<jacoco-plugin.version>0.8.7</jacoco-plugin.version>
+		<jacoco-plugin.version>0.8.11</jacoco-plugin.version>
 		<pmd-plugin.version>3.15.0</pmd-plugin.version>
 		<spotbugs-plugin.version>4.5.2.0</spotbugs-plugin.version>
 		<sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
@@ -91,9 +91,9 @@
 		<!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
 		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
-		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
-
-
+		<!-- this property needs to be overwritten in modules -->
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		
 	</properties>
 
 	<dependencyManagement>
@@ -373,6 +373,17 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>${jacoco-plugin.version}</version>
+						<configuration>
+							<excludes>
+								<!-- see also sonar sonar.coverage.exclusions -->
+								<!-- exclude serch api client eventually -->
+								<!--
+								<exclude>eu/europeana/set/search/**/*.*</exclude>
+								-->
+								<!-- exclude annotation client package as client tests are not executed -->
+								<exclude>**/UsageStatsService.class</exclude>
+							</excludes>
+						</configuration>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
@@ -380,6 +391,14 @@
 									<goal>prepare-agent</goal>
 								</goals>
 							</execution>
+							<!--
+							<execution>
+								<id>report</id>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+							-->
 						</executions>
 					</plugin>
 					<plugin>

@@ -1,16 +1,11 @@
-/**
- * 
- */
 package eu.europeana.set.search.service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-/**      
- * refactor code to remove dependency on web modules and change this class
- * @deprecated
+/**
+ * Base class defining common fields of API response
  */
-@Deprecated(since = "", forRemoval = true)
 @JsonInclude(Include.NON_NULL)
 public abstract class ApiResponse {
 

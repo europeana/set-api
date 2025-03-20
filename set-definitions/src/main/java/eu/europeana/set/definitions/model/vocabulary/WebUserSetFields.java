@@ -8,7 +8,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // Web application Constants
     public static final String USER_SET_PROVIDER          = "userset";
     public static final String USER_SET_APPLICATION_NAME  = "webuserset";
-    public static final String SLASH                      = "/";
+    public static final char SLASH                      = '/';
     public static final String PAR_CHAR                   = "?";
     public static final String AND                        = "&";
     public static final String COMMA                      = ",";
@@ -43,11 +43,6 @@ public class WebUserSetFields extends WebUserSetModelFields {
     // JsonLd Constants
     public static final String CONTEXT                    = "https://api.europeana.eu/schema/context/set.jsonld";
     public static final String CONTEXT_FIELD              = "@context";
-    public static final String IDENTIFIER                 = "identifier";
-    public static final String TITLE                      = "title";
-    public static final String DESCRIPTION                = "description";
-    public static final String TYPE                       = "type";
-    public static final String ITEMS                      = "items";
     public static final String LANG                      = "lang";
 
     public static final String FIRST                     = "first";
@@ -88,5 +83,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String PROJECT_EUROPEANA_BASE_URL      = "https://pro.europeana.eu/project/";
     public static final String ENTITY_URI_BASE      = "/base";
 
+    //search API params
+    public static final String REQUEST_PARAM_QF      = "qf";
+    public static final String REQUEST_PARAM_REUSABILITY = "reusability";
+    
     WebUserSetFields() {}
 }
