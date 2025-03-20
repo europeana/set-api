@@ -18,7 +18,6 @@ import java.util.List;
 
 import eu.europeana.api.commons.http.HttpConnection;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons.http.HttpConnection;
 import eu.europeana.api.commons.http.HttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ContentType;
@@ -54,16 +53,16 @@ public class BaseApiConnection {
     private final ObjectMapper mapper = new ObjectMapper();
 
     private String                setServiceUri;
-    private AuthenticationHandler auth;
+    private AuthenticationHandler authHandler;
 
     /**
      * BaseApiConnection constructor
      * @param setServiceUri set api service url
-     * @param auth Authentication Handler for the client
+     * @param authHandler Authentication Handler for the client
      */
-    public BaseApiConnection(String setServiceUri, AuthenticationHandler auth) {
+    public BaseApiConnection(String setServiceUri, AuthenticationHandler authHandler) {
         this.setServiceUri = setServiceUri;
-        this.auth = auth;
+        this.authHandler = authHandler;
 
         // set object mapper
         SimpleModule module = new SimpleModule();
@@ -80,11 +79,11 @@ public class BaseApiConnection {
     }
 
     public AuthenticationHandler getAuthenticationHandler() {
-        return this.auth;
+        return this.authHandler;
     }
 
     public void setAuthenticationHandler(AuthenticationHandler auth) {
-        this.auth = auth;
+        this.authHandler = auth;
     }
 
 
@@ -98,7 +97,7 @@ public class BaseApiConnection {
     protected UserSet getUserSetResponse(String url) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Get UserSet API (GET) : {}.", url);
-            return parseSetApiResponse(getHttpConnection().get(url, null, this.auth), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_NOT_MODIFIED)));
+            return parseSetApiResponse(getHttpConnection().get(url, null, getAuthenticationHandler()), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_NOT_MODIFIED)));
         } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
@@ -114,7 +113,7 @@ public class BaseApiConnection {
     protected UserSet getCreateUserSetResponse(String url, String requestBody) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Create UserSet API (POST) : {}.", url);
-            return parseSetApiResponse(getHttpConnection().post(url, requestBody, ContentType.APPLICATION_JSON.getMimeType(), this.auth), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
+            return parseSetApiResponse(getHttpConnection().post(url, requestBody, ContentType.APPLICATION_JSON.getMimeType(), getAuthenticationHandler()), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
         }
         catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage()
@@ -134,7 +133,7 @@ public class BaseApiConnection {
               throws SetApiClientException {
         try {
             LOGGER.trace("Call to Update UserSet API : {PUT}. {} ", url);
-            return parseSetApiResponse(getHttpConnection().put(url, requestBody, this.auth)
+            return parseSetApiResponse(getHttpConnection().put(url, requestBody, getAuthenticationHandler())
                                      , new ArrayList<>(Arrays.asList(HttpStatus.SC_OK)));
         }
         catch (IOException e) {
@@ -155,7 +154,7 @@ public class BaseApiConnection {
     protected String deleteURL(String url) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (DELETE): {} {} ", url, DELETE_URL_RESPONSE);
-            HttpResponseHandler response = getHttpConnection().deleteURL(url, this.auth);
+            HttpResponseHandler response = getHttpConnection().deleteURL(url, getAuthenticationHandler());
             if (response.getStatus() != HttpStatus.SC_NO_CONTENT) {
                 String responseBody = response.getResponse();
                 AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
@@ -197,7 +196,7 @@ public class BaseApiConnection {
     protected List<RecordPreview> getUserSetPaginatedResponse(String url, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Get UserSet API (Paginated): {} ", url);
-            HttpResponseHandler response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), this.auth);
+            HttpResponseHandler response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), getAuthenticationHandler());
             String responseBody = response.getResponse();
             if (response.getStatus() == HttpStatus.SC_OK) {
                 TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
@@ -226,7 +225,7 @@ public class BaseApiConnection {
     protected List<? extends UserSet> getSearchUserSetResponse(String url, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
-            HttpResponseHandler response = getHttpConnection().get(url, "application/json", this.auth);
+            HttpResponseHandler response = getHttpConnection().get(url, "application/json", getAuthenticationHandler());
             String responseBody = response.getResponse();
             if (response.getStatus() == HttpStatus.SC_OK) {
                 if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {
