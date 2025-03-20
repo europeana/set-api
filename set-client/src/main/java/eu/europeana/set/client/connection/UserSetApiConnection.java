@@ -3,7 +3,7 @@ package eu.europeana.set.client.connection;
 import java.io.IOException;
 import java.util.List;
 
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.exception.SetApiClientException;

@@ -15,9 +15,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
-import eu.europeana.api.commons_sb3.http.HttpConnection;
-import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
+
+import eu.europeana.api.commons.http.HttpConnection;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons.http.HttpConnection;
+import eu.europeana.api.commons.http.HttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;

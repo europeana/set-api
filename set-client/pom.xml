@@ -28,9 +28,9 @@
 
         <!--Client is using api-commons-sb3 -->
 		<dependency>
-			<groupId>eu.europeana.api</groupId>
-			<artifactId>commons-sb3-clientutils</artifactId>
-			<version>0.1.2-SNAPSHOT</version>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-clientutils</artifactId>
+			<version>${version.commonsApi}</version>
 		</dependency>
 
 		<dependency>
