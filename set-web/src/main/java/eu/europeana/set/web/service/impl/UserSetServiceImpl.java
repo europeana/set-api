@@ -1179,31 +1179,26 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     String itemId = userSet.getItems().get(0);
     WebResource depiction = generateDepictionByItemId(itemId);
-    // depiction found by first item 
+    // if no thumbnail search further 
+    if(!depiction.hasThumbnail() && userSet.getItems().size() > 1) {   
+      //search in first 10 items
+      final int shortListSize = 10;
+      depiction = generateDepictionByItemList(userSet, shortListSize);
+      
+      if(!depiction.hasThumbnail() && userSet.getItems().size() > shortListSize) {
+        //search in first 100 items
+        final int longListSize = 100;
+        depiction = generateDepictionByItemList(userSet, longListSize);
+      }    
+    }
+    
     if(depiction.hasThumbnail()) {
       return depiction;
     }
-    
-    //no more items to search for
-    if(userSet.getItems().size() == 1) {  
+    else {
       return null;
     }
-    
-    //search in first 10 items
-    final int shortListSize = 10;
-    depiction = generateDepictionByItemList(userSet, shortListSize);
-    
-    if(!depiction.hasThumbnail() && userSet.getItems().size() > shortListSize) {
-      //search in first 100 items
-      final int longListSize = 100;
-      depiction = generateDepictionByItemList(userSet, longListSize);
-    }
 
-    if(depiction.hasThumbnail()) {
-      return depiction;
-    }
-    
-    return null;
   }
 
   private WebResource generateDepictionByItemId(String itemId) throws SearchApiClientException {
