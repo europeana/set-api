@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1179,26 +1178,35 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     String itemId = userSet.getItems().get(0);
-    WebResource depiction = fillDepictionByItemId(itemId);
-    // depiction found by first item, or not found but no more items to search for 
-    if (depiction.hasThumbnail() || userSet.getItems().size() == 1) {
+    WebResource depiction = generateDepictionByItemId(itemId);
+    // depiction found by first item 
+    if(depiction.hasThumbnail()) {
       return depiction;
     }
-
+    
+    //no more items to search for
+    if(userSet.getItems().size() == 1) {  
+      return null;
+    }
+    
     //search in first 10 items
     final int shortListSize = 10;
-    depiction = fillDepictionByItemList(userSet, shortListSize);
+    depiction = generateDepictionByItemList(userSet, shortListSize);
     
     if(!depiction.hasThumbnail() && userSet.getItems().size() > shortListSize) {
       //search in first 100 items
       final int longListSize = 100;
-      depiction = fillDepictionByItemList(userSet, longListSize);
+      depiction = generateDepictionByItemList(userSet, longListSize);
     }
 
-    return depiction;
+    if(depiction.hasThumbnail()) {
+      return depiction;
+    }
+    
+    return null;
   }
 
-  private WebResource fillDepictionByItemId(String itemId) throws SearchApiClientException {
+  private WebResource generateDepictionByItemId(String itemId) throws SearchApiClientException {
     String url =
         SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
             getConfiguration().getItemDataEndpoint(), itemId, getConfiguration().getSearchApiKey(),
@@ -1209,7 +1217,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return depiction;
   }
 
-  private WebResource fillDepictionByItemList(UserSet userSet, int pageSize)
+  private WebResource generateDepictionByItemList(UserSet userSet, int pageSize)
       throws SearchApiClientException {
 
     WebResource depiction = new WebResource();
