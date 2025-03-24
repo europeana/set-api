@@ -9,11 +9,11 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String USER_SET_PROVIDER          = "userset";
     public static final String USER_SET_APPLICATION_NAME  = "webuserset";
     public static final char SLASH                      = '/';
-    public static final String PAR_CHAR                   = "?";
+    public static final char PAR_CHAR                   = '?';
     public static final String AND                        = "&";
     public static final String COMMA                      = ",";
     public static final String SPACE                      = " ";
-    public static final String EQUALS_PARAMETER           = "=";
+    public static final char EQUALS_PARAMETER             = '=';
     public static final String JSON_LD_REST               = ".jsonld";
     public static final String FORMAT_JSONLD              = "jsonld";
     public static final String SEARCH_PATH             = "search";

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -47,7 +49,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
 
   @BeforeAll
-  public static void initTokens() {
+  public static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
       return;
     }

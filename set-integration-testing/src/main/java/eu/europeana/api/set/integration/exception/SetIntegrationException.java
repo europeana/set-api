@@ -5,15 +5,15 @@ package eu.europeana.api.set.integration.exception;
  *
  * @author GrafR
  */
-public class TechnicalRuntimeException extends RuntimeException {
+public class SetIntegrationException extends Exception {
 
     private static final long serialVersionUID = -2040704860209418648L;
 
-    public TechnicalRuntimeException(String message, Exception e) {
+    public SetIntegrationException(String message, Exception e) {
         super(message, e);
     }
 
-    public TechnicalRuntimeException(String message) {
+    public SetIntegrationException(String message) {
         super(message);
     }
 }
