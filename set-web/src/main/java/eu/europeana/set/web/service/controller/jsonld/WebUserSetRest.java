@@ -119,6 +119,11 @@ public class WebUserSetRest extends BaseRest {
       // serialization
       UserSet storedUserSet = getUserSetService().createUserSet(webUserSet, authentication);
 
+      if(storedUserSet.isOpenSet()) {
+        SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(storedUserSet);
+        storedUserSet.setTotal(apiResponse.getTotal());
+      }
+
       // add specific headers
       Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
           UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);

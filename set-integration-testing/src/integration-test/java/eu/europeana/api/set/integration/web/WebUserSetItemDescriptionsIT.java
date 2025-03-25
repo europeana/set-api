@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -268,32 +269,40 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
 
   @Test
   public void getOpenUserSetWithFilters_metadata() throws Exception {
-    WebUserSetImpl userSet = createTestUserSet(USER_SET_OPEN_WITH_FILTERS, regularUserToken);
+    String requestJson = getJsonStringInput(USER_SET_OPEN_WITH_FILTERS);
+    String resultCreate = mockMvc
+        .perform(
+            post(BASE_URL)
+                .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        .andReturn().getResponse().getContentAsString();
+    String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), resultCreate);
+    //verify that total is set
+    assertTrue(1 <  Integer.valueOf(getvalueOfkey(resultCreate, "total")));
 
     // get the identifier
-    MockHttpServletResponse response =
+    MockHttpServletResponse responseGet =
         mockMvc
-            .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+            .perform(get(BASE_URL + "{identifier}", identifier)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE,
                     SetPageProfile.ITEMS_META.getProfileParamValue())
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();
 
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertEquals(HttpStatus.OK.value(), responseGet.getStatus());
     //verify results
-    String result = response.getContentAsString();
-    assertNotNull(result);
-    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, "type"));
-    assertEquals(VisibilityTypes.PUBLIC.getJsonValue(), getvalueOfkey(result, "visibility"));
+    String resultGet = responseGet.getContentAsString();
+    assertNotNull(resultGet);
+    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(resultGet, "type"));
+    assertEquals(VisibilityTypes.PUBLIC.getJsonValue(), getvalueOfkey(resultGet, "visibility"));
     //verify that total is set
-    assertTrue(1 <  Integer.valueOf(getvalueOfkey(result, "total")));
+    assertTrue(1 <  Integer.valueOf(getvalueOfkey(resultGet, "total")));
     //total in set and total in page
-    assertTrue(getvalueOfkey(result, "title").contains("\"en\""));
-    assertTrue(getvalueOfkey(result, "description").contains("\"en\""));
-    assertFalse(result.contains(CommonApiConstants.PARAM_WSKEY));
-    assertEquals(1, noOfOccurance(result, "total"));
-    
+    assertTrue(getvalueOfkey(resultGet, "title").contains("\"en\""));
+    assertTrue(getvalueOfkey(resultGet, "description").contains("\"en\""));
+    assertFalse(resultGet.contains(CommonApiConstants.PARAM_WSKEY));
+    assertEquals(1, noOfOccurance(resultGet, "total"));
     
   }
 
