@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 
 import eu.europeana.api.commons.auth.service.GrantConstants;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,7 +103,7 @@ public abstract class BaseUserSetClientTest {
   protected static String START = "{";
   protected static String END = "}";
 
-  protected void initObjects(int port) throws SetApiClientException {
+  protected void initObjects(int port) throws SetApiClientException, SetIntegrationException {
     /*this needs to be called before the initialization of the apiClient 
     (because the token is used in the apiClient)
     */
@@ -148,7 +149,7 @@ public abstract class BaseUserSetClientTest {
     return properties;
   }
 
-	protected static String retrieveOatuhToken(String user) {
+	protected static String retrieveOatuhToken(String user) throws SetIntegrationException {
 	  EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
 	  return oauthClient.getOauthToken(user);
 	}

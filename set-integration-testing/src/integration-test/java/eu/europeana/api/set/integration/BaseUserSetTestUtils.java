@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -153,21 +155,21 @@ public abstract class BaseUserSetTestUtils {
         .put(UserSetConfigurationImpl.GALLERY_SIZE_MAX, "249");
   }
 
-  public static void initRegularUserToken() {
+  public static void initRegularUserToken() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }
     regularUserToken = retrieveOauthToken(EuropeanaOauthClient.REGULAR_USER);
   }
 
-  public static void initPublisherUserToken() {
+  public static void initPublisherUserToken() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }
     publisherUserToken = retrieveOauthToken(EuropeanaOauthClient.PUBLISHER_USER);
   }
 
-  public static void initEntitySetTokens() {
+  public static void initEntitySetTokens() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }
@@ -176,7 +178,7 @@ public abstract class BaseUserSetTestUtils {
     creatorEntitySetUserToken = retrieveOauthToken(EuropeanaOauthClient.CREATOR_ENTITYSETS);
   }
 
-  public static void initAdminUserToken() {
+  public static void initAdminUserToken() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }
@@ -196,7 +198,7 @@ public abstract class BaseUserSetTestUtils {
     return configuration;
   }
 
-  public static String retrieveOauthToken(String user) {
+  public static String retrieveOauthToken(String user) throws SetIntegrationException {
     EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
     return oauthClient.getOauthToken(user);
   }

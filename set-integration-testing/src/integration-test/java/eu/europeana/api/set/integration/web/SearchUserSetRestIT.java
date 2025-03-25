@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,7 +58,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
 
   @BeforeAll
-  public static void initTokens() {
+  public static void initTokens() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }

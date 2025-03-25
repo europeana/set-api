@@ -5,7 +5,7 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
-import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.common.http.HttpConnection;
 import eu.europeana.set.common.http.HttpResponseHandler;
 
@@ -27,7 +27,7 @@ public class EuropeanaOauthClient {
 	//
     }
 
-    public String getOauthToken(String user) {
+    public String getOauthToken(String user) throws SetIntegrationException {
 	try {
 	    String accessToken = "access_token";
 	    String oauthUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
@@ -59,13 +59,13 @@ public class EuropeanaOauthClient {
 		if (json.has(accessToken)) {
 		    return "Bearer " + json.getString(accessToken);
 		} else {
-		    throw new TechnicalRuntimeException("Cannot extract authentication token from reponse:" + body);
+		    throw new SetIntegrationException("Cannot extract authentication token from reponse:" + body);
 		}
 	    } else {
-		throw new TechnicalRuntimeException("Error occured when calling oath service! " + response);
+		throw new SetIntegrationException("Error occured when calling oath service! " + response);
 	    }
 	} catch (IOException | JSONException e) {
-	    throw new TechnicalRuntimeException("Cannot retrieve authentication token!", e);
+	    throw new SetIntegrationException("Cannot retrieve authentication token!", e);
 	}
     }
 }

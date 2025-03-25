@@ -3,6 +3,8 @@ package eu.europeana.api.set.integration.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ public class UserSetClientTest extends BaseUserSetClientTest {
   private int port;
     
   @BeforeAll
-  void initObjects() throws SetApiClientException {
+  void initObjects() throws SetApiClientException, SetIntegrationException {
     initObjects(port);
   }
   
