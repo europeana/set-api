@@ -119,6 +119,8 @@ public class WebUserSetRest extends BaseRest {
       // serialization
       UserSet storedUserSet = getUserSetService().createUserSet(webUserSet, authentication);
 
+      doPostRetrieveProcessing(storedUserSet);
+
       // add specific headers
       Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
           UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
@@ -205,13 +207,18 @@ public class WebUserSetRest extends BaseRest {
     // if the Set is disabled respond with HTTP 410
     try {
       UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
-      if(userSet.isOpenSet()) {
-        SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(userSet);
-        userSet.setTotal(apiResponse.getTotal());
-      }
+      doPostRetrieveProcessing(userSet);
       return buildResponseEntity(userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
     } catch (IOException e) {
       throw new InternalServerException(e);
+    }
+  }
+
+  private void doPostRetrieveProcessing(UserSet userSet)
+      throws ParamValidationException, RequestBodyValidationException {
+    if(userSet.isOpenSet()) {
+      SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(userSet);
+      userSet.setTotal(apiResponse.getTotal());
     }
   }
 
