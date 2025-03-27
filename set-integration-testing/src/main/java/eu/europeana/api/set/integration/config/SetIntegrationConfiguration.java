@@ -43,6 +43,8 @@ public class SetIntegrationConfiguration {
 
     /**
      * Laizy loading of configuration properties
+     *
+     * @throws SetIntegrationException if property file is not loaded
      */
     public synchronized void loadProperties() throws SetIntegrationException {
 	try {

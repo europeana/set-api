@@ -58,7 +58,7 @@ import eu.europeana.set.web.search.UserSetQueryBuilder;
 public class WebUserSetRestIT extends IntegrationTestSetup {
 
   @BeforeAll
-  public static void initTokens() throws SetIntegrationException {
+  static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
       return;
     }

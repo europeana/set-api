@@ -15,6 +15,13 @@ import eu.europeana.set.web.model.vocabulary.Roles;
 
 public class UserSetAuthorizationUtils {
 
+  /**
+   * Create Authentication for the given user
+   * @param userId user id
+   * @param userName name of the user
+   * @param role role of the user
+   * @return Authentication
+   */
   public static Authentication createAuthentication(String userId, String userName, Role role) {
     return createAuthertication(userId, userName, role.getName());
   }

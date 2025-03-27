@@ -53,7 +53,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
   PersistentUserSetService mongoPersistanceService;
 
   @BeforeAll
-  public static void initTokens() throws SetIntegrationException {
+  static void initTokens() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }

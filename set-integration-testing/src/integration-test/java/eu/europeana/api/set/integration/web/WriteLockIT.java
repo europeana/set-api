@@ -44,7 +44,7 @@ public class WriteLockIT extends IntegrationTestSetup {
   protected ApiWriteLockService writeLockService; 
 
   @BeforeAll
-  public static void initTokens() throws SetIntegrationException {
+  static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
       return;
     }

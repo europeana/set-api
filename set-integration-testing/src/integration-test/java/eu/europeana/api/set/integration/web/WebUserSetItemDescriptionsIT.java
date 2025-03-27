@@ -49,7 +49,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
 
   @BeforeAll
-  public static void initTokens() throws SetIntegrationException {
+  static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
       return;
     }
