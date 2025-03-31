@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -471,9 +472,15 @@ public class PersistentUserSetServiceImpl extends
       Criteria ownerCriterion = searchQuery.criteria(FIELD_CREATOR).equal(query.getUser());
       searchQuery.and(searchQuery.or(publicCriterion, ownerCriterion));
 
-    } else if (VisibilityTypes.PRIVATE.getJsonValue().equals(query.getVisibility())) {
-      // private only, user can see only his private sets
-      searchQuery.filter(FIELD_CREATOR, query.getUser());
+    } else if (query.getVisibility().contains(VisibilityTypes.PRIVATE.getJsonValue())) {
+      // user can see only his private sets, not from other users
+      List<String> visibilitiesWithoutPrivate = query.getVisibility().stream()
+          .filter(el -> !el.equals(VisibilityTypes.PRIVATE.getJsonValue()))
+          .collect(Collectors.toList());
+      Criteria visibilityCriterion =
+          searchQuery.criteria(WebUserSetModelFields.VISIBILITY).in(visibilitiesWithoutPrivate);
+      Criteria ownerCriterion = searchQuery.criteria(FIELD_CREATOR).equal(query.getUser());
+      searchQuery.and(searchQuery.or(visibilityCriterion, ownerCriterion));      
     }
 
     return searchQuery;
@@ -484,23 +491,23 @@ public class PersistentUserSetServiceImpl extends
     mongoQuery.disableValidation();
 
     if (query.getVisibility() != null) {
-      mongoQuery.filter(WebUserSetModelFields.VISIBILITY, query.getVisibility());
+      mongoQuery.filter(WebUserSetModelFields.VISIBILITY + " in", query.getVisibility());
     }
 
     if (query.getType() != null) {
-      mongoQuery.filter(WebUserSetModelFields.TYPE, query.getType());
+      mongoQuery.filter(WebUserSetModelFields.TYPE + " in", query.getType());
     }
     
     if (query.getCollectionType() != null) {
-      mongoQuery.filter(WebUserSetModelFields.COLLECTION_TYPE, query.getCollectionType());
+      mongoQuery.filter(WebUserSetModelFields.COLLECTION_TYPE + " in", query.getCollectionType());
     }
 
     if (query.getCreator() != null) {
-      mongoQuery.filter(WebUserSetModelFields.CREATOR + ".httpUrl", query.getCreator());
+      mongoQuery.filter(WebUserSetModelFields.CREATOR + ".httpUrl" + " in", query.getCreator());
     }
 
     if (query.getProvider() != null) {
-      mongoQuery.filter(WebUserSetModelFields.PROVIDER + ".id", query.getProvider());
+      mongoQuery.filter(WebUserSetModelFields.PROVIDER + ".id" + " in", query.getProvider());
     }
 
     if (query.getContributor() != null) {
@@ -516,7 +523,7 @@ public class PersistentUserSetServiceImpl extends
     }
 
     if (query.getSetId() != null) {
-      mongoQuery.filter(WebUserSetModelFields.IDENTIFIER, query.getSetId());
+      mongoQuery.filter(WebUserSetModelFields.IDENTIFIER + " in", query.getSetId());
     }
 
     if (query.getText() != null) {

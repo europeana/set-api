@@ -1,6 +1,9 @@
 package eu.europeana.set.web.search;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -23,22 +26,25 @@ import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
 
 public class UserSetQueryBuilder extends QueryBuilder {
-
-
+  
   public static final String SEARCH_ALL = "*";
   public static final String SEARCH_ALL_ALL = "*:*";
   public static final String PREFIX_HTTP = "http";
 
-  String[] fields = new String[] {WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
-      WebUserSetFields.TYPE, WebUserSetFields.COLLECTION_TYPE, WebUserSetFields.ITEM,
-      WebUserSetFields.SET_ID, WebUserSetFields.CONTRIBUTOR, WebUserSetFields.SUBJECT,
-      WebUserSetFields.PROVIDER, WebUserSetFields.LANG};
-  String[] facetsFields = new String[] {WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM};
-
-  Set<String> suportedFields = Set.of(fields);
-  Set<String> supportedFacets = Set.of(facetsFields);
-
-  private UserSetQuery buildSearchQuery(Map<String, String> searchCriteria, String sort, int page,
+  static Set<String> fieldsOfTypeList = Set.of(WebUserSetFields.ITEM, WebUserSetFields.CONTRIBUTOR, 
+      WebUserSetFields.SUBJECT, WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
+      WebUserSetFields.TYPE, WebUserSetFields.COLLECTION_TYPE, WebUserSetFields.SET_ID,
+      WebUserSetFields.PROVIDER);
+  static Set<String> fieldsOfTypeNonList = Set.of(WebUserSetFields.LANG);
+  static Set<String> facetsFields = Set.of(WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM);
+  static Set<String> suportedFields;
+  static {
+    suportedFields = new HashSet<>();
+    suportedFields.addAll(fieldsOfTypeList);
+    suportedFields.addAll(fieldsOfTypeNonList);    
+  }
+  
+  private UserSetQuery buildSearchQuery(Map<String, Object> searchCriteria, String sort, int page,
       int pageSize, UserSetConfiguration config) throws ParamValidationException {
     UserSetQuery searchQuery = new UserSetQueryImpl();
     searchQuery.setQuery(searchCriteria.toString());
@@ -73,7 +79,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
     return searchQuery;
   }
 
-  private void addSortCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery,
+  private void addSortCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
       String sort) throws ParamValidationException {
     // validate sorting based on score (can be only in the descending order)
     if (sort != null && sort.contains(WebUserSetFields.TEXT_SCORE_SORT)
@@ -100,141 +106,90 @@ public class UserSetQueryBuilder extends QueryBuilder {
     searchQuery.setSortCriteria(sortCriteria);
   }
 
-  private void addTitleLangCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+  private void addTitleLangCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
       throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
-      String lang = searchCriteria.get(WebUserSetFields.LANG).toLowerCase();
-      if (!LanguageUtils.isIsoLanguage(lang)) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {
-                "invalid value for search value for lang: field, language must be a 2-letter ISO Code",
-                lang});
-      }
+      String lang = (String) searchCriteria.get(WebUserSetFields.LANG);
       searchQuery.setTitleLang(lang);
     }
   }
 
-  private void addFullTextCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery) {
+  private void addFullTextCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetFields.TEXT)) {
-      String text = searchCriteria.get(WebUserSetFields.TEXT);
+      String text = (String) searchCriteria.get(WebUserSetFields.TEXT);
       searchQuery.setText(text);
     }
   }
 
-  private void addSetIdCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+  private void addSetIdCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
       throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.SET_ID)) {
-      String setId = searchCriteria.get(WebUserSetFields.SET_ID);
-      if (!UserSetUtils.isInteger(setId)) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.SET_ID, setId});
-      }
+      List<String> setId = (List<String>) searchCriteria.get(WebUserSetFields.SET_ID);
       searchQuery.setSetId(setId);
     }
   }
 
-  private void addItemCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery,
+  private void addItemCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
       String itemDataEndpoint) {
     if (searchCriteria.containsKey(WebUserSetFields.ITEM)) {
-      String item = searchCriteria.get(WebUserSetFields.ITEM);
-      if (item.startsWith(PREFIX_HTTP)) {
-        searchQuery.setItem(item);
-      } else {
-        searchQuery.setItem(UserSetUtils.buildItemUrl(itemDataEndpoint, item));
-      }
+      List<String> items = (List<String>) searchCriteria.get(WebUserSetFields.ITEM);
+      searchQuery.setItem(items);
     }
   }
 
-  private void addSubjectCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+  private void addSubjectCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
       throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetModelFields.SUBJECT)) {
-      String subject = searchCriteria.get(WebUserSetModelFields.SUBJECT);
-      if (subject.startsWith(PREFIX_HTTP)) {
-        searchQuery.setSubject(subject);
-      } else {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {"invalid value for search field, subject must be a URI", subject});
-      }
+      List<String> subjects = (List<String>) searchCriteria.get(WebUserSetModelFields.SUBJECT);
+      searchQuery.setSubject(subjects);
     }
   }
 
-  private void addContributorCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery,
+  private void addContributorCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
       String userDataEndpoint) {
     if (searchCriteria.containsKey(WebUserSetModelFields.CONTRIBUTOR)) {
-      String contributorId = searchCriteria.get(WebUserSetModelFields.CONTRIBUTOR);
-      if (contributorId.startsWith(PREFIX_HTTP)) {
-        searchQuery.setContributor(contributorId);
-      } else {
-        searchQuery.setContributor(UserSetUtils.buildUserUri(userDataEndpoint, contributorId));
-      }
+      List<String> contributorId = (List<String>) searchCriteria.get(WebUserSetModelFields.CONTRIBUTOR);
+      searchQuery.setContributor(contributorId);
     }
   }
 
-  private void addCreatorCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery,
+  private void addCreatorCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
       String userDataEndpoint) {
     if (searchCriteria.containsKey(WebUserSetModelFields.CREATOR)) {
-      String creatorId = searchCriteria.get(WebUserSetModelFields.CREATOR);
-      if (creatorId.startsWith(PREFIX_HTTP)) {
-        searchQuery.setCreator(creatorId);
-      } else {
-        searchQuery.setCreator(UserSetUtils.buildUserUri(userDataEndpoint, creatorId));
-      }
+      List<String> creatorId = (List<String>) searchCriteria.get(WebUserSetModelFields.CREATOR);
+      searchQuery.setCreator(creatorId);
     }
   }
 
-  private void addProviderCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+  private void addProviderCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
       throws ParamValidationException {
 
     if (searchCriteria.containsKey(WebUserSetModelFields.PROVIDER)) {
-      String providerId = searchCriteria.get(WebUserSetModelFields.PROVIDER);
-      if (providerId != null && !providerId.startsWith(PREFIX_HTTP)) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {
-                "invalid value for search field, provider (id) must be a URI", providerId});
-      }
+      List<String> providerId = (List<String>) searchCriteria.get(WebUserSetModelFields.PROVIDER);
       searchQuery.setProvider(providerId);
     }
   }
 
-  private void addTypeCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+  private void addTypeCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
       throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.TYPE)) {
-      String type = searchCriteria.get(WebUserSetFields.TYPE);
-      if (type != null && !UserSetTypes.isValid(type)) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {"invalid value for search field " + WebUserSetFields.TYPE, type});
-      }
+      List<String> type = (List<String>) searchCriteria.get(WebUserSetFields.TYPE);
       searchQuery.setType(type);
     }
   }
 
-  private void addCollectionTypeCriterion(Map<String, String> searchCriteria,
+  private void addCollectionTypeCriterion(Map<String, Object> searchCriteria,
       UserSetQuery searchQuery) throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetFields.COLLECTION_TYPE)) {
-      String collectionType = searchCriteria.get(WebUserSetFields.COLLECTION_TYPE);
-      if (collectionType != null && !WebUserSetFields.TYPE_GALLERY.equals(collectionType)) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {"invalid value for search field " + WebUserSetFields.COLLECTION_TYPE,
-                collectionType});
-      }
+      List<String> collectionType = (List<String>) searchCriteria.get(WebUserSetFields.COLLECTION_TYPE);
       searchQuery.setCollectionType(collectionType);
     }
   }
 
-  private void addVisibilityCriterion(Map<String, String> searchCriteria, UserSetQuery searchQuery)
+  private void addVisibilityCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
       throws ParamValidationException {
     if (searchCriteria.containsKey(WebUserSetModelFields.VISIBILITY)) {
-      // only for sorting WebUserSetFields.MODIFIED
-      String visibility = searchCriteria.get(WebUserSetModelFields.VISIBILITY);
-      if (visibility != null && !VisibilityTypes.isValid(visibility)) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {
-                "invalid value for search field " + WebUserSetModelFields.VISIBILITY, visibility});
-      }
+      List<String> visibility = (List<String>) searchCriteria.get(WebUserSetModelFields.VISIBILITY);
       searchQuery.setVisibility(visibility);
     }
   }
@@ -242,21 +197,21 @@ public class UserSetQueryBuilder extends QueryBuilder {
   public UserSetQuery buildUserSetQuery(String query, String qf[], String sort, int page,
       int pageSize, UserSetConfiguration config) throws ParamValidationException {
 
-    Map<String, String> criteria = new HashMap<>();
-    parseSearchCriteria(criteria, query, qf);
+    Map<String, Object> criteria = new HashMap<>();
+    parseSearchCriteria(criteria, query, qf, config);
     return buildSearchQuery(criteria, sort, page, pageSize, config);
   }
 
-  private void parseSearchCriteria(Map<String, String> criteria, String query, String[] qf)
-      throws ParamValidationException {
+  private void parseSearchCriteria(Map<String, Object> criteria, String query, String[] qf,
+      UserSetConfiguration config) throws ParamValidationException {
     boolean searchAllQuery = isSearchAllQuery(query);
     if (!searchAllQuery) {
-      parseCriterion(criteria, query);
+      parseCriterion(criteria, query, config);
     }
 
     if (qf != null) {
       for (String criterion : qf) {
-        parseCriterion(criteria, criterion);
+        parseCriterion(criteria, criterion, config);
       }
     }
   }
@@ -265,7 +220,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
     return SEARCH_ALL.equals(query) || SEARCH_ALL_ALL.equals(query);
   }
 
-  private void parseCriterion(Map<String, String> criteria, String criterion)
+  private void parseCriterion(Map<String, Object> criteria, String criterion, UserSetConfiguration config)
       throws ParamValidationException {
     String toParse = criterion;
     String separator = WebUserSetFields.SEPARATOR_SEMICOLON;
@@ -313,14 +268,98 @@ public class UserSetQueryBuilder extends QueryBuilder {
         toParse = StringUtils.removeStart(toParse, value);
       }
 
-      if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
-        // invalid seearch value
+      value = validateAndSanitizeCriterion(field, value, config, separator);
+      
+      addCriterionToOthers(field, value, criteria);
+    }
+  }
+  
+  private void addCriterionToOthers(String field, String value, Map<String, Object> criteria) {
+    //field is of type List
+    if(fieldsOfTypeList.contains(field)) {
+      if(criteria.containsKey(field)) {
+        List<String> val = (List<String>) criteria.get(field);
+        val.add(value);
+      } else {
+        List<String> val = new ArrayList<>();
+        val.add(value);
+        criteria.put(field, val);
+      }
+    } else {
+      criteria.put(field, value);
+    }    
+  }
+  
+  private String validateAndSanitizeCriterion(String field, String value, UserSetConfiguration config,
+      String separator) throws ParamValidationException {
+    
+    if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
+      // invalid seearch value
+      throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+          I18nConstants.INVALID_PARAM_VALUE,
+          new String[] {"invalid formatting of search query for field " + field, value});
+    }
+    
+    if(WebUserSetModelFields.VISIBILITY.equals(field)) {
+      if (!VisibilityTypes.isValid(value)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {
+                "invalid value for search field " + WebUserSetModelFields.VISIBILITY, value});
+      }
+    } else if(WebUserSetFields.TYPE.equals(field)) {
+      if (!UserSetTypes.isValid(value)) {
         throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
             I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {"invalid formatting of search query for field " + field, value});
+            new String[] {"invalid value for search field " + WebUserSetFields.TYPE, value});
       }
-      criteria.put(field, value);
+    } else if(WebUserSetFields.COLLECTION_TYPE.equals(field)) {
+      if (!WebUserSetFields.TYPE_GALLERY.equals(value)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE,
+            new String[] {"invalid value for search field " + WebUserSetFields.COLLECTION_TYPE,
+                value});
+      }
+    } else if (WebUserSetModelFields.CREATOR.equals(field)) {
+      if (!value.startsWith(PREFIX_HTTP)) {
+        value = UserSetUtils.buildUserUri(config.getUserDataEndpoint(), value);
+      }
+    } else if (WebUserSetModelFields.CONTRIBUTOR.equals(field)) {
+      if (!value.startsWith(PREFIX_HTTP)) {
+        value = UserSetUtils.buildUserUri(config.getUserDataEndpoint(), value);
+      }
+    } else if (WebUserSetModelFields.PROVIDER.equals(field)) {
+      if (!value.startsWith(PREFIX_HTTP)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {
+                "invalid value for search field, provider (id) must be a URI", value});
+      }
+    } else if (WebUserSetModelFields.SUBJECT.equals(field)) {
+      if (!value.startsWith(PREFIX_HTTP)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE,
+            new String[] {"invalid value for search field, subject must be a URI", value});
+      }
+    } else if (WebUserSetFields.ITEM.equals(field)) {
+      if (!value.startsWith(PREFIX_HTTP)) {
+        value = UserSetUtils.buildItemUrl(config.getItemDataEndpoint(), value);
+      }
+    } else if (WebUserSetFields.SET_ID.equals(field)) {
+      if (!UserSetUtils.isInteger(value)) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE, new String[] {WebUserSetFields.SET_ID, value});
+      }
+    } else if (WebUserSetFields.LANG.equals(field)) {
+      if (!LanguageUtils.isIsoLanguage(value.toLowerCase())) {
+        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
+            I18nConstants.INVALID_PARAM_VALUE,
+            new String[] {
+                "invalid value for search value for lang: field, language must be a 2-letter ISO Code",
+                value});
+      }
+      value=value.toLowerCase();
     }
+    
+    return value;    
   }
 
   public UserSetFacetQuery buildUserSetFacetQuery(String facet, int facetLimit)
@@ -348,7 +387,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
           I18nConstants.INVALID_PARAM_VALUE,
           new String[] {"multiple facet value is not supported ", facet});
     }
-    if (!supportedFacets.contains(facet)) {
+    if (!facetsFields.contains(facet)) {
       throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
           I18nConstants.INVALID_PARAM_VALUE,
           new String[] {"parameter value not supported in facets query ", facet});

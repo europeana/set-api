@@ -148,8 +148,8 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     UserSetQuery query = new UserSetQueryImpl();
     query.setPageSize(10);
     query.setUser(creatorId);
-    query.setType(UserSetTypes.BOOKMARKSFOLDER.getJsonValue());
-    query.setVisibility(VisibilityTypes.PRIVATE.getJsonValue());
+    query.setType(List.of(UserSetTypes.BOOKMARKSFOLDER.getJsonValue()));
+    query.setVisibility(List.of(VisibilityTypes.PRIVATE.getJsonValue()));
 
     List<PersistentUserSet> userSetList = userSetService.find(query).getResults();
     assertTrue(userSetList.size() > 0);
@@ -165,7 +165,7 @@ public class PersistentUserSetServiceTest extends UserSetTestDataBuilder {
     UserSetQuery query = new UserSetQueryImpl();
     query.setPageSize(10);
     query.setUser(creatorId);
-    query.setType(UserSetTypes.COLLECTION.getJsonValue());
+    query.setType(List.of(UserSetTypes.COLLECTION.getJsonValue()));
 
     List<PersistentUserSet> userSetList = userSetService.find(query).getResults();
     assertTrue(userSetList.size() > 0);

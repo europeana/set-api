@@ -1,22 +1,23 @@
 package eu.europeana.set.definitions.model.search;
 
+import java.util.List;
 import eu.europeana.api.commons.definitions.search.impl.QueryImpl;
 
 public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
 
-    String creator;
-    String contributor;
-    String subject;
-    String visibility;
-    String type;
+    List<String> creator;
+    List<String> contributor;
+    List<String> subject;
+    List<String> visibility;
+    List<String> type;
     boolean admin;
-    String item;
+    List<String> item;
     String user;
-    String setId;
+    List<String> setId;
     String text;
-    String provider;
+    List<String> provider;
     String titleLang;
-    String collectionType;
+    List<String> collectionType;
     
     @Override
     public String getUser() {
@@ -36,65 +37,65 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
         this.admin = admin;
     }
     @Override
-    public String getItem() {
+    public List<String> getItem() {
         return item;
     }
     @Override
-    public void setItem(String item) {
+    public void setItem(List<String> item) {
         this.item = item;
     }
     @Override
-    public String getCreator() {
+    public List<String> getCreator() {
         return creator;
     }
     @Override
-    public void setCreator(String creator) {
+    public void setCreator(List<String> creator) {
         this.creator = creator;
     }
     @Override
-    public String getVisibility() {
+    public List<String> getVisibility() {
         return visibility;
     }
     @Override
-    public void setVisibility(String visibility) {
+    public void setVisibility(List<String> visibility) {
         this.visibility = visibility;
     }
     @Override
-    public String getType() {
+    public List<String> getType() {
         return type;
     }
     @Override
-    public void setType(String type) {
+    public void setType(List<String> type) {
         this.type = type;
     }
 
     @Override
-    public String getSetId() {
+    public List<String> getSetId() {
         return setId;
     }
 
     @Override
-    public void setSetId(String setId) {
+    public void setSetId(List<String> setId) {
         this.setId = setId;
     }
 
     @Override
-    public String getContributor() {
+    public List<String> getContributor() {
         return contributor;
     }
 
     @Override
-    public void setContributor(String contributor) {
+    public void setContributor(List<String> contributor) {
         this.contributor = contributor;
     }
 
     @Override
-    public String getSubject() {
+    public List<String> getSubject() {
         return subject;
     }
 
     @Override
-    public void setSubject(String subject) {
+    public void setSubject(List<String> subject) {
         this.subject = subject;
     }
 
@@ -109,12 +110,12 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     }
 
     @Override
-    public void setProvider(String provider) {
+    public void setProvider(List<String> provider) {
       this.provider = provider;
     }
 
     @Override
-    public String getProvider() {
+    public List<String> getProvider() {
       return provider;
     }
 
@@ -129,12 +130,12 @@ public class UserSetQueryImpl extends QueryImpl implements UserSetQuery{
     }
 
     @Override
-    public String getCollectionType() {
+    public List<String> getCollectionType() {
       return collectionType;
     }
 
     @Override
-    public void setCollectionType(String collectionType) {
+    public void setCollectionType(List<String> collectionType) {
       this.collectionType = collectionType;
     }
 }
