@@ -45,7 +45,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
   }
   
   private UserSetQuery buildSearchQuery(Map<String, Object> searchCriteria, String sort, int page,
-      int pageSize, UserSetConfiguration config) throws ParamValidationException {
+      int pageSize) throws ParamValidationException {
     UserSetQuery searchQuery = new UserSetQueryImpl();
     searchQuery.setQuery(searchCriteria.toString());
 
@@ -189,7 +189,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
     Map<String, Object> criteria = new HashMap<>();
     parseSearchCriteria(criteria, query, qf, config);
-    return buildSearchQuery(criteria, sort, page, pageSize, config);
+    return buildSearchQuery(criteria, sort, page, pageSize);
   }
 
   private void parseSearchCriteria(Map<String, Object> criteria, String query, String[] qf,
