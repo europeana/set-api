@@ -31,17 +31,17 @@ public class UserSetQueryBuilder extends QueryBuilder {
   public static final String SEARCH_ALL_ALL = "*:*";
   public static final String PREFIX_HTTP = "http";
 
-  static Set<String> fieldsOfTypeList = Set.of(WebUserSetFields.ITEM, WebUserSetFields.CONTRIBUTOR, 
+  static Set<String> arrayFields = Set.of(WebUserSetFields.ITEM, WebUserSetFields.CONTRIBUTOR, 
       WebUserSetFields.SUBJECT, WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
       WebUserSetFields.TYPE, WebUserSetFields.COLLECTION_TYPE, WebUserSetFields.SET_ID,
       WebUserSetFields.PROVIDER);
-  static Set<String> fieldsOfTypeNonList = Set.of(WebUserSetFields.LANG);
+  static Set<String> nonArrayFields = Set.of(WebUserSetFields.LANG);
   static Set<String> facetsFields = Set.of(WebUserSetModelFields.VISIBILITY, WebUserSetFields.ITEM);
   static Set<String> suportedFields;
   static {
     suportedFields = new HashSet<>();
-    suportedFields.addAll(fieldsOfTypeList);
-    suportedFields.addAll(fieldsOfTypeNonList);    
+    suportedFields.addAll(arrayFields);
+    suportedFields.addAll(nonArrayFields);    
   }
   
   private UserSetQuery buildSearchQuery(Map<String, Object> searchCriteria, String sort, int page,
@@ -55,15 +55,15 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
     addCollectionTypeCriterion(searchCriteria, searchQuery);
 
-    addCreatorCriterion(searchCriteria, searchQuery, config.getUserDataEndpoint());
+    addCreatorCriterion(searchCriteria, searchQuery);
 
-    addContributorCriterion(searchCriteria, searchQuery, config.getUserDataEndpoint());
+    addContributorCriterion(searchCriteria, searchQuery);
 
     addProviderCriterion(searchCriteria, searchQuery);
 
     addSubjectCriterion(searchCriteria, searchQuery);
 
-    addItemCriterion(searchCriteria, searchQuery, config.getItemDataEndpoint());
+    addItemCriterion(searchCriteria, searchQuery);
 
     addSetIdCriterion(searchCriteria, searchQuery);
 
@@ -106,8 +106,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
     searchQuery.setSortCriteria(sortCriteria);
   }
 
-  private void addTitleLangCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
-      throws ParamValidationException {
+  private void addTitleLangCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetFields.LANG)) {
       String lang = (String) searchCriteria.get(WebUserSetFields.LANG);
       searchQuery.setTitleLang(lang);
@@ -121,57 +120,49 @@ public class UserSetQueryBuilder extends QueryBuilder {
     }
   }
 
-  private void addSetIdCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
-      throws ParamValidationException {
+  private void addSetIdCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetFields.SET_ID)) {
       List<String> setId = (List<String>) searchCriteria.get(WebUserSetFields.SET_ID);
       searchQuery.setSetId(setId);
     }
   }
 
-  private void addItemCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
-      String itemDataEndpoint) {
+  private void addItemCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetFields.ITEM)) {
       List<String> items = (List<String>) searchCriteria.get(WebUserSetFields.ITEM);
       searchQuery.setItem(items);
     }
   }
 
-  private void addSubjectCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
-      throws ParamValidationException {
+  private void addSubjectCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetModelFields.SUBJECT)) {
       List<String> subjects = (List<String>) searchCriteria.get(WebUserSetModelFields.SUBJECT);
       searchQuery.setSubject(subjects);
     }
   }
 
-  private void addContributorCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
-      String userDataEndpoint) {
+  private void addContributorCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetModelFields.CONTRIBUTOR)) {
       List<String> contributorId = (List<String>) searchCriteria.get(WebUserSetModelFields.CONTRIBUTOR);
       searchQuery.setContributor(contributorId);
     }
   }
 
-  private void addCreatorCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery,
-      String userDataEndpoint) {
+  private void addCreatorCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetModelFields.CREATOR)) {
       List<String> creatorId = (List<String>) searchCriteria.get(WebUserSetModelFields.CREATOR);
       searchQuery.setCreator(creatorId);
     }
   }
 
-  private void addProviderCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
-      throws ParamValidationException {
-
+  private void addProviderCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetModelFields.PROVIDER)) {
       List<String> providerId = (List<String>) searchCriteria.get(WebUserSetModelFields.PROVIDER);
       searchQuery.setProvider(providerId);
     }
   }
 
-  private void addTypeCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
-      throws ParamValidationException {
+  private void addTypeCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetFields.TYPE)) {
       List<String> type = (List<String>) searchCriteria.get(WebUserSetFields.TYPE);
       searchQuery.setType(type);
@@ -179,15 +170,14 @@ public class UserSetQueryBuilder extends QueryBuilder {
   }
 
   private void addCollectionTypeCriterion(Map<String, Object> searchCriteria,
-      UserSetQuery searchQuery) throws ParamValidationException {
+      UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetFields.COLLECTION_TYPE)) {
       List<String> collectionType = (List<String>) searchCriteria.get(WebUserSetFields.COLLECTION_TYPE);
       searchQuery.setCollectionType(collectionType);
     }
   }
 
-  private void addVisibilityCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery)
-      throws ParamValidationException {
+  private void addVisibilityCriterion(Map<String, Object> searchCriteria, UserSetQuery searchQuery) {
     if (searchCriteria.containsKey(WebUserSetModelFields.VISIBILITY)) {
       List<String> visibility = (List<String>) searchCriteria.get(WebUserSetModelFields.VISIBILITY);
       searchQuery.setVisibility(visibility);
@@ -276,7 +266,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
   
   private void addCriterionToOthers(String field, String value, Map<String, Object> criteria) {
     //field is of type List
-    if(fieldsOfTypeList.contains(field)) {
+    if(arrayFields.contains(field)) {
       if(criteria.containsKey(field)) {
         List<String> val = (List<String>) criteria.get(field);
         val.add(value);
