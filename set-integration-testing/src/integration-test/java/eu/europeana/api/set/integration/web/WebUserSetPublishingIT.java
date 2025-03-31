@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,7 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 public class WebUserSetPublishingIT extends IntegrationTestSetup {
 
   @BeforeAll
-  public static void initTokens() {
+  static void initTokens() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }

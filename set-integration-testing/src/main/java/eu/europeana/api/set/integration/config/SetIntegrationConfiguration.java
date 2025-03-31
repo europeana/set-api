@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import eu.europeana.api.set.integration.exception.TechnicalRuntimeException;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 
 public class SetIntegrationConfiguration {
 
@@ -33,7 +33,7 @@ public class SetIntegrationConfiguration {
      * 
      * @return
      */
-    public static synchronized SetIntegrationConfiguration getInstance() {
+    public static synchronized SetIntegrationConfiguration getInstance() throws SetIntegrationException {
 	if (singleton == null) {
 	    singleton = new SetIntegrationConfiguration();
 	    singleton.loadProperties();
@@ -43,8 +43,10 @@ public class SetIntegrationConfiguration {
 
     /**
      * Laizy loading of configuration properties
+     *
+     * @throws SetIntegrationException if property file is not loaded
      */
-    public synchronized void loadProperties() {
+    public synchronized void loadProperties() throws SetIntegrationException {
 	try {
 	    properties = new Properties();
 	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_INTEGRATION_TESTING_PROPERTIES_FILE);
@@ -55,7 +57,7 @@ public class SetIntegrationConfiguration {
 	    
 	    getProperties().load(resourceAsStream);
 	} catch (IOException e) {
-	    throw new TechnicalRuntimeException("Cannot read configuration file: " + SET_INTEGRATION_TESTING_PROPERTIES_FILE, e);
+	    throw new SetIntegrationException("Cannot read configuration file: " + SET_INTEGRATION_TESTING_PROPERTIES_FILE, e);
 	}
 
     }

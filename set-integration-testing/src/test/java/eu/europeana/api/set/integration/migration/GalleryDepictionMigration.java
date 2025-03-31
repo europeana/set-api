@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,7 +53,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
   PersistentUserSetService mongoPersistanceService;
 
   @BeforeAll
-  public static void initTokens() {
+  static void initTokens() throws SetIntegrationException {
     if (DISABLE_AUTH) {
       return;
     }

@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Arrays;
 import java.util.Collections;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -56,7 +58,7 @@ import eu.europeana.set.web.search.UserSetQueryBuilder;
 public class WebUserSetRestIT extends IntegrationTestSetup {
 
   @BeforeAll
-  public static void initTokens() {
+  static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
       return;
     }

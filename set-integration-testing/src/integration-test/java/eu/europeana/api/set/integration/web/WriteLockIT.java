@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import javax.annotation.Resource;
+
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +44,7 @@ public class WriteLockIT extends IntegrationTestSetup {
   protected ApiWriteLockService writeLockService; 
 
   @BeforeAll
-  public static void initTokens() {
+  static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
       return;
     }

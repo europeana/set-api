@@ -1,6 +1,8 @@
 package eu.europeana.set.web.service.authorization;
 
 import java.util.List;
+
+import eu.europeana.api.commons.definitions.vocabulary.Role;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,7 +15,14 @@ import eu.europeana.set.web.model.vocabulary.Roles;
 
 public class UserSetAuthorizationUtils {
 
-  public static Authentication createAuthentication(String userId, String userName, Roles role) {
+  /**
+   * Create Authentication for the given user
+   * @param userId user id
+   * @param userName name of the user
+   * @param role role of the user
+   * @return Authentication
+   */
+  public static Authentication createAuthentication(String userId, String userName, Role role) {
     return createAuthertication(userId, userName, role.getName());
   }
 
