@@ -32,7 +32,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
   public static final String SEARCH_ALL_ALL = "*:*";
   public static final String PREFIX_HTTP = "http";
 
-  static Set<String> arrayFields = Set.of(WebUserSetFields.ITEM, WebUserSetFields.CONTRIBUTOR, 
+  static Set<String> arrayFields = Set.of(WebUserSetFields.ITEM, WebUserSetModelFields.CONTRIBUTOR, 
       WebUserSetModelFields.SUBJECT, WebUserSetModelFields.CREATOR, WebUserSetModelFields.VISIBILITY,
       WebUserSetModelFields.TYPE, WebUserSetModelFields.COLLECTION_TYPE, WebUserSetFields.SET_ID,
       WebUserSetModelFields.PROVIDER);
@@ -84,7 +84,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
       String sort) throws ParamValidationException {
     // validate sorting based on score (can be only in the descending order)
     if (sort != null && sort.contains(WebUserSetFields.TEXT_SCORE_SORT)
-        && !searchCriteria.containsKey(WebUserSetFields.TEXT)) {
+        && !searchCriteria.containsKey(WebUserSetModelFields.TEXT)) {
       throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
           I18nConstants.INVALID_PARAM_VALUE,
           new String[] {
@@ -295,7 +295,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
     // if query field is not empty, default to text-title search
     // Multiple criteria are not supported with text-title search
     if (!toParse.isEmpty() && !toParse.contains(separator)) {
-      criteria.put(WebUserSetFields.TEXT, toParse);
+      criteria.put(WebUserSetModelFields.TEXT, toParse);
     }
 
     while (toParse.contains(separator)) {
@@ -409,11 +409,11 @@ public class UserSetQueryBuilder extends QueryBuilder {
     // 'BookmarkFolder'}
     // also as items is an array unwind will be true
     if (WebUserSetFields.ITEM.equals(facet)) {
-      return new UserSetFacetQuery(facet, WebUserSetFields.TYPE,
+      return new UserSetFacetQuery(facet, WebUserSetModelFields.TYPE,
           UserSetTypes.BOOKMARKSFOLDER.getJsonValue(), true, UserSetMongoConstants.MONGO_ITEMS,
           facetLimit);
     }
-    if (WebUserSetFields.VISIBILITY.equals(facet)) {
+    if (WebUserSetModelFields.VISIBILITY.equals(facet)) {
       return new UserSetFacetQuery(facet, null, null, false, UserSetMongoConstants.MONGO_VISIBILITY,
           facetLimit);
     }
