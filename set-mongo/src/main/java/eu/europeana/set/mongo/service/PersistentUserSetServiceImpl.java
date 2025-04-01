@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -476,7 +475,7 @@ public class PersistentUserSetServiceImpl extends
       // user can see only his private sets, not from other users
       List<String> visibilitiesWithoutPrivate = query.getVisibility().stream()
           .filter(el -> !el.equals(VisibilityTypes.PRIVATE.getJsonValue()))
-          .collect(Collectors.toList());
+          .toList();
       Criteria visibilityCriterion =
           searchQuery.criteria(WebUserSetModelFields.VISIBILITY).in(visibilitiesWithoutPrivate);
       Criteria ownerCriterion = searchQuery.criteria(FIELD_CREATOR).equal(query.getUser());
