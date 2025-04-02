@@ -1,24 +1,25 @@
 package eu.europeana.set.definitions.model.search;
 
+import java.util.List;
 import eu.europeana.api.commons.definitions.search.Query;
 
 public interface UserSetQuery extends Query{
 
-    void setType(String type);
+    void setType(List<String> type);
 
-    String getType();
+    List<String> getType();
 
-    void setVisibility(String visibility);
+    void setVisibility(List<String> visibility);
 
-    String getVisibility();
+    List<String> getVisibility();
 
-    void setCreator(String creator);
+    void setCreator(List<String> creator);
 
-    String getCreator();
+    List<String> getCreator();
 
-    void setItem(String item);
+    void setItem(List<String> item);
 
-    String getItem();
+    List<String> getItem();
 
     void setAdmin(boolean admin);
 
@@ -28,32 +29,32 @@ public interface UserSetQuery extends Query{
 
     String getUser();
 
-    String getSetId();
+    List<String> getSetId();
 
-    void setSetId(String setId);
+    void setSetId(List<String> setId);
 
-    void setContributor(String contributor);
+    void setContributor(List<String> contributor);
 
-    String getContributor();
+    List<String> getContributor();
 
-    void setSubject(String subject);
+    void setSubject(List<String> subject);
 
-    String getSubject();
+    List<String> getSubject();
 
     void setText(String text);
 
     String getText();
     
-    void setProvider(String provider);
+    void setProvider(List<String> provider);
 
-    String getProvider();
+    List<String> getProvider();
     
     void setTitleLang(String lang);
 
     String getTitleLang();
 
-    void setCollectionType(String collectionType);
+    void setCollectionType(List<String> collectionType);
 
-    String getCollectionType();
+    List<String> getCollectionType();
     
 }

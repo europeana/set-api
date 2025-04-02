@@ -571,25 +571,58 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithCreator() throws Exception {
+  public void searchWithMultipleQfParams() throws Exception {
     deleteBookmarkFolder(regularUserToken);
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-    UserSet set2 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
+    UserSet set2 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
     // Update tests to delete sets before test and enable bookmark folder creation
-    UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
-    String creator = (String) getAuthentication(regularUserToken).getPrincipal();
+    UserSet set3 = createTestUserSet(USER_SET_BOOKMARK_FOLDER, editorUserToken);
+    String creatorRegular = (String) getAuthentication(regularUserToken).getPrincipal();
+    String creatorEditor = (String) getAuthentication(editorUserToken).getPrincipal();
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             // apikey will be ignored
             .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_CREATOR + creator)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorRegular)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorEditor)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
         .getContentAsString();
-    // check ids
+    /*
+     * check ids (first 2 inside, 3. one no because it is private and the user cannot see
+     * private sets of other users)
+     */
     assertTrue(containsKeyOrValue(result, UserSetUtils
+        .buildUserSetId(getConfiguration().getSetDataEndpoint(), set1.getIdentifier())));
+    assertTrue(containsKeyOrValue(result, UserSetUtils
+        .buildUserSetId(getConfiguration().getSetDataEndpoint(), set2.getIdentifier())));
+    assertFalse(containsKeyOrValue(result, UserSetUtils
+        .buildUserSetId(getConfiguration().getSetDataEndpoint(), set3.getIdentifier())));
+    
+    //search with added visibility qf param
+    result = mockMvc
+        .perform(get(SEARCH_URL)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
+            .header(HttpHeaders.AUTHORIZATION, editorUserToken)
+            // apikey will be ignored
+            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorRegular)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorEditor)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QF, PRIVATE_VISIBILITY)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QF, PUBLIC_VISIBILITY)
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
+        .getContentAsString();
+
+    /*
+     * check ids (the 2. and 3. are inside, first not because it is a private set from another user and a 
+     * user can only see his own private sets)
+     */
+    assertFalse(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), set1.getIdentifier())));
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), set2.getIdentifier())));

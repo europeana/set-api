@@ -46,7 +46,7 @@ public class UserSetQueryBuilderTest {
         String query = buildQuery(WebUserSetFields.SET_ID, TEST_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
-        assertTrue(StringUtils.equals(TEST_VALUE, userSetQuery.getSetId()));
+        assertTrue(StringUtils.equals(TEST_VALUE, userSetQuery.getSetId().get(0)));
         assertFalse(userSetQuery.isAdmin());
     }
 
@@ -55,7 +55,7 @@ public class UserSetQueryBuilderTest {
         String query = buildQuery(WebUserSetFields.CREATOR, CREATOR_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
-        assertTrue(StringUtils.equals(UserSetUtils.buildUserUri("http://data.europeana.eu/user/", CREATOR_VALUE), userSetQuery.getCreator()));
+        assertTrue(StringUtils.equals(UserSetUtils.buildUserUri("http://data.europeana.eu/user/", CREATOR_VALUE), userSetQuery.getCreator().get(0)));
         assertFalse(userSetQuery.isAdmin());
     }
 
@@ -64,7 +64,7 @@ public class UserSetQueryBuilderTest {
         String query = buildQuery(WebUserSetFields.VISIBILITY, VisibilityTypes.PUBLIC.getJsonValue());
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
-        assertTrue(StringUtils.equals(VisibilityTypes.PUBLIC.getJsonValue(), userSetQuery.getVisibility()));
+        assertTrue(StringUtils.equals(VisibilityTypes.PUBLIC.getJsonValue(), userSetQuery.getVisibility().get(0)));
         assertFalse(userSetQuery.isAdmin());
     }
 
@@ -73,7 +73,7 @@ public class UserSetQueryBuilderTest {
         String query = buildQuery(WebUserSetFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
-        assertTrue(StringUtils.equals(UserSetTypes.COLLECTION.getJsonValue(), userSetQuery.getType()));
+        assertTrue(StringUtils.equals(UserSetTypes.COLLECTION.getJsonValue(), userSetQuery.getType().get(0)));
         assertFalse(userSetQuery.isAdmin());
     }
 
@@ -82,7 +82,7 @@ public class UserSetQueryBuilderTest {
         String query = buildQuery(WebUserSetFields.ITEM, TEST_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
-        assertTrue(StringUtils.equals(UserSetUtils.buildItemUrl("http://data.europeana.eu/item/", TEST_VALUE), userSetQuery.getItem()));
+        assertTrue(StringUtils.equals(UserSetUtils.buildItemUrl("http://data.europeana.eu/item/", TEST_VALUE), userSetQuery.getItem().get(0)));
         assertFalse(userSetQuery.isAdmin());
     }
 

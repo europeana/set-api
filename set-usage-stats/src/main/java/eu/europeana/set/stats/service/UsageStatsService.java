@@ -1,5 +1,6 @@
 package eu.europeana.set.stats.service;
 
+import java.util.List;
 import javax.annotation.Resource;
 import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -99,9 +100,9 @@ public class UsageStatsService {
      */
     public UserSetQuery buildUserSetQuery(String creator, String type, String visibility) {
         UserSetQuery userSetQuery = new UserSetQueryImpl();
-        userSetQuery.setCreator(creator);
-        userSetQuery.setType(type);
-        userSetQuery.setVisibility(visibility);
+        userSetQuery.setCreator(List.of(creator));
+        userSetQuery.setType(List.of(type));
+        userSetQuery.setVisibility(List.of(visibility));
         userSetQuery.setAdmin(true);
 
         return userSetQuery;
