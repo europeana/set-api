@@ -43,11 +43,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		
-		<!-- property to be used for add opens jvm arguments in plugins -->
-		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
-        	--add-opens java.base/java.lang=ALL-UNNAMED
-		</java.17.addopens>
-		<version.commonsApi>0.4.5-SNAPSHOT</version.commonsApi>
+		<version.commonsApi>0.4.5</version.commonsApi>
 		<version.springBoot>2.5.14</version.springBoot>
 		
 		<!-- overwrite version defined in spring boot parent pom -->
@@ -66,7 +62,11 @@
 		<!-- java version properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+		<!-- property to be used for add opens jvm arguments in plugins -->
+		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
+        	--add-opens java.base/java.lang=ALL-UNNAMED
+		</java.17.addopens>
+		
 		<!-- test dependencies -->
 		<version.testcontainers>1.19.7</version.testcontainers>
 		
