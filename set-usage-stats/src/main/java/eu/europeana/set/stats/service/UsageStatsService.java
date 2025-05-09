@@ -11,6 +11,7 @@ import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.mongo.model.UserSetMongoConstants;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
+import org.apache.commons.lang3.StringUtils;
 
 public class UsageStatsService {
 
@@ -100,11 +101,16 @@ public class UsageStatsService {
      */
     public UserSetQuery buildUserSetQuery(String creator, String type, String visibility) {
         UserSetQuery userSetQuery = new UserSetQueryImpl();
-        userSetQuery.setCreator(List.of(creator));
-        userSetQuery.setType(List.of(type));
-        userSetQuery.setVisibility(List.of(visibility));
+        if (StringUtils.isNotEmpty(creator)) {
+            userSetQuery.setCreator(List.of(creator));
+        }
+        if (StringUtils.isNotEmpty(type)) {
+            userSetQuery.setType(List.of(type));
+        }
+        if (StringUtils.isNotEmpty(visibility)) {
+            userSetQuery.setVisibility(List.of(visibility));
+        }
         userSetQuery.setAdmin(true);
-
         return userSetQuery;
     }
 }
