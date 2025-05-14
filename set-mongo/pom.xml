@@ -10,7 +10,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>0.13.1</version>
+		<version>0.14-SNAPSHOT</version>
 	</parent>
 
 	<properties>
@@ -23,13 +23,13 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
-			<version>0.13.1</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>0.13.1</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
