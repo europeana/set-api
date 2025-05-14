@@ -644,8 +644,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       //search description for current item
       for (String description : itemDescriptions) {
         // match record's id in json string
-        System.out.println(description);
-        
         if (description.contains(recordIdJsonString)) {
           orderedItemDescriptions.add(description);
           found = true;
