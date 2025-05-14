@@ -5,7 +5,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>0.13.2</version>
+		<version>0.14-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>set-integration-testing</artifactId>
@@ -40,27 +40,27 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
-			<version>0.13.2</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-mongo</artifactId>
-			<version>0.13.2</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
-			<version>0.13.2</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>0.13.2</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-client</artifactId>
-			<version>0.13.2</version>
+			<version>0.14-SNAPSHOT</version>
 		</dependency>
 		
 		
