@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import eu.europeana.api.commons.auth.service.GrantConstants;
@@ -188,7 +189,7 @@ public abstract class BaseUserSetClientTest {
 	}
 
 	protected UserSet getUserSet(UserSet set) throws SetApiClientException {
-		return apiClient.getWebUserSetApi().getUserSet(set.getIdentifier(), null);
+		return apiClient.getWebUserSetApi().getUserSet(set.getIdentifier(), Optional.empty(), Optional.empty()).get();
 	}
 	
 	

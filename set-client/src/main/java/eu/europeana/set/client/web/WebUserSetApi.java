@@ -1,10 +1,12 @@
 package eu.europeana.set.client.web;
 
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Client API interface
@@ -23,12 +25,13 @@ public interface WebUserSetApi {
 	/**
 	 * This method retrieves user set from database
 	 * 
-	 * @param identifier
-	 * @param profile
+	 * @param identifier id of the user set to be fetched
+	 * @param profile profile value
+	 * @param caching Resource caching object for the caching responses.
+	 *                If null/empty will return the normal response with any caching headers being set
 	 * @return response entity that contains response body, headers and status code.
-	 */	
-	UserSet getUserSet(
-			String identifier, String profile) throws SetApiClientException;
+	 */
+	Optional<UserSet> getUserSet(String identifier, Optional<String> profile, Optional<ResourceCaching> caching) throws SetApiClientException;
 	
 	/**
 	 * This method deletes user set by the given identifier

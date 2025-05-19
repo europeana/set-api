@@ -13,15 +13,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import eu.europeana.api.commons.http.HttpConnection;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +48,7 @@ public class BaseApiConnection {
     protected static final Logger LOGGER = LogManager.getLogger(BaseApiConnection.class);
 
     private static final String DELETE_URL_RESPONSE = ". Returns status code.";
-    private static final String ERROR_MESSAGE = "Set API Client call failed - ";
+    private static final String ERROR_MESSAGE       = "Set API Client call failed - ";
 
     private final HttpConnection httpConnection = new HttpConnection();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -86,22 +87,82 @@ public class BaseApiConnection {
         this.authHandler = auth;
     }
 
-
     /**
      * Fetches the get user set response (GET request)
+     *
+     * If caching object is present, will add the caching headers in the requests
+     *    1. If the ETag is present in the caching set the HTTP request header with If-None-Match.
+     *    2. If the LastModified is present in the caching set the HTTP request header with If-Modified-Since
+     *
+     *    When receiving the response, if the response is a HTTP 200 then a User Set needs to be parsed and
+     *    the ResourceCaching needs to be set with all the caching Response headers.
+     *
+     *    If the response is 304 nothing to be done
+     *    For 404 throw an exception
      *
      * @param url
      * @return
      * @throws SetApiClientException
      */
-    protected UserSet getUserSetResponse(String url) throws SetApiClientException {
+    protected Optional<UserSet> getUserSetResponse(String url, Optional<ResourceCaching> caching) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Get UserSet API (GET) : {}.", url);
-            return parseSetApiResponse(getHttpConnection().get(url, null, getAuthenticationHandler()), new ArrayList<>(Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_NOT_MODIFIED)));
+            HttpGet get = getHttpConnection().getHttpRequest(url, null, getAuthenticationHandler());
+            ResourceCaching apiCaching = setCachingHeaders(caching, get);
+            HttpResponseHandler response = getHttpConnection().executeHttpClient(get);
+            String responseBody = response.getResponse();
+            if (response.getStatus() == HttpStatus.SC_OK) {
+                updateResourceCaching(response.getCachingHeaders(), apiCaching);
+                return Optional.of(mapper.readValue(responseBody, UserSet.class));
+            } else if (response.getStatus() == HttpStatus.SC_NOT_MODIFIED) {
+               return Optional.empty();
+            }
+            else {
+                AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(ERROR_MESSAGE + " {} ", errorResponse.getMessage());
+                }
+                throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getStatus());
+            }
         } catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
+
+    private ResourceCaching setCachingHeaders(Optional<ResourceCaching> caching, HttpGet get) {
+        ResourceCaching apiCaching = new ResourceCaching();
+        if (caching.isPresent()) {
+            apiCaching = caching.get();
+            if (apiCaching.getETag() != null) {
+                get.setHeader(HttpHeaders.IF_NONE_MATCH, apiCaching.getETag());
+            }
+            if (apiCaching.getLastModified() != null) {
+                get.setHeader(HttpHeaders.IF_MODIFIED_SINCE, apiCaching.getLastModified());
+            }
+        }
+        return apiCaching;
+    }
+
+    /**
+     * Update the resource caching with the header values received from the response
+     * @param cachingHeaders Http response caching headers
+     * @param apiCaching resource caching
+     */
+    private void updateResourceCaching(List<Header> cachingHeaders, ResourceCaching apiCaching) {
+        for (Header h: cachingHeaders) {
+            if (StringUtils.equals(h.getName(), CachingHeaders.ETAG)) {
+                apiCaching.setETag(CachingUtils.parseETag(new WeakETag(h.getValue()).format()));
+            }
+            if (StringUtils.equals(h.getName(), CachingHeaders.LAST_MODIFIED)) {
+                apiCaching.setLastModified(CachingUtils.getLastModified(Long.parseLong(h.getValue())));
+
+            } if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
+                apiCaching.setCacheControl(h.getValue());
+
+            }
+        }
+    }
+
 
     /**
      * Fetches the create user set response (GET request)
@@ -113,7 +174,9 @@ public class BaseApiConnection {
     protected UserSet getCreateUserSetResponse(String url, String requestBody) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Create UserSet API (POST) : {}.", url);
-            return parseSetApiResponse(getHttpConnection().post(url, requestBody, ContentType.APPLICATION_JSON.getMimeType(), getAuthenticationHandler()), new ArrayList<>(Arrays.asList(HttpStatus.SC_CREATED)));
+            return parseSetApiResponse(getHttpConnection().post(
+                    url, requestBody, ContentType.APPLICATION_JSON.getMimeType(), getAuthenticationHandler()),
+                    HttpStatus.SC_CREATED);
         }
         catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage()
@@ -133,8 +196,8 @@ public class BaseApiConnection {
               throws SetApiClientException {
         try {
             LOGGER.trace("Call to Update UserSet API : {PUT}. {} ", url);
-            return parseSetApiResponse(getHttpConnection().put(url, requestBody, getAuthenticationHandler())
-                                     , new ArrayList<>(Arrays.asList(HttpStatus.SC_OK)));
+            return parseSetApiResponse(getHttpConnection().put(url, requestBody, getAuthenticationHandler()),
+                    HttpStatus.SC_OK);
         }
         catch (IOException e) {
             throw new SetApiClientException(ERROR_MESSAGE + e.getMessage()
@@ -169,9 +232,9 @@ public class BaseApiConnection {
         }
     }
 
-    private UserSet parseSetApiResponse(HttpResponseHandler response, List<Integer> statusToCheckList) throws SetApiClientException, JsonProcessingException {
+    private UserSet parseSetApiResponse(HttpResponseHandler response, Integer statusToCheck) throws SetApiClientException, JsonProcessingException {
         String responseBody = response.getResponse();
-        if (statusToCheckList.contains(response.getStatus())) {
+        if (response.getStatus() == statusToCheck) {
             return mapper.readValue(responseBody, UserSet.class);
         } else {
             AbstractUserSetApiResponse errorResponse = mapper.readValue(responseBody, AbstractUserSetApiResponse.class);
@@ -180,7 +243,6 @@ public class BaseApiConnection {
             }
             throw new SetApiClientException(ERROR_MESSAGE + errorResponse.getMessage(), response.getStatus());
         }
-
     }
 
     /**

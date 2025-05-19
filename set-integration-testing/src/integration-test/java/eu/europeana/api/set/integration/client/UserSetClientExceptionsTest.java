@@ -2,6 +2,7 @@ package eu.europeana.api.set.integration.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
+import java.util.Optional;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
@@ -76,7 +77,7 @@ public class UserSetClientExceptionsTest extends BaseUserSetClientTest {
     @Test
     public void getUserSetWithWrongIdentifier() {
         try {
-            apiClient.getWebUserSetApi().getUserSet(WRONG_GENERATED_IDENTIFIER, null);
+            apiClient.getWebUserSetApi().getUserSet(WRONG_GENERATED_IDENTIFIER, Optional.empty(), Optional.empty());
         } catch (SetApiClientException e) {
             assertEquals(HttpStatus.SC_NOT_FOUND, e.getRemoteStatusCode());
         }
