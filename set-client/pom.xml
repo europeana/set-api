@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>commons-sb3-definitions</artifactId>
-			<version>0.1.2-SNAPSHOT</version>
+			<version>${version.commons.api.sb3}</version>
 		</dependency>
 
 		<dependency>
