@@ -50,7 +50,7 @@ public class BaseApiConnection {
     private static final String DELETE_URL_RESPONSE = ". Returns status code.";
     private static final String ERROR_MESSAGE       = "Set API Client call failed - ";
 
-    private final HttpConnection httpConnection = new HttpConnection();
+    private final HttpConnection httpConnection = new HttpConnection(true);
     private final ObjectMapper mapper = new ObjectMapper();
 
     private String                setServiceUri;
@@ -100,6 +100,7 @@ public class BaseApiConnection {
      *    If the response is 304 nothing to be done
      *    For 404 throw an exception
      *
+     * NOTE : Other 3xx response will follow the redirects as the getHttpConnection() is set to follow redirects.
      * @param url
      * @return
      * @throws SetApiClientException
@@ -129,10 +130,10 @@ public class BaseApiConnection {
         }
     }
 
-    private ResourceCaching setCachingHeaders(Optional<ResourceCaching> caching, HttpGet get) {
+    private ResourceCaching setCachingHeaders(Optional<ResourceCaching> cachingOptional, HttpGet get) {
         ResourceCaching apiCaching = new ResourceCaching();
-        if (caching.isPresent()) {
-            apiCaching = caching.get();
+        if (cachingOptional.isPresent()) {
+            apiCaching = cachingOptional.get();
             if (apiCaching.getETag() != null) {
                 get.setHeader(HttpHeaders.IF_NONE_MATCH, apiCaching.getETag());
             }
