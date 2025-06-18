@@ -1,7 +1,8 @@
 # Please note, this file should have unix-based end of line
 # Use same version as CloudFoundry deployment
 #FROM library/mongo:4.4.15
-FROM library/mongo:6.0.14-jammy
+#FROM library/mongo:6.0.14-jammy
+FROM library/mongo:7.0.21-jammy
 
 EXPOSE 27017
 

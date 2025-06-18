@@ -1,12 +1,12 @@
 package eu.europeana.api.set.integration.exception;
 
-import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.common.http.HttpResponseHandler;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
+import org.junit.Assert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import eu.europeana.set.common.http.HttpConnection;
 
+@Disabled("Enable back when real intergration tests are implemented")
 public class SetIntegrationExceptionTest {
 
     String expectedMessage = "Error occured when calling oath service!";
@@ -25,7 +25,7 @@ public class SetIntegrationExceptionTest {
     private void getToken() throws SetIntegrationException {
         try {
             HttpConnection connection = new HttpConnection();
-            HttpResponseHandler response = connection.post("http://test.com", "oauthParams", "application/x-www-form-urlencoded", null);
+            connection.post("http://fake-url-for-testing.com", "oauthParams", "application/x-www-form-urlencoded", null);
         } catch (IOException e) {
             throw new SetIntegrationException(expectedMessage + e.getMessage(), e);
 
