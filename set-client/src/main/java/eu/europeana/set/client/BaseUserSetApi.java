@@ -5,6 +5,7 @@ import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.connection.UserSetApiConnection;
 import eu.europeana.set.client.exception.SetApiClientException;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Base class for client API
@@ -29,7 +30,7 @@ public class BaseUserSetApi {
 
     protected BaseUserSetApi(String serviceUri
                            , AuthenticationHandler auth) throws SetApiClientException {
-        if (serviceUri == null) {
+        if (StringUtils.isEmpty(serviceUri)) {
             throw new SetApiClientException(" Set Api Endpoint not provided !!!");
         }
 

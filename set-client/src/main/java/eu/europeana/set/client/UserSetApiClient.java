@@ -1,8 +1,10 @@
 package eu.europeana.set.client;
 
 import java.util.List;
+import java.util.Optional;
 
 import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.set.client.config.ClientConfiguration;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
@@ -60,8 +62,9 @@ public class UserSetApiClient extends BaseUserSetApi {
         }
 
         @Override
-        public UserSet getUserSet(String identifier, String profile) throws SetApiClientException {
-            return getApiConnection().getUserSet(identifier, profile);
+        public Optional<UserSet> getUserSet(String identifier, Optional<String> profile, Optional<ResourceCaching> caching) throws SetApiClientException {
+            return getApiConnection().getUserSet(identifier, profile, caching);
+
         }
 
         @Override

@@ -2,8 +2,11 @@ package eu.europeana.set.client.connection;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
+import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.exception.SetApiClientException;
@@ -19,7 +22,6 @@ public class UserSetApiConnection extends BaseApiConnection {
   public UserSetApiConnection(String setServiceUri, AuthenticationHandler auth) {
       super(setServiceUri, auth);
   }
-
 
   /**
    * This method creates UserSet object from Json string. Example HTTP request for tag object:
@@ -44,20 +46,24 @@ public class UserSetApiConnection extends BaseApiConnection {
       return getCreateUserSetResponse(resUrl, set);
   }
 
-  /**
-   * This method retrieves UserSet object. Example HTTP request for tag object:
-   * http://localhost:8080/set/{identifier}.jsonld?profile=minimal where identifier is: 496
-   *
-   * @param identifier set id
-   * @param profile profile requested
-   * @throws IOException
-   * @return userset
-   */
-  public UserSet getUserSet(String identifier, String profile) 
-         throws SetApiClientException {
-      StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(identifier + WebUserSetFields.JSON_LD_REST, profile));
-      return getUserSetResponse(urlBuilder.toString());
-  }
+    /**
+     * This method retrieves UserSet object. Example HTTP request for tag object:
+     * http://localhost:8080/set/{identifier}.jsonld?profile=minimal where identifier is: 496
+     *
+     * @param identifier set id
+     * @param profile profile requested
+     * @param caching  if present caching headers are set in the http request.
+     * @throws IOException
+     * @return userset
+     */
+    public Optional<UserSet> getUserSet(String identifier, Optional<String> profile, Optional<ResourceCaching> caching)
+            throws SetApiClientException {
+        StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(
+                identifier + WebUserSetFields.JSON_LD_REST,
+                profile.isPresent() ? profile.get() : null));
+        return getUserSetResponse(urlBuilder.toString(), caching);
+    }
+
 
   /**
    * This method updates UserSet object by the passed Json update string. Example HTTP request:

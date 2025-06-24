@@ -25,7 +25,13 @@
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
 
-        <!--Client is using api-commons-sb3 -->
+        <!--Client is using api-commons-sb3 for caching classes -->
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>commons-sb3-definitions</artifactId>
+			<version>${version.commons.api.sb3}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-clientutils</artifactId>

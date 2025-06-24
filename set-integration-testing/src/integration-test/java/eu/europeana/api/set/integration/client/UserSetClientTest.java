@@ -3,6 +3,7 @@ package eu.europeana.api.set.integration.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
+import java.util.Optional;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
@@ -47,7 +48,7 @@ public class UserSetClientTest extends BaseUserSetClientTest {
 		String testSetId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
-		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, null);
+		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, Optional.empty(), Optional.empty()).get();
 		assertNotNull(userSet);
 		assertEquals(testSetId, userSet.getIdentifier());
 		deleteCreatedSets();
