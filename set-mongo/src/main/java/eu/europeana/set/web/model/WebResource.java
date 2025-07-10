@@ -72,9 +72,8 @@ public class WebResource extends BaseWebResource {
   }
 
   @JsonIgnore
-  @SuppressWarnings("java:NoSonar")
   public boolean hasThumbnail() {
     //need to ignore in json serialization
-    return super.hasThumbnail();//NOSONAR
+    return super.hasThumbnail();
   }
 }

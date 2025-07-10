@@ -388,12 +388,11 @@ public class PersistentUserSetServiceImpl extends
   }
 
   // create $match and $group for mongo query
-  @SuppressWarnings("external_spotbugs:NP_NONNULL_PARAM_VIOLATION")
   private List<DBObject> getAggregatePipeline(String collectionType,
       Map<String, DBObject> groupFieldsAdditional) {
     DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
-    DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);//NOSONAR
+    DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
     for (Map.Entry<String, DBObject> field : groupFieldsAdditional.entrySet()) {
       groupFields.put(field.getKey(), field.getValue());
     }
