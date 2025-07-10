@@ -10,9 +10,9 @@ import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
@@ -113,15 +113,15 @@ public class HttpConnection {
 	}
 
 
-    private <T extends HttpUriRequestBase> HttpResponseHandler executeHttpClient(T url) throws IOException {
+    private HttpResponseHandler executeHttpClient(ClassicHttpRequest request) throws IOException {
       HttpResponseHandler responseHandler = new HttpResponseHandler();      
-      httpClient.execute(url, responseHandler); 
+      httpClient.execute(request, responseHandler); 
       return responseHandler;
 	}
 
-	private <T extends HttpUriRequestBase> void addHeaders(T url, String headerName, String headerValue) {
+	private void addHeaders(ClassicHttpRequest request, String headerName, String headerValue) {
 		if (StringUtils.isNotBlank(headerValue)) {
-			url.setHeader(headerName, headerValue);
+			request.setHeader(headerName, headerValue);
 		}
 	}
 }

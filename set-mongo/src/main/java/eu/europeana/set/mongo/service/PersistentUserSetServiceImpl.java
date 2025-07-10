@@ -392,7 +392,6 @@ public class PersistentUserSetServiceImpl extends
       Map<String, DBObject> groupFieldsAdditional) {
     DBObject match = getMatchFilter(WebUserSetFields.TYPE, collectionType);
 
-    //NOSONAR
     DBObject groupFields = new BasicDBObject(UserSetMongoConstants.MONGO_ID, null);
     for (Map.Entry<String, DBObject> field : groupFieldsAdditional.entrySet()) {
       groupFields.put(field.getKey(), field.getValue());

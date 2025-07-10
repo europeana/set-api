@@ -5,190 +5,192 @@ import eu.europeana.set.definitions.model.vocabulary.AgentTypes;
 
 public abstract class BaseAgent implements Agent {
 
-    private String httpUrl;
-    private String agentType;
-    private String internalType;
-    private String name;
-    private String email;
-    private String emailSha1;
-    private String nickname;
+  private String httpUrl;
+  private String agentType;
+  private String internalType;
+  private String name;
+  private String email;
+  private String emailSha1;
+  private String nickname;
 
-    private String homepage;
-    private String inputString;
-    private String userGroup;
+  private String homepage;
+  private String inputString;
+  private String userGroup;
 
-    @Override
-    public String getHttpUrl() {
-        return httpUrl;
+  @Override
+  public String getHttpUrl() {
+    return httpUrl;
+  }
+
+  @Override
+  public void setHttpUrl(String httpUrl) {
+    this.httpUrl = httpUrl;
+  }
+
+  @Override
+  public String getUserGroup() {
+    return userGroup;
+  }
+
+  @Override
+  public void setUserGroup(String userGroup) {
+    this.userGroup = userGroup;
+  }
+
+  @Override
+  public String getType() {
+    return agentType;
+  }
+
+  @Override
+  public void setType(String agentType) {
+    this.agentType = agentType;
+  }
+
+  @Override
+  public String getInternalType() {
+    return internalType;
+  }
+
+  @Override
+  public void setInternalType(String internalType) {
+    this.internalType = internalType;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public String getEmail() {
+    return email;
+  }
+
+  @Override
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  @Override
+  public String getEmailSha1() {
+    return emailSha1;
+  }
+
+  @Override
+  public void setEmailSha1(String emailSha1) {
+    this.emailSha1 = emailSha1;
+  }
+
+  @Override
+  public String getNickname() {
+    return nickname;
+  }
+
+  @Override
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
+  }
+
+  @Override
+  public String getHomepage() {
+    return homepage;
+  }
+
+  @Override
+  public void setHomepage(String homepage) {
+    this.homepage = homepage;
+  }
+
+  @Override
+  public String getInputString() {
+    return inputString;
+  }
+
+  @Override
+  public void setInputString(String inputString) {
+    this.inputString = inputString;
+  }
+
+  @Override
+  public void setAgentTypeEnum(AgentTypes curAgentType) {
+    agentType = curAgentType.name();
+  }
+
+  @Override
+  public void setAgentTypeAsString(String agentTypeStr) {
+    agentType = agentTypeStr;
+  }
+
+  protected BaseAgent() {}
+
+  protected BaseAgent(AgentTypes type) {
+    agentType = type.name();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == null) {
+      return false;
+    }
+    if (!(other instanceof BaseAgent)) {
+      return false;
+    }
+    BaseAgent that = (BaseAgent) other;
+
+    boolean res = true;
+
+    /**
+     * equality check for all relevant fields.
+     */
+    if ((this.getType() != null) && (that.getType() != null)
+        && (!this.getType().equals(that.getType()))) {
+      res = false;
     }
 
-    @Override
-    public void setHttpUrl(String httpUrl) {
-        this.httpUrl = httpUrl;
+    if ((this.getHomepage() != null) && (that.getHomepage() != null)
+        && (!this.getHomepage().equals(that.getHomepage()))) {
+      res = false;
     }
 
-    @Override
-    public String getUserGroup() {
-        return userGroup;
+    if ((this.getName() != null) && (that.getName() != null)
+        && (!this.getName().equals(that.getName()))) {
+      res = false;
     }
 
-    @Override
-    public void setUserGroup(String userGroup) {
-        this.userGroup = userGroup;
+    if ((this.getHttpUrl() != null) && (that.getHttpUrl() != null)
+        && (!this.getHttpUrl().equals(that.getHttpUrl()))) {
+      res = false;
     }
+    return res;
+  }
 
-    @Override
-    public String getType() {
-        return agentType;
+  @Override
+  public int hashCode() {
+    if (getHttpUrl() != null) {
+      return getHttpUrl().hashCode();
+    } else {
+      return super.hashCode();
     }
+  }
 
-    @Override
-    public void setType(String agentType) {
-        this.agentType = agentType;
-    }
+  @Override
+  public String toString() {
+    StringBuilder res = new StringBuilder("### Agent ###\n");
 
-    @Override
-    public String getInternalType() {
-        return internalType;
-    }
-
-    @Override
-    public void setInternalType(String internalType) {
-        this.internalType = internalType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public String getEmailSha1() {
-        return emailSha1;
-    }
-
-    @Override
-    public void setEmailSha1(String emailSha1) {
-        this.emailSha1 = emailSha1;
-    }
-
-    @Override
-    public String getNickname() {
-        return nickname;
-    }
-
-    @Override
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    @Override
-    public String getHomepage() {
-        return homepage;
-    }
-
-    @Override
-    public void setHomepage(String homepage) {
-        this.homepage = homepage;
-    }
-
-    @Override
-    public String getInputString() {
-        return inputString;
-    }
-
-    @Override
-    public void setInputString(String inputString) {
-        this.inputString = inputString;
-    }
-
-    @Override
-    public void setAgentTypeEnum(AgentTypes curAgentType) {
-        agentType = curAgentType.name();
-    }
-
-    @Override
-    public void setAgentTypeAsString(String agentTypeStr) {
-        agentType = agentTypeStr;
-    }
-
-    protected BaseAgent() {
-    }
-
-    protected BaseAgent(AgentTypes type) {
-	agentType = type.name();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (!(other instanceof Agent)) {
-            return false;
-        }
-        Agent that = (Agent) other;
-
-        boolean res = true;
-
-        /**
-         * equality check for all relevant fields.
-         */
-        if ((this.getType() != null) && (that.getType() != null) &&
-                (!this.getType().equals(that.getType()))) {
-            res = false;
-        }
-
-        if ((this.getHomepage() != null) && (that.getHomepage() != null) &&
-                (!this.getHomepage().equals(that.getHomepage()))) {
-            res = false;
-        }
-
-        if ((this.getName() != null) && (that.getName() != null) &&
-                (!this.getName().equals(that.getName()))) {
-            res = false;
-        }
-
-        if ((this.getHttpUrl() != null) && (that.getHttpUrl() != null) &&
-                (!this.getHttpUrl().equals(that.getHttpUrl()))) {
-            res = false;
-        }
-        return res;
-    }
-
-    @Override
-    public int hashCode() {
-	if(getHttpUrl() != null) {
-	    return getHttpUrl().hashCode();
-	} else {
-	    return super.hashCode();
-	}
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder res = new StringBuilder("### Agent ###\n");
-
-        if (getType() != null)
-            res.append('\t').append("agentType:").append(getType()).append('\n');
-        if (getName() != null)
-            res.append('\t').append("name:").append(getName()).append('\n');
-        if (getHttpUrl() != null)
-            res.append('\t').append("httpUrl:").append(getHttpUrl()).append('\n');
-        if (getHomepage() != null)
-            res.append('\t').append("homepage:").append(getHomepage()).append('\n');
-        return res.toString();
-    }
+    if (getType() != null)
+      res.append('\t').append("agentType:").append(getType()).append('\n');
+    if (getName() != null)
+      res.append('\t').append("name:").append(getName()).append('\n');
+    if (getHttpUrl() != null)
+      res.append('\t').append("httpUrl:").append(getHttpUrl()).append('\n');
+    if (getHomepage() != null)
+      res.append('\t').append("homepage:").append(getHomepage()).append('\n');
+    return res.toString();
+  }
 }
