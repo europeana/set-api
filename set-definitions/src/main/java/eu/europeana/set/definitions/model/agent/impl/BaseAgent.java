@@ -135,6 +135,7 @@ public abstract class BaseAgent implements Agent {
     }
 
     @Override
+    @SuppressWarnings("java:S2162")
     public boolean equals(Object other) {
         if (!(other instanceof BaseAgent)) {
             return false;
