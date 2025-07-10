@@ -130,7 +130,7 @@ public class BaseApiConnection {
         }
     }
 
-    private ResourceCaching setCachingHeaders(Optional<ResourceCaching> cachingOptional, HttpGet get) {
+    private ResourceCaching setCachingHeaders(Optional<ResourceCaching> cachingOptional, HttpRequest get) {
         ResourceCaching apiCaching = new ResourceCaching();
         if (cachingOptional.isPresent()) {
             apiCaching = cachingOptional.get();

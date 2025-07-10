@@ -74,6 +74,6 @@ public class WebResource extends BaseWebResource {
   @JsonIgnore
   public boolean hasThumbnail() {
     //need to ignore in json serialization
-    return super.hasThumbnail();
+    return super.hasThumbnail();//NOSONAR
   }
 }

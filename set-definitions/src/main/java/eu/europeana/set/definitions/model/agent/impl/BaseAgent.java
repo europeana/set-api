@@ -136,10 +136,10 @@ public abstract class BaseAgent implements Agent {
 
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Agent)) {
+        if (!(other instanceof BaseAgent)) {
             return false;
         }
-        Agent that = (Agent) other;
+        BaseAgent that = (BaseAgent) other;
 
         boolean res = true;
 

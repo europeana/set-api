@@ -44,59 +44,59 @@ public class BaseUserSetResultPage<T> extends ResultsPageImpl<T> {
   @Override
   @JsonProperty(WebUserSetModelFields.TOTAL)
   public long getTotalInPage() {
-    return super.getTotalInPage();
+    return super.getTotalInPage();//NOSONAR
   }
 
   @Override
   @JsonIgnore
   public long getTotalInCollection() {
     // remove from serialization
-    return super.getTotalInCollection();
+    return super.getTotalInCollection();//NOSONAR
   }
 
   @Override
   @JsonIgnore
   public int getCurrentPage() {
     // remove from serialization
-    return super.getCurrentPage();
+    return super.getCurrentPage();//NOSONAR
   }
 
   @Override
   @JsonIgnore
   public String getResultCollectionUri() {
     // remove from serialization
-    return super.getResultCollectionUri();
+    return super.getResultCollectionUri();//NOSONAR
   }
 
   @Override
   @JsonIgnore
   public String getCollectionUri() {
     // remove from serialization
-    return super.getCollectionUri();
+    return super.getCollectionUri();//NOSONAR
   }
 
   @Override
   @JsonProperty(WebUserSetModelFields.ID)
   public String getCurrentPageUri() {
-    return super.getCurrentPageUri();
+    return super.getCurrentPageUri();//NOSONAR
   }
 
   @Override
   @JsonProperty(WebUserSetFields.NEXT)
   public String getNextPageUri() {
-    return super.getNextPageUri();
+    return super.getNextPageUri();//NOSONAR
   }
 
   @Override
   @JsonProperty(WebUserSetFields.PREV)
   public String getPrevPageUri() {
-    return super.getPrevPageUri();
+    return super.getPrevPageUri();//NOSONAR
   }
 
   @Override
   @JsonProperty(WebUserSetFields.FACETS)
   public List<FacetFieldView> getFacetFields() {
-    return super.getFacetFields();
+    return super.getFacetFields();//NOSONAR
   }
 
 }

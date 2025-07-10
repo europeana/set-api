@@ -11,8 +11,8 @@ public class PositiveIntegerFilter {
 	super();
     }
 
-	@SuppressWarnings("java:S2162")
-    @Override
+	@SuppressWarnings({"java:S2162", "external_fbcontrib:NSE_NON_SYMMETRIC_EQUALS"})
+	@Override
     public boolean equals(Object other) {
 	// Trick required to be compliant with the Jackson Custom attribute processing
 	if (other == null) {
