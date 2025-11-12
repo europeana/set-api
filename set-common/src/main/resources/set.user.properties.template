@@ -38,6 +38,12 @@ europeana.apikey.jwttoken.siganturekey=
 #URL of the APIKEY service
 #europeana.apikey.serviceurl=
 
+#Keycloak token endpoint
+keycloak.token.endpoint =
+
+#Request parameters to retrieve the token from keycloak
+keycloak.token.grant.params =
+
 #API key used for invocation of search api
 #europeana.search.apikey=
 

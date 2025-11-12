@@ -95,10 +95,16 @@
 			</exclusions>
 		</dependency>
 
+<!--		<dependency>-->
+<!--			<groupId>eu.europeana.api.commons</groupId>-->
+<!--			<artifactId>commons-oauth</artifactId>-->
+<!--			<version>${version.commonsApi}</version>-->
+<!--		</dependency>-->
+
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-oauth</artifactId>
-			<version>${version.commonsApi}</version>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>commons-sb3-oauth</artifactId>
+			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
