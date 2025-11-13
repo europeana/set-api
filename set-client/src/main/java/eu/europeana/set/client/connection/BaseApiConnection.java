@@ -259,7 +259,7 @@ public class BaseApiConnection {
     protected List<RecordPreview> getUserSetPaginatedResponse(String url, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Get UserSet API (Paginated): {} ", url);
-            HttpResponseHandler response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), null,  getAuthenticationHandler());
+            HttpResponseHandler response = getHttpConnection().get(url,ContentType.APPLICATION_JSON.getMimeType(),getAuthenticationHandler());
             String responseBody = response.getResponse();
             if (response.getStatus() == HttpStatus.SC_OK) {
                 TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
@@ -288,7 +288,7 @@ public class BaseApiConnection {
     protected List<? extends UserSet> getSearchUserSetResponse(String url, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
-            HttpResponseHandler response = getHttpConnection().get(url, "application/json", null,  getAuthenticationHandler());
+            HttpResponseHandler response = getHttpConnection().get(url, "application/json",getAuthenticationHandler());
             String responseBody = response.getResponse();
             if (response.getStatus() == HttpStatus.SC_OK) {
                 if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {

@@ -43,8 +43,8 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		
-		<version.commonsApi>0.4.7-SNAPSHOT</version.commonsApi>
-		<version.commons.api.sb3>0.1.2-SNAPSHOT</version.commons.api.sb3>
+		<version.commonsApi>0.4.10-SNAPSHOT</version.commonsApi>
+		<version.commons.api.sb3>0.1.3-SNAPSHOT</version.commons.api.sb3>
 		<version.springBoot>2.5.14</version.springBoot>
 		
 		<!-- overwrite version defined in spring boot parent pom -->
