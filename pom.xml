@@ -43,7 +43,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		
-		<version.commonsApi>0.4.7-SNAPSHOT</version.commonsApi>
+		<version.commonsApi>0.4.9</version.commonsApi>
 		<version.commons.api.sb3>0.1.2-SNAPSHOT</version.commons.api.sb3>
 		<version.springBoot>2.5.14</version.springBoot>
 		
@@ -67,7 +67,7 @@
 		<java.17.addopens>--add-opens java.base/java.util=ALL-UNNAMED
         	--add-opens java.base/java.lang=ALL-UNNAMED
 		</java.17.addopens>
-		
+
 		<!-- test dependencies -->
 		<version.testcontainers>1.19.7</version.testcontainers>
 		
