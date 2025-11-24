@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;

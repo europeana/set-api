@@ -33,9 +33,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<version>${version.commonsApi}</version>
-			<artifactId>commons-nosql</artifactId>
+			<groupId>eu.europeana.api</groupId>
+			<version>${version.commons.api.sb3}</version>
+			<artifactId>commons-sb3-nosql</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
@@ -46,8 +46,8 @@
 
 		<!--  apis not included in JDK 11 -->
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<!-- overwrite -->

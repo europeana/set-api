@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import eu.europeana.api.commons.definitions.search.FacetFieldView;
+import eu.europeana.api.commons_sb3.definitions.search.FacetFieldView;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 
@@ -56,4 +56,3 @@ public class FacetFieldViewImpl implements FacetFieldView {
     return facetValues;
   }
 }
-

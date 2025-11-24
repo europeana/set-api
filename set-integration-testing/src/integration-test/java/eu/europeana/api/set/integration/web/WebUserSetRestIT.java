@@ -25,9 +25,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
@@ -229,7 +229,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
-    assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), eu.europeana.api.commons_sb3.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     String result = response.getContentAsString();
     assertNotNull(result);
     assertEquals(HttpStatus.OK.value(), response.getStatus());

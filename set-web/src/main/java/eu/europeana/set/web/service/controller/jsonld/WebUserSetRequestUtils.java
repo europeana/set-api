@@ -1,8 +1,8 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
@@ -33,13 +33,13 @@ public class WebUserSetRequestUtils {
       try {
         Integer value = Integer.valueOf(paramValue);
         if ((maxValue > 0 && value > maxValue) || value < minValue) {
-          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-              I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue});
+          throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+              ErrorConfig.INVALID_PARAM_VALUE, new String[] {paramName, paramValue});
         }
         return value;
       } catch (NumberFormatException e) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue}, e);
+        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+            ErrorConfig.INVALID_PARAM_VALUE, new String[] {paramName, paramValue}, e);
       }
     }
     return null;

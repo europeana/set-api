@@ -3,8 +3,8 @@ package eu.europeana.set.mongo.service;
 import java.util.List;
 import java.util.Map;
 import dev.morphia.query.QueryResults;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.nosql.service.AbstractNoSqlService;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.nosql.service.AbstractNoSqlService;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -145,4 +145,3 @@ public interface PersistentUserSetService extends AbstractNoSqlService<Persisten
   UserSet create(UserSet userSet);
 
 }
-

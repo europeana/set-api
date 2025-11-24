@@ -24,9 +24,9 @@
 	<dependencies>
 		<!-- europeana api commons -->
 		 <dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-definitions</artifactId>
-			<version>${version.commonsApi}</version>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>commons-sb3-definitions</artifactId>
+			<version>${version.commons.api.sb3}</version>
 		</dependency>
 			
 		<dependency>
@@ -54,9 +54,14 @@
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-jaxb-annotations</artifactId>
+			<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+
 	</dependencies>
  
 </project>

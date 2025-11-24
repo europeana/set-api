@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Properties;
 
-import eu.europeana.api.commons.auth.service.GrantConstants;
+import eu.europeana.api.commons_sb3.auth.service.GrantConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import eu.europeana.set.client.config.ClientConfiguration;

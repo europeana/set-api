@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
+import  jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
@@ -16,15 +16,15 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.utils.LoggingUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.definitions.utils.LoggingUtils;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.HttpException;
+import eu.europeana.api.commons_sb3.error.exceptions.InternalServerException;
+import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -63,8 +63,6 @@ import eu.europeana.set.web.service.controller.jsonld.WebUserSetRequestUtils;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
-
-
 
   @Override
   public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
@@ -726,8 +724,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       case FACETS:
         // serialization profile should not be facets
       default:
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE,
+        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+            ErrorConfig.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE,
                 serializationProfile.getProfileParamValue()});
     }
     // add facets if requested
@@ -954,8 +952,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       case FACETS:
         // serialization profile should not be facets
       default:
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
+        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+            ErrorConfig.INVALID_PARAM_VALUE,
             new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile.getProfileParamValue()});
 
     }

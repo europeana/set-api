@@ -2,7 +2,7 @@ package eu.europeana.set.web.exception.request;
 
 import org.springframework.http.HttpStatus;
 
-import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons_sb3.error.HttpException;
 
 public class RequestBodyValidationException extends HttpException{
 

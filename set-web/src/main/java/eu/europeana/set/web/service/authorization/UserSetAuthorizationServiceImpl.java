@@ -1,14 +1,14 @@
 package eu.europeana.set.web.service.authorization;
 
-import javax.annotation.Resource;
+import eu.europeana.api.commons_sb3.definitions.oauth.Role;
+import eu.europeana.api.commons_sb3.nosql.service.ApiWriteLockService;
+import jakarta.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import eu.europeana.api.commons.definitions.vocabulary.Role;
-import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
-import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.model.vocabulary.Roles;
+import eu.europeana.api.commons_sb3.web.service.authorization.BaseAuthorizationService;
 
 @SuppressWarnings("deprecation")
 public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService implements UserSetAuthorizationService {
@@ -48,7 +48,7 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
 
     @Override
     protected Role getRoleByName(String name) {
-	return Roles.getRoleByName(name);
+	     return Roles.getRoleByName(name);
     }
 
     @Override

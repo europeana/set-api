@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -25,7 +24,7 @@ import org.springframework.context.annotation.ImportResource;
     // Remove these exclusions to re-enable security
     SecurityAutoConfiguration.class,
     // WebMvcAutoConfiguration.class,
-    EmbeddedMongoAutoConfiguration.class, EmbeddedWebServerFactoryCustomizerAutoConfiguration.class,
+    EmbeddedWebServerFactoryCustomizerAutoConfiguration.class,
     MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
     MongoMetricsAutoConfiguration.class,
     // MongoMetricsAutoConfiguration.class,

@@ -1,13 +1,13 @@
 package eu.europeana.set.web.service.controller.exception;
 
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
 import io.swagger.v3.oas.annotations.Hidden;
 
 /**

@@ -22,7 +22,7 @@
 		p:dao-ref="set_db_setDao">
 	</bean>
 	
-	<bean name="set_db_apilockService" class="eu.europeana.api.commons.nosql.service.impl.ApiWriteLockServiceImpl"
+	<bean name="set_db_apilockService" class="eu.europeana.api.commons_sb3.nosql.service.impl.ApiWriteLockServiceImpl"
 		p:dao-ref="set_db_lockDao"/>
 	
 					

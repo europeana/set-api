@@ -1,7 +1,7 @@
 package eu.europeana.set.web.model;
 
-import eu.europeana.api.commons.definitions.vocabulary.Role;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.api.commons_sb3.definitions.oauth.Role;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;

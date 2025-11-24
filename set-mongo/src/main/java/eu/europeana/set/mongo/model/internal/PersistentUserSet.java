@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.bson.types.ObjectId;
 
-import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
+import eu.europeana.api.commons_sb3.nosql.entity.NoSqlEntity;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 

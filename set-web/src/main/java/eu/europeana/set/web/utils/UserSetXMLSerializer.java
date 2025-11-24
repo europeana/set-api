@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import eu.europeana.set.web.model.elevation.Elevation;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class UserSetXMLSerializer {
      * @throws IOException
      */
     public String serialize(Elevation elevation) throws JsonProcessingException {
-        mapper.registerModule(new JaxbAnnotationModule());
+        mapper.registerModule(new JakartaXmlBindAnnotationModule());
         return mapper.writeValueAsString(elevation);
     }
 

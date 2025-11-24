@@ -2,9 +2,9 @@ package eu.europeana.set.web.exception.response;
 
 import org.springframework.http.HttpStatus;
 
-import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons_sb3.error.HttpException;
 
-public class UserSetNotFoundException extends HttpException{
+public class UserSetNotFoundException extends HttpException {
 
 	private static final long serialVersionUID = 3050674865876453650L;
 

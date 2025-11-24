@@ -3,7 +3,7 @@ package eu.europeana.set.mongo.dao;
 import java.io.Serializable;
 import java.util.List;
 
-import eu.europeana.api.commons.nosql.dao.NosqlDao;
+import eu.europeana.api.commons_sb3.nosql.dao.NosqlDao;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import org.bson.types.ObjectId;
 

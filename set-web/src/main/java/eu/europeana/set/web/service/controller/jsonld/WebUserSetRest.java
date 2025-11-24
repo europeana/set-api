@@ -1,13 +1,13 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import static eu.europeana.api.commons.web.definitions.WebFields.FORMAT_JSONLD;
+import static eu.europeana.api.commons_sb3.definitions.web.WebFields.FORMAT_JSONLD;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Pattern;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.http.HttpStatus;
@@ -26,16 +26,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonParseException;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.exception.DateParsingException;
-import eu.europeana.api.commons.definitions.utils.DateUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.definitions.oauth.exception.DateParsingException;
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.HttpException;
+import eu.europeana.api.commons_sb3.error.exceptions.InternalServerException;
+import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
+import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
 import eu.europeana.set.definitions.exception.UserSetInstantiationException;
@@ -386,8 +386,8 @@ public class WebUserSetRest extends BaseRest {
       try {
         issuedDate = DateUtils.parseToDate(issued);
       } catch (DateParsingException e) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
+        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+            ErrorConfig.INVALID_PARAM_VALUE,
             new String[] {WebUserSetFields.REQUEST_PARAM_ISSUED, issued}, e);
       }
     }
@@ -642,13 +642,13 @@ public class WebUserSetRest extends BaseRest {
       try {
         positionFinal = Integer.parseInt(position);
         if (positionFinal < 0) {
-          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-              I18nConstants.INVALID_PARAM_VALUE,
+          throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+              ErrorConfig.INVALID_PARAM_VALUE,
               new String[] {WebUserSetFields.PATH_PARAM_POSITION, position});
         }
       } catch (RuntimeException e) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
+        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+            ErrorConfig.INVALID_PARAM_VALUE,
             new String[] {WebUserSetFields.PATH_PARAM_POSITION, position}, e);
       }
     }
@@ -1004,14 +1004,14 @@ public class WebUserSetRest extends BaseRest {
     } else {
       // if creatorId is empty, return 400 Bad Request
       if (creatorId.isEmpty()) {
-        throw new RequestValidationException(I18nConstants.INVALID_PARAM_VALUE,
+        throw new RequestValidationException(ErrorConfig.INVALID_PARAM_VALUE,
             new String[] {"Creator Id is empty"});
       }
       // if creator is passed, verify if the user is admin.
       // Owner/User can not perform this action
       if (!getUserSetService().isAdmin(authentication)) {
-        throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
-            I18nConstants.OPERATION_NOT_AUTHORIZED,
+        throw new ApplicationAuthenticationException(ErrorConfig.OPERATION_NOT_AUTHORIZED,
+            ErrorConfig.OPERATION_NOT_AUTHORIZED,
             new String[] {"Only admins are authorized to perform this operation."},
             HttpStatus.FORBIDDEN);
       }
@@ -1035,8 +1035,8 @@ public class WebUserSetRest extends BaseRest {
       // verify if the user sets are associated with the creatorId
       for (UserSet userset : userSets) {
         if (!StringUtils.equals(creatorId, userset.getCreator().getHttpUrl())) {
-          throw new OperationAuthorizationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
-              I18nConstants.OPERATION_NOT_AUTHORIZED,
+          throw new OperationAuthorizationException(ErrorConfig.OPERATION_NOT_AUTHORIZED,
+              ErrorConfig.OPERATION_NOT_AUTHORIZED,
               new String[] {"Only user associated sets can be deleted"}, HttpStatus.FORBIDDEN);
         }
       }

@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons_sb3.definitions.caching.CachingUtils;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import org.apache.commons.lang3.StringUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
 import eu.europeana.set.definitions.model.UserSet;

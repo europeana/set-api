@@ -9,20 +9,20 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
+import  jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.search.result.ResultsPage;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.oauth2.model.ApiCredentials;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.definitions.search.result.ResultsPage;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.oauth2.model.ApiCredentials;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.HttpException;
+import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
@@ -1058,8 +1058,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
             message.append(
                 "Only the creators of the user set or admins are authorized to perform this operation.");
           }
-          throw new ApplicationAuthenticationException(I18nConstants.OPERATION_NOT_AUTHORIZED,
-              I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {message.toString()},
+          throw new ApplicationAuthenticationException(ErrorConfig.OPERATION_NOT_AUTHORIZED,
+              ErrorConfig.OPERATION_NOT_AUTHORIZED, new String[] {message.toString()},
               HttpStatus.FORBIDDEN);
         }
       }

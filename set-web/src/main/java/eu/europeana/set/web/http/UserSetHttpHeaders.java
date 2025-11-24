@@ -1,6 +1,6 @@
 package eu.europeana.set.web.http;
 
-import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
 
 public class UserSetHttpHeaders {
 

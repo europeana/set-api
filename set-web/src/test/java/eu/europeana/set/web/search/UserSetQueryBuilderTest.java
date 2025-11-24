@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -94,7 +94,7 @@ public class UserSetQueryBuilderTest {
                 () -> userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config),
                 "Something went wrong, check supportedFields "
         );
-        assertTrue(StringUtils.equals(thrown.getMessage(), I18nConstants.INVALID_PARAM_VALUE));
+        assertTrue(StringUtils.equals(thrown.getMessage(), ErrorConfig.INVALID_PARAM_VALUE));
     }
 
     private static String buildQuery(String fieldName, String fieldValue) {

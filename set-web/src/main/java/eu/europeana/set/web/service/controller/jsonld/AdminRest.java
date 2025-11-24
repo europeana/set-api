@@ -1,7 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import  jakarta.annotation.Resource;
+import  jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -9,12 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
-import eu.europeana.api.commons.nosql.entity.ApiWriteLock;
-import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
+import eu.europeana.api.commons_sb3.error.HttpException;
+import eu.europeana.api.commons_sb3.nosql.entity.ApiWriteLock;
+import eu.europeana.api.commons_sb3.nosql.service.ApiWriteLockService;
+import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
 import eu.europeana.api2.utils.JsonWebUtils;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
@@ -32,7 +32,7 @@ public class AdminRest extends BaseRest {
   Logger adminLogger = LogManager.getLogger(getClass());
   
   @Resource(name = "set_db_apilockService")
-  private ApiWriteLockService writeLockService; 
+  private ApiWriteLockService writeLockService;
   
   public ApiWriteLockService getApiWriteLockService() {
   return writeLockService;

@@ -2,9 +2,9 @@ package eu.europeana.set.web.exception.authorization;
 
 import org.springframework.http.HttpStatus;
 
-import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons_sb3.error.HttpException;
 
-public class OperationAuthorizationException extends HttpException{
+public class OperationAuthorizationException extends HttpException {
 
 	private static final long serialVersionUID = -3294054571719881829L;
 	

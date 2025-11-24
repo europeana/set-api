@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import eu.europeana.api.commons.definitions.search.FacetFieldView;
-import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.commons_sb3.definitions.search.FacetFieldView;
+import eu.europeana.api.commons_sb3.definitions.search.result.impl.ResultsPageImpl;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 

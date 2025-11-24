@@ -15,42 +15,31 @@
         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
         ">
-    
-    <!-- USING OTHER MODULES -->
+
+	<!-- USING OTHER MODULES -->
 	<beans:import resource="classpath:set-definitions-context.xml"/>
 	<beans:import resource="classpath:set-mongo-context.xml"/>
-	
-    
-   	<!--  ApiKeyService -->
-	 		
-    <!--  AuthenticationService -->
-   	<beans:bean name="set_authorizationService" class="eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl">
-    </beans:bean>
-    
-    
-    <!--  java api bean -->
+
+	<!--  AuthenticationService -->
+	<beans:bean name="set_authorizationService"
+		class="eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl">
+	</beans:bean>
+
+	<!--  java api bean -->
 	<beans:bean id="setService" class="eu.europeana.set.web.service.impl.UserSetServiceImpl">
-    	<!-- 
-    	<beans:property name="configuration" ref="configuration"/>
-    	<beans:property name="authenticationService" ref="annotation_authenticationService"/>
-    	 --> 	
-    </beans:bean>
+		<!--
+    <beans:property name="configuration" ref="configuration"/>
+    <beans:property name="authenticationService" ref="annotation_authenticationService"/>
+     -->
+	</beans:bean>
 
 	<beans:bean id="statsService" class="eu.europeana.set.stats.service.UsageStatsService">
 	</beans:bean>
 
-    <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans -->
-    <context:component-scan base-package="eu.europeana.set.web.service,eu.europeana.set.stats" />
+	<!-- Scans the classpath for annotated components that will be auto-registered as Spring beans -->
+	<context:component-scan base-package="eu.europeana.set.web.service,eu.europeana.set.stats"/>
 
-    <!-- Activates various annotations to be detected in bean classes e.g: @Autowired -->
-    <context:annotation-config />
- 
-    <!-- configurable error messages -->
-    <beans:bean id="set_i18n_messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-		<beans:property name="basename" value="classpath:messages"/>	
-		<beans:property name="defaultEncoding" value="utf-8"/>	 	
-    </beans:bean>
-    <beans:bean id="i18nService" class="eu.europeana.api.commons.config.i18n.I18nServiceImpl">
-    	<beans:property name="messageSource" ref="set_i18n_messageSource"/>
-    </beans:bean>
+	<!-- Activates various annotations to be detected in bean classes e.g: @Autowired -->
+	<context:annotation-config/>
+
 </beans:beans>

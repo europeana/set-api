@@ -13,7 +13,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import static eu.europeana.api.commons.web.http.HttpHeaders.*;
+import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.*;
 
 /**
  * Setup CORS for all requests and setup default Content-type

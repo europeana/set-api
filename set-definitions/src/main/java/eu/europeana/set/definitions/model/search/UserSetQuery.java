@@ -1,7 +1,7 @@
 package eu.europeana.set.definitions.model.search;
 
 import java.util.List;
-import eu.europeana.api.commons.definitions.search.Query;
+import eu.europeana.api.commons_sb3.definitions.search.Query;
 
 public interface UserSetQuery extends Query{
 

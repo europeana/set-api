@@ -2,9 +2,9 @@ package eu.europeana.set.web.exception.request;
 
 import org.springframework.http.HttpStatus;
 
-import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons_sb3.error.HttpException;
 
-public class RequestValidationException extends HttpException{
+public class RequestValidationException extends HttpException {
 
 	private static final long serialVersionUID = 3364526076494279093L;
 

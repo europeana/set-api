@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import javax.annotation.Resource;
+import  jakarta.annotation.Resource;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.junit.jupiter.api.AfterEach;
@@ -18,8 +18,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import eu.europeana.api.commons.definitions.exception.ApiWriteLockException;
-import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
+import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
+import eu.europeana.api.commons_sb3.nosql.service.ApiWriteLockService;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;

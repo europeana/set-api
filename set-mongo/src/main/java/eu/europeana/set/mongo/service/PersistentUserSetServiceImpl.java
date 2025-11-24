@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,8 +21,8 @@ import dev.morphia.query.Meta;
 import dev.morphia.query.Query;
 import dev.morphia.query.QueryResults;
 import dev.morphia.query.Sort;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.nosql.service.impl.AbstractNoSqlServiceImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.exception.UserSetValidationException;
@@ -245,7 +245,7 @@ public class PersistentUserSetServiceImpl extends
   /*
    * (non-Javadoc)
    * 
-   * @see eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl#findByID(java.io.
+   * @see eu.europeana.api.commons_sb3.nosql.service.impl.AbstractNoSqlServiceImpl#findByID(java.io.
    * Serializable)
    */
   @Override

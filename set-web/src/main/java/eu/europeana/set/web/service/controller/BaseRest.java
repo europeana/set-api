@@ -1,15 +1,15 @@
 package eu.europeana.set.web.service.controller;
 
-import static eu.europeana.api.commons.web.definitions.WebFields.FORMAT_JSONLD;
-import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW;
-import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_DELETE;
-import static eu.europeana.api.commons.web.http.HttpHeaders.ALLOW_POST;
-import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
-import static eu.europeana.api.commons.web.http.HttpHeaders.PREFER;
-import static javax.ws.rs.core.HttpHeaders.ACCEPT;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.HttpHeaders.ETAG;
-import static javax.ws.rs.core.HttpHeaders.VARY;
+import static eu.europeana.api.commons_sb3.definitions.web.WebFields.FORMAT_JSONLD;
+import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.ALLOW;
+import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.ALLOW_DELETE;
+import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.ALLOW_POST;
+import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.LINK;
+import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.PREFER;
+import static jakarta.ws.rs.core.HttpHeaders.ACCEPT;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static jakarta.ws.rs.core.HttpHeaders.ETAG;
+import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,16 +29,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.exception.AuthorizationExtractionException;
-import eu.europeana.api.commons.web.controller.BaseRestController;
-import eu.europeana.api.commons.web.definitions.WebFields;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
+import eu.europeana.api.commons_sb3.web.controller.BaseRestController;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.HttpException;
+import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
+import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -138,8 +137,8 @@ public class BaseRest extends BaseRestController {
         throw new ParamValidationException(UserSetI18nConstants.INVALID_HEADER_VALUE,
             UserSetI18nConstants.INVALID_HEADER_VALUE, new String[] {PREFER, preferHeader}, e);
       } else {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
+        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+            ErrorConfig.INVALID_PARAM_VALUE,
             new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile}, e);
       }
     }
@@ -160,14 +159,14 @@ public class BaseRest extends BaseRestController {
     // profile=facets OR profile=facets,minimal OR profile=standard,facets OR
     // profile=itemDescription,facets
     if (profiles.size() > 2) {
-      throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-          I18nConstants.INVALID_PARAM_VALUE, new String[] {"Only one of these should be provided ",
+      throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+          ErrorConfig.INVALID_PARAM_VALUE, new String[] {"Only one of these should be provided ",
               StringUtils.remove(profileStr, SetPageProfile.FACETS.getProfileParamValue())});
     }
     // For now - if multiple profile then one of them has to be facets
     if (profiles.size() == 2 && !profiles.contains(SetPageProfile.FACETS)) {
-      throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-          I18nConstants.INVALID_PARAM_VALUE,
+      throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
+          ErrorConfig.INVALID_PARAM_VALUE,
           new String[] {"These profiles are not supported together ", profileStr});
     }
   }
@@ -273,7 +272,7 @@ public class BaseRest extends BaseRestController {
       throws IOException, HttpException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
-    String etag = generateETag(modified, WebFields.FORMAT_JSONLD, getApiVersion());
+    String etag = generateETag(modified, FORMAT_JSONLD, getApiVersion());
 
     // build response
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
@@ -328,7 +327,7 @@ public class BaseRest extends BaseRestController {
           operation);
     } catch (AuthorizationExtractionException e) {
       throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(),
-          I18nConstants.OPERATION_NOT_AUTHORIZED, new String[] {operation}, HttpStatus.UNAUTHORIZED,
+          ErrorConfig.OPERATION_NOT_AUTHORIZED, new String[] {operation}, HttpStatus.UNAUTHORIZED,
           e);
     }
     return auth;

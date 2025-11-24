@@ -23,9 +23,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-definitions</artifactId>
-			<version>${version.commonsApi}</version>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>commons-sb3-definitions</artifactId>
+			<version>${version.commons.api.sb3}</version>
 		</dependency>
 	</dependencies>
 </project>
