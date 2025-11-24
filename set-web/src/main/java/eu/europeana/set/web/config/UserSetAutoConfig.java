@@ -26,10 +26,10 @@ public class UserSetAutoConfig{
   @Value("${europeana.apikey.serviceurl}")
   private String apikeyServiceUrl;
 
-  @Value("${keycloak.token.endpoint:}")
+  @Value("${keycloak.token.endpoint}")
   private String tokenEndpoint;
 
-  @Value("${keycloak.token.grant.params:}")
+  @Value("${keycloak.token.grant.params}")
   private String grantParams;
 
   @Bean(name = BeanNames.BEAN_CLIENT_DETAILS_SERVICE)
