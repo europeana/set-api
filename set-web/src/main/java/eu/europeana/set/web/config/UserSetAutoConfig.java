@@ -6,6 +6,9 @@ import eu.europeana.api.commons_sb3.error.i18n.I18nService;
 import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
 import eu.europeana.api.commons_sb3.oauth2.service.impl.EuropeanaClientDetailsService;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +25,8 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
     ignoreResourceNotFound = true)
 public class UserSetAutoConfig{
 
+  private static final Logger LOG = LogManager.getLogger(UserSetAutoConfig.class);
+
   @Value("${europeana.apikey.serviceurl}")
   private String apikeyServiceUrl;
 
@@ -35,8 +40,12 @@ public class UserSetAutoConfig{
   public EuropeanaClientDetailsService getApiKeyClientDetailsService(){
     EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
     clientDetails.setApiKeyServiceUrl(apikeyServiceUrl);
-    AuthenticationConfig config = new AuthenticationConfig(tokenEndpoint,grantParams);
-    clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+    if(StringUtils.isNotEmpty(tokenEndpoint) && StringUtils.isNotEmpty(grantParams)) {
+      AuthenticationConfig config = new AuthenticationConfig(tokenEndpoint, grantParams);
+      clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+    }else{
+      LOG.error("Keycloak token-endpoint and/or grant-parameters NOT set !! ");
+    }
     return clientDetails;
   }
 
