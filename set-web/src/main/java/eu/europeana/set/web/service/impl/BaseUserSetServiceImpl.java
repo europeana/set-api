@@ -3,12 +3,12 @@ package eu.europeana.set.web.service.impl;
 import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED;
 import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_NUMBER_OF_ITEMS;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import  jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -21,8 +21,6 @@ import eu.europeana.api.commons_sb3.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.oauth2.model.ApiCredentials;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
-import eu.europeana.api.commons_sb3.error.HttpException;
-import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
@@ -184,18 +182,16 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * europeana.UserSet.definitions.model.UserSet, boolean)
    */
   // @Override
-  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) 
-      throws SetUniquenessValidationException, RequestBodyValidationException, ParamValidationException, 
-      ApplicationAuthenticationException, ItemValidationException {
+  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws EuropeanaApiException {
     // ###### FIRST Validate the input data, which is allowed to be partial ####/
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
     // TODO: reassess if the type should be kept muable
     if (persistentUserSet.isOpenSet() && webUserSet.getIsDefinedBy()==null) {
       // isDefinedBy is mandatory for open sets
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          new String[] {WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)"});
+      throw new InvalidBodyException(
+              Collections.singletonMap(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+                      Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)")));
     }
     
     // when we change the type to Gallery, check the items size of the existing set
@@ -501,8 +497,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         invalidItems.add(item);
       }
     }
-    if(!invalidItems.isEmpty()) {
-      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
+    if (!invalidItems.isEmpty()) {
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT,
+              Arrays.asList(invalidItems.toString()));
     }
   }
 
@@ -531,7 +528,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       }
     }
     if(!invalidItems.isEmpty()) {
-      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {invalidItems.toString()} );
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, Arrays.asList(invalidItems.toString()));
     }
     return itemsWithFullUrls; 
   }
@@ -552,7 +549,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   protected void validateItemWhole(String item) throws ItemValidationException {
     if(!item.startsWith(getConfiguration().getItemDataEndpoint())) {
-      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+      throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, Arrays.asList(item));
     }
     else {
       validateEuropeanaRecordId(extractRecordId(item));
@@ -564,50 +561,45 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    */
   protected void validateEuropeanaRecordId(String item) throws ItemValidationException {
      if(! UserSetUtils.EUROPEANA_ID.matcher(item).matches()) {
-       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, new String[] {item});
+       throw new ItemValidationException(UserSetI18nConstants.USERSET_ITEM_INVALID_FORMAT, Arrays.asList(item));
      }
   }
   
-  public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws RequestBodyValidationException,
-      ParamValidationException, SetUniquenessValidationException, ItemValidationException {
+  public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws EuropeanaApiException{
 
     // validate title
     if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          new String[] {WebUserSetModelFields.TITLE});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, Arrays.asList(WebUserSetModelFields.TITLE)));
     }
 
     // validate open sets
     if (webUserSet.isOpenSet()) {
       //we should not have items for the open sets
       if(webUserSet.getItems() != null) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-            new String[] {WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN});
+        throw new InvalidBodyException(Collections.singletonMap(
+                UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+                Arrays.asList(WebUserSetModelFields.ITEMS, WebUserSetModelFields.SET_OPEN)));
       }
       
       //isDefinedBy is mandatory for open sets
       if(webUserSet.getIsDefinedBy() == null) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY});
+        throw new InvalidBodyException(Collections.singletonMap(
+                UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY, Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY)));
       }
     }
     else {
       //for sets that are not open sets (closed sets), isDefinedBy is not allowed
       if(webUserSet.getIsDefinedBy() != null) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.SET_CLOSED});
+        throw new InvalidBodyException(Collections.singletonMap(
+                UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+                Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY, WebUserSetModelFields.SET_CLOSED)));
       }
     }
 
     // prevent updating the state to "published" (must use the publish method for that)
     if (!isAlreadyPublished && webUserSet.isPublished()) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+      throw new InvalidParamException(Arrays.asList(WebUserSetModelFields.VISIBILITY, "", webUserSet.getVisibility()));
     }
     
     //validate number of items for the sets of type Gallery
@@ -627,13 +619,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     final int galleryMaxSize = getConfiguration().getGalleryMaxSize();
     if(webUserSet.getItems()!=null 
         && webUserSet.getItems().size() + newItems > galleryMaxSize) {
-      String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;   
-      throw new ItemValidationException(messageKey, 
-          new String[] {String.valueOf(galleryMaxSize)} );
+      String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;
+      String error = (newItems == 0) ? "Number of items above the limit" :  "Limit of items was reached";
+      throw new ItemValidationException(null, error, messageKey,
+          Arrays.asList(String.valueOf(galleryMaxSize)));
     }
   }
   
-  void validateProvider(UserSet webUserSet) throws RequestBodyValidationException {
+  void validateProvider(UserSet webUserSet) throws InvalidBodyException {
     if (webUserSet.getProvider() == null) {
       return;
     }
@@ -641,9 +634,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     if (StringUtils.isBlank(webUserSet.getProvider().getId())
         && StringUtils.isBlank(webUserSet.getProvider().getName())) {
       final String message = "must contain either an id or a name.";
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.PROVIDER, message});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, Arrays.asList(WebUserSetModelFields.PROVIDER, message)));
     }
     // check provider id if available
     if (!StringUtils.isBlank(webUserSet.getProvider().getId())) {
@@ -655,9 +647,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
         final String message = providerId + " - must be under one of the domains: "
             + WebUserSetFields.DATA_EUROPEANA_BASE_URL + ", "
             + WebUserSetFields.PROJECT_EUROPEANA_BASE_URL;
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.PROVIDER, message});
+        throw new InvalidBodyException(Collections.singletonMap(
+            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, Arrays.asList(WebUserSetModelFields.PROVIDER, message)));
       }
     }
 
@@ -669,30 +660,26 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @param webUserSet The new user set
    * @throws RequestBodyValidationException
    */
-  void validateBookmarkFolder(UserSet webUserSet)
-      throws RequestBodyValidationException, ParamValidationException {
+  void validateBookmarkFolder(UserSet webUserSet) throws EuropeanaApiException {
 
     if (!webUserSet.isBookmarksFolder()) {
       return;
     }
 
     if (!webUserSet.isPrivate()) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+      throw new InvalidParamException(Arrays.asList(WebUserSetModelFields.VISIBILITY, "", webUserSet.getVisibility()));
     }
 
     if (webUserSet.isOpenSet()) {
-      throw new ParamValidationException(
+      throw new InvalidBodyException(Collections.singletonMap(
           UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-          new String[] {WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
+          Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType())));
     }
 
     if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          new String[] {WebUserSetModelFields.CREATOR});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+              Arrays.asList(WebUserSetModelFields.CREATOR)));
     }
 
     UserSet usersBookmarkFolder = getBookmarkFolder(webUserSet.getCreator());
@@ -703,19 +690,18 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
     // for create method indicate existing bookmark folder
     if (webUserSet.getIdentifier() == null) {
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS, new String[] {
-              usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl()});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
+              Arrays.asList(usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl())));
     }
 
     // for update method indicate the existing bookmark folder (cannot change type
     // to BookmarkFolder)
     if (!webUserSet.getIdentifier().equals(usersBookmarkFolder.getIdentifier())) {
       // update method, prevent creation of 2 BookmarkFolders
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS, new String[] {
-              usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl()});
-
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_BOOKMARKFOLDER_EXISTS,
+              Arrays.asList(usersBookmarkFolder.getIdentifier(), usersBookmarkFolder.getCreator().getHttpUrl())));
     }
   }
 
@@ -727,19 +713,19 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @param webUserSet The new user set
    * @throws RequestBodyValidationException
    */
-  void validateControlledValues(UserSet webUserSet) throws RequestBodyValidationException {
+  void validateControlledValues(UserSet webUserSet) throws InvalidBodyException {
 
     if (webUserSet.getVisibility() == null
         || !VisibilityTypes.isValid(webUserSet.getVisibility())) {
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility()});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              Arrays.asList(WebUserSetModelFields.VISIBILITY, webUserSet.getVisibility())));
     }
 
     if (webUserSet.getType() == null || !UserSetTypes.isValid(webUserSet.getType())) {
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.TYPE, webUserSet.getType()});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              Arrays.asList(WebUserSetModelFields.TYPE, webUserSet.getType())));
     }
   }
 
@@ -751,11 +737,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * The URL from isDefinedBy is sanitized to remove API Keys if included
    * 
    * @param webUserSet the user set
-   * @throws ParamValidationException if invalid isDefinedBy url
-   * @throws RequestBodyValidationException if invocation of isDefinedBy doesn't return results
+   * @throws InvalidBodyException if invocation of isDefinedBy doesn't return results oR if invalid isDefinedBy url
    */
   void validateAndSanitizeIsDefinedBy(UserSet webUserSet)
-      throws ParamValidationException, RequestBodyValidationException {
+      throws InvalidBodyException {
 
     if (webUserSet.isOpenSet()) {
       //remove the apikey provided by the user from the isDefinedBy field
@@ -763,25 +748,24 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       webUserSet.setIsDefinedBy(isDefinedByWithoutApikey);
       SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet);
       if (apiResult.getTotal() <= 0) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-                "no items returned when calling " + webUserSet.getIsDefinedBy()});
+        throw new InvalidBodyException(Collections.singletonMap(
+                UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+                Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY,
+                        "no items returned when calling " + webUserSet.getIsDefinedBy())));
       }
     }
   }
 
   @Override
-  public SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet)
-      throws ParamValidationException, RequestBodyValidationException {
+  public SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet) throws InvalidBodyException {
     String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
     StringBuilder queryUrl =
         new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
     if (!searchUrl.equals(queryUrl.toString())) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-              " the access to api endpoint is not allowed: " + queryUrl});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY,
+                      " the access to api endpoint is not allowed: " + queryUrl)));
     }
 
     String apiKey = getConfiguration().getSearchApiKey();
@@ -795,16 +779,14 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
       return getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);
     } catch (SearchApiClientException e) {
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-          new String[] {WebUserSetModelFields.IS_DEFINED_BY,
-              "an error occured when calling " + webUserSet.getIsDefinedBy()},
-          e);
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY,
+                      "an error occured when calling " + webUserSet.getIsDefinedBy())));
     } catch (IOException e) {
-      throw new RequestBodyValidationException(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID,
-          null, e);
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, Collections.emptyList()));
     }
-   
   }
 
 
@@ -818,21 +800,19 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * reference.
    * 
    * @param webUserSet the user set to verify
-   * @throws ParamValidationException
    * @throws RequestBodyValidationException
    * @throws SetUniquenessValidationException
    */
-  void validateEntityBestItemsSet(UserSet webUserSet) throws ParamValidationException,
-      RequestBodyValidationException, SetUniquenessValidationException {
+  void validateEntityBestItemsSet(UserSet webUserSet) throws InvalidBodyException, SetUniquenessValidationException {
     if (!webUserSet.isEntityBestItemsSet()) {
       return;
     }
 
     // creator must be present
     if (webUserSet.getCreator() == null || webUserSet.getCreator().getHttpUrl() == null) {
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          new String[] {WebUserSetModelFields.CREATOR});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+              Arrays.asList(WebUserSetModelFields.CREATOR)));
     }
 
     // subject field must be present. Only one uri value should be present
@@ -840,29 +820,29 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     final List<String> subject = webUserSet.getSubject();
     if (subject == null || subject.isEmpty()) {
       // subject must be present
-      throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
-          new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_MANDATORY_PROPERTY,
+              Arrays.asList(WebUserSetModelFields.SUBJECT, String.valueOf(subject))));
     } else if (subject.size() != 1 || !isUri(subject.get(0))) {
       // must include only one HTTP reference
-      throw new RequestBodyValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
-          new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_ENTITY_REFERENCE,
+              Arrays.asList(WebUserSetModelFields.SUBJECT, String.valueOf(subject))));
     }
     // if present check of entity uri pattern
     if (StringUtils.startsWith(subject.get(0), WebUserSetFields.DATA_EUROPEANA_BASE_URL)
         && StringUtils.contains(subject.get(0), WebUserSetFields.ENTITY_URI_BASE)) {
       // must include only one HTTP reference
-      throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_VALIDATION_ENTITY_URI,
-          new String[] {WebUserSetModelFields.SUBJECT, String.valueOf(subject)});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_ENTITY_URI,
+              Arrays.asList(WebUserSetModelFields.SUBJECT, String.valueOf(subject))));
     }
 
     // entity user set is a close set
     if (webUserSet.isOpenSet()) {
-      throw new ParamValidationException(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
-          new String[] {WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType()});
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_NOT_ALLOWED,
+              Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY, webUserSet.getType())));
     }
 
     checkDuplicateUserSets(webUserSet);
@@ -875,8 +855,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       if (duplicateSetsIds != null) {
         String[] i18nParamsSetDuplicates = new String[1];
         i18nParamsSetDuplicates[0] = String.join(",", duplicateSetsIds);
-        throw new SetUniquenessValidationException(UserSetI18nConstants.USERSET_DUPLICATION,
-            UserSetI18nConstants.USERSET_DUPLICATION, i18nParamsSetDuplicates);
+        throw new SetUniquenessValidationException(null, UserSetI18nConstants.USERSET_DUPLICATION,
+           Arrays.asList(i18nParamsSetDuplicates));
       }
     }
   }
@@ -992,14 +972,13 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return getConfiguration().getSetDataEndpoint() + identifier;
   }
 
-  protected int validateLastPage(long totalInCollection, int pageSize, int pageNr)
-      throws ParamValidationException {
+  protected int validateLastPage(long totalInCollection, int pageSize, int pageNr) throws InvalidBodyException {
         int lastPage = getLastPage(totalInCollection, pageSize);
         if (pageNr > lastPage) {
-          throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-              new String[] {CommonApiConstants.QUERY_PARAM_PAGE,
-                  "value out of range: " + pageNr + ", last page:" + lastPage});
+          throw new InvalidBodyException(Collections.singletonMap(
+                  UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+                  Arrays.asList(CommonApiConstants.QUERY_PARAM_PAGE,
+                          "value out of range: " + pageNr + ", last page:" + lastPage)));
         }
         return lastPage;
       }
@@ -1011,11 +990,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @param authentication
    * @return
    * @return userSet object
-   * @throws HttpException
+   * @throws EuropeanaI18nApiException
    */
   @Override
-  public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication, boolean includeEntitySetMsg) throws HttpException {
-  
+  public UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication, boolean includeEntitySetMsg) throws EuropeanaI18nApiException {
     return verifyOwnerOrAdminOrRole(userSet, authentication, null, includeEntitySetMsg);
   }
 
@@ -1026,18 +1004,17 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @param authentication the authentication token
    * @param role optional role granting access
    * @return the userset if the access is granted
-   * @throws HttpException if hte access is not granted
+   * @throws EuropeanaI18nApiException if hte access is not granted
    */
   protected UserSet verifyOwnerOrAdminOrRole(UserSet userSet, Authentication authentication, String role, boolean includeEntitySetMsg)
-      throws HttpException {
+      throws EuropeanaI18nApiException {
       
         if (authentication == null) {
           // access by API KEY, authentication not available
-          throw new ApplicationAuthenticationException(UserSetI18nConstants.USER_NOT_AUTHORIZED,
-              UserSetI18nConstants.USER_NOT_AUTHORIZED,
-              new String[] {
-                  "Access to update operations of private User Sets require user authentication with JwtToken"},
-              HttpStatus.FORBIDDEN);
+          throw new ApplicationAuthenticationException( null,
+                  UserSetI18nConstants.USER_NOT_AUTHORIZED,
+                  Arrays.asList("Access to update operations of private User Sets require user authentication with JwtToken"),
+                  HttpStatus.FORBIDDEN);
         }
       
         // verify ownership
@@ -1058,9 +1035,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
             message.append(
                 "Only the creators of the user set or admins are authorized to perform this operation.");
           }
-          throw new ApplicationAuthenticationException(ErrorConfig.OPERATION_NOT_AUTHORIZED,
-              ErrorConfig.OPERATION_NOT_AUTHORIZED, new String[] {message.toString()},
-              HttpStatus.FORBIDDEN);
+          throw new ApplicationAuthenticationException(null,
+                  ErrorConfig.OPERATION_NOT_AUTHORIZED,
+                  Arrays.asList(message.toString()),
+                  HttpStatus.FORBIDDEN);
         }
       }
 
@@ -1071,10 +1049,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    *
    * @param existingUserSet
    * @param authentication
-   * @throws HttpException
+   * @throws
    */
   public void verifyPermissionToUpdate(UserSet existingUserSet, Authentication authentication, boolean includeEntitySetMsg)
-      throws HttpException {
+          throws EuropeanaI18nApiException {
         if (existingUserSet.isEntityBestItemsSet() && hasEditorRole(authentication)) {
           return;
         }

@@ -1,5 +1,6 @@
 package eu.europeana.set.web.service.controller.exception;
 
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler extends EuropeanaGlobalExceptionHandler {
    */
   @Autowired
   public GlobalExceptionHandler(RequestPathMethodService requestPathMethodService,
-      @Qualifier(BeanNames.BEAN_I18N_SERVICE) I18nService i18nService) {
+      @Qualifier(ErrorConfig.BEAN_I18nService) I18nService i18nService) {
     this.requestPathMethodService = requestPathMethodService;
     this.i18nService = i18nService;
   }

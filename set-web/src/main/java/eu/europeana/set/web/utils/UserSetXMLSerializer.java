@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.set.web.model.elevation.Elevation;
 
 import java.io.IOException;
@@ -26,9 +27,13 @@ public class UserSetXMLSerializer {
      * @return xml string
      * @throws IOException
      */
-    public String serialize(Elevation elevation) throws JsonProcessingException {
-        mapper.registerModule(new JakartaXmlBindAnnotationModule());
-        return mapper.writeValueAsString(elevation);
+    public String serialize(Elevation elevation) throws EuropeanaApiException {
+        try {
+            mapper.registerModule(new JakartaXmlBindAnnotationModule());
+            return mapper.writeValueAsString(elevation);
+        } catch (JsonProcessingException e) {
+           throw new EuropeanaApiException("Error serialising Elevation in UserSetXMLSerializer", e);
+        }
     }
 
 }

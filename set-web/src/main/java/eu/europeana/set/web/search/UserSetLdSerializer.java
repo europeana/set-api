@@ -3,9 +3,12 @@ package eu.europeana.set.web.search;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons_sb3.definitions.statistics.set.SetMetric;
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -40,10 +43,13 @@ public class UserSetLdSerializer {
    * @return full user set view
    * @throws IOException
    */
-  public String serialize(UserSet userSet) throws IOException {
-
-    mapper.registerModule(new JsonldModule());
-    return mapper.writer().writeValueAsString(getUserSetResourceBuilder().build(userSet));
+  public String serialize(UserSet userSet) throws EuropeanaApiException {
+    try {
+      mapper.registerModule(new JsonldModule());
+      return mapper.writer().writeValueAsString(getUserSetResourceBuilder().build(userSet));
+    } catch (JsonProcessingException e) {
+      throw new EuropeanaApiException("Error serialising user set", e);
+    }
   }
 
   /**
@@ -53,10 +59,13 @@ public class UserSetLdSerializer {
    * @return full user set view
    * @throws IOException
    */
-  public String serialize(BaseUserSetResultPage<?> resultsPage) throws IOException {
-
-    mapper.registerModule(new JsonldModule());
-    return mapper.writer().writeValueAsString(getResultPageResourceBuilder().build(resultsPage));
+  public String serialize(BaseUserSetResultPage<?> resultsPage) throws EuropeanaApiException {
+    try {
+      mapper.registerModule(new JsonldModule());
+      return mapper.writer().writeValueAsString(getResultPageResourceBuilder().build(resultsPage));
+    } catch (JsonProcessingException e) {
+      throw new EuropeanaApiException("Error serialising BaseUserSetResultPage", e);
+    }
   }
 
   /**

@@ -46,30 +46,36 @@
 		</dependency>
 
 		<!-- europeana api commons -->
-		<dependency>
-			<groupId>eu.europeana.api</groupId>
-			<artifactId>commons-sb3-web</artifactId>
-			<version>${version.commons.api.sb3}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.springfox</groupId>
-					<artifactId>springfox-swagger2</artifactId>
-				</exclusion>
-				<!-- Explicitly exclude test dependencies for Eclipse, transitive dependency for groovy generates runtime errors --> 
-				<exclusion>
-					<groupId>io.rest-assured</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>eu.europeana.api</groupId>-->
+<!--			<artifactId>commons-sb3-web</artifactId>-->
+<!--			<version>${version.commons.api.sb3}</version>-->
+<!--			<exclusions>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.slf4j</groupId>-->
+<!--					<artifactId>slf4j-log4j12</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>io.springfox</groupId>-->
+<!--					<artifactId>springfox-swagger2</artifactId>-->
+<!--				</exclusion>-->
+<!--				&lt;!&ndash; Explicitly exclude test dependencies for Eclipse, transitive dependency for groovy generates runtime errors &ndash;&gt; -->
+<!--				<exclusion>-->
+<!--					<groupId>io.rest-assured</groupId>-->
+<!--					<artifactId>*</artifactId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>commons-sb3-oauth</artifactId>
+			<version>${version.commons.api.sb3}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>commons-sb3-nosql</artifactId>
 			<version>${version.commons.api.sb3}</version>
 		</dependency>
 

@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import  jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import eu.europeana.api.commons_sb3.error.HttpException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
@@ -57,7 +58,7 @@ public class BaseRestTest {
     }
 
     @Test
-    public void testGetHeaderProfileSuccess() throws HttpException {
+    public void testGetHeaderProfileSuccess() throws EuropeanaI18nApiException {
         String preferHeader = "include=" + ProfileConstants.VALUE_LD_MINIMAL + "; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
@@ -72,8 +73,8 @@ public class BaseRestTest {
         String preferHeader = "handling=lenient; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
-        HttpException thrown = assertThrows(
-                HttpException.class,
+        EuropeanaI18nApiException thrown = assertThrows(
+                EuropeanaI18nApiException.class,
                 () -> baseRest.getProfilesFromRequest(null, request),
                 "Something went wrong, check preferHeader "
         );
@@ -87,8 +88,8 @@ public class BaseRestTest {
         String preferHeader = "include=testing; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
-        HttpException thrown = assertThrows(
-                HttpException.class,
+        EuropeanaI18nApiException thrown = assertThrows(
+                EuropeanaI18nApiException.class,
                 () -> baseRest.getProfilesFromRequest(null, request),
                 "Something went wrong, check preferHeader value "
         );
@@ -97,7 +98,7 @@ public class BaseRestTest {
     }
 
     @Test
-    public void testGetProfile() throws HttpException {
+    public void testGetProfile() throws EuropeanaI18nApiException {
         String preferHeader = "include=" + ProfileConstants.VALUE_LD_ITEM_DESCRIPTIONS + "; wait=100";
         Mockito.when(request.getHeader(Mockito.any())).thenReturn(preferHeader);
 
@@ -108,7 +109,7 @@ public class BaseRestTest {
     }
 
     @Test
-    public void testSerialiseUserSet() throws IOException {
+    public void testSerialiseUserSet() throws EuropeanaApiException {
         UserSet userSet = new WebUserSetImpl();
         userSet.setVisibility(VisibilityTypes.PUBLIC.getJsonValue());
         userSet.setType(UserSetTypes.COLLECTION.getJsonValue());

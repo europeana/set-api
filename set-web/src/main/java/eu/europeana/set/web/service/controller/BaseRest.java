@@ -1,22 +1,20 @@
 package eu.europeana.set.web.service.controller;
 
-import static eu.europeana.api.commons_sb3.definitions.web.WebFields.FORMAT_JSONLD;
-import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.ALLOW;
-import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.ALLOW_DELETE;
-import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.ALLOW_POST;
-import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.LINK;
-import static eu.europeana.api.commons_sb3.web.http.HttpHeaders.PREFER;
+import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.FORMAT_JSONLD;
 import static jakarta.ws.rs.core.HttpHeaders.ACCEPT;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
+
+import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import eu.europeana.api.commons_sb3.nosql.service.WriteLockAuthorizationService;
+import eu.europeana.api.commons_sb3.oauth2.BaseRestController;
+import eu.europeana.set.web.config.BeanNames;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,11 +30,7 @@ import org.springframework.util.MultiValueMap;
 import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
-import eu.europeana.api.commons_sb3.web.controller.BaseRestController;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
-import eu.europeana.api.commons_sb3.error.HttpException;
-import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
-import eu.europeana.api.commons_sb3.web.http.HttpHeaders;
 import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
@@ -45,7 +39,6 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetProfileHelper;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.stats.service.UsageStatsService;
-import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
@@ -54,6 +47,8 @@ import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
+
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 
 public class BaseRest extends BaseRestController {
 
@@ -65,6 +60,9 @@ public class BaseRest extends BaseRestController {
 
   @Resource
   UserSetAuthorizationService authorizationService;
+
+  @Resource(name = BeanNames.BEAN_WRITE_LOCK_AUTH_SERVICE)
+  WriteLockAuthorizationService apiWriteLockAuthService;
 
   @Resource
   UsageStatsService usageStatsService;
@@ -122,7 +120,7 @@ public class BaseRest extends BaseRestController {
   }
 
   protected List<SetPageProfile> getProfilesFromRequest(String profile, HttpServletRequest request)
-      throws ParamValidationException {
+      throws EuropeanaI18nApiException {
     String preferHeader = request.getHeader(PREFER);
     if (preferHeader != null && getLogger().isDebugEnabled()) {
       getLogger().debug("'Prefer' header value: {} ", preferHeader);
@@ -134,12 +132,9 @@ public class BaseRest extends BaseRestController {
       profiles = getProfileHelper().getSetPageProfiles(profile, preferHeader);
     } catch (UserSetProfileValidationException e) {
       if (StringUtils.isNotEmpty(preferHeader)) {
-        throw new ParamValidationException(UserSetI18nConstants.INVALID_HEADER_VALUE,
-            UserSetI18nConstants.INVALID_HEADER_VALUE, new String[] {PREFER, preferHeader}, e);
+        throw new InvalidParamException(Arrays.asList(PREFER + " header", " ", preferHeader));
       } else {
-        throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
-            ErrorConfig.INVALID_PARAM_VALUE,
-            new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile}, e);
+        throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE, " ", profile));
       }
     }
     return profiles;
@@ -148,26 +143,26 @@ public class BaseRest extends BaseRestController {
   /**
    * Method validates the multiple profile combinations
    * 
-   * @param ldProfiles
-   * @return
-   * @throws HttpException
+   * @param profiles
+   * @param profileStr
+   * @throws EuropeanaI18nApiException
    */
   protected void validateMultipleProfiles(List<SetPageProfile> profiles, String profileStr)
-      throws HttpException {
+      throws EuropeanaI18nApiException {
     // remove profile 'debug' as it's only used for stackTrace purpose
     // For now maximum two profile-combinations are possible
     // profile=facets OR profile=facets,minimal OR profile=standard,facets OR
     // profile=itemDescription,facets
     if (profiles.size() > 2) {
-      throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
-          ErrorConfig.INVALID_PARAM_VALUE, new String[] {"Only one of these should be provided ",
-              StringUtils.remove(profileStr, SetPageProfile.FACETS.getProfileParamValue())});
+      throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE,
+              "Only one of these should be provided - " + StringUtils.remove(profileStr, SetPageProfile.FACETS.getProfileParamValue()),
+               profiles.toString()));
     }
     // For now - if multiple profile then one of them has to be facets
     if (profiles.size() == 2 && !profiles.contains(SetPageProfile.FACETS)) {
-      throw new ParamValidationException(ErrorConfig.INVALID_PARAM_VALUE,
-          ErrorConfig.INVALID_PARAM_VALUE,
-          new String[] {"These profiles are not supported together ", profileStr});
+      throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE,
+          "These profiles are not supported together " + profileStr ,
+    profiles.toString()));
     }
   }
 
@@ -179,11 +174,9 @@ public class BaseRest extends BaseRestController {
    * @return serialized user set as a JsonLd string
    * @throws IOException
    */
-  protected String serializeUserSet(SetPageProfile profile, UserSet storedUserSet)
-      throws IOException {
+  protected String serializeUserSet(SetPageProfile profile, UserSet storedUserSet) throws EuropeanaApiException {
     // prepare data for serialization according to the profile
     getUserSetService().applyProfile(storedUserSet, profile);
-
     UserSetLdSerializer serializer = new UserSetLdSerializer();
     return serializer.serialize(storedUserSet);
   }
@@ -197,19 +190,21 @@ public class BaseRest extends BaseRestController {
    * @return serialized user set as a JsonLd string
    * @throws IOException
    */
-  protected String serializeUserSet(SetResourceProfile profile, UserSet storedUserSet)
-      throws IOException {
-    // prepare data for serialization according to the profile
-    getUserSetService().applyProfile(storedUserSet, profile);
-
-    UserSetLdSerializer serializer = new UserSetLdSerializer();
-    return serializer.serialize(storedUserSet);
+  protected String serializeUserSet(SetResourceProfile profile, UserSet storedUserSet) throws EuropeanaApiException {
+      // prepare data for serialization according to the profile
+      getUserSetService().applyProfile(storedUserSet, profile);
+      UserSetLdSerializer serializer = new UserSetLdSerializer();
+      return serializer.serialize(storedUserSet);
   }
 
-  protected String serializeCollectionPage(CollectionPage itemPage) throws IOException {
-    // prepare data for serialization according to the profile
-    UserSetLdSerializer serializer = new UserSetLdSerializer();
-    return serializer.serialize(itemPage);
+  protected String serializeCollectionPage(CollectionPage itemPage) throws EuropeanaApiException {
+    try {
+      // prepare data for serialization according to the profile
+      UserSetLdSerializer serializer = new UserSetLdSerializer();
+      return serializer.serialize(itemPage);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serialising Collection Page", e);
+    }
   }
 
   /**
@@ -243,15 +238,15 @@ public class BaseRest extends BaseRestController {
 
   protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
       final SetResourceProfile profile, final HttpStatus responseStatus,
-      Map<String, String> additionalHeaders, HttpServletRequest request) throws IOException {
+      Map<String, String> additionalHeaders, HttpServletRequest request) throws EuropeanaApiException {
     String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
 
     String etag = generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-    headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-    headers.add(HttpHeaders.ALLOW, createAllowHeader(request));
+    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+    headers.add(ALLOW, createAllowHeader(request));
     // headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
     if (additionalHeaders != null) {
       for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
@@ -268,8 +263,7 @@ public class BaseRest extends BaseRestController {
   }
 
   protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, Date modified,
-      SetPageProfile profile,HttpServletRequest request)
-      throws IOException, HttpException {
+      SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
     String etag = generateETag(modified, FORMAT_JSONLD, getApiVersion());
@@ -281,7 +275,7 @@ public class BaseRest extends BaseRestController {
     // headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
     headers.add(ALLOW, createAllowHeader(request));
     headers.add(VARY, PREFER);
-    headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED, profile.getPreferenceApplied());
+    headers.add(PREFERENCE_APPLIED, profile.getPreferenceApplied());
     // generate “ETag”;
     headers.add(ETAG, etag);
 
@@ -301,10 +295,15 @@ public class BaseRest extends BaseRestController {
 
   @Override
   public Authentication verifyWriteAccess(String operation, HttpServletRequest request)
-      throws ApplicationAuthenticationException {
+          throws ApplicationAuthenticationException {
 
     // prevent write operations when the application is locked
-    getAuthorizationService().checkWriteLockInEffect(operation);
+    try {
+      apiWriteLockAuthService.checkWriteLockInEffect(operation);
+    } catch (ApiWriteLockException e) {
+      throw new ApplicationAuthenticationException(e.getMessage(), ErrorConfig.LOCKED_MAINTENANCE, null, HttpStatus.LOCKED);
+    }
+    //getAuthorizationService().checkWriteLockInEffect(operation);
 
     Authentication auth = null;
     // verify if auth is enabled
@@ -327,7 +326,7 @@ public class BaseRest extends BaseRestController {
           operation);
     } catch (AuthorizationExtractionException e) {
       throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(),
-          ErrorConfig.OPERATION_NOT_AUTHORIZED, new String[] {operation}, HttpStatus.UNAUTHORIZED,
+          ErrorConfig.OPERATION_NOT_AUTHORIZED, Arrays.asList(operation), HttpStatus.UNAUTHORIZED,
           e);
     }
     return auth;

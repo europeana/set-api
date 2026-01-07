@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.Properties;
+
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
-import eu.europeana.api.commons_sb3.error.exceptions.ParamValidationException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -42,7 +43,7 @@ public class UserSetQueryBuilderTest {
     }
   
     @Test
-    public void testBuildUserSetQueryForSetId() throws ParamValidationException {
+    public void testBuildUserSetQueryForSetId() throws InvalidParamException {
         String query = buildQuery(WebUserSetFields.SET_ID, TEST_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
@@ -51,7 +52,7 @@ public class UserSetQueryBuilderTest {
     }
 
     @Test
-    public void testBuildUserSetQueryForCreator() throws ParamValidationException {
+    public void testBuildUserSetQueryForCreator() throws InvalidParamException {
         String query = buildQuery(WebUserSetFields.CREATOR, CREATOR_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
@@ -60,7 +61,7 @@ public class UserSetQueryBuilderTest {
     }
 
     @Test
-    public void testBuildUserSetQueryForVisibility() throws ParamValidationException {
+    public void testBuildUserSetQueryForVisibility() throws InvalidParamException {
         String query = buildQuery(WebUserSetFields.VISIBILITY, VisibilityTypes.PUBLIC.getJsonValue());
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
@@ -69,7 +70,7 @@ public class UserSetQueryBuilderTest {
     }
 
     @Test
-    public void testBuildUserSetQueryForType() throws ParamValidationException {
+    public void testBuildUserSetQueryForType() throws InvalidParamException {
         String query = buildQuery(WebUserSetFields.TYPE, UserSetTypes.COLLECTION.getJsonValue());
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
@@ -78,7 +79,7 @@ public class UserSetQueryBuilderTest {
     }
 
     @Test
-    public void testBuildUserSetQueryForItem() throws ParamValidationException {
+    public void testBuildUserSetQueryForItem() throws InvalidParamException {
         String query = buildQuery(WebUserSetFields.ITEM, TEST_VALUE);
         UserSetQuery userSetQuery = userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config);
 
@@ -89,12 +90,12 @@ public class UserSetQueryBuilderTest {
     @Test
     public void testSupportedFields() {
         String query = buildQuery(WebUserSetFields.NICKNAME, TEST_VALUE);
-        ParamValidationException thrown = assertThrows(
-                ParamValidationException.class,
+        InvalidParamException thrown = assertThrows(
+                InvalidParamException.class,
                 () -> userSetQueryBuilder.buildUserSetQuery(query, null, null, 0, 100, config),
                 "Something went wrong, check supportedFields "
         );
-        assertTrue(StringUtils.equals(thrown.getMessage(), ErrorConfig.INVALID_PARAM_VALUE));
+        assertTrue(StringUtils.equals(thrown.getMessage(), ErrorMessage.PARAM_INVALID_400.getI18nKey()));
     }
 
     private static String buildQuery(String fieldName, String fieldValue) {

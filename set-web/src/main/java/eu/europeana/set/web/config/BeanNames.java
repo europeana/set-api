@@ -6,9 +6,10 @@ package eu.europeana.set.web.config;
 public abstract class BeanNames {
   public static final String BEAN_SET_MONGO_STORE = "set_db_morphia_datastore_set";
   public static final String BEAN_SET_PERSITENCE_SERVICE = "set_db_setService";
-  public static final String BEAN_I18N_SERVICE = "i18nService";
   public static final String BEAN_CLIENT_DETAILS_SERVICE ="commons_oauth2_europeanaClientDetailsService";
   public static final String BEAN_I18N_MESAGE_SOURCE = "messageSource";
+  public static final String BEAN_WRITE_LOCK_AUTH_SERVICE = "writeLockAuthorizationService";
+
   private BeanNames() {}
 
   }

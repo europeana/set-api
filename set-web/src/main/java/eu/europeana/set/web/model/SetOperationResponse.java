@@ -1,15 +1,26 @@
 package eu.europeana.set.web.model;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.europeana.api.commons_sb3.definitions.web.ApiResponse;
 
 @JsonInclude(Include.NON_NULL)
-public class SetOperationResponse extends ApiResponse{
-  
+public class SetOperationResponse {
+
+	private String apikey;
+
+	private String action;
+
+	@JsonProperty("success")
+	public boolean success;
+
+	@JsonProperty("message")
+	private String message;
+
+	@JsonProperty("status")
+	private int status;
+
     @JsonProperty("since")
     private Date since;
     
@@ -34,13 +45,20 @@ public class SetOperationResponse extends ApiResponse{
 
 	
 	public SetOperationResponse(String apiKey, String action){
-		super(apiKey, action);
+		this.apikey = apiKey;
+		this.action = action;
 	}
-	
-	@Override
-	@JsonGetter("message")
-	public String getStatus() {
-	  return super.getStatus();
+
+	public SetOperationResponse(String apiKey, String action, String message, boolean success, int status){
+		this.apikey = apiKey;
+		this.action = action;
+		this.message = message;
+		this.success = success;
+		this.status = status;
+	}
+
+	public boolean isSuccess() {
+		return this.success;
 	}
 
     public Date getSince() {
@@ -58,5 +76,20 @@ public class SetOperationResponse extends ApiResponse{
     public void setEnd(Date end) {
       this.end = end;
     }
-	
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
 }
