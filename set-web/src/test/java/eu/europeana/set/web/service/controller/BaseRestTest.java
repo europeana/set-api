@@ -10,6 +10,7 @@ import java.util.Map;
 
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import  jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,6 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
-import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.service.UserSetService;
 
@@ -79,8 +79,10 @@ public class BaseRestTest {
                 "Something went wrong, check preferHeader "
         );
 
-        //assertTrue(StringUtils.equals(thrown.getMessage(), UserSetI18nConstants.INVALID_HEADER_FORMAT));
-        assertTrue(StringUtils.equals(thrown.getMessage(), UserSetI18nConstants.INVALID_HEADER_VALUE));
+        assertTrue(StringUtils.equals(thrown.getErrorCode(), ErrorMessage.PARAM_INVALID_400.getCode()));
+        assertTrue(StringUtils.equals(thrown.getError(), ErrorMessage.PARAM_INVALID_400.getError()));
+        assertTrue(StringUtils.equals(thrown.getI18nKey(), ErrorMessage.PARAM_INVALID_400.getI18nKey()));
+        assertTrue(thrown.getI18nParams().contains(preferHeader));
     }
 
     @Test
@@ -94,7 +96,10 @@ public class BaseRestTest {
                 "Something went wrong, check preferHeader value "
         );
 
-        assertTrue(StringUtils.equals(thrown.getMessage(), UserSetI18nConstants.INVALID_HEADER_VALUE));
+        assertTrue(StringUtils.equals(thrown.getErrorCode(), ErrorMessage.PARAM_INVALID_400.getCode()));
+        assertTrue(StringUtils.equals(thrown.getError(), ErrorMessage.PARAM_INVALID_400.getError()));
+        assertTrue(StringUtils.equals(thrown.getI18nKey(), ErrorMessage.PARAM_INVALID_400.getI18nKey()));
+        assertTrue(thrown.getI18nParams().contains(preferHeader));
     }
 
     @Test
