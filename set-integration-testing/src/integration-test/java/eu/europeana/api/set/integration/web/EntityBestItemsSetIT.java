@@ -69,7 +69,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(post(BASE_URL)
             .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
 
   @Test
@@ -199,7 +199,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(put(BASE_URL + "{identifier}", identifier)
             .content(updateRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
 
 
@@ -298,7 +298,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(delete(BASE_URL + "{identifier}", identifier)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
   }
 
@@ -311,7 +311,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(delete(BASE_URL + "{identifier}", identifier)
             .header(HttpHeaders.AUTHORIZATION, editorUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
   }
 
@@ -325,7 +325,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
 
     // getUserSetService().deleteUserSet(identifier);
 

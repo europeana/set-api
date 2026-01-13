@@ -35,8 +35,12 @@ mongodb.set.truststorepass=
 #string value representing the key used for JWT signature verification
 europeana.apikey.jwttoken.siganturekey=
 
-#URL of the APIKEY service
-#europeana.apikey.serviceurl=
+
+## Use keycloak (internal route)
+europeana.apikey.serviceurl=
+keycloak.token.endpoint=
+keycloak.token.grant.params=
+
 
 #Keycloak token endpoint
 keycloak.token.endpoint =

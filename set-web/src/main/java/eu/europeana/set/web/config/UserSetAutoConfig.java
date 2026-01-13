@@ -48,10 +48,10 @@ public class UserSetAutoConfig{
   public EuropeanaClientDetailsService getApiKeyClientDetailsService(){
     EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
     clientDetails.setApiKeyServiceUrl(apikeyServiceUrl);
-    if(StringUtils.isNotEmpty(tokenEndpoint) && StringUtils.isNotEmpty(grantParams)) {
+    if (StringUtils.isNotEmpty(tokenEndpoint) && StringUtils.isNotEmpty(grantParams)) {
       AuthenticationConfig config = new AuthenticationConfig(tokenEndpoint, grantParams);
       clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
-    }else{
+    } else{
       LOG.error("Keycloak token-endpoint and/or grant-parameters NOT set !! ");
     }
     return clientDetails;
