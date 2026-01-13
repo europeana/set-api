@@ -233,7 +233,6 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // verify that ids are not escaped, use one item from second page
     assertTrue(containsKeyOrValue(secondPageContent, "/11647/_Botany_AMD_87140"));
 
-    System.out.println(secondPageContent);
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
     int pageSize = StringUtils.countMatches(secondPageContent, "\\/item\\/");
     assertEquals(defaultPageSize, pageSize);
