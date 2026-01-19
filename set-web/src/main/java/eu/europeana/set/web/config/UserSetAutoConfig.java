@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -57,17 +56,13 @@ public class UserSetAutoConfig{
     return clientDetails;
   }
 
-  @Bean(name = BeanNames.BEAN_I18N_MESAGE_SOURCE)
-  public MessageSource i18nMessagesSource(){
-    ReloadableResourceBundleMessageSource source = new ReloadableResourceBundleMessageSource();
-    source.setBasename("classpath:messages");
-    source.setDefaultEncoding(StandardCharsets.UTF_8.name());
-    return source;
-  }
-
   @Bean(name = ErrorConfig.BEAN_I18nService)
   public I18nService getI18nService() {
-    return new I18nServiceImpl(i18nMessagesSource());
+    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+    messageSource.setBasenames(ErrorConfig.COMMON_MESSAGE_SOURCE, "classpath:messages");
+    messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
+    I18nServiceImpl service =  new I18nServiceImpl(messageSource);
+    return service;
   }
 
   @Bean(name = BeanNames.BEAN_WRITE_LOCK_AUTH_SERVICE)

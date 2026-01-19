@@ -53,8 +53,7 @@ public class AdminRest extends BaseRest {
     boolean isLocked = isLocked(activeLock);
     
     HttpStatus httpStatus = isLocked ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
-    SetOperationResponse response = new SetOperationResponse("admin",
-            "/set/admin/lock",
+    SetOperationResponse response = new SetOperationResponse("/set/admin/lock",
             isLocked ? "Server is now locked for changes" : "Unable to set lock",
             isLocked,
             httpStatus.value());
@@ -83,7 +82,7 @@ public class AdminRest extends BaseRest {
     //allows write_unlock even when application is locked
     verifyWriteAccess(Operations.WRITE_UNLOCK, request);
   
-    SetOperationResponse response = new SetOperationResponse("admin", "/set/admin/lock");
+    SetOperationResponse response = new SetOperationResponse("/set/admin/lock");
 
     ApiWriteLock activeLock = getApiWriteLockService().getLastActiveLock(ApiWriteLock.LOCK_WRITE_TYPE);
     if (activeLock != null && activeLock.getEnded() == null && ApiWriteLock.LOCK_WRITE_TYPE.equals(activeLock.getName())) {
@@ -100,7 +99,9 @@ public class AdminRest extends BaseRest {
           response.success = false;
         }
     } else {
-      throw new EuropeanaI18nApiException(null, null, null, ErrorConfig.NO_LOCK_IN_EFFECT, Collections.emptyList());
+      // as there is no lock in effect throw 400 bad request
+      throw new EuropeanaI18nApiException(null, null, null, HttpStatus.BAD_REQUEST,
+              ErrorConfig.NO_LOCK_IN_EFFECT, Collections.emptyList());
     }
     
     if (adminLogger.isInfoEnabled()) {

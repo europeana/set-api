@@ -35,7 +35,6 @@ import eu.europeana.set.web.search.UserSetQueryBuilder;
 @SpringBootTest
 public class SearchUserSetRestIT extends IntegrationTestSetup {
 
-  private static final String API_KEY = "api2demo";
   private static final String SEARCH_URL = "/set/search";
   private static final String SEARCH_SET_ID = WebUserSetFields.SET_ID + ":";
   private static final String SEARCH_INVALID_SET_ID = WebUserSetFields.SET_ID + ":" + "test";
@@ -106,7 +105,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
@@ -117,8 +116,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_SET_ID + set.getIdentifier())
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_SET_ID + set.getIdentifier())
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value()));
     // delete item created by test
@@ -131,8 +130,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_INVALID_SET_ID)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_INVALID_SET_ID)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
   }
@@ -145,8 +144,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_TITLE_LANG_EN)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_TITLE_LANG_EN)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value()));
     assertNotNull(set);
@@ -160,7 +159,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value()));
@@ -176,7 +175,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
@@ -202,7 +201,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
@@ -232,7 +231,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .perform(get(SEARCH_URL)
                 .param(CommonApiConstants.QUERY_PARAM_PROFILE,
                     ProfileConstants.VALUE_PARAM_ITEMS_META)
-                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                    .header(HttpHeaders.AUTHORIZATION, editorUserToken)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
             .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
@@ -259,7 +258,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
@@ -272,7 +271,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
@@ -284,7 +283,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
@@ -298,7 +297,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT))
@@ -318,7 +317,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .perform(get(SEARCH_URL)
                 .param(CommonApiConstants.QUERY_PARAM_PROFILE,
                     ProfileConstants.VALUE_PARAM_ITEMS_META)
-                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                    .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
                 .queryParam(CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT))
@@ -349,7 +348,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE).queryParam(
                 CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT + " asc"))
@@ -362,7 +361,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
@@ -376,7 +375,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
@@ -396,7 +395,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .perform(get(SEARCH_URL)
                 .param(CommonApiConstants.QUERY_PARAM_PROFILE,
                     ProfileConstants.VALUE_PARAM_ITEMS_META)
-                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                    .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QF, qf)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
@@ -430,7 +429,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .perform(get(SEARCH_URL)
                 .param(CommonApiConstants.QUERY_PARAM_PROFILE,
                     ProfileConstants.VALUE_PARAM_ITEMS_META)
-                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                    .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
             .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
@@ -463,7 +462,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .perform(get(SEARCH_URL)
                 .param(CommonApiConstants.QUERY_PARAM_PROFILE,
                     ProfileConstants.VALUE_PARAM_ITEMS_META)
-                .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                    .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
                 .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
             .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
@@ -490,7 +489,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLIC_VISIBILITY)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value()));
@@ -541,9 +540,9 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PRIVATE_VISIBILITY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken))
         .andExpect(status().is(HttpStatus.OK.value()));
 
     assertNotNull(set1);
@@ -561,10 +560,10 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, PUBLISHED_VISIBILITY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.OK.value()));
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken))
+            .andExpect(status().is(HttpStatus.OK.value()));
 
     // delete item created by test
     // getUserSetService().deleteUserSet(set.getIdentifier());
@@ -583,8 +582,6 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-            // apikey will be ignored
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL)
             .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorRegular)
             .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorEditor)
@@ -607,8 +604,6 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, editorUserToken)
-            // apikey will be ignored
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL)
             .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorRegular)
             .queryParam(CommonApiConstants.QUERY_PARAM_QF, SEARCH_CREATOR + creatorEditor)
@@ -647,7 +642,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     // retrieve fist page of results
     String result =
         callSearchItemsInSet(setIdentifier, qf, String.valueOf(WebUserSetFields.DEFAULT_PAGE), "1",
-            ProfileConstants.VALUE_PARAM_ITEMS_META, null);
+            ProfileConstants.VALUE_PARAM_ITEMS_META, regularUserToken);
     // check ids
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
@@ -674,7 +669,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     final String secondPageIndex = String.valueOf(WebUserSetFields.DEFAULT_PAGE + 1);
     // using pagesize 2, we get two pages of results (only 4 items found in set)
     // retrieve last page
-    String result = callSearchItemsInSet(setIdentifier, qf, secondPageIndex, "2", null, null);
+    String result = callSearchItemsInSet(setIdentifier, qf, secondPageIndex, "2", null, regularUserToken);
     // check ids
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
@@ -689,7 +684,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
     // retrieve fist page of results
     result = callSearchItemsInSet(setIdentifier, qf, String.valueOf(WebUserSetFields.DEFAULT_PAGE),
-        "2", null, null);
+        "2", null, regularUserToken);
     // check ids
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
@@ -785,8 +780,6 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     }
     if (regularUserToken != null) {
       getRequest.header(HttpHeaders.AUTHORIZATION, regularUserToken);
-    } else {
-      getRequest.queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY);
     }
 
     if (page != null) {
@@ -816,7 +809,6 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_GALLERY)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .header("Authorization", "Bearer " + regularUserToken))
@@ -836,8 +828,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+                .header(HttpHeaders.AUTHORIZATION,  regularUserToken)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
         .getContentAsString();
@@ -853,8 +845,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_COLLECTION)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_COLLECTION)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value()));
 
@@ -869,7 +861,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
@@ -880,7 +872,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "test"))
@@ -892,7 +884,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, ""))
@@ -904,7 +896,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item,visibility"))
@@ -917,7 +909,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String profile = ProfileConstants.VALUE_PARAM_FACETS + "," + "test";
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
@@ -929,7 +921,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String profile = ProfileConstants.VALUE_PARAM_META + "," + ProfileConstants.VALUE_PARAM_ITEMS;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
@@ -942,7 +934,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         + ProfileConstants.VALUE_PARAM_FACETS + "," + ProfileConstants.VALUE_PARAM_STANDARD;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
@@ -955,7 +947,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String profile = ProfileConstants.VALUE_PARAM_META + "," + ProfileConstants.VALUE_PARAM_FACETS;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
@@ -967,7 +959,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String profile = ProfileConstants.VALUE_PARAM_DEBUG + "," + ProfileConstants.VALUE_PARAM_FACETS;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
@@ -981,7 +973,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         + "  " + ProfileConstants.VALUE_PARAM_META;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
@@ -1000,7 +992,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item")
@@ -1033,7 +1025,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
-            .queryParam(CommonApiConstants.PARAM_WSKEY, API_KEY)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "0")
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item")

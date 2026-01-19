@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.*;
 
 import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
@@ -295,16 +296,17 @@ public class BaseRest extends BaseRestController {
 
   @Override
   public Authentication verifyWriteAccess(String operation, HttpServletRequest request)
-          throws ApplicationAuthenticationException {
+          throws EuropeanaI18nApiException {
 
     // prevent write operations when the application is locked
     try {
       apiWriteLockAuthService.checkWriteLockInEffect(operation);
     } catch (ApiWriteLockException e) {
-      throw new ApplicationAuthenticationException(e.getMessage(), ErrorConfig.LOCKED_MAINTENANCE, null, HttpStatus.LOCKED);
+      throw new EuropeanaI18nApiException(e.getMessage(), "423_locked_maintenance",
+              "Locked for maintenance",
+              HttpStatus.LOCKED,
+              ErrorConfig.LOCKED_MAINTENANCE, Arrays.asList(e.getMessage()));
     }
-    //getAuthorizationService().checkWriteLockInEffect(operation);
-
     Authentication auth = null;
     // verify if auth is enabled
     if (getConfiguration().isAuthEnabled()) {
