@@ -226,7 +226,6 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();
 
-    //
     String secondPageContent = response.getContentAsString();
     assertNotNull(secondPageContent);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -234,8 +233,11 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     assertTrue(containsKeyOrValue(secondPageContent, "/11647/_Botany_AMD_87140"));
 
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
-    int pageSize = StringUtils.countMatches(secondPageContent, "\\/item\\/");
-    assertEquals(defaultPageSize, pageSize);
+    // while reorderItemDescriptions we add the localId as a result if item is not found in SR API
+    int countItems = StringUtils.countMatches(secondPageContent, "\\/item\\/") +
+            StringUtils.countMatches(secondPageContent, "{\"id\":\"/");
+
+    assertEquals(defaultPageSize, countItems);
   }
 
 
