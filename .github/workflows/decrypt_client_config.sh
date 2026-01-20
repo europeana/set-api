@@ -5,4 +5,4 @@ mkdir -p /opt/app/config
 # --batch to prevent interactive command
 # --yes to assume "yes" for questions
 gpg --quiet --batch --yes --decrypt --passphrase="$SECRET_PROPS_PASSPHRASE" \
---output /opt/app/config/set.user.properties ./.github/workflows/set.user.properties.gpg
+--output /opt/app/config/set-client.user.properties ./.github/workflows/set-client.user.properties.gpg
