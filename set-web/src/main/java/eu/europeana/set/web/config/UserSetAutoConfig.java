@@ -25,7 +25,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
  */
 @Configuration()
 @PropertySource(
-    value = {"classpath:set.common.properties", "classpath:set.user.properties"},
+    value = {"classpath:set.common.properties", "classpath:set.user.properties", "file:/opt/app/config/set.user.properties"},
     ignoreResourceNotFound = true)
 public class UserSetAutoConfig{
 
