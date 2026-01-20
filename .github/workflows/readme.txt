@@ -6,8 +6,8 @@ A - Generate Encrypted Properties
 cd ./.github/workflows
 gpg --symmetric --cipher-algo AES256 set.user.properties
 3. when prompted provide encyption password
-4. if successfull et.user.properties.gpg file is created
-4.1 deleteet.user.properties
+4. if successfull set.user.properties.gpg file is created
+4.1 delete set.user.properties
 4.2 save used encryption password in github secret (e.g. SET_API_PROPS_ENCODING_PASS)
 
 B - Use Encrypted Properties
