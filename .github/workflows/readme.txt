@@ -1,13 +1,13 @@
 0. Install gpg:  https://gnupg.org/download/index.html
 
 A - Generate Encrypted Properties
-1. create unencrypted properties file (set.user.properties)
-2. encript file:
+1. create unencrypted properties file ( set-client.user.properties)
+2. encrypt file:
 cd ./.github/workflows
-gpg --symmetric --cipher-algo AES256 set.user.properties
+gpg --symmetric --cipher-algo AES256 set-client.user.properties
 3. when prompted provide encyption password
-4. if successfull set.user.properties.gpg file is created
-4.1 delete set.user.properties
+4. if successfull  set-client.user.properties.gpg file is created
+4.1 delete  set-client.user.properties
 4.2 save used encryption password in github secret (e.g. SET_API_PROPS_ENCODING_PASS)
 
 B - Use Encrypted Properties
