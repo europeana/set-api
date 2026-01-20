@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Decrypt the file
+# Decrypt the client properties file
 mkdir -p /opt/app/config
 # --batch to prevent interactive command
 # --yes to assume "yes" for questions
