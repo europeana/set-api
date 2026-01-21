@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.commons_sb3.http.HttpConnection;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
@@ -155,7 +156,8 @@ public class BaseApiConnection {
                 apiCaching.setETag(CachingUtils.parseETag(new WeakETag(h.getValue()).format()));
             }
             if (StringUtils.equals(h.getName(), CachingHeaders.LAST_MODIFIED)) {
-                apiCaching.setLastModified(CachingUtils.getLastModified(Long.parseLong(h.getValue())));
+                apiCaching.setLastModified(DateUtils.parseRFCToZonedDateTime(h.getValue()));
+
 
             } if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
                 apiCaching.setCacheControl(h.getValue());
