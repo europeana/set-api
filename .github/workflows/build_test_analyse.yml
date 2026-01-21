@@ -10,7 +10,7 @@ jobs:
         with:
           # Shallow clones should be disabled for a better relevancy of analysis
           fetch-depth: 0
-      - name: Set up JDK 171
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin' #should use the same as in the docker file
@@ -22,6 +22,16 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Decrypt configuration properties
+        run: ./.github/workflows/decrypt_config.sh
+        env:
+          #provide the secret to decrypt script
+          SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
+      - name: Decrypt client configuration properties
+        run: ./.github/workflows/decrypt_client_config.sh
+        env:
+          #provide the secret to decrypt script
+          SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
       - name: Build, run tests and analyse
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=europeana_set-api
         env:

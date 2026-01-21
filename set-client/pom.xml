@@ -83,6 +83,7 @@
 	</dependencies>
 	<build>
 		<!-- configure source and output locations -->
+		<!-- SG: SOME OF THESE CONFIGURATIONS migh be redundant --> 
 		<directory>target</directory>
 		<outputDirectory>target/classes</outputDirectory>
 		<finalName>${project.artifactId}-${project.version}</finalName>

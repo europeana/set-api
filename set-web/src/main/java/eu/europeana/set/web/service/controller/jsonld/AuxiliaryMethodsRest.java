@@ -79,7 +79,6 @@ public class AuxiliaryMethodsRest extends BaseRest {
     @GetMapping(value = "/set/stats", produces = {CONTENT_TYPE_JSON_UTF8})
     @Operation(description = SwaggerConstants.SET_USAGE_STATS, summary = "Generate usage statistics")
     public ResponseEntity<String> generateUsageStats(
-            @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = true) String wsKey,
             HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
         return getUsageStats(request);
     }

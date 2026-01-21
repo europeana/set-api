@@ -83,25 +83,32 @@
 		<version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
-		<!-- sonar - jacoco properties -->
-		<jacoco-plugin.version>0.8.11</jacoco-plugin.version>
-		<pmd-plugin.version>3.15.0</pmd-plugin.version>
-		<spotbugs-plugin.version>4.5.2.0</spotbugs-plugin.version>
-		<sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
-		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
-		<sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
-		<sonar.organization>europeana</sonar.organization>
+		
+		<!-- sonar properties -->
 		<!-- project key cannot be sent both as property and in command line (check github action) -->
 		<!--
 		<sonar.projectKey>europeana_set-api</sonar.projectKey>
 		-->
+		<sonar.organization>europeana</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-		<!-- Exclude POJOs code duplication analysis -->
+		<sonar.exclusions>**/*.gpg,**/*.template</sonar.exclusions>
+        <!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
 		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
 		<!-- this property needs to be overwritten in modules -->
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 		<argLine></argLine>
+		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
+		<sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
+		
+		 
+		<!-- sonar - plugins -->
+		<jacoco-plugin.version>0.8.11</jacoco-plugin.version>
+		<pmd-plugin.version>3.15.0</pmd-plugin.version>
+		<spotbugs-plugin.version>4.5.2.0</spotbugs-plugin.version>
+		<sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
+		
+		
 	</properties>
 
 	<dependencyManagement>
