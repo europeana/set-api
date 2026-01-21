@@ -9,11 +9,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.util.Arrays;
 import java.util.Collections;
 
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
-import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +36,6 @@ import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
-import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 
@@ -232,7 +230,12 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andReturn().getResponse();
 
     assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), CONTENT_TYPE_JSONLD_UTF8);
-    String result = response.getContentAsString();
+    assertNotNull(response.getHeader(HttpHeaders.ETAG));
+    // check last Modified
+    assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
+    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+
+      String result = response.getContentAsString();
     assertNotNull(result);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));

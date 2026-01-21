@@ -5,11 +5,13 @@ import static jakarta.ws.rs.core.HttpHeaders.ACCEPT;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
+import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
+
 import java.io.IOException;
 import java.util.*;
 
 import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
@@ -257,12 +259,23 @@ public class BaseRest extends BaseRestController {
 
     // generate “ETag”;
     headers.add(UserSetHttpHeaders.ETAG, etag);
-    // headers.add(UserSetHttpHeaders.PREFERENCE_APPLIED,
-    // LdProfiles.MINIMAL.getPreferHeaderValue());
+    // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
+    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(storedUserSet.getModified()));
 
     return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, responseStatus);
   }
 
+
+
+  /**
+   * Builds the Set Paginated response
+   * @param setPage collection page
+   * @param modified userSet.getModified() date
+   * @param profile profile requested
+   * @param request http request
+   * @return
+   * @throws EuropeanaApiException
+   */
   protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, Date modified,
       SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
@@ -279,6 +292,8 @@ public class BaseRest extends BaseRestController {
     headers.add(PREFERENCE_APPLIED, profile.getPreferenceApplied());
     // generate “ETag”;
     headers.add(ETAG, etag);
+    // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
+    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(modified));
 
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }

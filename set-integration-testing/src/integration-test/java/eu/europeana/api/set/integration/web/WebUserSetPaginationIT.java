@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.util.List;
 
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -82,6 +83,11 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(),
     // request.getQueryString());
     // assertTrue(constainsKey(result, collectionUrl));
+
+    assertNotNull(response.getHeader(HttpHeaders.ETAG));
+    // check last Modified
+    assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
+    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
 
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.PART_OF));
     assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.COLLECTION));
