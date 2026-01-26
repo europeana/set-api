@@ -1,6 +1,6 @@
 package eu.europeana.api.set.integration.client;
 
-import eu.europeana.api.commons.auth.apikey.ApikeyBasedAuthentication;
+import eu.europeana.api.commons_sb3.auth.apikey.ApikeyBasedAuthentication;
 import eu.europeana.set.client.connection.BaseApiConnection;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import org.junit.jupiter.api.BeforeEach;

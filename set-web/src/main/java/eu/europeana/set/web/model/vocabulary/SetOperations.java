@@ -1,6 +1,6 @@
 package eu.europeana.set.web.model.vocabulary;
 
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 
 public interface SetOperations extends Operations {
 

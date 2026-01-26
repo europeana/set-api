@@ -5,7 +5,7 @@ import org.bson.types.ObjectId;
 import dev.morphia.annotations.Embedded;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
-import eu.europeana.api.commons.nosql.entity.PersistentObject;
+import eu.europeana.api.commons_sb3.nosql.entity.PersistentObject;
 import eu.europeana.set.definitions.model.authentication.Application;
 import eu.europeana.set.definitions.model.authentication.impl.BaseClientImpl;
 import eu.europeana.set.mongo.model.internal.PersistentClient;

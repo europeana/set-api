@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +22,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import eu.europeana.api.commons.definitions.statistics.UsageStatsFields;
-import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons_sb3.definitions.statistics.UsageStatsFields;
+import eu.europeana.api.commons_sb3.definitions.statistics.set.SetMetric;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -43,6 +45,8 @@ import eu.europeana.set.web.utils.UserSetXMLSerializer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
+
 @RestController
 @Tag(name = "Auxiliary Methods")
 public class AuxiliaryMethodsRest extends BaseRest {
@@ -53,13 +57,13 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @param wsKey
      * @param request
      * @return
-     * @throws HttpException
+     * @throws EuropeanaApiException
      */
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
     @Operation(description = "Generate Elevation file for best bets", summary = "Generate elevation file")
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wsKey,
-            HttpServletRequest request) throws HttpException {
+            HttpServletRequest request) throws EuropeanaApiException {
     verifyReadAccess(request);
     return generateElevation();
     }
@@ -72,7 +76,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @return
      * @throws UserSetServiceException 
      */
-    @GetMapping(value = "/set/stats", produces = {HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+    @GetMapping(value = "/set/stats", produces = {CONTENT_TYPE_JSON_UTF8})
     @Operation(description = SwaggerConstants.SET_USAGE_STATS, summary = "Generate usage statistics")
     public ResponseEntity<String> generateUsageStats(
             HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
@@ -82,32 +86,26 @@ public class AuxiliaryMethodsRest extends BaseRest {
     /**
      * generate elevation file
      * @return
-     * @throws HttpException
+     * @throws EuropeanaApiException
      */
-    private ResponseEntity<String> generateElevation() throws HttpException {
-    try {
+    private ResponseEntity<String> generateElevation() throws EuropeanaApiException {
         List<PersistentUserSet> usersets = getUserSetService().getEntitySetBestBetsItems(
-                getUsageStatsService().buildUserSetQuery(null, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(),null));
+                getUsageStatsService().buildUserSetQuery(null, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), null));
         Elevation elevation = buildElevation(usersets);
         if (elevation != null) {
             UserSetXMLSerializer xmlSerializer = new UserSetXMLSerializer();
             String xml = xmlSerializer.serialize(elevation);
-            
+
             //TODO: enable writing to file, when the behaviour and server configurations with regard to write permissions are clarified
 //            writeElevation(getConfiguration().getElevationFileLocation(), xml);
             // returning the elevation response
             //TODO - remove the body, once we know how elevation file will be used
             return ResponseEntity.status(HttpStatus.OK)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE +";charset=UTF-8")
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8")
                     .body(xml);
         } else {
-            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED,
-                    UserSetI18nConstants.ELEVATION_NOT_GENERATED,
-                    null);
+            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED, Collections.EMPTY_LIST);
         }
-    } catch (IOException e) {
-        throw new InternalServerException(e);
-    }
     }
 
     /**
@@ -170,14 +168,15 @@ public class AuxiliaryMethodsRest extends BaseRest {
      *
      * @param directoryLocation folder location
      */
-    public static void writeElevation(String directoryLocation, String xml) throws InternalServerException {
+    public static void writeElevation(String directoryLocation, String xml) throws  EuropeanaI18nApiException {
     if (!directoryLocation.isEmpty()) {
         try {
             File elevationFile = new File(directoryLocation,  FilenameUtils.getName(WebUserSetFields.ELEVATION_FILENAME));
             elevationFile.mkdirs();
             FileUtils.write(elevationFile, xml, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new InternalServerException("Error creating the " + WebUserSetFields.ELEVATION_FILENAME + " file", e);
+            throw new EuropeanaI18nApiException("Error creating the " + WebUserSetFields.ELEVATION_FILENAME + " file",
+                    null, null, HttpStatus.INTERNAL_SERVER_ERROR, null, null,  e);
         }
     }
     }
@@ -213,7 +212,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
         // build response
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
         headers.add(UserSetHttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
-        headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+        headers.add(HttpHeaders.ALLOW, ALLOW_GET);
 
         return new ResponseEntity<>(json, headers, HttpStatus.OK);
     }

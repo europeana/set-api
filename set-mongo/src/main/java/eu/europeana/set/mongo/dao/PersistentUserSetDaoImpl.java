@@ -2,14 +2,14 @@ package eu.europeana.set.mongo.dao;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.types.ObjectId;
 import dev.morphia.Datastore;
 import dev.morphia.query.Query;
 import dev.morphia.query.UpdateOperations;
-import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
+import eu.europeana.api.commons_sb3.nosql.dao.impl.NosqlDaoImpl;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;

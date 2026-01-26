@@ -1,14 +1,15 @@
 package eu.europeana.set.web.service.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
+
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import eu.europeana.api.commons_sb3.error.exceptions.ResourceNotFoundException;
+import  jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
@@ -16,17 +17,12 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.utils.LoggingUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.definitions.utils.LoggingUtils;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.exception.UserSetAttributeInstantiationException;
-import eu.europeana.set.definitions.exception.UserSetInstantiationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
@@ -64,14 +60,11 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
-
-
   @Override
-  public UserSet getUserSetById(String userSetId) throws UserSetNotFoundException {
+  public UserSet getUserSetById(String userSetId) throws ResourceNotFoundException {
     UserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
     if (userSet == null) {
-      throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
-          UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
+      throw new ResourceNotFoundException(UserSet.class, Arrays.asList(userSetId));
     }
     //update total/first/last
     getUserSetUtils().updatedTotal(userSet);
@@ -107,8 +100,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public UserSet parseUserSetLd(String userSetJsonLdStr)
-      throws RequestBodyValidationException, UserSetInstantiationException {
+  public UserSet parseUserSetLd(String userSetJsonLdStr) throws InvalidBodyException {
 
     JsonParser parser;
     ObjectMapper mapper = new ObjectMapper();
@@ -132,8 +124,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       removeItemDuplicates(userSet);
       return userSet;
     } catch (UserSetAttributeInstantiationException | IOException e) {
-      throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
-          new String[] {e.getMessage()}, e);
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_CANT_PARSE_BODY, Arrays.asList(e.getMessage())), e);
     }
   }
 
@@ -141,7 +133,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * This method normalizes item list if they exist to remove duplicated items.
    * 
    * @param userSet
-   * @throws ParamValidationException
    */
   public void removeItemDuplicates(UserSet userSet) {
     if (userSet.getItems() != null && !userSet.getItems().isEmpty()) {
@@ -157,7 +148,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @see eu.europeana.set.web.service.UserSetService#deleteUserSet(java.lang.String)
    */
   public void deleteUserSet(String userSetId) throws UserSetNotFoundException {
-
     getMongoPersistence().remove(userSetId);
   }
 
@@ -184,7 +174,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * @param position The given position
    * @param items The item list
    * @return position The validated position in list to insert
-   * @throws ApplicationAuthorizationException
    */
   int validatePosition(String position, List<String> items, int pinnedItems) {
     int positionInt = -1;
@@ -414,7 +403,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * java.lang.String, eu.europeana.set.definitions.model.UserSet)
    */
   public UserSet insertItem(String datasetId, String localId, String position,
-      UserSet existingUserSet) throws ApplicationAuthenticationException, ItemValidationException {
+      UserSet existingUserSet) throws ItemValidationException {
     String itemForPartialValidation = "/" + datasetId + "/" + localId;
     validateEuropeanaRecordId(itemForPartialValidation);
 
@@ -556,7 +545,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   @Override
   public UserSet fetchUserSetItems(UserSet userSet, String sort, String sortOrder, int pageNr,
-      int pageSize, SetPageProfile profile) throws HttpException {
+      int pageSize, SetPageProfile profile) throws EuropeanaApiException {
     if (!userSet.isOpenSet() && (userSet.getItems() == null
         || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
       // if empty closed userset, nothing to do
@@ -599,15 +588,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       return userSet;
     } catch (SearchApiClientException e) {
       if (SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY.equals(e.getMessage())) {
-        throw new RequestBodyValidationException(
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            new String[] {WebUserSetModelFields.IS_DEFINED_BY, url}, e);
+        throw new InvalidBodyException(Collections.singletonMap(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+                Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY, url)), e);
       } else {
-        throw new InternalServerException(e);
+        throw new EuropeanaApiException(e.getMessage(), e);
       }
     } catch (IOException e) {
-      throw new RequestBodyValidationException(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID,
-          new String[] {}, e);
+      throw new InvalidBodyException(Collections.singletonMap(UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, Collections.emptyList()), e);
     }
   }
 
@@ -678,7 +665,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   @Override
   public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery,
       ResultSet<? extends UserSet> results, String requestUrl, String reqParams,
-      List<SetPageProfile> profiles, Authentication authentication) throws HttpException {
+      List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException {
 
     BaseUserSetResultPage<?> resPage = null;
     int resultPageSize = results.getResults().size();
@@ -709,7 +696,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   private BaseUserSetResultPage<?> createResultPageWithItems(ResultSet<? extends UserSet> results,
       int resultPageSize, SetPageProfile serializationProfile, List<SetPageProfile> profiles,
-      Authentication authentication) throws HttpException {
+      Authentication authentication) throws EuropeanaI18nApiException {
     BaseUserSetResultPage<?> resPage;
     switch (serializationProfile) {
       case ITEMS_META:
@@ -726,9 +713,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       case FACETS:
         // serialization profile should not be facets
       default:
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {CommonApiConstants.QUERY_PARAM_PROFILE,
-                serializationProfile.getProfileParamValue()});
+        throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE,
+                "items.meta, items, meta ",
+                serializationProfile.getProfileParamValue()));
     }
     // add facets if requested
     if (profiles.contains(SetPageProfile.FACETS)) {
@@ -752,7 +739,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   UserSetResultPage setPageItemsAsSetData(ResultSet<? extends UserSet> results,
-      Authentication authentication, SetPageProfile profile) throws HttpException {
+      Authentication authentication, SetPageProfile profile) {
 
     UserSetResultPage resPage = new UserSetResultPage();
     List<UserSet> items = new ArrayList<>(results.getResults().size());
@@ -793,7 +780,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   @Override
   public CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr,
-      int pageSize, HttpServletRequest request) throws ParamValidationException {
+      int pageSize, HttpServletRequest request) throws EuropeanaApiException {
 
     // validate params
     int totalInCollection = userSet.getTotal();
@@ -900,7 +887,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   public BaseUserSetResultPage<String> buildRecodsResultsPage(String setIdentifier,
       List<String> itemIds, int page, int pageSize, SetPageProfile profile,
-      HttpServletRequest request) throws HttpException {
+      HttpServletRequest request) throws EuropeanaApiException {
     // new ResultsPageImpl<T>()
     BaseUserSetResultPage<String> result;
 
@@ -954,9 +941,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       case FACETS:
         // serialization profile should not be facets
       default:
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE,
-            new String[] {CommonApiConstants.QUERY_PARAM_PROFILE, profile.getProfileParamValue()});
+        throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE,
+                "items.meta, items, meta ",
+                profile.getProfileParamValue()));
 
     }
 
@@ -972,8 +959,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return result;
   }
 
-  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile)
-      throws HttpException {
+  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile) throws EuropeanaApiException {
     UserSet itemsSet = new WebUserSetImpl();
     itemsSet.setItems(pageItems);
     UserSet dereferenced = fetchUserSetItems(itemsSet, null, null, WebUserSetFields.DEFAULT_PAGE,
@@ -1127,12 +1113,11 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   @Override
   public UserSet publishUnpublishUserSet(String userSetId, Date issued,
-      Authentication authentication, boolean publish) throws HttpException {
+      Authentication authentication, boolean publish) throws EuropeanaApiException {
     PersistentUserSet userSet = getMongoPersistence().getByIdentifier(userSetId);
     // if the user set does not exist, return 404
     if (userSet == null) {
-      throw new UserSetNotFoundException(UserSetI18nConstants.USERSET_NOT_FOUND,
-          UserSetI18nConstants.USERSET_NOT_FOUND, new String[] {userSetId});
+      throw new ResourceNotFoundException(UserSet.class, Arrays.asList(userSetId));
     }
     validateUserSetForPublishUnPublish(userSet, publish);
     if (publish) {
@@ -1146,22 +1131,20 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
    * Validates the user set for publishing or un-publishing
    * 
    * @param userSet
-   * @param authentication
-   * @throws HttpException
    */
   private void validateUserSetForPublishUnPublish(PersistentUserSet userSet, boolean publish)
-      throws HttpException {
+      throws InvalidBodyException {
     // Check if the “type” of the set is “EntityBestItemsSet” or “BookmarkFolder”, if so respond
     // with 400;
     if (isPublishingPrevented(userSet)) {
-      throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
-          new String[] {"Publish/Unpublish user set ", userSet.getType()});
+      throw new InvalidBodyException(Collections.singletonMap(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+          Arrays.asList("Publish/Unpublish user set ", userSet.getType())));
     }
     // verify the state of the object
     if (!publish && !userSet.isPublished()) {
       // if depublishing
-      throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
-          new String[] {"Unpublish", "not published"});
+      throw new InvalidBodyException(Collections.singletonMap(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
+              Arrays.asList("Unpublish", "not published")));
     }
   }
 
@@ -1240,8 +1223,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public UserSet createUserSet(UserSet userSet, Authentication authentication)
-      throws HttpException, IOException {
+  public UserSet createUserSet(UserSet userSet, Authentication authentication) throws EuropeanaApiException {
     setDefaults(userSet, authentication);
     if (userSet.isEntityBestItemsSet()) {
       verifyPermissionToUpdate(userSet, authentication, true);

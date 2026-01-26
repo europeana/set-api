@@ -1,8 +1,8 @@
 package eu.europeana.set.stats.service;
 
 import java.util.List;
-import javax.annotation.Resource;
-import eu.europeana.api.commons.definitions.statistics.set.SetMetric;
+import jakarta.annotation.Resource;
+import eu.europeana.api.commons_sb3.definitions.statistics.set.SetMetric;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.search.UserSetQuery;

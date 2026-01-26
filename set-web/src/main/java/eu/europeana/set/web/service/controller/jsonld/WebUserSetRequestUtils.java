@@ -1,11 +1,12 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
+
+import java.util.Arrays;
 
 public class WebUserSetRequestUtils {
 
@@ -25,21 +26,19 @@ public class WebUserSetRequestUtils {
    * @param maxValue max allowed value
    * @param minValue min allowed value (negative value will be ignored)
    * @return the parsed value or null 
-   * @throws ParamValidationException is the value is not in the expected range 
+   * @throws InvalidParamException is the value is not in the expected range
    */
   public static Integer parseIntegerParam(String paramName, String paramValue, int maxValue, int minValue)
-      throws ParamValidationException {
+      throws InvalidParamException {
     if (paramValue != null) {
       try {
         Integer value = Integer.valueOf(paramValue);
         if ((maxValue > 0 && value > maxValue) || value < minValue) {
-          throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-              I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue});
+          throw new InvalidParamException(Arrays.asList(paramName, "value in range", paramValue));
         }
         return value;
       } catch (NumberFormatException e) {
-        throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE,
-            I18nConstants.INVALID_PARAM_VALUE, new String[] {paramName, paramValue}, e);
+        throw new InvalidParamException(Arrays.asList(paramName, "integer value", paramValue), e);
       }
     }
     return null;
@@ -50,9 +49,9 @@ public class WebUserSetRequestUtils {
    * @param page the value of the request param
    * @param maxPageNumber the mx value for the page number, negative value is ignored
    * @return
-   * @throws ParamValidationException
+   * @throws InvalidParamException
    */
-  public static Integer parsePageNumber(String page, int maxPageNumber) throws ParamValidationException {
+  public static Integer parsePageNumber(String page, int maxPageNumber) throws InvalidParamException {
     Integer pageNr;
     //
     pageNr = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE, page, maxPageNumber,
@@ -66,10 +65,10 @@ public class WebUserSetRequestUtils {
    * @param maxPageSize maximum pageSize value (depends on requested profile)
    * @param defaultItemsPerPage default value to return if the param value is empty 
    * @return the value parsed from the param or the default
-   * @throws ParamValidationException if ti is out of range
+   * @throws InvalidParamException if ti is out of range
    */
   public static Integer getPageSizeOrDefault(String pageSize, int maxPageSize,
-      final int defaultItemsPerPage) throws ParamValidationException {
+      final int defaultItemsPerPage) throws InvalidParamException {
     Integer pageItems;
 
     pageItems = parseIntegerParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize, maxPageSize,

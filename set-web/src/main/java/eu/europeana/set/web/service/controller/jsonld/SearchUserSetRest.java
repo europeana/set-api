@@ -1,10 +1,15 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+
+import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,12 +19,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.InternalServerException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
@@ -39,6 +40,8 @@ import eu.europeana.set.web.service.controller.BaseRest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
+
 @RestController
 @Tag(name = "User Set Discovery API")
 public class SearchUserSetRest extends BaseRest {
@@ -53,7 +56,7 @@ public class SearchUserSetRest extends BaseRest {
   }
 
   @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
-      produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+      produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.SEARCH, summary = "Search user sets")
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -68,10 +71,8 @@ public class SearchUserSetRest extends BaseRest {
       @RequestParam(value = "facet.limit", required = false, defaultValue = "50") int facetLimit,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
           defaultValue = ProfileConstants.VALUE_PARAM_ITEMS_META) String profileStr,
-      HttpServletRequest request) throws HttpException {
-
-    try {
-      // authorization
+      HttpServletRequest request) throws EuropeanaApiException {
+     // authorization
       Authentication authentication = verifyReadAccess(request);
 
       //TODO: temporary fix to remove later
@@ -118,16 +119,10 @@ public class SearchUserSetRest extends BaseRest {
 
       String jsonLd = serializeResultsPage(resultsPage);
       return buildSearchResponse(jsonLd);
-
-    } catch (HttpException e) {
-      throw e;
-    } catch (IOException | RuntimeException e) {
-      throw new InternalServerException(e);
-    }
   }
 
   @SuppressWarnings("rawtypes")
-  private String serializeResultsPage(BaseUserSetResultPage resultsPage) throws IOException {
+  private String serializeResultsPage(BaseUserSetResultPage resultsPage) throws EuropeanaApiException {
     UserSetLdSerializer serializer = new UserSetLdSerializer();
     return serializer.serialize(resultsPage);
   }
@@ -135,9 +130,9 @@ public class SearchUserSetRest extends BaseRest {
   private ResponseEntity<String> buildSearchResponse(String jsonLd) {
     // build response
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-    headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-    headers.add(HttpHeaders.VARY, HttpHeaders.PREFER);
-    headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+    headers.add(UserSetHttpHeaders.VARY, AcceptUtils.ACCEPT);
+    headers.add(UserSetHttpHeaders.VARY, PREFER);
+    headers.add(ALLOW, ALLOW_GET);
 
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
@@ -145,7 +140,7 @@ public class SearchUserSetRest extends BaseRest {
   @GetMapping(
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
-      produces = {HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpHeaders.CONTENT_TYPE_JSON_UTF8})
+      produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   @Operation(description = SwaggerConstants.SEARCH_ITEMS_IN_SET, summary = "Search items in set")
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
@@ -159,16 +154,14 @@ public class SearchUserSetRest extends BaseRest {
           defaultValue = "" + UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE) String pageSize,
        @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false,
        defaultValue = ProfileConstants.VALUE_PARAM_ITEMS) String profileStr,
-      HttpServletRequest request) throws HttpException {
-
-    try {
-      // authorization
+      HttpServletRequest request) throws EuropeanaApiException {
+     // authorization
       Authentication authentication = verifyReadAccess(request);
 
       if (!UserSetQueryBuilder.isSearchAllQuery(query)) {
-        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] {"query", query
-                + " Currently only * is supported as query, use qf for provinding the items list."});
+        throw new InvalidBodyException(Collections.singletonMap(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+            Arrays.asList("query", query
+                + " Currently only * is supported as query, use qf for provinding the items list.")));
       }
       
       // validate params - profile
@@ -192,7 +185,7 @@ public class SearchUserSetRest extends BaseRest {
       // for the time being not supported for open sets
       if (existingUserSet.isOpenSet()) {
         throw new RequestValidationException(UserSetI18nConstants.USER_SET_OPERATION_NOT_ALLOWED,
-            new String[] {"Search item in set", "open"});
+                Arrays.asList("Search item in set", "open"));
       }
 
       // check visibility level for given user
@@ -223,19 +216,15 @@ public class SearchUserSetRest extends BaseRest {
 
       // build response
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-      headers.add(HttpHeaders.LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+      headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
+      headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+      headers.add(ALLOW, ALLOW_GET);
 
       return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
-    } catch (HttpException e) {
-      throw e;
-    } catch (IOException | RuntimeException e) {
-      throw new InternalServerException(e);
-    }
+
   }
 
-  private List<String> buildItemIdsList(String[] qf) throws ParamValidationException {
+  private List<String> buildItemIdsList(String[] qf) throws InvalidParamException {
     if (qf == null || qf.length == 0) {
       return null;
     }
@@ -245,8 +234,7 @@ public class SearchUserSetRest extends BaseRest {
     String recordId;
     for (int i = 0; i < qf.length; i++) {
       if (!qf[i].contains(ITEM_PREFIX)) {
-        throw new ParamValidationException(UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-            UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, new String[] {"qf", qf[i]});
+        throw new InvalidParamException(Arrays.asList("qf", "valid value", qf[i]));
       }
       recordId = qf[i].replace(ITEM_PREFIX, "").trim();
       itemIds.add(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), recordId));

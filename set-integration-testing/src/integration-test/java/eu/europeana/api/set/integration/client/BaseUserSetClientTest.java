@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-import eu.europeana.api.commons.auth.service.GrantConstants;
+import eu.europeana.api.commons_sb3.auth.service.GrantConstants;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +26,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
-import eu.europeana.api.commons.oauth2.utils.OAuthUtils;
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.api.set.integration.MongoContainer;
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;

@@ -3,7 +3,9 @@ package eu.europeana.api.set.integration.migration;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
+
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import  jakarta.annotation.Resource;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.logging.log4j.LogManager;
@@ -15,9 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.exception.AuthorizationExtractionException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
+import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
 import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.UserSetApp;
@@ -111,7 +112,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
 
   private DepictionGenerationReport generateDepictionsAndUpdateCollectionType(
       final String collectionsQuery)
-      throws AuthorizationExtractionException, ParamValidationException {
+      throws AuthorizationExtractionException, InvalidParamException {
     // create object in database
     UserSetQueryBuilder queryBuilder = new UserSetQueryBuilder();
 

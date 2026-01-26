@@ -2,15 +2,15 @@ package eu.europeana.set.web.service.authorization;
 
 import java.util.List;
 
-import eu.europeana.api.commons.definitions.vocabulary.Role;
+import eu.europeana.api.commons_sb3.definitions.oauth.Role;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import eu.europeana.api.commons.exception.AuthorizationExtractionException;
-import eu.europeana.api.commons.oauth2.model.impl.EuropeanaApiCredentials;
-import eu.europeana.api.commons.oauth2.model.impl.EuropeanaAuthenticationToken;
-import eu.europeana.api.commons.oauth2.utils.OAuthUtils;
+import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
+import eu.europeana.api.commons_sb3.oauth2.model.impl.EuropeanaApiCredentials;
+import eu.europeana.api.commons_sb3.oauth2.model.impl.EuropeanaAuthenticationToken;
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
 public class UserSetAuthorizationUtils {

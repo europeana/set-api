@@ -1,7 +1,7 @@
 package eu.europeana.set.web.model.vocabulary;
 
-import eu.europeana.api.commons.definitions.vocabulary.Role;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.api.commons_sb3.definitions.oauth.Role;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 
 public enum Roles implements Role {
 

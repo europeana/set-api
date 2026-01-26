@@ -3,7 +3,7 @@
 set.service.uri = http://localhost:8080/set
 
 
-## Authentication endpoints ( @See eu.europeana.api.commons.auth#AuthenticationConfig )
+## Authentication endpoints ( @See eu.europeana.api.commons_sb3.auth#AuthenticationConfig )
 
 ## url and params for generating a Long Lasting token that refresh itself.
 token_endpoint=
@@ -14,4 +14,3 @@ apikey=
 
 # for generating static token for the client to use. Only pass the token value (without Bearer)
 access_token=
-

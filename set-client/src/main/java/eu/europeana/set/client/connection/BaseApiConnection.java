@@ -1,12 +1,12 @@
 package eu.europeana.set.client.connection;
 
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_FACET;
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PAGE;
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PAGE_SIZE;
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE;
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_QF;
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_QUERY;
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_SORT;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_FACET;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PAGE;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PAGE_SIZE;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_QF;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_QUERY;
+import static eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_SORT;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.PARAM_SORT_ORDER;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.SEARCH_PATH;
 import java.io.IOException;
@@ -16,9 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import eu.europeana.api.commons.http.HttpConnection;
-import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
+import eu.europeana.api.commons_sb3.http.HttpConnection;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -31,7 +32,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import eu.europeana.api.commons.definitions.search.result.impl.ResultsPageImpl;
+import eu.europeana.api.commons_sb3.definitions.search.result.impl.ResultsPageImpl;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.json.AgentDeserializer;
 import eu.europeana.set.client.json.UserSetDeserializer;
@@ -155,7 +156,8 @@ public class BaseApiConnection {
                 apiCaching.setETag(CachingUtils.parseETag(new WeakETag(h.getValue()).format()));
             }
             if (StringUtils.equals(h.getName(), CachingHeaders.LAST_MODIFIED)) {
-                apiCaching.setLastModified(CachingUtils.getLastModified(Long.parseLong(h.getValue())));
+                apiCaching.setLastModified(DateUtils.parseRFCToZonedDateTime(h.getValue()));
+
 
             } if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
                 apiCaching.setCacheControl(h.getValue());
@@ -259,7 +261,7 @@ public class BaseApiConnection {
     protected List<RecordPreview> getUserSetPaginatedResponse(String url, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to Get UserSet API (Paginated): {} ", url);
-            HttpResponseHandler response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(),  getAuthenticationHandler());
+            HttpResponseHandler response = getHttpConnection().get(url, ContentType.APPLICATION_JSON.getMimeType(), getAuthenticationHandler());
             String responseBody = response.getResponse();
             if (response.getStatus() == HttpStatus.SC_OK) {
                 TypeReference<ResultsPageImpl<RecordPreview>> typeRef = new TypeReference<>() {};
@@ -288,7 +290,7 @@ public class BaseApiConnection {
     protected List<? extends UserSet> getSearchUserSetResponse(String url, String profile) throws SetApiClientException {
         try {
             LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
-            HttpResponseHandler response = getHttpConnection().get(url, "application/json",  getAuthenticationHandler());
+            HttpResponseHandler response = getHttpConnection().get(url, "application/json" , getAuthenticationHandler());
             String responseBody = response.getResponse();
             if (response.getStatus() == HttpStatus.SC_OK) {
                 if (StringUtils.equals(profile, ProfileConstants.VALUE_PARAM_ITEMS)) {

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import com.mongodb.WriteConcern;
 import dev.morphia.Datastore;
-import eu.europeana.api.commons.nosql.entity.ApiWriteLockImpl;
+import eu.europeana.api.commons_sb3.nosql.entity.ApiWriteLockImpl;
 import eu.europeana.corelib.db.wrapper.ApiMongoConnector;
 import eu.europeana.set.mongo.model.PersistentUserSetImpl;
 

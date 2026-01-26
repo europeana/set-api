@@ -1,12 +1,15 @@
 package eu.europeana.set.web.service.authorization;
 
-import javax.annotation.Resource;
+import eu.europeana.api.commons_sb3.definitions.oauth.Role;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.nosql.service.ApiWriteLockService;
+import eu.europeana.api.commons_sb3.nosql.service.WriteLockAuthorizationService;
+import eu.europeana.api.commons_sb3.oauth2.service.authorization.BaseAuthorizationService;
+import eu.europeana.set.web.config.BeanNames;
+import jakarta.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import eu.europeana.api.commons.definitions.vocabulary.Role;
-import eu.europeana.api.commons.nosql.service.ApiWriteLockService;
-import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.web.model.vocabulary.Roles;
 
@@ -21,12 +24,15 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
     @Resource(name = "commons_oauth2_europeanaClientDetailsService")
     ClientDetailsService clientDetailsService;
 
-    @Resource(name = "set_db_apilockService")
-    private ApiWriteLockService apiWriteLockService;
+//    @Resource(name = "set_db_apilockService")
+//    private ApiWriteLockService apiWriteLockService;
 
-    public ApiWriteLockService getApiWriteLockService() {
-    return apiWriteLockService;
-    }
+    @Resource(name = BeanNames.BEAN_WRITE_LOCK_AUTH_SERVICE)
+    private WriteLockAuthorizationService apiWriteLockAuthService;
+
+//    public ApiWriteLockService getApiWriteLockService() {
+//    return apiWriteLockService;
+//    }
     
     @Override
     protected ClientDetailsService getClientDetailsService() {
@@ -36,6 +42,12 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
     public UserSetConfiguration getConfiguration() {
 	return configuration;
     }
+
+    @Override
+    public WriteLockAuthorizationService getWriteLockAuthorizationService() {
+        return apiWriteLockAuthService;
+    }
+
 
     public void setConfiguration(UserSetConfiguration configuration) {
 	this.configuration = configuration;
@@ -48,7 +60,7 @@ public class UserSetAuthorizationServiceImpl extends BaseAuthorizationService im
 
     @Override
     protected Role getRoleByName(String name) {
-	return Roles.getRoleByName(name);
+	     return Roles.getRoleByName(name);
     }
 
     @Override

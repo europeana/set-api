@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.util.List;
 
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -21,8 +22,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
@@ -82,6 +83,11 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // String collectionUrl = buildCollectionUrl(null, request.getRequestURL().toString(),
     // request.getQueryString());
     // assertTrue(constainsKey(result, collectionUrl));
+
+    assertNotNull(response.getHeader(HttpHeaders.ETAG));
+    // check last Modified
+    assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
+    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
 
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.PART_OF));
     assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.COLLECTION));
@@ -226,16 +232,18 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andReturn().getResponse();
 
-    //
     String secondPageContent = response.getContentAsString();
     assertNotNull(secondPageContent);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     // verify that ids are not escaped, use one item from second page
-    assertTrue(containsKeyOrValue(secondPageContent, "\\/11647\\/_Botany_AMD_87140"));
+    assertTrue(containsKeyOrValue(secondPageContent, "/11647/_Botany_AMD_87140"));
 
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
-    int pageSize = StringUtils.countMatches(secondPageContent, "\\/item\\/");
-    assertEquals(defaultPageSize, pageSize);
+    // while reorderItemDescriptions we add the localId as a result if item is not found in SR API
+    int countItems = StringUtils.countMatches(secondPageContent, "\\/item\\/") +
+            StringUtils.countMatches(secondPageContent, "{\"id\":\"/");
+
+    assertEquals(defaultPageSize, countItems);
   }
 
 

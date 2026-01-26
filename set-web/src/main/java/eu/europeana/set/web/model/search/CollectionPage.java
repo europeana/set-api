@@ -1,7 +1,7 @@
 package eu.europeana.set.web.model.search;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 

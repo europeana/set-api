@@ -1,15 +1,15 @@
 package eu.europeana.set.web.service;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.codehaus.jettison.json.JSONException;
+
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
-import eu.europeana.api.commons.definitions.search.ResultSet;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
+import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
 import eu.europeana.set.definitions.model.search.UserSetQuery;
@@ -20,12 +20,10 @@ import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.exception.request.ItemValidationException;
-import eu.europeana.set.web.exception.request.RequestBodyValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.model.search.CollectionPage;
-import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
 public interface UserSetService {
 
@@ -34,10 +32,9 @@ public interface UserSetService {
    *
    * @param userSet
    * @return UserSet object
-   * @throws HttpException
+   * @throws EuropeanaApiException
    */
-  UserSet createUserSet(UserSet userSet, Authentication authentication)
-      throws HttpException, IOException;
+  UserSet createUserSet(UserSet userSet, Authentication authentication) throws EuropeanaApiException;
   
 
   /**
@@ -50,11 +47,10 @@ public interface UserSetService {
    * @param pageSize
    * @param profile
    * @return updated set
-   * @throws HttpException
-   * @throws JSONException
+   * @throws EuropeanaApiException
    */
   UserSet fetchUserSetItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr,
-      int pageSize, SetPageProfile profile) throws HttpException, JSONException;
+      int pageSize, SetPageProfile profile) throws EuropeanaApiException;
 
   /**
    * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
@@ -62,10 +58,9 @@ public interface UserSetService {
    * @param persistentUserSet
    * @param webUserSet
    * @return
-   * @throws HttpException
+   * @throws EuropeanaApiException
    */
-  UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet)
-      throws HttpException;
+  UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws EuropeanaApiException;
 
   /**
    * This method returns UserSet object for given user set identifier.
@@ -73,7 +68,7 @@ public interface UserSetService {
    * @param
    * @return UserSet object
    */
-  UserSet getUserSetById(String userSetId) throws UserSetNotFoundException;
+  UserSet getUserSetById(String userSetId) throws ResourceNotFoundException;
 
   List<PersistentUserSet> getUserSetByCreatorId(String creatorId) throws UserSetNotFoundException;
 
@@ -82,9 +77,9 @@ public interface UserSetService {
    * 
    * @param userSetJsonLdStr
    * @return a UserSet object
-   * @throws HttpException
+   * @throws EuropeanaI18nApiException
    */
-  UserSet parseUserSetLd(String userSetJsonLdStr) throws HttpException;
+  UserSet parseUserSetLd(String userSetJsonLdStr) throws InvalidBodyException;
 
   /**
    * This method validates and processes the Set description for format and mandatory fields if
@@ -93,14 +88,9 @@ public interface UserSetService {
    * @param webUserSet
    * @param isAlreadyPublished indicates if the set is already in the published state (in the
    *        database)
-   * @throws RequestBodyValidationException
-   * @throws ParamValidationException
-   * @throws SetUniquenessValidationException
-   * @throws ItemValidationException
+   * @throws EuropeanaApiException
    */
-  void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished)
-      throws RequestBodyValidationException, ParamValidationException,
-      SetUniquenessValidationException, ItemValidationException;
+  void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws EuropeanaApiException;
 
   /**
    * This method deletes user set by user set Id value.
@@ -133,11 +123,9 @@ public interface UserSetService {
    * @param position The position in item list
    * @param existingUserSet
    * @return user set enriched by new item
-   * @throws ApplicationAuthorizationException
    * @throws ItemValidationException
    */
-  UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet)
-      throws ApplicationAuthenticationException, ItemValidationException;
+  UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet) throws ItemValidationException;
 
   UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
       UserSet existingUserSet) throws ItemValidationException;
@@ -159,13 +147,13 @@ public interface UserSetService {
 
   BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery,
       ResultSet<? extends UserSet> results, String requestUrl, String reqParams,
-      List<SetPageProfile> profiles, Authentication authentication) throws HttpException;
+      List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException;
 
   BaseUserSetResultPage<String> buildRecodsResultsPage(String setId, List<String> itemIds, int page,
-      int pageSize, SetPageProfile profile, HttpServletRequest request) throws HttpException;
+      int pageSize, SetPageProfile profile, HttpServletRequest request) throws EuropeanaApiException;
 
   CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr,
-      int pageSize, HttpServletRequest request) throws HttpException;
+      int pageSize, HttpServletRequest request) throws EuropeanaApiException;
 
   /**
    * This method validates input if the user is the owner/creator of the user set or is admin
@@ -174,10 +162,10 @@ public interface UserSetService {
    * @param authentication
    * @return
    * @return userSet object
-   * @throws HttpException
+   * @throws EuropeanaI18nApiException
    */
   UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication,
-      boolean includeEntitySetMsg) throws HttpException;
+      boolean includeEntitySetMsg) throws EuropeanaI18nApiException;
 
 
   /**
@@ -186,7 +174,6 @@ public interface UserSetService {
    * @param authentication
    *
    * @return true if userToken has admin role
-   * @throws HttpException
    */
   boolean isAdmin(Authentication authentication);
 
@@ -196,7 +183,6 @@ public interface UserSetService {
    * @param authentication
    *
    * @return true if userToken has editor role
-   * @throws HttpException
    */
   boolean hasEditorRole(Authentication authentication);
 
@@ -206,10 +192,10 @@ public interface UserSetService {
    * @param authentication
    *
    * @return true if the user has permission
-   * @throws HttpException
+   * @throws EuropeanaI18nApiException
    */
   void verifyPermissionToUpdate(UserSet userSet, Authentication authentication,
-      boolean includeEntitySetMsg) throws HttpException;
+      boolean includeEntitySetMsg) throws EuropeanaI18nApiException;
 
   /**
    * This method retrieves user id from authentication object
@@ -271,16 +257,15 @@ public interface UserSetService {
    * @param authentication
    * @param publish
    * @return
-   * @throws HttpException
+   * @throws EuropeanaApiException
    */
   UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication,
-      boolean publish) throws HttpException;
+      boolean publish) throws EuropeanaApiException;
 
   void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
 
   WebResource generateDepiction(UserSet userSet) throws SearchApiClientException;
 
-  SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet)
-      throws ParamValidationException, RequestBodyValidationException;
+  SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet) throws EuropeanaApiException;
 
 }
