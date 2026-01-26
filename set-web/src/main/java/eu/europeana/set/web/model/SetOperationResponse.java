@@ -37,6 +37,10 @@ public class SetOperationResponse {
 		this.status = status;
 	}
 
+	public String getAction() {
+		return action;
+	}
+
 	public boolean isSuccess() {
 		return this.success;
 	}

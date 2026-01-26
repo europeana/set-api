@@ -38,7 +38,7 @@ public class WebUserSetRequestUtils {
         }
         return value;
       } catch (NumberFormatException e) {
-        throw new InvalidParamException(Arrays.asList(paramName, "integer value", paramValue));
+        throw new InvalidParamException(Arrays.asList(paramName, "integer value", paramValue), e);
       }
     }
     return null;

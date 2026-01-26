@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
@@ -135,9 +136,9 @@ public class BaseRest extends BaseRestController {
       profiles = getProfileHelper().getSetPageProfiles(profile, preferHeader);
     } catch (UserSetProfileValidationException e) {
       if (StringUtils.isNotEmpty(preferHeader)) {
-        throw new InvalidParamException(Arrays.asList(PREFER + " header", " ", preferHeader));
+        throw new InvalidParamException(Arrays.asList(PREFER + " header", " ", preferHeader), e);
       } else {
-        throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE, " ", profile));
+        throw new InvalidParamException(Arrays.asList(CommonApiConstants.QUERY_PARAM_PROFILE, " ", profile), e);
       }
     }
     return profiles;
@@ -240,7 +241,7 @@ public class BaseRest extends BaseRestController {
   }
 
   protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
-      final SetResourceProfile profile, final HttpStatus responseStatus,
+      final SetResourceProfile profile, final HttpStatusCode responseStatus,
       Map<String, String> additionalHeaders, HttpServletRequest request) throws EuropeanaApiException {
     String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
 
@@ -320,7 +321,7 @@ public class BaseRest extends BaseRestController {
       throw new EuropeanaI18nApiException(e.getMessage(), "423_locked_maintenance",
               "Locked for maintenance",
               HttpStatus.LOCKED,
-              ErrorConfig.LOCKED_MAINTENANCE, Arrays.asList(e.getMessage()));
+              ErrorConfig.LOCKED_MAINTENANCE, Arrays.asList(e.getMessage()), e);
     }
     Authentication auth = null;
     // verify if auth is enabled
@@ -363,7 +364,7 @@ public class BaseRest extends BaseRestController {
     }
   }
 
-  protected ResponseEntity<String> buildResponse(String jsonStr, HttpStatus httpStatus) {
+  protected ResponseEntity<String> buildResponse(String jsonStr, HttpStatusCode httpStatus) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
     headers.add(VARY, ACCEPT);
     headers.add(ETAG, Integer.toString(hashCode()));

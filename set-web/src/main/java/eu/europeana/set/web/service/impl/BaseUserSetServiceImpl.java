@@ -782,10 +782,10 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throw new InvalidBodyException(Collections.singletonMap(
               UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
               Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY,
-                      "an error occured when calling " + webUserSet.getIsDefinedBy())));
+                      "an error occured when calling " + webUserSet.getIsDefinedBy())), e);
     } catch (IOException e) {
       throw new InvalidBodyException(Collections.singletonMap(
-              UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, Collections.emptyList()));
+              UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, Collections.emptyList()), e);
     }
   }
 

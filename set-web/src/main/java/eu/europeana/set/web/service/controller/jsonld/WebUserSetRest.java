@@ -352,7 +352,7 @@ public class WebUserSetRest extends BaseRest {
       try {
         issuedDate = DateUtils.parseToDate(issued);
       } catch (DateParsingException e) {
-        throw new InvalidParamException(Arrays.asList(REQUEST_PARAM_ISSUED, " ", issued));
+        throw new InvalidParamException(Arrays.asList(REQUEST_PARAM_ISSUED, " ", issued), e);
       }
     }
 
@@ -592,7 +592,7 @@ public class WebUserSetRest extends BaseRest {
           throw new InvalidParamException(Arrays.asList(PATH_PARAM_POSITION, "", position));
         }
       } catch (RuntimeException e) {
-        throw new InvalidParamException(Arrays.asList(PATH_PARAM_POSITION, "", position));
+        throw new InvalidParamException(Arrays.asList(PATH_PARAM_POSITION, "", position), e);
       }
     }
     return positionFinal;

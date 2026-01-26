@@ -1,8 +1,8 @@
 package eu.europeana.set.client.config;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
@@ -61,7 +61,7 @@ public class ClientConfiguration extends AuthenticationConfig {
     }
 
     void loadFromConfigFile(File externalConfigFile) {
-      try (FileInputStream input = new FileInputStream(externalConfigFile)) {
+      try (InputStream input = java.nio.file.Files.newInputStream(externalConfigFile.toPath())) {
         load(input);
       } catch (IOException e) {
         LOGGER.error("Error loading the properties config folder: {}", externalConfigFile.getName(), e);

@@ -124,7 +124,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       removeItemDuplicates(userSet);
       return userSet;
     } catch (UserSetAttributeInstantiationException | IOException e) {
-      throw new InvalidBodyException(Collections.singletonMap(UserSetI18nConstants.USERSET_CANT_PARSE_BODY, Arrays.asList(e.getMessage())));
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_CANT_PARSE_BODY, Arrays.asList(e.getMessage())), e);
     }
   }
 

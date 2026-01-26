@@ -61,8 +61,7 @@ public class UserSetAutoConfig{
     ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
     messageSource.setBasenames(ErrorConfig.COMMON_MESSAGE_SOURCE, "classpath:messages");
     messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
-    I18nServiceImpl service =  new I18nServiceImpl(messageSource);
-    return service;
+    return new I18nServiceImpl(messageSource);
   }
 
   @Bean(name = BeanNames.BEAN_WRITE_LOCK_AUTH_SERVICE)
