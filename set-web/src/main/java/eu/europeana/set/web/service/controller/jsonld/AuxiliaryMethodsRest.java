@@ -71,9 +71,8 @@ public class AuxiliaryMethodsRest extends BaseRest {
     /**
      * Method to generate metric for User Set (Galleries)
      *
-     * @param wsKey
      * @param request
-     * @return
+     * @return response containing usage statistics details
      * @throws UserSetServiceException 
      */
     @GetMapping(value = "/set/stats", produces = {CONTENT_TYPE_JSON_UTF8})
@@ -104,7 +103,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8")
                     .body(xml);
         } else {
-            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED, Collections.EMPTY_LIST);
+            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED, Collections.emptyList());
         }
     }
 
