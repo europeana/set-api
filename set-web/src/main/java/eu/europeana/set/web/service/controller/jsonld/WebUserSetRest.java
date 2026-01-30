@@ -2,6 +2,7 @@ package eu.europeana.set.web.service.controller.jsonld;
 
 import java.util.*;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
@@ -112,7 +113,7 @@ public class WebUserSetRest extends BaseRest {
       // serialization
       UserSet storedUserSet = getUserSetService().createUserSet(webUserSet, authentication);
 
-      doPostRetrieveProcessing(storedUserSet);
+      doPostRetrieveProcessing(storedUserSet, authentication);
 
       // add specific headers
       Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
@@ -192,13 +193,13 @@ public class WebUserSetRest extends BaseRest {
     // if the Set doesn’t exist, respond with HTTP 404
     // if the Set is disabled respond with HTTP 410
       UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
-      doPostRetrieveProcessing(userSet);
+      doPostRetrieveProcessing(userSet, authentication);
       return buildResponseEntity(userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
   }
 
-  private void doPostRetrieveProcessing(UserSet userSet) throws  EuropeanaApiException{
-    if(userSet.isOpenSet()) {
-      SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(userSet);
+  private void doPostRetrieveProcessing(UserSet userSet, Authentication authentication) throws  EuropeanaApiException{
+    if (userSet.isOpenSet()) {
+      SearchApiResponse apiResponse = getUserSetService().retrieveTotalForOpenSets(userSet, authentication);
       userSet.setTotal(apiResponse.getTotal());
     }
   }
@@ -233,7 +234,7 @@ public class WebUserSetRest extends BaseRest {
 
       if (mustFetchItems(userSet, profile)) {
         userSet = getUserSetService().fetchUserSetItems(userSet, sort, sortOrder, pageNr, pageSize,
-            profile);
+            profile, authentication);
       }
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
@@ -303,7 +304,7 @@ public class WebUserSetRest extends BaseRest {
       // that are present in the Set description only when a profile is indicated and
       // modified date is set in the service;
       UserSet updatedUserSet =
-          getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet);
+          getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet, authentication);
 
       return buildResponseEntity(updatedUserSet, SetResourceProfile.META, HttpStatus.OK, null,
           request);
@@ -540,7 +541,7 @@ public class WebUserSetRest extends BaseRest {
 
       // 7. (verify size for Galleries) & 11-13. (process items)
       UserSet updatedUserSet =
-          getUserSetService().insertMultipleItems(items, position, itemsPosition, existingUserSet);
+          getUserSetService().insertMultipleItems(items, position, itemsPosition, existingUserSet, authentication);
 
       String serializedUserSetJsonLdStr = serializeUserSet(SetPageProfile.META, updatedUserSet);
 
@@ -794,7 +795,7 @@ public class WebUserSetRest extends BaseRest {
       addContributorForEntitySet(existingUserSet, authentication);
 
       // 7. & 8. remove items, update pinned, update modified
-      UserSet updatedUserSet = getUserSetService().deleteMultipleItems(items, existingUserSet);
+      UserSet updatedUserSet = getUserSetService().deleteMultipleItems(items, existingUserSet, authentication);
 
       // serialize to JsonLd
       String serializedUserSetJsonLdStr = serializeUserSet(SetPageProfile.META, updatedUserSet);

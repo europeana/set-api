@@ -50,17 +50,19 @@ import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 
+import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
+
 public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   @Resource(name = UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
 
+  @Resource
+  UserSetConfiguration configuration;
+
   UserSetUtils userSetUtils = new UserSetUtils();
 
   SearchApiUtils userSetSearchApiUtils = SearchApiUtils.getInstance();
-
-  @Resource
-  UserSetConfiguration configuration;
 
   private SearchApiClient searchApiClient = new SearchApiClientImpl();
 
@@ -182,7 +184,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * europeana.UserSet.definitions.model.UserSet, boolean)
    */
   // @Override
-  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws EuropeanaApiException {
+  public UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet,
+                               Authentication authentication) throws EuropeanaApiException {
     // ###### FIRST Validate the input data, which is allowed to be partial ####/
     resetImmutableFields(webUserSet, persistentUserSet);
     // TODO: move verification to validateMethod when new specs are available
@@ -200,7 +203,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
 
     // validate input
-    validateWebUserSet(webUserSet, persistentUserSet.isPublished());
+    validateWebUserSet(webUserSet, persistentUserSet.isPublished(), authentication);
 
     // merge properties into the persitentUserSet
     mergeUserSetProperties(persistentUserSet, webUserSet);
@@ -565,7 +568,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
      }
   }
   
-  public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws EuropeanaApiException{
+  public void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished, Authentication authentication)
+          throws EuropeanaApiException{
 
     // validate title
     if (webUserSet.getTitle() == null && !webUserSet.isBookmarksFolder()) {
@@ -609,7 +613,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
-    validateAndSanitizeIsDefinedBy(webUserSet);
+    validateAndSanitizeIsDefinedBy(webUserSet, authentication);
     validateEntityBestItemsSet(webUserSet);
     validateItems(webUserSet.getItems());
   }
@@ -735,18 +739,19 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * upon creation to see if the request total items returns more then 0 and success is true
    * (meaning is valid).
    * The URL from isDefinedBy is sanitized to remove API Keys if included
+   * The URL is stored (without any api key information).
    * 
    * @param webUserSet the user set
    * @throws InvalidBodyException if invocation of isDefinedBy doesn't return results oR if invalid isDefinedBy url
    */
-  void validateAndSanitizeIsDefinedBy(UserSet webUserSet)
+  void validateAndSanitizeIsDefinedBy(UserSet webUserSet, Authentication authentication)
       throws InvalidBodyException {
-
     if (webUserSet.isOpenSet()) {
       //remove the apikey provided by the user from the isDefinedBy field
-      String isDefinedByWithoutApikey = removeParam(CommonApiConstants.PARAM_WSKEY, webUserSet.getIsDefinedBy());
-      webUserSet.setIsDefinedBy(isDefinedByWithoutApikey);
-      SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet);
+      String sanitisedIsDefinedBy = removeParam(CommonApiConstants.PARAM_WSKEY, webUserSet.getIsDefinedBy());
+      webUserSet.setIsDefinedBy(sanitisedIsDefinedBy);
+
+      SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet, authentication);
       if (apiResult.getTotal() <= 0) {
         throw new InvalidBodyException(Collections.singletonMap(
                 UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
@@ -756,28 +761,36 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     }
   }
 
+  /**
+   * retrieve total for open sets from SR api
+   * 1. Validation : it must check that the base URL is according to what
+   *                 is expected for that environment. This is to prevent the
+   *                 URL of a Search API acceptance environment (or preview) being used in Set production.
+   * 2. SR API call : check by calling the URL that it returns a 200 using the authorisation credentials that are supplied
+   *                  as part of the request (not any possible api key information that may have been present in the URL).
+   *                  This is to make sure that the URL is properly constructed according to the Search API specifications.
+   *
+   * @param webUserSet user set
+   * @param authentication authentication provided by user
+   * @return
+   * @throws InvalidBodyException
+   */
   @Override
-  public SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet) throws InvalidBodyException {
-    String searchUrl = getSearchApiUtils().getBaseSearchUrl(getConfiguration().getSearchApiUrl());
-    StringBuilder queryUrl =
-        new StringBuilder(getSearchApiUtils().getBaseSearchUrl(webUserSet.getIsDefinedBy()));
-    if (!searchUrl.equals(queryUrl.toString())) {
-      throw new InvalidBodyException(Collections.singletonMap(
-              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
-              Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY,
-                      " the access to api endpoint is not allowed: " + queryUrl)));
-    }
-
-    String apiKey = getConfiguration().getSearchApiKey();
+  public SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet, Authentication authentication) throws InvalidBodyException {
+   String queryUrl = baseUrlValidation(webUserSet.getIsDefinedBy());
     try {
-      queryUrl.append('?').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
-      // the items are not required for validation, hence pageSize =0
-      // form the minimal post body
+      // the items are not required for validation, Only totalResults is fetched
+      // hence pageSize =0 and form the minimal post body
       SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(webUserSet,
           getConfiguration().getItemDataEndpoint(), null, null, 0, 0, null);
       String jsonBody = serializeSearchApiRequest(searchApiRequest);
 
-      return getSearchApiClient().searchItems(queryUrl.toString(), jsonBody, apiKey, false);
+      return getSearchApiClient().searchItems(
+              queryUrl,
+              jsonBody,
+              getAuthHandler(authentication),
+              false);
+
     } catch (SearchApiClientException e) {
       throw new InvalidBodyException(Collections.singletonMap(
               UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
@@ -787,6 +800,27 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throw new InvalidBodyException(Collections.singletonMap(
               UserSetI18nConstants.SEARCH_API_REQUEST_INVALID, Collections.emptyList()), e);
     }
+  }
+
+  /**
+   * Validation : it must check that the base URL is according to what
+   * is expected for that environment. This is to prevent the URL of a
+   * Search API acceptance environment (or preview) being used in Set production.
+   *
+   * @param isDefinedBy isDefinedBy url of the user set
+   */
+  private String baseUrlValidation(String isDefinedBy) throws InvalidBodyException {
+    String searchUrl = getConfiguration().getSearchApiUrl();
+
+    StringBuilder queryUrl = new StringBuilder(getSearchApiUtils().getBaseSearchUrl(isDefinedBy));
+
+    if (!searchUrl.equals(queryUrl.toString())) {
+      throw new InvalidBodyException(Collections.singletonMap(
+              UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE,
+              Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY,
+                      " the access to api endpoint is not allowed: " + queryUrl)));
+    }
+    return queryUrl.toString();
   }
 
 
@@ -938,7 +972,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public WebResource generateDepiction(UserSet userSet) throws SearchApiClientException {
+  public WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException {
     // TODO Auto-generated method stub
     return null;
   }

@@ -209,7 +209,7 @@ public class SearchUserSetRest extends BaseRest {
       Integer pageItems = WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
       
       BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecodsResultsPage(identifier,
-          filtered, pageNr, pageItems, profile, request);
+          filtered, pageNr, pageItems, profile, request, authentication);
       
       UserSetLdSerializer serializer = new UserSetLdSerializer();
       String jsonLd = serializer.serialize(resultPage);

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import  jakarta.annotation.Resource;
 
@@ -141,7 +142,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
       if (hasNoItems(results)) {
         break; // stop if no results found anymore
       }
-      generateDepictions(results.getResults(), report);
+      generateDepictions(results.getResults(), report, adminAuth);
 
       LOG.info("Completed Depiction Generation for result pages: {}", page);
 
@@ -162,8 +163,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
   }
 
   private void generateDepictions(List<? extends UserSet> results,
-      DepictionGenerationReport report) {
-
+      DepictionGenerationReport report, Authentication authentication) {
     for (UserSet userSet : results) {
       if (userSet.isOpenSet() || userSet.isBookmarksFolder()) {
         // bookmarks is redundant, but we keep it for future
@@ -191,7 +191,7 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
         LOG.debug("Set has no depiction and more items id:{}", userSet.getIdentifier());
       }
 
-      final WebResource isShownBy = generateDepiction(userSet);
+      final WebResource isShownBy = generateDepiction(userSet, authentication);
       // do not update set if the depiction cannot be generated
       final boolean shouldSkip = (isShownBy == null && !userSet.isCollection())
           || (isShownBy != null && !isShownBy.hasThumbnail());
@@ -250,10 +250,9 @@ public class GalleryDepictionMigration extends BaseUserSetTestUtils {
     return isShownBy != null && isShownBy.hasThumbnail();
   }
 
-  private WebResource generateDepiction(UserSet userSet) {
-
+  private WebResource generateDepiction(UserSet userSet, Authentication authentication) {
     try {
-      return getUserSetService().generateDepiction(userSet);
+      return getUserSetService().generateDepiction(userSet, authentication);
     } catch (SearchApiClientException e) {
       // work with best user effort
       LOG.info("Cannot generate depiction for set: {}, {}", userSet.getIdentifier(),

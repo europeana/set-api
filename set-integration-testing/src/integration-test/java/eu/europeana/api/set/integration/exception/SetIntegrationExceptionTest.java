@@ -1,10 +1,11 @@
 package eu.europeana.api.set.integration.exception;
 
 import java.io.IOException;
+
+import eu.europeana.api.commons_sb3.http.HttpConnection;
 import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import eu.europeana.set.common.http.HttpConnection;
 
 @Disabled("Enable back when real intergration tests are implemented")
 public class SetIntegrationExceptionTest {

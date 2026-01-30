@@ -226,6 +226,7 @@ public abstract class BaseUserSetTestUtils {
     String requestJson = getJsonStringInput(testFile);
     UserSet set = getUserSetService().parseUserSetLd(requestJson);
     Authentication authentication = getAuthentication(token);
+
    
     //for the time being we still allow items in the store method but not in the create rest method 
     //

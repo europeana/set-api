@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
@@ -496,7 +497,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item4Existing=existingUserSet.getItems().get(2);
     newItems.add(item4Existing);
     newItems.add(item3);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, -1, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, -1,
+            existingUserSet,  UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
      
     //check the new items
     assertEquals(0, existingUserSet.getItems().indexOf(item2FullUrl));
@@ -515,7 +517,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.add(item5);
     String item6Existing=existingUserSet.getItems().get(4);
     newItems.add(item6Existing);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet,
+            UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
     
     assertEquals(4, existingUserSet.getPinned());
     //check the new items
@@ -533,7 +536,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.clear();
     String item7="/07/123_unPinnedItem";
     newItems.add(item7);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet,
+            UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
     //check the new items
     String item7FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item7);
     assertEquals(6, existingUserSet.getItems().indexOf(item7FullUrl));
@@ -543,7 +547,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.clear();
     String item8="/08/123_unPinnedItem";
     newItems.add(item8);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet,
+            UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
     //check the new items
     String item8FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item8);
     assertEquals(7, existingUserSet.getItems().indexOf(item8FullUrl));
@@ -714,7 +719,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item2="/02/123_pinnedItem";
     newItems.add(item1);
     newItems.add(item2);    
-    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, 0, userSet);
+    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, 0, userSet,
+            UserSetAuthorizationUtils.createAuthentication(editorUserToken));
 
     assertEquals(2, userSet.getPinned());
     String identifier = userSet.getIdentifier();

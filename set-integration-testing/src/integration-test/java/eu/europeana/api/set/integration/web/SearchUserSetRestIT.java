@@ -762,7 +762,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
   private String callSearchItemsInSet(String setIdentifier, String[] qf, String page,
       String pageSize, String profile, String regularUserToken)
-      throws UnsupportedEncodingException, Exception {
+      throws Exception {
 
     MockHttpServletRequestBuilder searchRequest =
         buildSearchItemsInSetRequest(setIdentifier, qf, page, pageSize, profile, regularUserToken);
