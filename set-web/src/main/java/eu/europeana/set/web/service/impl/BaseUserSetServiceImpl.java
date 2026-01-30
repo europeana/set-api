@@ -972,10 +972,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  public abstract WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException;
 
   protected int calculatePosition(int position, List<String> items) {
     int positionFinal = items.size();

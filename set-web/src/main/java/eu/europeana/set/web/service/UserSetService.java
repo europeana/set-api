@@ -56,10 +56,11 @@ public interface UserSetService {
   /**
    * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
    * 
-   * @param persistentUserSet
-   * @param webUserSet
-   * @return
-   * @throws EuropeanaApiException
+   * @param persistentUserSet stored UserSet
+   * @param webUserSet update request web user set
+   * @param authentication authentication sent by user
+   * @return updated user set
+   * @throws EuropeanaApiException EuropeanaApiException
    */
   UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, Authentication authentication) throws EuropeanaApiException;
 
@@ -86,12 +87,13 @@ public interface UserSetService {
    * This method validates and processes the Set description for format and mandatory fields if
    * false responds with HTTP 400
    * 
-   * @param webUserSet
+   * @param webUserSet web user set
    * @param isAlreadyPublished indicates if the set is already in the published state (in the
    *        database)
+   * @param authentication authentication sent by user
    * @throws EuropeanaApiException
    */
-  void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished, Authentication auth) throws EuropeanaApiException;
+  void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished, Authentication authentication) throws EuropeanaApiException;
 
   /**
    * This method deletes user set by user set Id value.
@@ -158,10 +160,9 @@ public interface UserSetService {
 
   /**
    * This method validates input if the user is the owner/creator of the user set or is admin
-   * 
-   * @param userSet
-   * @param authentication
-   * @return
+   *
+   * @param userSet user set
+   * @param authentication authentication sent by user
    * @return userSet object
    * @throws EuropeanaI18nApiException
    */

@@ -19,12 +19,13 @@ import eu.europeana.set.web.model.vocabulary.Roles;
 
 public class UserSetAuthorizationUtils {
 
-  public static final Logger LOG = LogManager.getLogger(UserSetAuthorizationUtils.class);
+  private static final Logger LOG = LogManager.getLogger(UserSetAuthorizationUtils.class);
 
   /**
    * Only used for IT
    */
-  public static ThreadLocal<AuthenticationHandler> fallBackAuth = new ThreadLocal();
+  private static final ThreadLocal<AuthenticationHandler> fallBackAuth =
+          new ThreadLocal<AuthenticationHandler>();
 
   /**
    * Authentication for api requests.
@@ -85,11 +86,17 @@ public class UserSetAuthorizationUtils {
     return null;
   }
 
+  /**
+   * Returns the ApikeyBasedAuthentication from the authentication passed in the request
+   * For IT (testing), return the fallBackAuth generated in IT stubs.
+   * @param authentication authentication passed in the requests
+   * @return AuthenticationHandler
+   */
   public static AuthenticationHandler getAuthHandler(Authentication authentication) {
     /**
      * Only used for IT
      */
-    if (fallBackAuth != null) {
+    if (fallBackAuth.get() != null) {
       LOG.info("Using fallback Auth.... !!");
       return fallBackAuth.get();
     }

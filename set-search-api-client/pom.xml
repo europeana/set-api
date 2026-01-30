@@ -34,19 +34,13 @@
 			<artifactId>commons-sb3-clientutils</artifactId>
 			<version>${version.commons.api.sb3}</version>
 		</dependency>
-			
+
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
-	
-<!--		<dependency>-->
-<!--			<groupId>eu.europeana.set</groupId>-->
-<!--			<artifactId>set-common</artifactId>-->
-<!--			<version>0.14-SNAPSHOT</version>-->
-<!--		</dependency>-->
-		
+
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>

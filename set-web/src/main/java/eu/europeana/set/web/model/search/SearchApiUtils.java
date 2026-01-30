@@ -34,9 +34,9 @@ public class SearchApiUtils {
      * eg : https://api.europeana.eu/record/v2/search.json
      * 
      * @param userSet the user set for which the 
-     * @param searchUrl
-     * @param profile
-     * @return
+     * @param searchUrl serach api url
+     * @param profile profile requested
+     * @return sr api url with params
      */
     public String buildSearchApiUrl(UserSet userSet, String searchUrl, String profile) {
         StringBuilder url = new StringBuilder();
@@ -56,11 +56,11 @@ public class SearchApiUtils {
      * Will create the Search Api post request url
      * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
      * 
-     * @param baseSearchApiUrl
-     * @param baseItemUrl
-     * @param itemId
-     * @param profile
-     * @return
+     * @param baseSearchApiUrl sr api url
+     * @param baseItemUrl base item url
+     * @param itemId item id
+     * @param profile profile requested
+     * @return sr api url for item
      */
     public String buildSearchApiUrlForItem(String baseSearchApiUrl, String baseItemUrl, String itemId, String profile) {
         StringBuilder url = new StringBuilder();
@@ -87,12 +87,12 @@ public class SearchApiUtils {
      *     Items are taken in the order of the items present in the user set
      *    ex:{"query":"europeana_id:(\"123\" OR \"xyz\" OR \"abc\")","qf":null,"start":1,"rows":3,"sort":null}
      *
-     * @param userSet
-     * @param sort
-     * @param sortOrder
-     * @param pageNr
-     * @param pageSize
-     * @return
+     * @param userSet user set
+     * @param sort sort fields
+     * @param sortOrder sorting order
+     * @param pageNr page number
+     * @param pageSize page size
+     * @return Sr api request
      */
     public SearchApiRequest buildSearchApiPostBody(UserSet userSet, String itemDataEndpoint, String sort,
                                                    String sortOrder, int pageNr, int pageSize, String profile) {

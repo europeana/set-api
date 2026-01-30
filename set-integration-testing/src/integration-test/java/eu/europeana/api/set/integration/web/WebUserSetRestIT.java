@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
-import eu.europeana.api.set.integration.BaseUserSetTestUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -40,7 +38,6 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
-import org.springframework.security.core.Authentication;
 
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 
@@ -95,9 +92,6 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
  @Test
  public void createGalleryWithDepiction() throws Exception {
    String requestJson = getJsonStringInput(USER_SET_GALLERY_DEPICTION);
-
-//   Authentication authentication = getUserSetAuthorizationUtils().createAuthentication(regularUserToken);
-
 
    String result = mockMvc
        .perform(

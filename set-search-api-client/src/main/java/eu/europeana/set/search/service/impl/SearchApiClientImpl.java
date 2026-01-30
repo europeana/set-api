@@ -32,9 +32,9 @@ import eu.europeana.set.search.service.SearchApiResponse;
  */
 public class SearchApiClientImpl implements SearchApiClient {
 
-  Logger logger = LogManager.getLogger(SearchApiClientImpl.class);
+  private static final Logger logger = LogManager.getLogger(SearchApiClientImpl.class);
 
-  private HttpConnection httpConnection = new HttpConnection(true);
+  private final HttpConnection httpConnection = new HttpConnection(true);
 
   /**
    * Fetch items from Search api and return the SearchApiResponse with the items list
@@ -70,7 +70,7 @@ public class SearchApiClientImpl implements SearchApiClient {
    * @param postBody
    * @param auth
    * @return
-   * @throws SearchApiClientException
+   * @throws SearchApiClientException sr api exceptions
    */
   @Override
   public JSONObject searchItems(String uri, String postBody, AuthenticationHandler auth) throws SearchApiClientException {
@@ -196,6 +196,7 @@ public class SearchApiClientImpl implements SearchApiClient {
    * Fires the search request and returns the body
    * @param url the search api URL
    * @param postBody for search request
+   * @param auth authentication handler for SR api
    * @return response body
    * @throws SearchApiClientException
    */

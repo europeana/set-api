@@ -20,8 +20,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -146,7 +144,7 @@ public abstract class BaseUserSetTestUtils {
   protected static boolean USE_FALLBACK_AUTH = true;
 
   @BeforeAll
-  protected void initApplication() throws AuthorizationExtractionException {
+  protected void initApplication() {
     if (mockMvc == null) {
       this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }

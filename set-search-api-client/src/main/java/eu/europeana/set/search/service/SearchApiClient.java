@@ -14,36 +14,35 @@ import eu.europeana.set.search.exception.SearchApiClientException;
 public interface SearchApiClient {
 
     /**
-     * @param uri
+     * Searches items from SR api
+     * @param uri url
      * @param searchPostBody Search post request json body
-     * @param auth
+     * @param auth authentication handler for SR api
      * @param descriptions if true include item descriptions, otherwise only ids
      * @return
      * @throws IOException
      * @throws JSONException
      * @throws SearchApiClientException
      */
-    public SearchApiResponse searchItems(String uri, String searchPostBody, AuthenticationHandler auth, boolean descriptions)
+    SearchApiResponse searchItems(String uri, String searchPostBody, AuthenticationHandler auth, boolean descriptions)
     		throws SearchApiClientException;
 
     /**
      * This method queries Europeana API by URI retrieves item descriptions
-     * @param uri
+     * @param uri url
      * @param searchPostBody Search post request json body
-     * @param auth
+     * @param auth authentication handler for SR api
      * @return
-     * @throws IOException
-     * @throws JSONException
      * @throws SearchApiClientException 
      */
-    public SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, AuthenticationHandler auth)
+    SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, AuthenticationHandler auth)
     		throws SearchApiClientException;
 
     /**
      * Returns JsonObject of SR api response
-     * @param uri
-     * @param postBody
-     * @param auth
+     * @param uri url of sr api
+     * @param postBody body for the request
+     * @param auth authentication handler for SR api
      * @return
      * @throws SearchApiClientException
      */
@@ -51,10 +50,10 @@ public interface SearchApiClient {
 
     /**
      * fill depictions
-     * @param searchApiUri
-     * @param itemId
-     * @param depiction
-     * @param auth
+     * @param searchApiUri sr api url
+     * @param itemId item ids
+     * @param depiction depiction
+     * @param auth authentication handler for SR api
      * @throws SearchApiClientException
      */
     void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction, AuthenticationHandler auth)
@@ -62,12 +61,12 @@ public interface SearchApiClient {
 
     /**
      *
-     * @param searchApiFullUrl
-     * @param searchPostBody
-     * @param itemIds
-     * @param itemDataEndpoint
-     * @param depiction
-     * @param auth
+     * @param searchApiFullUrl sr api url
+     * @param searchPostBody post body
+     * @param itemIds item ids
+     * @param itemDataEndpoint item data endpoint
+     * @param depiction  depiction
+     * @param auth authentication handler for SR api
      * @throws SearchApiClientException
      */
     void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds,
