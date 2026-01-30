@@ -130,8 +130,10 @@ public abstract class BaseUserSetTestUtils {
   protected static List<PersistentUserSet> createdUserSets = new ArrayList<>();
   /**
    * can be used to enable AUTH for local environment
+   * EA-4382 : enabled now we need the valid authentication to access
+   *           the SR API requests.
    */
-  protected static boolean DISABLE_AUTH = true;
+  protected static boolean DISABLE_AUTH = false;
 
   @BeforeAll
   protected void initApplication() {
