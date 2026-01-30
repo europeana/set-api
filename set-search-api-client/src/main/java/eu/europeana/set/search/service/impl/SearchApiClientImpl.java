@@ -32,7 +32,7 @@ import eu.europeana.set.search.service.SearchApiResponse;
  */
 public class SearchApiClientImpl implements SearchApiClient {
 
-  private static final Logger logger = LogManager.getLogger(SearchApiClientImpl.class);
+  private static final Logger LOGGER = LogManager.getLogger(SearchApiClientImpl.class);
 
   private final HttpConnection httpConnection = new HttpConnection(true);
 
@@ -43,7 +43,7 @@ public class SearchApiClientImpl implements SearchApiClient {
    * @param auth authentication to access Search api
    * @param descriptions if true include item descriptions, otherwise only ids
    * @return
-   * @throws SearchApiClientException
+   * @throws SearchApiClientException sr api exception
    */
   @Override
   public SearchApiResponse searchItems(String uri, String searchPostBody, AuthenticationHandler auth,
@@ -94,7 +94,7 @@ public class SearchApiClientImpl implements SearchApiClient {
       return jo.has(keySuccess) && jo.getBoolean(keySuccess);
     } catch (JSONException e) {
       // actually it shouldn't happen
-      logger.trace("Invalid Json Object", e);
+      LOGGER.trace("Invalid Json Object", e);
       return false;
     }
   }
@@ -163,7 +163,7 @@ public class SearchApiClientImpl implements SearchApiClient {
    * @param valueObject
    * @return list of values
    * @throws JSONException
-   * @throws SearchApiClientException
+   * @throws SearchApiClientException sr api exception
    */
   protected List<String> extractItemsFromSearchResponse(JSONArray valueObject, String fieldName)
       throws SearchApiClientException {
@@ -189,16 +189,13 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   }
 
-
-
-
   /**
    * Fires the search request and returns the body
    * @param url the search api URL
    * @param postBody for search request
    * @param auth authentication handler for SR api
    * @return response body
-   * @throws SearchApiClientException
+   * @throws SearchApiClientException sr api exception
    */
   public String searchItemDescriptionsAsString(String url, String postBody, AuthenticationHandler auth)
       throws SearchApiClientException {

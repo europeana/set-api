@@ -91,7 +91,7 @@ public interface UserSetService {
    * @param isAlreadyPublished indicates if the set is already in the published state (in the
    *        database)
    * @param authentication authentication sent by user
-   * @throws EuropeanaApiException
+   * @throws EuropeanaApiException europeana exception
    */
   void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished, Authentication authentication) throws EuropeanaApiException;
 
@@ -135,6 +135,14 @@ public interface UserSetService {
 
   UserSet deleteItem(String item, UserSet existingUserSet);
 
+  /**
+   * Deletes multiple items
+   * @param items items to delete
+   * @param existingUserSet user set existing
+   * @param authentication auth sent in the request
+   * @return updated user set
+   * @throws ItemValidationException item validation exception
+   */
   UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet, Authentication authentication) throws ItemValidationException;
 
   /**
@@ -268,6 +276,13 @@ public interface UserSetService {
 
   WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException;
 
+  /**
+   * retrieve total for open sets from SR api
+   * @param webUserSet user set
+   * @param authentication authentication provided by user
+   * @return sr api response
+   * @throws InvalidBodyException
+   */
   SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet, Authentication authentication) throws EuropeanaApiException;
 
 }

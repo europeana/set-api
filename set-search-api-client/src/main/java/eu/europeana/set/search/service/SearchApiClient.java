@@ -19,10 +19,8 @@ public interface SearchApiClient {
      * @param searchPostBody Search post request json body
      * @param auth authentication handler for SR api
      * @param descriptions if true include item descriptions, otherwise only ids
-     * @return
-     * @throws IOException
-     * @throws JSONException
-     * @throws SearchApiClientException
+     * @return sr api response with items
+     * @throws SearchApiClientException SearchApi exceptions
      */
     SearchApiResponse searchItems(String uri, String searchPostBody, AuthenticationHandler auth, boolean descriptions)
     		throws SearchApiClientException;
@@ -32,8 +30,8 @@ public interface SearchApiClient {
      * @param uri url
      * @param searchPostBody Search post request json body
      * @param auth authentication handler for SR api
-     * @return
-     * @throws SearchApiClientException 
+     * @return sr api response with items
+     * @throws SearchApiClientException  SearchApi exceptions
      */
     SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, AuthenticationHandler auth)
     		throws SearchApiClientException;
@@ -43,8 +41,8 @@ public interface SearchApiClient {
      * @param uri url of sr api
      * @param postBody body for the request
      * @param auth authentication handler for SR api
-     * @return
-     * @throws SearchApiClientException
+     * @return json Object of sr api response
+     * @throws SearchApiClientException sr api exception
      */
     JSONObject searchItems(String uri, String postBody, AuthenticationHandler auth) throws SearchApiClientException;
 
@@ -54,7 +52,7 @@ public interface SearchApiClient {
      * @param itemId item ids
      * @param depiction depiction
      * @param auth authentication handler for SR api
-     * @throws SearchApiClientException
+     * @throws SearchApiClientException sr api exception
      */
     void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction, AuthenticationHandler auth)
             throws SearchApiClientException;
@@ -67,7 +65,7 @@ public interface SearchApiClient {
      * @param itemDataEndpoint item data endpoint
      * @param depiction  depiction
      * @param auth authentication handler for SR api
-     * @throws SearchApiClientException
+     * @throws SearchApiClientException sr api exception
      */
     void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds,
         String itemDataEndpoint, BaseWebResource depiction, AuthenticationHandler auth) throws SearchApiClientException;

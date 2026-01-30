@@ -89,6 +89,8 @@ public class SearchApiUtils {
      *
      * @param userSet user set
      * @param sort sort fields
+     * @param itemDataEndpoint item data endpoitn
+     * @param profile  profile requested
      * @param sortOrder sorting order
      * @param pageNr page number
      * @param pageSize page size

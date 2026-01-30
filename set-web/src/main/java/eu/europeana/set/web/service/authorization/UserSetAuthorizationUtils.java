@@ -24,8 +24,7 @@ public class UserSetAuthorizationUtils {
   /**
    * Only used for IT
    */
-  private static final ThreadLocal<AuthenticationHandler> fallBackAuth =
-          new ThreadLocal<AuthenticationHandler>();
+  private static final ThreadLocal<AuthenticationHandler> fallBackAuth = new ThreadLocal<>();
 
   /**
    * Authentication for api requests.
@@ -78,7 +77,10 @@ public class UserSetAuthorizationUtils {
    * @return apikey String
    */
   public static String extractApiKeyFromAuthorization(Authentication authentication) {
-    Object credentials = (authentication != null ? authentication.getCredentials() : null);
+    Object credentials = null;
+    if (authentication != null) {
+      credentials = authentication.getCredentials();
+    }
     if (credentials instanceof EuropeanaApiCredentials europeanaCredentials) {
       return europeanaCredentials.getApiKey();
     }

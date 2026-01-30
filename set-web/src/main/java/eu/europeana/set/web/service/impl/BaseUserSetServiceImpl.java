@@ -971,9 +971,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return userSet.getCreator().getHttpUrl().equals(userId);
   }
 
-  @Override
-  public abstract WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException;
-
   protected int calculatePosition(int position, List<String> items) {
     int positionFinal = items.size();
     if (position >= 0 && position < items.size()) {
