@@ -8,14 +8,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
+import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -109,6 +115,8 @@ public abstract class BaseUserSetTestUtils {
   @Qualifier(UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
 
+ public UserSetAuthorizationUtils userSetAuthorizationUtils;
+
   @Autowired
   private UserSetConfiguration configuration;
   // format: user
@@ -128,21 +136,41 @@ public abstract class BaseUserSetTestUtils {
   protected static String publisherUserToken = USER_PUBLISHER;
   protected static String adminUserToken = OAuthUtils.TYPE_BEARER + " " + USER_ADMIN;
   protected static List<PersistentUserSet> createdUserSets = new ArrayList<>();
+
+  protected static AuthenticationHandler searchApiAuth;
   /**
    * can be used to enable AUTH for local environment
-   * EA-4382 : enabled now we need the valid authentication to access
-   *           the SR API requests.
    */
-  protected static boolean DISABLE_AUTH = false;
+  protected static boolean DISABLE_AUTH = true;
+
+  protected static boolean USE_FALLBACK_AUTH = true;
 
   @BeforeAll
-  protected void initApplication() {
+  protected void initApplication() throws AuthorizationExtractionException {
     if (mockMvc == null) {
       this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
     
     disableOauth();
     changeProperiesForTests();
+
+      /**
+       * Set fallback authentication for SR API requests
+       */
+     if (USE_FALLBACK_AUTH) {
+         userSetAuthorizationUtils = new UserSetAuthorizationUtils();
+         AuthenticationConfig config = new AuthenticationConfig(
+                 ((UserSetConfigurationImpl) configuration).getKeycloakTokenEndpoint(),
+                 ((UserSetConfigurationImpl) configuration).getKeycloakGrantParams());
+
+         searchApiAuth = AuthenticationBuilder.newAuthentication(config);
+         userSetAuthorizationUtils.setFallBackAuth(searchApiAuth);
+     }
+  }
+
+  @AfterAll
+  public void remove() {
+      userSetAuthorizationUtils.removeFallBackAuth();
   }
 
   private void disableOauth() {
@@ -198,6 +226,10 @@ public abstract class BaseUserSetTestUtils {
 
   public UserSetConfiguration getConfiguration() {
     return configuration;
+  }
+
+  public UserSetAuthorizationUtils getUserSetAuthorizationUtils() {
+    return userSetAuthorizationUtils;
   }
 
   public static String retrieveOauthToken(String user) throws SetIntegrationException {

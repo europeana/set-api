@@ -32,8 +32,11 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
   public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY =
       "europeana.apikey.jwttoken.siganturekey";
-  public static final String KEY_APIKEY_SERVICE_URL = "europeana.apikey.serviceurl";  
-  
+  public static final String KEY_APIKEY_SERVICE_URL = "europeana.apikey.serviceurl";
+
+  public static final String KEYCLOAK_TOKEN_ENDPOINT = "keycloak.token.endpoint";
+  public static final String KEYCLOAK_GRANT_PARAMS = "keycloak.token.grant.params";
+
   public static final String KEY_AUTH_DISABLED = "set.auth.disabled";
   public static final String KEY_SEARCH_URL = "europeana.search.url";
   public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
@@ -153,6 +156,16 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     return getSetProperties().containsKey(KEY_APIKEY_SERVICE_URL) 
         && StringUtils.isNotBlank(getSetProperties().getProperty(KEY_APIKEY_SERVICE_URL));
   }
+
+
+  public String getKeycloakTokenEndpoint() {
+    return getSetProperties().getProperty(KEYCLOAK_TOKEN_ENDPOINT);
+  }
+
+  public String getKeycloakGrantParams() {
+    return getSetProperties().getProperty(KEYCLOAK_GRANT_PARAMS);
+  }
+
 
   @Override
   public String getEuropeanaPublisherId() {

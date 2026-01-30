@@ -22,6 +22,26 @@ public class UserSetAuthorizationUtils {
   public static final Logger LOG = LogManager.getLogger(UserSetAuthorizationUtils.class);
 
   /**
+   * Only used for IT
+   */
+  public static ThreadLocal<AuthenticationHandler> fallBackAuth = new ThreadLocal();
+
+  /**
+   * Authentication for api requests.
+   * @param authHandler fall back authentication
+   */
+  public void setFallBackAuth(AuthenticationHandler authHandler) {
+      fallBackAuth.set(authHandler);
+  }
+
+  /**
+   * Close / purge from memory
+   */
+  public void removeFallBackAuth() {
+    fallBackAuth.remove();
+  }
+
+  /**
    * Create Authentication for the given user
    * @param userId user id
    * @param userName name of the user
@@ -29,11 +49,11 @@ public class UserSetAuthorizationUtils {
    * @return Authentication
    */
   public static Authentication createAuthentication(String userId, String userName, Role role) {
-    return createAuthertication(userId, userName, role.getName());
+    return createAuthentication(userId, userName, role.getName());
   }
 
-  private static Authentication createAuthertication(String userId, String userName,
-      final String roleName) {
+  private static Authentication createAuthentication(String userId, String userName,
+                                                     final String roleName) {
     GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(roleName);
     return new EuropeanaAuthenticationToken(List.of(grantedAuthority), "usersets", userId,
         new EuropeanaApiCredentials(userName, "unknown-client"));
@@ -66,6 +86,13 @@ public class UserSetAuthorizationUtils {
   }
 
   public static AuthenticationHandler getAuthHandler(Authentication authentication) {
+    /**
+     * Only used for IT
+     */
+    if (fallBackAuth != null) {
+      LOG.info("Using fallback Auth.... !!");
+      return fallBackAuth.get();
+    }
     return new ApikeyBasedAuthentication(extractApiKeyFromAuthorization(authentication));
   }
 }
