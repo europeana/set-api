@@ -13,6 +13,7 @@ import java.util.Collections;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -159,7 +160,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
                 .andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
 
         assertNotNull(result);
-        assertTrue(containsKeyOrValue(result,"Invalid property value. isDefinedBy :  the access to api endpoint is not allowed"));
+        assertTrue(StringUtils.contains(result,
+                "Invalid property value. isDefinedBy :  the access to api endpoint is not allowed"));
   }
 
 
