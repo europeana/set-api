@@ -54,7 +54,7 @@ public class SearchApiUtils {
     
     /**
      * Will create the Search Api post request url
-     * eg : https://api.europeana.eu/record/v2/search.json?wskey=api2demo
+     * eg : https://api.europeana.eu/record/v2/search.json
      * 
      * @param baseSearchApiUrl sr api url
      * @param baseItemUrl base item url
