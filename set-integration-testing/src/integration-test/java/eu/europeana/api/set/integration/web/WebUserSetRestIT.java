@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Collections;
+import java.util.Date;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
@@ -275,8 +276,9 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), CONTENT_TYPE_JSONLD_UTF8);
     assertNotNull(response.getHeader(HttpHeaders.ETAG));
     // check last Modified
-    assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+      assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
+      assertEquals(new Date(response.getHeader(HttpHeaders.LAST_MODIFIED)),
+              new Date(DateUtils.getRFC_1123_FormatDate(userSet.getModified())));
 
       String result = response.getContentAsString();
     assertNotNull(result);

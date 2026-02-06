@@ -19,15 +19,10 @@ import eu.europeana.api.commons_sb3.nosql.service.ApiWriteLockService;
 import eu.europeana.api2.utils.JsonWebUtils;
 import eu.europeana.set.web.model.SetOperationResponse;
 import eu.europeana.set.web.service.controller.BaseRest;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.Collections;
 
 @RestController
-@Hidden
-@Tag(name = "Set Admin Rest")
 public class AdminRest extends BaseRest {
   
   Logger adminLogger = LogManager.getLogger(getClass());
@@ -41,7 +36,6 @@ public class AdminRest extends BaseRest {
   
   @PostMapping(value = "/set/admin/lock", produces = { HttpHeaders.CONTENT_TYPE_JSON_UTF8,
       HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
-  @Operation(description = "Lock write operations. Authorization required.", summary = "Lock Write Operations")
   public ResponseEntity<String> lockWriteOperations(
       HttpServletRequest request) throws ApiWriteLockException, EuropeanaI18nApiException {
 
@@ -75,7 +69,6 @@ public class AdminRest extends BaseRest {
 
   @DeleteMapping(value = "/set/admin/lock", produces = {
       HttpHeaders.CONTENT_TYPE_JSON_UTF8, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8 })
-  @Operation(summary = "Unlock write operations")
   public ResponseEntity<String> unlockWriteOperations(
       HttpServletRequest request) throws EuropeanaI18nApiException, ApiWriteLockException {
     

@@ -48,8 +48,6 @@ import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.model.vocabulary.SetOperations;
 import eu.europeana.set.web.service.controller.BaseRest;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.*;
@@ -59,7 +57,6 @@ import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.*;
  */
 
 @RestController
-@Tag(name = "Web User Set API", description = "Perform CRUD Operations for User Sets")
 public class WebUserSetRest extends BaseRest {
 
   private static final String INVALID_RECORD_ID_MESSAGE =
@@ -71,7 +68,6 @@ public class WebUserSetRest extends BaseRest {
   
   @PostMapping(value = "/set/",
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(summary = "Create user set", description = SwaggerConstants.SAMPLES_JSONLD)
   public ResponseEntity<String> createUserSet(@RequestBody String userSet,
       HttpServletRequest request) throws EuropeanaApiException {
     // validate user - check user credentials (all registered users can create)
@@ -131,7 +127,6 @@ public class WebUserSetRest extends BaseRest {
 
   @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.SEARCH_HELP_NOTE, summary = "Retrieve a user set")
   public ResponseEntity<String> getUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
@@ -249,8 +244,6 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.UPDATE_SAMPLES_JSONLD,
-      summary = "Update an existing user set")
   public ResponseEntity<String> updateUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @RequestBody String userSet, HttpServletRequest request) throws EuropeanaApiException {
@@ -338,8 +331,6 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/publish"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE,
-      summary = "Publish an existing user set")
   public ResponseEntity<String> publishUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = REQUEST_PARAM_ISSUED, required = false) String issued,
@@ -361,8 +352,6 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/unpublish"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.PUBLISH_SET_NOTE,
-      summary = "Unpublish an existing user set")
   public ResponseEntity<String> unpublishUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       HttpServletRequest request) throws EuropeanaApiException {
@@ -386,8 +375,6 @@ public class WebUserSetRest extends BaseRest {
   @Deprecated
   @PutMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.INSERT_ITEM_NOTE,
-      summary = "Insert item to an existing user set")
   public ResponseEntity<String> insertItemIntoUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @PathVariable(value = PATH_PARAM_DATASET_ID) @Pattern(
@@ -406,8 +393,6 @@ public class WebUserSetRest extends BaseRest {
 
   @PutMapping(value = {"/set/{identifier}/items"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.INSERT_MULTIPLE_ITEM_NOTE,
-      summary = "Insert multiple items to an existing user set")
   public ResponseEntity<String> insertMultipleItemsIntoUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = PATH_PARAM_POSITION, required = false) String position,
@@ -600,8 +585,6 @@ public class WebUserSetRest extends BaseRest {
 
   @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.CHECK_ITEM_NOTE,
-      summary = "Check if item is member of the Set")
   public ResponseEntity<String> isItemInUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
@@ -682,8 +665,6 @@ public class WebUserSetRest extends BaseRest {
   @Deprecated(since = "EA-3869", forRemoval = true)
   @DeleteMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.DELETE_ITEM_NOTE,
-      summary = "Delete a item from the set")
   public ResponseEntity<String> deleteItemFromUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @PathVariable(value = PATH_PARAM_DATASET_ID) @Pattern(
@@ -761,8 +742,6 @@ public class WebUserSetRest extends BaseRest {
 
   @DeleteMapping(value = {"/set/{identifier}/items"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.DELETE_MULTIPLE_ITEMS_NOTE,
-      summary = "Delete multiple items from the set")
   public ResponseEntity<String> deleteMultipleItemsFromUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @RequestBody List<String> items, HttpServletRequest request) throws EuropeanaApiException {
@@ -818,7 +797,6 @@ public class WebUserSetRest extends BaseRest {
 
 
   @DeleteMapping(value = {"/set/{identifier}"})
-  @Operation(summary = "Delete Set", description = "Delete an existing user set")
   public ResponseEntity<String> deleteUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       HttpServletRequest request) throws EuropeanaApiException {
@@ -888,7 +866,6 @@ public class WebUserSetRest extends BaseRest {
    * @throws EuropeanaApiException
    */
   @DeleteMapping(value = {"/set/"})
-  @Operation(summary = "Delete Sets", description = "Delete sets associated with user")
   public ResponseEntity<String> deleteUserAssociatedSet(
       @RequestParam(value = PATH_PARAM_CREATOR_ID,
           required = false) String creator,

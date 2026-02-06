@@ -83,12 +83,7 @@
 		<version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
-		
-		<!-- sonar properties -->
-		<!-- project key cannot be sent both as property and in command line (check github action) -->
-		<!--
-		<sonar.projectKey>europeana_set-api</sonar.projectKey>
-		-->
+
 		<sonar.organization>europeana</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.exclusions>**/*.gpg,**/*.template</sonar.exclusions>

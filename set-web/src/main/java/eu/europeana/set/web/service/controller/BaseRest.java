@@ -18,13 +18,14 @@ import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.api.commons_sb3.nosql.service.WriteLockAuthorizationService;
 import eu.europeana.api.commons_sb3.oauth2.BaseRestController;
 import eu.europeana.set.web.config.BeanNames;
+import eu.europeana.set.web.config.BuildInfo;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.boot.info.BuildProperties;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +73,7 @@ public class BaseRest extends BaseRestController {
   UsageStatsService usageStatsService;
 
   @Resource
-  protected BuildProperties buildInfo;
+  protected BuildInfo buildInfo;
 
   @Resource
   private RequestPathMethodService requestMethodService;
@@ -237,7 +238,7 @@ public class BaseRest extends BaseRestController {
   }
 
   public String getApiVersion() {
-    return buildInfo.getVersion();
+    return buildInfo.getAppVersion();
   }
 
   protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
@@ -295,7 +296,6 @@ public class BaseRest extends BaseRestController {
     headers.add(ETAG, etag);
     // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
     headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(modified));
-
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }
 

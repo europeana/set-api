@@ -34,7 +34,6 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
-import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.elevation.Doc;
 import eu.europeana.set.web.model.elevation.Elevation;
@@ -42,13 +41,10 @@ import eu.europeana.set.web.model.elevation.Query;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 
 @RestController
-@Tag(name = "Auxiliary Methods")
 public class AuxiliaryMethodsRest extends BaseRest {
 
     /**
@@ -60,7 +56,6 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @throws EuropeanaApiException
      */
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
-    @Operation(description = "Generate Elevation file for best bets", summary = "Generate elevation file")
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wsKey,
             HttpServletRequest request) throws EuropeanaApiException {
@@ -71,13 +66,11 @@ public class AuxiliaryMethodsRest extends BaseRest {
     /**
      * Method to generate metric for User Set (Galleries)
      *
-     * @param wsKey
      * @param request
      * @return
      * @throws UserSetServiceException 
      */
     @GetMapping(value = "/set/stats", produces = {CONTENT_TYPE_JSON_UTF8})
-    @Operation(description = SwaggerConstants.SET_USAGE_STATS, summary = "Generate usage statistics")
     public ResponseEntity<String> generateUsageStats(
             HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
         return getUsageStats(request);

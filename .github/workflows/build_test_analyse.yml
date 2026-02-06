@@ -33,7 +33,10 @@ jobs:
           #provide the secret to decrypt script
           SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
       - name: Build, run tests and analyse
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=europeana_set-api
+        # projectKey should match the <groupId>:<artifactId> of the project (see pom.xml).
+        # As jenkins artifactory job will push the project based on <groupId>:<artifactId>
+        # and if GitHub actions will push a new project in sonar cloud if they don't match
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.set:set-api
         env:
           # Needed to get some information about the pull request, if any
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
