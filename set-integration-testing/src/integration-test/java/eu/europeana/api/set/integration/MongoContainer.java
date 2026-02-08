@@ -3,8 +3,13 @@ package eu.europeana.api.set.integration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.mongodb.MongoContainerWrapper;
 
-/** This class creates a Mongo container using the dockerfile in the docker-scripts directory. */
+/** This class creates a Mongo container using the dockerfile in the docker-scripts directory. 
+ * @deprecated use {@link MongoContainerStarter} and {@link MongoContainerWrapper} instead
+ * SG: also delete docker-mongo folder when removing this class 
+ * */
+@Deprecated
 public class MongoContainer extends GenericContainer<MongoContainer> {
 
   private final String annotationDb;

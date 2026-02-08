@@ -62,7 +62,7 @@ import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ComponentScan(basePackageClasses = UserSetApp.class)
 @ContextConfiguration(locations = {"classpath:set-web-context.xml"})
-public abstract class BaseUserSetTestUtils {
+public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
 
   protected static final String BASE_URL = "/set/";
   public static final String USER_SET_REGULAR = "/content/userset_regular.json";
@@ -139,9 +139,9 @@ public abstract class BaseUserSetTestUtils {
   /**
    * can be used to enable AUTH for local environment
    */
-  protected static boolean DISABLE_AUTH = true;
+  protected static boolean DISABLE_AUTH = false;
 
-  protected static boolean USE_FALLBACK_AUTH = true;
+  protected static boolean USE_FALLBACK_AUTH = false;
 
   @BeforeAll
   protected void initApplication() {
@@ -168,7 +168,10 @@ public abstract class BaseUserSetTestUtils {
 
   @AfterAll
   public void remove() {
+    
+    if(USE_FALLBACK_AUTH && userSetAuthorizationUtils != null) {
       userSetAuthorizationUtils.removeFallBackAuth();
+    }
   }
 
   private void disableOauth() {
