@@ -32,6 +32,11 @@ jobs:
         env:
           #provide the secret to decrypt script
           SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
+      - name: Decrypt integration testing config properties
+        run: ./.github/workflows/decrypt_integration_testing_config.sh
+        env:
+          #provide the secret to decrypt script
+          SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
       - name: Build, run tests and analyse
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=europeana_set-api
         env:

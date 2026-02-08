@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>set-mongo</artifactId>
@@ -29,7 +30,7 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
-			<version>0.14-SNAPSHOT</version>
+			<version>0.14-SNAPSHOT</version>		
 		</dependency>
 
 		<dependency>
@@ -37,6 +38,12 @@
 			<version>${version.commons.api.sb3}</version>
 			<artifactId>commons-sb3-nosql</artifactId>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -82,6 +89,10 @@
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

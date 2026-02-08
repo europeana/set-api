@@ -48,7 +48,7 @@
 		<!-- Spring Boot 3 is based on Spring Framework 6.0 and Jakarta EE 9.-->
 		<spring-framework.version>6.0.11</spring-framework.version>
 		<swagger.version>3.0.0</swagger.version>
- 		<version.springBoot>3.1.2</version.springBoot>
+ 		<version.springBoot>3.3.5</version.springBoot>
 		<springdoc.version>2.3.0</springdoc.version>
 
 		<!--To have custom date time format for the build info-->
@@ -76,19 +76,16 @@
 		</java.17.addopens>
 
 		<!-- test dependencies -->
+		<!--
 		<version.testcontainers>1.19.7</version.testcontainers>
+		-->
+		<version.testcontainers>2.0.3</version.testcontainers>
 		
 		<!-- maven plugins -->
 		<version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
 		<version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
-		
-		<!-- sonar properties -->
-		<!-- project key cannot be sent both as property and in command line (check github action) -->
-		<!--
-		<sonar.projectKey>europeana_set-api</sonar.projectKey>
-		-->
 		<sonar.organization>europeana</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.exclusions>**/*.gpg,**/*.template</sonar.exclusions>
