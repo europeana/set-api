@@ -21,6 +21,7 @@
 	
 	<bean id="set_db_lockDao" parent="db_nosql_set_dao" class="eu.europeana.api.commons_sb3.nosql.dao.impl.ApiWriteLockDaoImpl">
 		<constructor-arg type="java.lang.Class" value="eu.europeana.api.commons_sb3.nosql.entity.ApiWriteLockImpl" />
+		<constructor-arg ref="set_db_morphia_datastore_set" name="datastore"/>
 	</bean>
 			
 </beans>

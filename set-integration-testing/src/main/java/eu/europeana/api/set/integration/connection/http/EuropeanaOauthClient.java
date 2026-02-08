@@ -49,6 +49,9 @@ public class EuropeanaOauthClient {
 	    case PUBLISHER_USER:
 	    oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsPublisher();
 	    break;
+	    case ADMIN_USER:
+	    oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsAdmin();
+	    break;
 	    }
 	    
 	    HttpConnection connection = new HttpConnection();

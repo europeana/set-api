@@ -12,22 +12,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.Authentication;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
+import eu.europeana.set.web.config.BeanNames;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 /**
@@ -46,7 +57,11 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 @SpringBootTest
 public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
-
+  
+  @Autowired
+  @Qualifier(BeanNames.BEAN_AUTHORIZATION_SERVICE)
+  UserSetAuthorizationService authorizationService;
+  
   @BeforeAll
   static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
@@ -497,8 +512,11 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item4Existing=existingUserSet.getItems().get(2);
     newItems.add(item4Existing);
     newItems.add(item3);
+    
+    //createAuthentication for updating set
+    Authentication editor2Authentication = createAuthentication(editor2UserToken, Operations.UPDATE);
     existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, -1,
-            existingUserSet,  UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
+            existingUserSet,  editor2Authentication);
      
     //check the new items
     assertEquals(0, existingUserSet.getItems().indexOf(item2FullUrl));
@@ -518,7 +536,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item6Existing=existingUserSet.getItems().get(4);
     newItems.add(item6Existing);
     existingUserSet = getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet,
-            UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
+        editor2Authentication);
     
     assertEquals(4, existingUserSet.getPinned());
     //check the new items
@@ -537,7 +555,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item7="/07/123_unPinnedItem";
     newItems.add(item7);
     existingUserSet = getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet,
-            UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
+        editor2Authentication);
     //check the new items
     String item7FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item7);
     assertEquals(6, existingUserSet.getItems().indexOf(item7FullUrl));
@@ -548,7 +566,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item8="/08/123_unPinnedItem";
     newItems.add(item8);
     existingUserSet = getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet,
-            UserSetAuthorizationUtils.createAuthentication(editor2UserToken));
+        editor2Authentication);
     //check the new items
     String item8FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item8);
     assertEquals(7, existingUserSet.getItems().indexOf(item8FullUrl));
@@ -718,9 +736,12 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item1="/01/123_pinnedItem";
     String item2="/02/123_pinnedItem";
     newItems.add(item1);
-    newItems.add(item2);    
+    newItems.add(item2);   
+    
+    //createAuthentication for updating set
+    Authentication authentication = createAuthentication(editorUserToken, Operations.UPDATE);
     getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, 0, userSet,
-            UserSetAuthorizationUtils.createAuthentication(editorUserToken));
+            authentication);
 
     assertEquals(2, userSet.getPinned());
     String identifier = userSet.getIdentifier();
@@ -746,6 +767,19 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     // getUserSetService().deleteUserSet(identifier);
 
+  }
+
+  Authentication createAuthentication(String userToken, String operation)
+      throws AuthorizationExtractionException, ApplicationAuthenticationException {
+    Authentication authentication;
+    if(DISABLE_AUTH) {
+      authentication = UserSetAuthorizationUtils.createAuthentication(userToken);
+    }else {
+      MockHttpServletRequest req = new MockHttpServletRequest();
+      req.addHeader(HttpHeaders.AUTHORIZATION, userToken);
+      authentication = authorizationService.authorizeWriteAccess(req, operation);
+    }
+    return authentication;
   }
 
   private void checkItemCountAndPosition(UserSet existingUserSet, String newItem,

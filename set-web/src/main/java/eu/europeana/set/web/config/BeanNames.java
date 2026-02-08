@@ -8,6 +8,7 @@ public abstract class BeanNames {
   public static final String BEAN_SET_PERSITENCE_SERVICE = "set_db_setService";
   public static final String BEAN_CLIENT_DETAILS_SERVICE ="commons_oauth2_europeanaClientDetailsService";
   public static final String BEAN_WRITE_LOCK_AUTH_SERVICE = "writeLockAuthorizationService";
+  public static final String BEAN_AUTHORIZATION_SERVICE = "set_authorizationService";
 
   private BeanNames() {}
 

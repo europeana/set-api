@@ -1,11 +1,11 @@
 package eu.europeana.api.set.integration.exception;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
-
-import eu.europeana.api.commons_sb3.http.HttpConnection;
-import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import eu.europeana.api.commons_sb3.http.HttpConnection;
 
 @Disabled("Enable back when real intergration tests are implemented")
 public class SetIntegrationExceptionTest {
@@ -14,12 +14,12 @@ public class SetIntegrationExceptionTest {
 
     @Test
     void whenExceptionThrown_thenAssertionSucceeds() {
-        Exception exception = Assert.assertThrows( SetIntegrationException.class, () -> {
+        Exception exception = assertThrows(SetIntegrationException.class, () -> {
            getToken();
         });
 
         String actualMessage = exception.getMessage();
-        Assert.assertTrue(actualMessage.contains(expectedMessage));
+        assertTrue(actualMessage.contains(expectedMessage));
     }
 
 

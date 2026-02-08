@@ -810,7 +810,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_GALLERY)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
-            .header("Authorization", "Bearer " + regularUserToken))
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
         .getContentAsString();
 

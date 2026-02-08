@@ -1,5 +1,6 @@
 package eu.europeana.api.set.integration.config;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -9,7 +10,7 @@ import eu.europeana.api.set.integration.exception.SetIntegrationException;
 
 public class SetIntegrationConfiguration {
 
-    protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "/set-integration-testing.user.properties";
+    protected static final String SET_INTEGRATION_TESTING_PROPERTIES_FILE = "set-integration-testing.user.properties";
     protected static final String PROP_OAUTH_SERVICE_URI = "oauth.service.uri";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_REGULAR = "oauth.token.request.params.regular";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_EDITOR = "oauth.token.request.params.editor";
@@ -18,8 +19,10 @@ public class SetIntegrationConfiguration {
     protected static final String PROP_OAUTH_REQUEST_PARAMS_PUBLISHER = "oauth.token.request.params.publisher";
     protected static final String PROP_OAUTH_REQUEST_PARAMS_ADMIN = "oauth.token.request.params.admin";
     protected static final Logger LOG = LogManager.getLogger(SetIntegrationConfiguration.class);
+    public static final String CONFIG_FOLDER = "/opt/app/config/";
+    
 
-    private static Properties properties = null;
+    private static Properties properties =  new Properties();;
     private static SetIntegrationConfiguration singleton;
 
     /**
@@ -47,20 +50,45 @@ public class SetIntegrationConfiguration {
      * @throws SetIntegrationException if property file is not loaded
      */
     public synchronized void loadProperties() throws SetIntegrationException {
-	try {
-	    properties = new Properties();
-	    InputStream resourceAsStream = getClass().getResourceAsStream(SET_INTEGRATION_TESTING_PROPERTIES_FILE);
-	    if (resourceAsStream == null) {
-	      LOG.warn("No properties file found for initialization of integration tests!");
-	      return;
-	    }
-	    
-	    getProperties().load(resourceAsStream);
-	} catch (IOException e) {
-	    throw new SetIntegrationException("Cannot read configuration file: " + SET_INTEGRATION_TESTING_PROPERTIES_FILE, e);
-	}
-
+        loadProperties(SET_INTEGRATION_TESTING_PROPERTIES_FILE);
+        if(getProperties().isEmpty()) {
+          throw new SetIntegrationException("Cannot load properties from configuration file: " + SET_INTEGRATION_TESTING_PROPERTIES_FILE);
+        }
     }
+    
+    
+    void loadProperties(String propertiesFile) {
+      File externalConfigFile = new File(CONFIG_FOLDER, propertiesFile);
+      // first check if the
+      if (externalConfigFile.exists()) {
+        loadFromConfigFile(externalConfigFile);
+      } else {
+        loadFromClasspathFile(propertiesFile);
+      }
+    }
+
+    void loadFromClasspathFile(String propertiesFile) {
+      try {
+        // try loading from classpath
+        //ensure /
+        String classpathPropsFile = propertiesFile.startsWith("/")? propertiesFile : "/" + propertiesFile; 
+        getProperties().load(getClass().getResourceAsStream(classpathPropsFile));
+
+      } catch (IOException e) {
+        LOG.error("Error loading the properties file from classpath: {}", propertiesFile, e);
+      }
+    }
+
+    void loadFromConfigFile(File externalConfigFile) {
+      try (InputStream input = java.nio.file.Files.newInputStream(externalConfigFile.toPath())) {
+        getProperties().load(input);
+      } catch (IOException e) {
+        LOG.error("Error loading the properties config folder: {}", externalConfigFile.getName(), e);
+      }
+    }
+    
+    
+    
 
     /**
      * provides access to the configuration properties. It is not recommended to use
