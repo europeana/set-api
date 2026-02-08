@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
@@ -86,8 +89,14 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
 
     assertNotNull(response.getHeader(HttpHeaders.ETAG));
     // check last Modified
+    // there is discrepancy here in MockedServletResponse/ servlet response
+    // tends to get Last-modified header with 0 appended in the dates < 10.
+    // so response.getHeader(HttpHeaders.LAST_MODIFIED) returns
+    // Sat, 03 Sep 2022 05:50:53 GMT instead of Sat, 3 Sep 2022 05:50:53 GMT
     assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+    assertEquals(new Date(response.getHeader(HttpHeaders.LAST_MODIFIED)),
+            new Date(DateUtils.getRFC_1123_FormatDate(userSet.getModified())));
+
 
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.PART_OF));
     assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.COLLECTION));
