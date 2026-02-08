@@ -10,8 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-
-import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,9 +18,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -54,11 +55,8 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     initPublisherUserToken();
   }
 
-
-
-  private static final String USERNAME_REGULAR = "username1";
-  private static final String USERNAME_PUBLISHER = "publisher-username";
-
+//  private static final String USERNAME_REGULAR = "username1";
+//  private static final String USERNAME_PUBLISHER = "publisher-username";
 
 
   @AfterEach
@@ -84,27 +82,27 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
   void publishPreviouslyPublishedUserSet() throws Exception {
 
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
-    // publish published user set
-    publishUserSet(userSet, null, USERNAME_REGULAR);
-    //Date is set in seconds, ensure 1 second before method execution
-    final int oneSecondInMilis = 1000;
-    Date beforeCallDate = new Date(System.currentTimeMillis()  - oneSecondInMilis);
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
     
-    MockHttpServletResponse response = mockMvc
-        .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
-        .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
-        .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andReturn().getResponse();
+    // publish published user set
+    publishUserSet(userSet, null, getUserName(regularUserAuthetication));
+    // Date is set in seconds, ensure 1 second before method execution
+    final int oneSecondInMilis = 1000;
+    Date beforeCallDate = new Date(System.currentTimeMillis() - oneSecondInMilis);
+
+    MockHttpServletResponse response =
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/publish")
+            .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     String result = response.getContentAsString();
-    
+
     Date issued = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.ISSUED));
     Date modified = DateUtils.parseToDate(getStringValue(result, WebUserSetModelFields.MODIFIED));
     assertEquals(issued, modified);
-    //issued should be after the call date
-    assertTrue(issued.compareTo(beforeCallDate)>=0);
+    // issued should be after the call date
+    assertTrue(issued.compareTo(beforeCallDate) >= 0);
   }
 
   // unpublish user set tests
@@ -128,33 +126,35 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    
+
     result = response.getContentAsString();
     assertNotNull(result);
-    
-    final String id = UserSetUtils
-        .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier());
-    
+
+    final String id = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(),
+        userSet.getIdentifier());
+
     assertTrue(containsKeyOrValue(result, id));
     assertTrue(containsKeyOrValue(result, "public"));
     assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     // unpublished set, the ownership is changed back to current user
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-    //When 
-    //assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
-    
+    // When
+    // assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
+
   }
-  
+
   // unpublish user set tests
   @Test
   void unpublishUserSet_NoOwnerTransfer() throws Exception {
     // create set by publisher
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
+    
     // publish set by publisher
     // expected change of ownership to editorial team
     String issued = DateUtils.convertDateToStr(new Date());
-    MockHttpServletResponse response = publishUserSet(userSet, issued, USERNAME_REGULAR);
+    MockHttpServletResponse response = publishUserSet(userSet, issued, getUserName(regularUserAuthetication));
 
     String result;
     // unpublish set
@@ -165,18 +165,18 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    
+
     result = response.getContentAsString();
-    //assert user name not changed
-    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
-    
+    // assert user name not changed
+    assertTrue(containsKeyOrValue(result, getUserName(regularUserAuthetication)));
+
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "public"));
     assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     // unpublished set, the ownership is changed back to current user
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-    
+
   }
 
   @Test
@@ -198,9 +198,12 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
   void updatePublishedUserSet_Success() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+    
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
+    Authentication publisherUserAuthetication = createAuthentication(publisherUserToken, Operations.UPDATE);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, null, USERNAME_REGULAR);
+    publishUserSet(userSet, null, getUserName(regularUserAuthetication));
 
     // update userset
     String updatedRequestJson = getJsonStringInput(USER_SET_REGULAR_UPDATED);
@@ -212,19 +215,19 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    
+
     String result = response.getContentAsString();
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
     // published by owner, the ownership is changed back to publisher
-    assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));
-    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    assertFalse(containsKeyOrValue(result, getUserName(publisherUserAuthetication)));
+    assertTrue(containsKeyOrValue(result, getUserName(regularUserAuthetication)));
     // check the updated value of the title
     assertTrue(containsKeyOrValue(result, "Sportswear-updated"));
-    
-    //check items, update is not modifying the items list
+
+    // check items, update is not modifying the items list
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
     assertEquals(userSet.getItems().size(), existingUserSet.getItems().size());
   }
@@ -233,9 +236,12 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
   void updatePublishedUserSetWithVisibility_Success() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
+    
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
+    Authentication publisherUserAuthetication = createAuthentication(publisherUserToken, Operations.UPDATE);
+    
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, null, USERNAME_REGULAR);
+    publishUserSet(userSet, null, getUserName(regularUserAuthetication));
 
 
     // update userset
@@ -248,19 +254,19 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    
+
     String result = response.getContentAsString();
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
     // published by owner, the ownership is changed back to publisher
-    assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));
-    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    assertFalse(containsKeyOrValue(result, getUserName(publisherUserAuthetication)));
+    assertTrue(containsKeyOrValue(result, getUserName(regularUserAuthetication)));
     // check the updated value of the title
     assertTrue(containsKeyOrValue(result, "Sportswear-updated"));
-    
-    //check items has the same size, update is not modifying the item list
+
+    // check items has the same size, update is not modifying the item list
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
     assertEquals(userSet.getItems().size(), existingUserSet.getItems().size());
   }
@@ -270,19 +276,20 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
+    Authentication publisherUserAuthetication = createAuthentication(publisherUserToken, Operations.UPDATE);
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, null, USERNAME_REGULAR);
+    publishUserSet(userSet, null, getUserName(regularUserAuthetication));
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(), "01",
-            "123_test")
-                .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+            "123_test").header(HttpHeaders.AUTHORIZATION, publisherUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    
+
     String result = response.getContentAsString();
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
@@ -290,8 +297,13 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     assertTrue(containsKeyOrValue(result, "published"));
     // published by owner, the ownership is changed back to publisher
     // assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-    assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));
-    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    
+    //assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));  
+    assertFalse(containsKeyOrValue(result, getUserName(publisherUserAuthetication)));
+    
+    //assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    assertTrue(containsKeyOrValue(result, getUserName(regularUserAuthetication)));
+    
     // check size of the items
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
     assertEquals(8, existingUserSet.getItems().size());
@@ -302,27 +314,29 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
+    Authentication publisherUserAuthetication = createAuthentication(publisherUserToken, Operations.UPDATE);
+    
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, null, USERNAME_REGULAR);
+    publishUserSet(userSet, null, getUserName(regularUserAuthetication));
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
         .perform(delete(BASE_URL + "{identifier}/{datasetId}/{localId}", userSet.getIdentifier(),
-            "2048128", "618580")
-                .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
+            "2048128", "618580").header(HttpHeaders.AUTHORIZATION, publisherUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    
+
     String result = response.getContentAsString();
     assertNotNull(result);
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
     // published by owner, the ownership is changed back to publisher
-    assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));
-    assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
+    assertFalse(containsKeyOrValue(result, getUserName(publisherUserAuthetication)));
+    assertTrue(containsKeyOrValue(result, getUserName(regularUserAuthetication)));
     // check size of the items
     UserSet existingUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
     assertEquals(6, existingUserSet.getItems().size());
@@ -333,9 +347,11 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
   void checkItemInSetFromPublishedSet() throws Exception {
     // create userset
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+    
+    Authentication regularUserAuthetication = createAuthentication(regularUserToken, Operations.UPDATE);
 
     // publish userset by other user, the ownership stays with the creator
-    publishUserSet(userSet, null, USERNAME_REGULAR);
+    publishUserSet(userSet, null, getUserName(regularUserAuthetication));
 
     // add item to userset as publisher
     MockHttpServletResponse response = mockMvc
@@ -357,9 +373,9 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
 
     String result = response.getContentAsString();
     assertNotNull(result);
-    
-    final String userSetId = UserSetUtils
-        .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier());
+
+    final String userSetId = UserSetUtils.buildUserSetId(getConfiguration().getSetDataEndpoint(),
+        userSet.getIdentifier());
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, userSetId));
     assertTrue(containsKeyOrValue(result, "published"));
@@ -373,7 +389,7 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     return response;
   }
 
-    
+
   @Test
   void publishNonExistingUserSet() throws Exception {
     mockMvc
@@ -382,7 +398,7 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
   }
-  
+
   @Test
   void publishWrongSetType() throws Exception {
     // wrong user set type (bookmark folder)
@@ -394,17 +410,17 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
 
   }
-  
+
   @Test
   void publishWithoutPermission() throws Exception {
     // wrong user set identifier
     WebUserSetImpl userSet1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-    //publish without publish permission 
+    // publish without publish permission
     mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
-   
+
 }

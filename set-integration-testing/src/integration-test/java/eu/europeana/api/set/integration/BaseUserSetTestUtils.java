@@ -11,6 +11,7 @@ import java.util.List;
 import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
 import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.HttpHeaders;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -43,10 +46,12 @@ import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.mongo.service.PersistentUserSetService;
+import eu.europeana.set.web.config.BeanNames;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebUserSetImpl;
 import eu.europeana.set.web.model.search.FacetValue;
 import eu.europeana.set.web.service.UserSetService;
+import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
 import eu.europeana.set.web.service.impl.UserSetServiceImpl;
 
@@ -112,9 +117,13 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
   @Autowired
   @Qualifier(UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
-
- public UserSetAuthorizationUtils userSetAuthorizationUtils;
-
+  
+  @Autowired
+  @Qualifier(BeanNames.BEAN_AUTHORIZATION_SERVICE)
+  UserSetAuthorizationService authorizationService;
+  
+  public UserSetAuthorizationUtils userSetAuthorizationUtils;
+ 
   @Autowired
   private UserSetConfiguration configuration;
   // format: user
@@ -174,6 +183,19 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
     }
   }
 
+  protected Authentication createAuthentication(String userToken, String operation)
+      throws AuthorizationExtractionException, ApplicationAuthenticationException {
+    Authentication authentication;
+    if(DISABLE_AUTH) {
+      authentication = UserSetAuthorizationUtils.createAuthentication(userToken);
+    }else {
+      MockHttpServletRequest req = new MockHttpServletRequest();
+      req.addHeader(HttpHeaders.AUTHORIZATION, userToken);
+      authentication = authorizationService.authorizeWriteAccess(req, operation);
+    }
+    return authentication;
+  }
+  
   private void disableOauth() {
     if (DISABLE_AUTH) {
       ((UserSetConfigurationImpl) configuration).getSetProperties()

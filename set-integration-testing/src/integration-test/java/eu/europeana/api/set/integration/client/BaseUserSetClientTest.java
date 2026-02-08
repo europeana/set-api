@@ -21,7 +21,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.mongodb.MongoContainerWrapper;
 import eu.europeana.api.commons_sb3.auth.service.GrantConstants;
 import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.api.set.integration.MongoContainerStarter;

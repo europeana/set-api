@@ -10,35 +10,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
 import java.util.List;
-
-import eu.europeana.api.set.integration.exception.SetIntegrationException;
-import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
-import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
-import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
-import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
-import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
-import eu.europeana.set.web.config.BeanNames;
 import eu.europeana.set.web.model.WebUserSetImpl;
 
 /**
@@ -57,11 +46,6 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 @SpringBootTest
 public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
-  
-  @Autowired
-  @Qualifier(BeanNames.BEAN_AUTHORIZATION_SERVICE)
-  UserSetAuthorizationService authorizationService;
-  
   @BeforeAll
   static void initTokens() throws SetIntegrationException {
     if(DISABLE_AUTH) {
@@ -767,19 +751,6 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     // getUserSetService().deleteUserSet(identifier);
 
-  }
-
-  Authentication createAuthentication(String userToken, String operation)
-      throws AuthorizationExtractionException, ApplicationAuthenticationException {
-    Authentication authentication;
-    if(DISABLE_AUTH) {
-      authentication = UserSetAuthorizationUtils.createAuthentication(userToken);
-    }else {
-      MockHttpServletRequest req = new MockHttpServletRequest();
-      req.addHeader(HttpHeaders.AUTHORIZATION, userToken);
-      authentication = authorizationService.authorizeWriteAccess(req, operation);
-    }
-    return authentication;
   }
 
   private void checkItemCountAndPosition(UserSet existingUserSet, String newItem,
