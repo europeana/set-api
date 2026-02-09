@@ -2,25 +2,30 @@ package eu.europeana.set.web.service.impl;
 
 import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED;
 import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_NUMBER_OF_ITEMS;
+import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
 import java.io.IOException;
-import java.util.*;
-
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
-import  jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons_sb3.oauth2.model.ApiCredentials;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import eu.europeana.api.commons_sb3.oauth2.model.ApiCredentials;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
@@ -41,7 +46,6 @@ import eu.europeana.set.search.service.impl.SearchApiClientImpl;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.ItemValidationException;
 import eu.europeana.set.web.exception.request.RequestBodyValidationException;
-import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.WebUser;
 import eu.europeana.set.web.model.search.CollectionOverview;
 import eu.europeana.set.web.model.search.SearchApiUtils;
@@ -49,8 +53,7 @@ import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
-
-import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
+import  jakarta.annotation.Resource;
 
 public abstract class BaseUserSetServiceImpl implements UserSetService {
 

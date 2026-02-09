@@ -1,22 +1,21 @@
 package eu.europeana.set.search.service.impl;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
-import eu.europeana.api.commons_sb3.http.HttpConnection;
-import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URLEncodedUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.http.HttpConnection;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -317,13 +316,18 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   private String getResourceId(String thumbnailUrl) throws SearchApiClientException {
     final String queryString = StringUtils.substringAfter(thumbnailUrl, "?");
-    List<NameValuePair> params = URLEncodedUtils.parse(queryString, StandardCharsets.UTF_8);
-    for (NameValuePair param : params) {
-      if ("uri".equals(param.getName())) {
-        return param.getValue();
-      }
+    NameValuePair uriParam;
+    try {
+      uriParam = (new URIBuilder(queryString)).getFirstQueryParam("uri");
+    } catch (URISyntaxException e) {
+      throw new SearchApiClientException(
+          "Invalid thumbnail URL: " + thumbnailUrl, e);
     }
-    throw new SearchApiClientException(
-        "Cannot extract resource id from thumbnail URL: " + thumbnailUrl, null);
+    
+    if(uriParam == null) {
+      throw new SearchApiClientException(
+          "Cannot extract resource id from thumbnail URL: " + thumbnailUrl, null);
+    }
+    return uriParam.getValue();
   }
 }

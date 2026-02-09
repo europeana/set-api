@@ -1,15 +1,15 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW_GET;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSON_UTF8;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,8 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
@@ -31,14 +35,12 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
-import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
-
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class SearchUserSetRest extends BaseRest {

@@ -1,42 +1,46 @@
 package eu.europeana.set.web.service.controller;
 
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW_DELETE;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW_POST;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFERENCE_APPLIED;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.FORMAT_JSONLD;
 import static jakarta.ws.rs.core.HttpHeaders.ACCEPT;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
-import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
-
+import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import java.io.IOException;
-import java.util.*;
-
-import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
-import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
-import eu.europeana.api.commons_sb3.nosql.service.WriteLockAuthorizationService;
-import eu.europeana.api.commons_sb3.oauth2.BaseRestController;
-import eu.europeana.set.web.config.BeanNames;
-import eu.europeana.set.web.config.BuildInfo;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
-import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
-import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
+import eu.europeana.api.commons_sb3.definitions.oauth.exception.ApiWriteLockException;
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
+import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import eu.europeana.api.commons_sb3.exception.AuthorizationExtractionException;
+import eu.europeana.api.commons_sb3.nosql.service.WriteLockAuthorizationService;
+import eu.europeana.api.commons_sb3.oauth2.BaseRestController;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -44,6 +48,8 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.SetProfileHelper;
 import eu.europeana.set.definitions.model.vocabulary.SetResourceProfile;
 import eu.europeana.set.stats.service.UsageStatsService;
+import eu.europeana.set.web.config.BeanNames;
+import eu.europeana.set.web.config.BuildInfo;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
@@ -52,8 +58,9 @@ import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils;
-
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class BaseRest extends BaseRestController {
 

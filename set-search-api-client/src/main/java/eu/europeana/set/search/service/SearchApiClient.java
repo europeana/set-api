@@ -1,12 +1,9 @@
 package eu.europeana.set.search.service;
 
 
-import java.io.IOException;
 import java.util.List;
-
-import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.search.exception.SearchApiClientException;
 
