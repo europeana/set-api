@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
@@ -90,8 +92,7 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // so response.getHeader(HttpHeaders.LAST_MODIFIED) returns
     // Sat, 03 Sep 2022 05:50:53 GMT instead of Sat, 3 Sep 2022 05:50:53 GMT
     assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-    assertEquals( DateFormat.getInstance().parse (response.getHeader(HttpHeaders.LAST_MODIFIED)),
-            userSet.getModified());
+    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
 
 
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.PART_OF));
