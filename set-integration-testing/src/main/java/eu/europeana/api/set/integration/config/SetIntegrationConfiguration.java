@@ -22,7 +22,7 @@ public class SetIntegrationConfiguration {
     public static final String CONFIG_FOLDER = "/opt/app/config/";
     
 
-    private static Properties properties =  new Properties();;
+    private static Properties properties =  new Properties();
     private static SetIntegrationConfiguration singleton;
 
     /**
@@ -71,11 +71,13 @@ public class SetIntegrationConfiguration {
       try {
         // try loading from classpath
         //ensure /
-        String classpathPropsFile = propertiesFile.startsWith("/")? propertiesFile : "/" + propertiesFile; 
+        String classpathPropsFile = (propertiesFile.startsWith("/") ? propertiesFile :("/" + propertiesFile) );
         getProperties().load(getClass().getResourceAsStream(classpathPropsFile));
 
       } catch (IOException e) {
-        LOG.error("Error loading the properties file from classpath: {}", propertiesFile, e);
+          if (LOG.isErrorEnabled()) {
+              LOG.error("Error loading the properties file from classpath: {}", propertiesFile, e);
+          }
       }
     }
 
@@ -83,7 +85,9 @@ public class SetIntegrationConfiguration {
       try (InputStream input = java.nio.file.Files.newInputStream(externalConfigFile.toPath())) {
         getProperties().load(input);
       } catch (IOException e) {
-        LOG.error("Error loading the properties config folder: {}", externalConfigFile.getName(), e);
+          if (LOG.isErrorEnabled()) {
+              LOG.error("Error loading the properties config folder: {}", externalConfigFile.getName(), e);
+          }
       }
     }
     

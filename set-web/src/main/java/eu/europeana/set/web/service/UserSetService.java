@@ -274,6 +274,13 @@ public interface UserSetService {
 
   void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
 
+  /**
+   * Generate depiction
+   * @param userSet
+   * @param authentication
+   * @return
+   * @throws SearchApiClientException
+   */
   WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException;
 
   /**
@@ -281,7 +288,7 @@ public interface UserSetService {
    * @param webUserSet user set
    * @param authentication authentication provided by user
    * @return sr api response
-   * @throws InvalidBodyException
+   * @throws EuropeanaApiException
    */
   SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet, Authentication authentication) throws EuropeanaApiException;
 

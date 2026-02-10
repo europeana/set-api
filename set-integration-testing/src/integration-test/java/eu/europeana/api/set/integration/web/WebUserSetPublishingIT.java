@@ -55,10 +55,6 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     initPublisherUserToken();
   }
 
-//  private static final String USERNAME_REGULAR = "username1";
-//  private static final String USERNAME_PUBLISHER = "publisher-username";
-
-
   @AfterEach
   protected void deleteCreatedSets() {
     super.deleteCreatedSets();
@@ -138,9 +134,6 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     assertFalse(containsKeyOrValue(result, WebUserSetModelFields.ISSUED));
     // unpublished set, the ownership is changed back to current user
     assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-    // When
-    // assertTrue(containsKeyOrValue(result, USERNAME_PUBLISHER));
-
   }
 
   // unpublish user set tests
@@ -154,7 +147,7 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     // publish set by publisher
     // expected change of ownership to editorial team
     String issued = DateUtils.convertDateToStr(new Date());
-    MockHttpServletResponse response = publishUserSet(userSet, issued, getUserName(regularUserAuthetication));
+    MockHttpServletResponse response;
 
     String result;
     // unpublish set
@@ -295,13 +288,7 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     assertTrue(containsKeyOrValue(result, "published"));
-    // published by owner, the ownership is changed back to publisher
-    // assertFalse(containsKeyOrValue(result, getConfiguration().getEuropeanaPublisherNickname()));
-    
-    //assertFalse(containsKeyOrValue(result, USERNAME_PUBLISHER));  
     assertFalse(containsKeyOrValue(result, getUserName(publisherUserAuthetication)));
-    
-    //assertTrue(containsKeyOrValue(result, USERNAME_REGULAR));
     assertTrue(containsKeyOrValue(result, getUserName(regularUserAuthetication)));
     
     // check size of the items

@@ -7,6 +7,10 @@ import org.springframework.context.annotation.PropertySource;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Build Info class
+ * @author Srishti singh
+ */
 @Configuration
 @PropertySource("classpath:build.properties")
 public class BuildInfo {

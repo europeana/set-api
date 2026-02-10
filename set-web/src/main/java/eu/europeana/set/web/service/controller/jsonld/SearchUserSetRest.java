@@ -1,11 +1,5 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW_GET;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSON_UTF8;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,6 +35,8 @@ import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
 import jakarta.servlet.http.HttpServletRequest;
+
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 
 @RestController
 public class SearchUserSetRest extends BaseRest {

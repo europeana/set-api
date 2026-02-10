@@ -68,11 +68,11 @@ public class AuxiliaryMethodsRest extends BaseRest {
      *
      * @param request
      * @return
-     * @throws UserSetServiceException 
+     * @throws EuropeanaApiException exception thrown
      */
     @GetMapping(value = "/set/stats", produces = {CONTENT_TYPE_JSON_UTF8})
     public ResponseEntity<String> generateUsageStats(
-            HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
+            HttpServletRequest request) throws EuropeanaApiException {
         return getUsageStats(request);
     }
     
@@ -181,18 +181,22 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @return
      * @throws UserSetServiceException 
      */
-    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
+    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws EuropeanaApiException {
         // authenticate and generate the new statistics
         verifyReadAccess(request);
         // create metric
         SetMetric metric = new SetMetric();
-        metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
-        getUsageStatsService().getPublicPrivateSetsCount(metric);
-        getUsageStatsService().getTotalItemsLiked(metric);
-        getUsageStatsService().getAverageSetsPerUser(metric);
-        getUsageStatsService().getNumberOfUsersWithLike(metric);
-        getUsageStatsService().getNumberOfEntitySets(metric);
-        getUsageStatsService().getNumberOfItemsInEntitySets(metric);
+        try {
+            metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
+            getUsageStatsService().getPublicPrivateSetsCount(metric);
+            getUsageStatsService().getTotalItemsLiked(metric);
+            getUsageStatsService().getAverageSetsPerUser(metric);
+            getUsageStatsService().getNumberOfUsersWithLike(metric);
+            getUsageStatsService().getNumberOfEntitySets(metric);
+            getUsageStatsService().getNumberOfItemsInEntitySets(metric);
+        } catch (UserSetServiceException e) {
+            throw new EuropeanaApiException(e.getMessage(), e);
+        }
 
         metric.setTimestamp(new Date());
 
@@ -210,7 +214,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
         return new ResponseEntity<>(json, headers, HttpStatus.OK);
     }
 
-    private String serializeMetricView(SetMetric metricData) throws IOException {
+    private String serializeMetricView(SetMetric metricData) throws EuropeanaApiException {
         UserSetLdSerializer serializer = new UserSetLdSerializer();
         return serializer.serialize(metricData);
     }

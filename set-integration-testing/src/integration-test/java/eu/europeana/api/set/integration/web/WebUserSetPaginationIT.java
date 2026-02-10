@@ -90,7 +90,6 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // so response.getHeader(HttpHeaders.LAST_MODIFIED) returns
     // Sat, 03 Sep 2022 05:50:53 GMT instead of Sat, 3 Sep 2022 05:50:53 GMT
     assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-    //assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
     Date expected = new Date(response.getHeader(HttpHeaders.LAST_MODIFIED));
     //need to compare on string level, otherwise the millisecond comparison is performed 
     assertEquals(expected.toString(),
