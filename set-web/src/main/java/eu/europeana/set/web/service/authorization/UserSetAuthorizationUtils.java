@@ -22,26 +22,6 @@ public class UserSetAuthorizationUtils {
   private static final Logger LOG = LogManager.getLogger(UserSetAuthorizationUtils.class);
 
   /**
-   * Only used for IT
-   */
-  private static final ThreadLocal<AuthenticationHandler> fallBackAuth = new ThreadLocal<>();
-
-  /**
-   * Authentication for api requests.
-   * @param authHandler fall back authentication
-   */
-  public void setFallBackAuth(AuthenticationHandler authHandler) {
-      fallBackAuth.set(authHandler);
-  }
-
-  /**
-   * Close / purge from memory
-   */
-  public void removeFallBackAuth() {
-    fallBackAuth.remove();
-  }
-
-  /**
    * Create Authentication for the given user
    * @param userId user id
    * @param userName name of the user
@@ -90,18 +70,10 @@ public class UserSetAuthorizationUtils {
 
   /**
    * Returns the ApikeyBasedAuthentication from the authentication passed in the request
-   * For IT (testing), return the fallBackAuth generated in IT stubs.
    * @param authentication authentication passed in the requests
    * @return AuthenticationHandler
    */
   public static AuthenticationHandler getAuthHandler(Authentication authentication) {
-    /**
-     * Only used for IT
-     */
-    if (fallBackAuth.get() != null) {
-      LOG.info("Using fallback Auth.... !!");
-      return fallBackAuth.get();
-    }
     return new ApikeyBasedAuthentication(extractApiKeyFromAuthorization(authentication));
   }
 }

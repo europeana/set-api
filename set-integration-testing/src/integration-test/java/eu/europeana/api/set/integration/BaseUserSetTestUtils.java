@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
-import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
@@ -18,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,28 +157,8 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
     
     disableOauth();
     changeProperiesForTests();
-
-      /**
-       * Set fallback authentication for SR API requests
-       */
-     if (USE_FALLBACK_AUTH) {
-         userSetAuthorizationUtils = new UserSetAuthorizationUtils();
-         AuthenticationConfig config = new AuthenticationConfig(
-                 ((UserSetConfigurationImpl) configuration).getKeycloakTokenEndpoint(),
-                 ((UserSetConfigurationImpl) configuration).getKeycloakGrantParams());
-
-         searchApiAuth = AuthenticationBuilder.newAuthentication(config);
-         userSetAuthorizationUtils.setFallBackAuth(searchApiAuth);
-     }
   }
 
-  @AfterAll
-  public void remove() {
-    
-    if(USE_FALLBACK_AUTH && userSetAuthorizationUtils != null) {
-      userSetAuthorizationUtils.removeFallBackAuth();
-    }
-  }
 
   protected Authentication createAuthentication(String userToken, String operation)
       throws AuthorizationExtractionException, ApplicationAuthenticationException {
