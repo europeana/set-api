@@ -220,6 +220,22 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     int defaultPageSize = UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE;
     int pageSize = StringUtils.countMatches(result, "http://data.europeana.eu/item/");
     assertEquals(defaultPageSize, pageSize);
+
+    /**
+     * check pagination values for set
+     */
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
+    assertEquals(defaultPageSize, (new JSONObject(result)).get(WebUserSetFields.TOTAL));
+
+    assertEquals(getUserSetService().buildPageUrl("http://localhost:8080/set/" + userSet.getIdentifier(),
+            Integer.parseInt(secondPageIdex) - 1 , defaultPageSize, SetPageProfile.ITEMS),
+            (new JSONObject(result)).get(WebUserSetFields.PREV).toString());
+
+    assertEquals(getUserSetService().buildPageUrl("http://localhost:8080/set/" +userSet.getIdentifier(),
+                    Integer.parseInt(secondPageIdex) + 1 , defaultPageSize, SetPageProfile.ITEMS),
+            (new JSONObject(result)).get(WebUserSetFields.NEXT).toString());
+
   }
 
   @Test

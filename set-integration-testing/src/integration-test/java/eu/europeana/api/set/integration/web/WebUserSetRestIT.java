@@ -288,14 +288,16 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
       /**
        * check pagination values for set that has items less than 10
-       * 'last' page should not exist as only one page exists
        */
-      assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
+      assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
       assertEquals(7,
             (new JSONObject(result)).get(WebUserSetFields.TOTAL));
       assertEquals(getUserSetUtils().fillPage(
               userSet, getConfiguration(), 1, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE),
               (new JSONObject(result)).get(WebUserSetFields.FIRST).toString());
+      assertEquals(getUserSetUtils().fillPage(
+                      userSet, getConfiguration(), 1, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE),
+              (new JSONObject(result)).get(WebUserSetFields.LAST).toString());
 
       // the default minimal profile is used
     assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
