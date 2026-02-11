@@ -97,7 +97,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8")
                     .body(xml);
         } else {
-            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED, Collections.EMPTY_LIST);
+            throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED, Collections.emptyList());
         }
     }
 
