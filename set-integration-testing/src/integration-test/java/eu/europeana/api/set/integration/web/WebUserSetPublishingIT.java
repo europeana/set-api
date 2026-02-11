@@ -147,11 +147,11 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
     // publish set by publisher
     // expected change of ownership to editorial team
     String issued = DateUtils.convertDateToStr(new Date());
-    MockHttpServletResponse response;
+    publishUserSet(userSet, issued, getUserName(regularUserAuthetication));
 
     String result;
     // unpublish set
-    response = mockMvc
+    MockHttpServletResponse response = mockMvc
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet.getIdentifier() + "/unpublish")
             .header(HttpHeaders.AUTHORIZATION, publisherUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
