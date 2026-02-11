@@ -14,6 +14,7 @@ import java.util.Date;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
+import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -292,7 +293,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
       assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
       assertEquals(7,
             (new JSONObject(result)).get(WebUserSetFields.TOTAL));
-      assertEquals("http://localhost:8080/set/1?page=1&pageSize=10",
+      assertEquals(getUserSetUtils().fillPage(
+              userSet, getConfiguration(), 1, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE),
               (new JSONObject(result)).get(WebUserSetFields.FIRST).toString());
 
       // the default minimal profile is used
