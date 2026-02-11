@@ -123,6 +123,9 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
  
   @Autowired
   private UserSetConfiguration configuration;
+
+  private UserSetUtils userSetUtils = new UserSetUtils();
+
   // format: user
   public static final String USER_REGULAR = "userid1:username1:USER";
   public static final String USER_EDITOR = "editor1:editoruser1:EDITOR";
@@ -226,6 +229,10 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
 
   public UserSetConfiguration getConfiguration() {
     return configuration;
+  }
+
+  public UserSetUtils getUserSetUtils() {
+    return userSetUtils;
   }
 
   public UserSetAuthorizationUtils getUserSetAuthorizationUtils() {

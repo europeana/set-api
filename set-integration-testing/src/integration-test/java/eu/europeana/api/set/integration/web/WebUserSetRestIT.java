@@ -14,6 +14,7 @@ import java.util.Date;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
+import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -272,7 +273,6 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
-    System.out.println(response.getContentAsString());
 
     assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), CONTENT_TYPE_JSONLD_UTF8);
     assertNotNull(response.getHeader(HttpHeaders.ETAG));
@@ -286,13 +286,17 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     assertEquals(HttpStatus.OK.value(), response.getStatus());
     assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
-    // check pagination values for set that has items less than 10
-    assertEquals(7,
+      /**
+       * check pagination values for set that has items less than 10
+       */
+      assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+      assertEquals(7,
             (new JSONObject(result)).get(WebUserSetFields.TOTAL));
-      assertEquals("http://localhost:8080/set/1?page=1&pageSize=10",
+      assertEquals(getUserSetUtils().fillPage(
+              userSet, getConfiguration(), 1, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE),
               (new JSONObject(result)).get(WebUserSetFields.FIRST).toString());
-      assertEquals("http://localhost:8080/set/1?page=1&pageSize=10",
+      assertEquals(getUserSetUtils().fillPage(
+                      userSet, getConfiguration(), 1, UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE),
               (new JSONObject(result)).get(WebUserSetFields.LAST).toString());
 
       // the default minimal profile is used
