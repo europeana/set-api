@@ -97,9 +97,13 @@ public class UserSetUtils {
         int pageIndexOfset = WebUserSetFields.DEFAULT_PAGE - 1;
         // the index of last page depends on the start index. i.e. 2 pages [0,1] vs. [1,2]
         int lastPageIndex = totalPages + pageIndexOfset;
-        String lastPageStr = fillPage(userSet, config, lastPageIndex,
-            UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
-        userSet.setLast(lastPageStr);
+        if (lastPageIndex == 0) {
+          userSet.setLast(null);
+        } else {
+          String lastPageStr = fillPage(userSet, config, lastPageIndex,
+                  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+          userSet.setLast(lastPageStr);
+        }
       }
 
     } else if (userSet != null && userSet.getTotal() == 0) {
