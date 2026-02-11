@@ -1,9 +1,17 @@
 package eu.europeana.set.web.search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons_sb3.definitions.utils.LanguageUtils;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.api.commons_sb3.search.util.QueryBuilder;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
@@ -18,10 +26,6 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetModelFields;
 import eu.europeana.set.mongo.model.UserSetMongoConstants;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
-
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class UserSetQueryBuilder extends QueryBuilder {
   

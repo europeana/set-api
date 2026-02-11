@@ -1,13 +1,14 @@
 package eu.europeana.api.set.integration.connection.http;
 
 import java.io.IOException;
+
+import eu.europeana.api.commons_sb3.http.HttpConnection;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import org.apache.hc.core5.http.HttpStatus;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
-import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.common.http.HttpResponseHandler;
 
 /**
  * @author GrafR
@@ -47,6 +48,9 @@ public class EuropeanaOauthClient {
 		break;
 	    case PUBLISHER_USER:
 	    oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsPublisher();
+	    break;
+	    case ADMIN_USER:
+	    oauthParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsAdmin();
 	    break;
 	    }
 	    

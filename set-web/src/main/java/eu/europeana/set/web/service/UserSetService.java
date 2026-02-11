@@ -31,6 +31,7 @@ public interface UserSetService {
    * This method validates, generates the id and UserSet object in database
    *
    * @param userSet
+   * @param authentication  Authentication object
    * @return UserSet object
    * @throws EuropeanaApiException
    */
@@ -50,17 +51,18 @@ public interface UserSetService {
    * @throws EuropeanaApiException
    */
   UserSet fetchUserSetItems(UserSet storedUserSet, String sort, String sortOrder, int pageNr,
-      int pageSize, SetPageProfile profile) throws EuropeanaApiException;
+      int pageSize, SetPageProfile profile, Authentication authentication) throws EuropeanaApiException;
 
   /**
    * update (stored) <code>persistentUserSet</code> with values from <code>webUserSet</code>
    * 
-   * @param persistentUserSet
-   * @param webUserSet
-   * @return
-   * @throws EuropeanaApiException
+   * @param persistentUserSet stored UserSet
+   * @param webUserSet update request web user set
+   * @param authentication authentication sent by user
+   * @return updated user set
+   * @throws EuropeanaApiException EuropeanaApiException
    */
-  UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet) throws EuropeanaApiException;
+  UserSet updateUserSet(PersistentUserSet persistentUserSet, UserSet webUserSet, Authentication authentication) throws EuropeanaApiException;
 
   /**
    * This method returns UserSet object for given user set identifier.
@@ -85,12 +87,13 @@ public interface UserSetService {
    * This method validates and processes the Set description for format and mandatory fields if
    * false responds with HTTP 400
    * 
-   * @param webUserSet
+   * @param webUserSet web user set
    * @param isAlreadyPublished indicates if the set is already in the published state (in the
    *        database)
-   * @throws EuropeanaApiException
+   * @param authentication authentication sent by user
+   * @throws EuropeanaApiException europeana exception
    */
-  void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished) throws EuropeanaApiException;
+  void validateWebUserSet(UserSet webUserSet, boolean isAlreadyPublished, Authentication authentication) throws EuropeanaApiException;
 
   /**
    * This method deletes user set by user set Id value.
@@ -128,11 +131,19 @@ public interface UserSetService {
   UserSet insertItem(String datasetId, String localId, String position, UserSet existingUserSet) throws ItemValidationException;
 
   UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
-      UserSet existingUserSet) throws ItemValidationException;
+      UserSet existingUserSet, Authentication authentication) throws ItemValidationException;
 
   UserSet deleteItem(String item, UserSet existingUserSet);
 
-  UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet) throws ItemValidationException;
+  /**
+   * Deletes multiple items
+   * @param items items to delete
+   * @param existingUserSet user set existing
+   * @param authentication auth sent in the request
+   * @return updated user set
+   * @throws ItemValidationException item validation exception
+   */
+  UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet, Authentication authentication) throws ItemValidationException;
 
   /**
    * search user sets using the given query and profile
@@ -150,17 +161,16 @@ public interface UserSetService {
       List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException;
 
   BaseUserSetResultPage<String> buildRecodsResultsPage(String setId, List<String> itemIds, int page,
-      int pageSize, SetPageProfile profile, HttpServletRequest request) throws EuropeanaApiException;
+      int pageSize, SetPageProfile profile, HttpServletRequest request, Authentication authentication) throws EuropeanaApiException;
 
   CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr,
       int pageSize, HttpServletRequest request) throws EuropeanaApiException;
 
   /**
    * This method validates input if the user is the owner/creator of the user set or is admin
-   * 
-   * @param userSet
-   * @param authentication
-   * @return
+   *
+   * @param userSet user set
+   * @param authentication authentication sent by user
    * @return userSet object
    * @throws EuropeanaI18nApiException
    */
@@ -264,8 +274,22 @@ public interface UserSetService {
 
   void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
 
-  WebResource generateDepiction(UserSet userSet) throws SearchApiClientException;
+  /**
+   * Generate depiction
+   * @param userSet
+   * @param authentication
+   * @return
+   * @throws SearchApiClientException
+   */
+  WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException;
 
-  SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet) throws EuropeanaApiException;
+  /**
+   * retrieve total for open sets from SR api
+   * @param webUserSet user set
+   * @param authentication authentication provided by user
+   * @return sr api response
+   * @throws EuropeanaApiException
+   */
+  SearchApiResponse retrieveTotalForOpenSets(UserSet webUserSet, Authentication authentication) throws EuropeanaApiException;
 
 }

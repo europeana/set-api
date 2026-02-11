@@ -6,6 +6,7 @@ A - Generate Encrypted Properties
 cd ./.github/workflows
 gpg --symmetric --cipher-algo AES256 set.user.properties
 gpg --symmetric --cipher-algo AES256 set-client.user.properties
+gpg --symmetric --cipher-algo AES256 set-integration-testing.user.properties
 3. when prompted provide encyption password
 4. if successfull set.user.properties.gpg file and set-client.user.properties.gpg are created
 4.1 delete set.user.properties and set-client.user.properties
@@ -21,6 +22,8 @@ ls -l decrypt_config.sh
 
 #on Windows cygwin or WSL or Git Bash can be used
 git add --chmod=+x  ./.github/workflows/decrypt_config.sh
+git add --chmod=+x  ./.github/workflows/decrypt_client_config.sh
+git add --chmod=+x  ./.github/workflows/decrypt_integration_testing_config.sh
 #if the file was allready added to git, use the following
 #git update-index --chmod=+x ./.github/workflows/decrypt_config.sh
 #verify executioin permissions

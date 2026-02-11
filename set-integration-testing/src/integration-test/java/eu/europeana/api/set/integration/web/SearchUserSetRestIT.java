@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
@@ -762,7 +761,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
   private String callSearchItemsInSet(String setIdentifier, String[] qf, String page,
       String pageSize, String profile, String regularUserToken)
-      throws UnsupportedEncodingException, Exception {
+      throws Exception {
 
     MockHttpServletRequestBuilder searchRequest =
         buildSearchItemsInSetRequest(setIdentifier, qf, page, pageSize, profile, regularUserToken);
@@ -811,7 +810,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_GALLERY)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
-            .header("Authorization", "Bearer " + regularUserToken))
+            .header(HttpHeaders.AUTHORIZATION, regularUserToken))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
         .getContentAsString();
 

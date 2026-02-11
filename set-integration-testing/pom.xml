@@ -13,6 +13,15 @@
 
 	<name>Europeana (User) Sets - Integration Testing</name>
 	<description>Module containing integration tests</description>
+	
+	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <repositories>    
+		<repository>
+			<id>mvnrepository.com</id>
+			<name>external mvn repo mvnrepository.com</name>
+			<url>https://mvnrepository.com/</url>
+		</repository>
+	</repositories>	
 
 	<properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
@@ -20,23 +29,14 @@
 			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- Import dependency management from Spring Boot (because we
-				don't use Spring-Boot as parent pom)-->
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${version.springBoot}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<!-- add all modules as dependeny for coverage computation -->
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-common</artifactId>
+			<version>0.14-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-web</artifactId>
@@ -50,11 +50,6 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
-			<version>0.14-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-common</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -97,6 +92,10 @@
 					<groupId>org.junit.vintage</groupId>
 					<artifactId>junit-vintage-engine</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -108,14 +107,30 @@
 
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>mongodb</artifactId>
+			<artifactId>testcontainers</artifactId>
+			<version>${version.testcontainers}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-mongodb</artifactId>
 			<version>${version.testcontainers}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
 			<version>${version.testcontainers}</version>
 			<scope>test</scope>
 		</dependency>

@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public class UserSetConfigurationImpl implements UserSetConfiguration {
 
-
   public static final String PREFIX_RETRIEVE_MAX_PAGE_SIZE = "set.retrieve.maxpagesize.";
   public static final String KEY_SEARCH_DEREFERENCE_ITEMS = "set.search.dereference.items.max";
   public static final String KEY_RETRIEVE_DEREFERENCE_ITEMS = "set.retrieve.dereference.items.max";
@@ -16,15 +15,10 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final int DEFAULT_MAX_ITEMS_TO_PRESENT = 1000;
   public static final int DEFAULT_MAX_ITEMS_TO_DEREF = 100;
 
-
   public static final String SET_API_ENDPOINT = "set.api.endpoint.baseUrl";
   public static final String SET_DATA_ENDPOINT = "set.data.endpoint.baseUrl";
   public static final String USER_DATA_ENDPOINT = "user.data.endpoint.baseUrl";
   public static final String ITEM_DATA_ENDPOINT = "item.data.endpoint.baseUrl";
-
-  // Pagination Constants
-//  public static final String BASE_ITEM_URL             = "http://data.europeana.eu/item/";
-
 
   public static final String USERSET_ENVIRONMENT = "set.environment";
   public static final String BASEURL_PREFIX = USERSET_ENVIRONMENT + ".baseUrl.";
@@ -38,10 +32,12 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
   public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY =
       "europeana.apikey.jwttoken.siganturekey";
-  public static final String KEY_APIKEY_SERVICE_URL = "europeana.apikey.serviceurl";  
-  
+  public static final String KEY_APIKEY_SERVICE_URL = "europeana.apikey.serviceurl";
+
+  public static final String KEYCLOAK_TOKEN_ENDPOINT = "keycloak.token.endpoint";
+  public static final String KEYCLOAK_GRANT_PARAMS = "keycloak.token.grant.params";
+
   public static final String KEY_AUTH_DISABLED = "set.auth.disabled";
-  public static final String KEY_SEARCH_APIKEY = "europeana.search.apikey";
   public static final String KEY_SEARCH_URL = "europeana.search.url";
   public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
   public static final String API_BASE_PATH = "set.api.basePath";
@@ -124,11 +120,6 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   }
 
   @Override
-  public String getSearchApiKey() {
-    return getSetProperties().getProperty(KEY_SEARCH_APIKEY);
-  }
-
-  @Override
   public String getEntityUserSetUserId() {
     return getSetProperties().getProperty(ENTITY_USERSET_USERID);
   }
@@ -165,6 +156,16 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
     return getSetProperties().containsKey(KEY_APIKEY_SERVICE_URL) 
         && StringUtils.isNotBlank(getSetProperties().getProperty(KEY_APIKEY_SERVICE_URL));
   }
+
+
+  public String getKeycloakTokenEndpoint() {
+    return getSetProperties().getProperty(KEYCLOAK_TOKEN_ENDPOINT);
+  }
+
+  public String getKeycloakGrantParams() {
+    return getSetProperties().getProperty(KEYCLOAK_GRANT_PARAMS);
+  }
+
 
   @Override
   public String getEuropeanaPublisherId() {

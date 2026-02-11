@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-
-import eu.europeana.api.commons_sb3.auth.service.GrantConstants;
-import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,12 +21,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.output.ToStringConsumer;
-import org.testcontainers.containers.output.WaitingConsumer;
+import eu.europeana.api.commons_sb3.auth.service.GrantConstants;
 import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
-import eu.europeana.api.set.integration.MongoContainer;
+import eu.europeana.api.set.integration.MongoContainerStarter;
 import eu.europeana.api.set.integration.config.SetIntegrationConfiguration;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.UserSetApp;
 import eu.europeana.set.client.UserSetApiClient;
 import eu.europeana.set.client.config.ClientConfiguration;
@@ -46,47 +43,26 @@ import eu.europeana.set.web.model.WebUserSetImpl;
 @ComponentScan(basePackageClasses = UserSetApp.class)
 @ContextConfiguration(locations = {"classpath:set-web-context.xml"})
 @EnableAutoConfiguration
-public abstract class BaseUserSetClientTest {
+public abstract class BaseUserSetClientTest extends MongoContainerStarter{
 
-  private static MongoContainer MONGO_CONTAINER;
-  static {
-    if(shouldStartMongo()) {
-      startMongo();
-    }
-  }
-
-  private static boolean shouldStartMongo() {
-    return true;
-  }
-
-  private static void startMongo() {
-    // MONGO_CONTAINER = new MongoDBContainer("mongo:6.0.14-jammy")
-    final String serviceDB = "admin"; // to change to "set-api-test"
-    // for debugging set the host port to 27017 or 27018
-    int hostPort = -1;
-
-    MONGO_CONTAINER = new MongoContainer(serviceDB, hostPort)
-        .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
-
-    MONGO_CONTAINER.start();
-  }
+  static Logger logger = LogManager.getLogger(BaseUserSetClientTest.class);
 
   @DynamicPropertySource
   static void setProperties(DynamicPropertyRegistry registry) {
-    if(shouldStartMongo()) {
+    if (shouldStartMongo()) {
       registry.add("mongodb.set.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
     } else {
-      registry.add("mongodb.set.connectionUrl",  () -> "mongodb://127.0.0.1:27017/set_test");
-    } 
+      registry.add("mongodb.set.connectionUrl", () -> "mongodb://127.0.0.1:27017/set_test");
+    }
   }
-  
+
   @Autowired
   @Qualifier(UserSetConfiguration.BEAN_SET_PERSITENCE_SERVICE)
   PersistentUserSetService mongoPersistance;
-  
+
   @Autowired
   private UserSetConfiguration configuration;
-      
+
   protected static List<PersistentUserSet> createdUserSets = new ArrayList<>();
 
   protected Logger log = LogManager.getLogger(getClass());
@@ -99,30 +75,40 @@ public abstract class BaseUserSetClientTest {
   protected static String regularUserToken = OAuthUtils.TYPE_BEARER + " " + USER_REGULAR;
   protected static String oauthServiceUri = "test";
   protected static String oauthRequestParams = "test";
-  
-  protected static boolean DISABLE_AUTH = true;
+
+  protected static boolean DISABLE_AUTH = false;
   protected static String START = "{";
   protected static String END = "}";
 
   protected void initObjects(int port) throws SetApiClientException, SetIntegrationException {
-    /*this needs to be called before the initialization of the apiClient 
-    (because the token is used in the apiClient)
-    */
-    if(DISABLE_AUTH) {
+    /*
+     * this needs to be called before the initialization of the apiClient (because the token is used
+     * in the apiClient)
+     */
+    ClientConfiguration clientConfig;
+    if (DISABLE_AUTH) {
       ((UserSetConfigurationImpl) configuration).getSetProperties()
-      .put(UserSetConfigurationImpl.KEY_AUTH_DISABLED, "true");
-    }
-    else {
-      regularUserToken = retrieveOatuhToken(EuropeanaOauthClient.REGULAR_USER);
+          .put(UserSetConfigurationImpl.KEY_AUTH_DISABLED, "true");
+      clientConfig = new ClientConfiguration(mockClientProperties(port));
+    } else {
       oauthServiceUri = SetIntegrationConfiguration.getInstance().getOauthServiceUri();
       oauthRequestParams = SetIntegrationConfiguration.getInstance().getOauthRequestParamsRegular();
+      
+      clientConfig = new ClientConfiguration();
+      clientConfig.put(ClientConfiguration.PROP_SET_SERVICE_URI, "http://localhost:" + port + "/set");
+      
+      //clientConfig.add
+      //mockClientProperties(port)
+      
     }
 
-    apiClient = new UserSetApiClient(new ClientConfiguration(loadClientProperties(port)));
+
+    apiClient = new UserSetApiClient(clientConfig);
   }
 
   /**
    * Should be called every time after creating a new set.
+   * 
    * @param identifier
    */
   protected void addToCreatedSets(String identifier) {
@@ -130,7 +116,7 @@ public abstract class BaseUserSetClientTest {
     userSet.setIdentifier(identifier);
     createdUserSets.add(userSet);
   }
-	  
+
   /**
    * Should be called after each test.
    */
@@ -139,7 +125,7 @@ public abstract class BaseUserSetClientTest {
     createdUserSets.clear();
   }
 
-  protected Properties loadClientProperties(int port) {
+  protected Properties mockClientProperties(int port) {
     Properties properties = new Properties();
     properties.put(ClientConfiguration.PROP_SET_SERVICE_URI, "http://localhost:" + port + "/set");
     properties.put(ClientConfiguration.CONFIG_APIKEY, "test");
@@ -150,47 +136,56 @@ public abstract class BaseUserSetClientTest {
     return properties;
   }
 
-	protected static String retrieveOatuhToken(String user) throws SetIntegrationException {
-	  EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
-	  return oauthClient.getOauthToken(user);
-	}
+  @Deprecated
+  /**
+   * @deprecated use UserSetApiClient with authentication from config properties 
+   * @param user
+   * @return
+   * @throws SetIntegrationException
+   */
+  protected static String retrieveOatuhToken(String user) throws SetIntegrationException {
+    EuropeanaOauthClient oauthClient = new EuropeanaOauthClient();
+    return oauthClient.getOauthToken(user);
+  }
 
-	/**
-	 * This method creates test set object
-	 * 
-	 * @param resource JSON test file
-	 * @parem profile
-	 * @return response entity that contains response body, headers and status code.
-	 * @throws IOException
-	 */
-	protected String storeTestUserSet(String resource, String profile) throws SetApiClientException, IOException {
-		String requestBody = getJsonStringInput(resource);
-		UserSet uSet= apiClient.getWebUserSetApi().createUserSet(requestBody, profile);
-		addToCreatedSets(uSet.getIdentifier());
-		return uSet.getIdentifier();
-	}
+  /**
+   * This method creates test set object
+   * 
+   * @param resource JSON test file
+   * @parem profile
+   * @return response entity that contains response body, headers and status code.
+   * @throws IOException
+   */
+  protected String storeTestUserSet(String resource, String profile)
+      throws SetApiClientException, IOException {
+    String requestBody = getJsonStringInput(resource);
+    UserSet uSet = apiClient.getWebUserSetApi().createUserSet(requestBody, profile);
+    addToCreatedSets(uSet.getIdentifier());
+    return uSet.getIdentifier();
+  }
 
-	protected String getJsonStringInput(String resource) throws IOException {
-		InputStream resourceAsStream = getClass().getResourceAsStream(resource);
+  protected String getJsonStringInput(String resource) throws IOException {
+    InputStream resourceAsStream = getClass().getResourceAsStream(resource);
 
-		StringBuilder out = new StringBuilder();
-		BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
-		for (String line = br.readLine(); line != null; line = br.readLine())
-			out.append(line);
-		br.close();
-		return out.toString();
+    StringBuilder out = new StringBuilder();
+    BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
+    for (String line = br.readLine(); line != null; line = br.readLine())
+      out.append(line);
+    br.close();
+    return out.toString();
 
-	}
+  }
 
-	protected void deleteUserSet(UserSet set) throws SetApiClientException {
-		String re = apiClient.getWebUserSetApi().deleteUserSet(set.getIdentifier());
-		assertEquals(String.valueOf(HttpStatus.SC_OK), re);
-		log.trace("User set deleted: /" + set.getIdentifier());
-	}
+  protected void deleteUserSet(UserSet set) throws SetApiClientException {
+    String re = apiClient.getWebUserSetApi().deleteUserSet(set.getIdentifier());
+    assertEquals(String.valueOf(HttpStatus.SC_OK), re);
+    log.trace("User set deleted: /" + set.getIdentifier());
+  }
 
-	protected UserSet getUserSet(UserSet set) throws SetApiClientException {
-		return apiClient.getWebUserSetApi().getUserSet(set.getIdentifier(), Optional.empty(), Optional.empty()).get();
-	}
-	
-	
+  protected UserSet getUserSet(UserSet set) throws SetApiClientException {
+    return apiClient.getWebUserSetApi()
+        .getUserSet(set.getIdentifier(), Optional.empty(), Optional.empty()).get();
+  }
+
+
 }

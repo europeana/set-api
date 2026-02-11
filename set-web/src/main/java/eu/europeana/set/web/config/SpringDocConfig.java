@@ -1,43 +1,38 @@
 package eu.europeana.set.web.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 /**
- * Class for configuration of SpringDoc 
+ * Spring documentation configuration class
  */
 @Configuration
-@OpenAPIDefinition(servers = {
-    @Server(url = "/", description = "Default Server URL")
- })
 public class SpringDocConfig {
 
-    private final BuildProperties buildProperties;
+    private final BuildInfo buildInfo;
 
     /**
      * Initialize SpringDoc with API build information
-     * @param buildProperties object for retrieving build information
+     * @param buildInfo object for retrieving build information
      */
-    public SpringDocConfig(BuildProperties buildProperties) {
-        this.buildProperties = buildProperties;
+    public SpringDocConfig(BuildInfo buildInfo) {
+        this.buildInfo = buildInfo;
     }
 
     /**
-     * create OpenAPI bean with required information
-     * @return the opeApi bean
+     * open service api
+     * @return OpenAPI
      */
     @Bean
     public OpenAPI userServiceOpenAPI() {
-        return new OpenAPI().info(new Info().title(buildProperties.getName())
-                        .description(buildProperties.get("build.project.description"))
-                        .version(buildProperties.get("build.version"))
+        return new OpenAPI().info(new Info().title(buildInfo.getAppName())
+                        .description(buildInfo.getAppDescription())
+                        .version(buildInfo.getAppVersion() + " (build " + buildInfo.getBuildNumber() + ")")
                         .contact(new Contact().name("API team").url("https://api.europeana.eu").email("api@europeana.eu"))
                         .termsOfService("https://www.europeana.eu/en/rights/api-terms-of-use")
                         .license(new License().name("EUPL 1.2").url("https://www.eupl.eu")))

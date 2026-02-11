@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
@@ -17,7 +18,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.utils.LoggingUtils;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
@@ -39,8 +39,6 @@ import eu.europeana.set.search.exception.SearchApiClientException;
 import eu.europeana.set.search.service.SearchApiResponse;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.ItemValidationException;
-import eu.europeana.set.web.exception.request.RequestBodyValidationException;
-import eu.europeana.set.web.exception.request.RequestValidationException;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
 import eu.europeana.set.web.model.WebResource;
 import eu.europeana.set.web.model.WebUserSetImpl;
@@ -57,6 +55,8 @@ import eu.europeana.set.web.model.search.UserSetIdsResultPage;
 import eu.europeana.set.web.model.search.UserSetResultPage;
 import eu.europeana.set.web.service.controller.jsonld.WebUserSetRequestUtils;
 import ioinformarics.oss.jackson.module.jsonld.JsonldModule;
+
+import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
 
 public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
@@ -216,14 +216,14 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return getMongoPersistence().store((PersistentUserSet) existingUserSet);
   }
 
-  private void updateIsShownBy(UserSet userSet, String firstItemOld) {
+  private void updateIsShownBy(UserSet userSet, String firstItemOld, Authentication authentication) {
     String firstItemNew = null;
     if (userSet.getItems() != null && !userSet.getItems().isEmpty()) {
       firstItemNew = userSet.getItems().get(0);
     }
     if (!StringUtils.equals(firstItemOld, firstItemNew)) {
       try {
-        final WebResource isShownBy = generateDepiction(userSet);
+        final WebResource isShownBy = generateDepiction(userSet, authentication);
         userSet.setIsShownBy(isShownBy);
       } catch (SearchApiClientException e) {
         if (getLogger().isInfoEnabled()) {
@@ -234,7 +234,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
   }
 
-  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet)
+  public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet, Authentication authentication)
       throws ItemValidationException {
     if (existingUserSet.getItems() == null || existingUserSet.getItems().isEmpty()) {
       return existingUserSet;
@@ -257,7 +257,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     UserSet updatedUserSet = existingUserSet;
     if (itemsRemoved) {
       // update isShownBy
-      updateIsShownBy(updatedUserSet, firstItemOld);
+      updateIsShownBy(updatedUserSet, firstItemOld, authentication);
 
       // update a user set in db (including modified and total)
       updatedUserSet = getMongoPersistence().store((PersistentUserSet) existingUserSet);
@@ -283,8 +283,9 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return itemsRemoved;
   }
 
+  @Override
   public UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
-      UserSet existingUserSet) throws ItemValidationException {
+      UserSet existingUserSet, Authentication authentication) throws ItemValidationException {
 
     // keep the first item to check if it is changed, for the re-creation of the isShownBy field
     String firstItemOld = null;
@@ -307,7 +308,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     // update isShownBy
-    updateIsShownBy(existingUserSet, firstItemOld);
+    updateIsShownBy(existingUserSet, firstItemOld, authentication);
 
     //pagination will be updated during serialization
     return getMongoPersistence().store((PersistentUserSet) existingUserSet);
@@ -545,7 +546,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   @Override
   public UserSet fetchUserSetItems(UserSet userSet, String sort, String sortOrder, int pageNr,
-      int pageSize, SetPageProfile profile) throws EuropeanaApiException {
+      int pageSize, SetPageProfile profile, Authentication authentication) throws EuropeanaApiException {
     if (!userSet.isOpenSet() && (userSet.getItems() == null
         || (userSet.getItems() != null && userSet.getItems().isEmpty()))) {
       // if empty closed userset, nothing to do
@@ -557,25 +558,25 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     if (!userSet.isOpenSet() && userSet.getItems().size() > 0) {
       validateLastPage(userSet.getItems().size(), pageSize, pageNr);
     }
-    String apiKey = getConfiguration().getSearchApiKey();
     String searchApiProfile = null;
     searchApiProfile = getConfiguration().getSearchApiProfileForItemDescriptions();
 
-    String url = getSearchApiUtils().buildSearchApiUrl(userSet, apiKey,
-        getConfiguration().getSearchApiUrl(), searchApiProfile);
+    String url = getSearchApiUtils().buildSearchApiUrl(userSet, getConfiguration().getSearchApiUrl(), searchApiProfile);
     SearchApiRequest searchApiRequest = getSearchApiUtils().buildSearchApiPostBody(userSet,
         getConfiguration().getItemDataEndpoint(), sort, sortOrder, pageNr, pageSize,
         searchApiProfile);
+
     try {
       String jsonBody = serializeSearchApiRequest(searchApiRequest);
+      AuthenticationHandler searchApiAuth = getAuthHandler(authentication);
       SearchApiResponse apiResult;
       if (userSet.isOpenSet() && SetPageProfile.ITEMS == profile) {
         // item ids for open sets
-        apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, false);
+        apiResult = getSearchApiClient().searchItems(url, jsonBody, searchApiAuth, false);
         setItemIds(userSet, apiResult);
       } else if (SetPageProfile.ITEMS_META == profile) {
         // item descriptions for open otr closed sets
-        apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
+        apiResult = getSearchApiClient().searchItems(url, jsonBody, searchApiAuth, true);
         int total = apiResult.getTotal();
         if (!userSet.isOpenSet()) {
           //for closed sets, total is the total in set
@@ -887,7 +888,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   public BaseUserSetResultPage<String> buildRecodsResultsPage(String setIdentifier,
       List<String> itemIds, int page, int pageSize, SetPageProfile profile,
-      HttpServletRequest request) throws EuropeanaApiException {
+      HttpServletRequest request, Authentication authentication) throws EuropeanaApiException {
     // new ResultsPageImpl<T>()
     BaseUserSetResultPage<String> result;
 
@@ -934,7 +935,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
       case ITEMS_META:
         result = createItemDescriptionsResultPage(lastPage, pageSize, totalnCollection, profile,
             collectionUrl);
-        List<String> dereferencedItems = dereferenceItems(pageItems, profile);
+        List<String> dereferencedItems = dereferenceItems(pageItems, profile, authentication);
         ((ItemDescriptionsResultPage) result).setItemList(dereferencedItems);
         result.setTotalInPage(dereferencedItems.size());
         break;
@@ -959,11 +960,12 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return result;
   }
 
-  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile) throws EuropeanaApiException {
+  private List<String> dereferenceItems(@NonNull List<String> pageItems, SetPageProfile profile,
+                                        Authentication authentication) throws EuropeanaApiException {
     UserSet itemsSet = new WebUserSetImpl();
     itemsSet.setItems(pageItems);
     UserSet dereferenced = fetchUserSetItems(itemsSet, null, null, WebUserSetFields.DEFAULT_PAGE,
-        pageItems.size(), profile);
+        pageItems.size(), profile, authentication);
     return dereferenced.getItems();
   }
 
@@ -1153,23 +1155,23 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   }
 
   @Override
-  public WebResource generateDepiction(UserSet userSet) throws SearchApiClientException {
+  public WebResource generateDepiction(UserSet userSet, Authentication authentication) throws SearchApiClientException {
     if (userSet.getItems() == null || userSet.getItems().isEmpty()) {
       return null;
     }
 
     String itemId = userSet.getItems().get(0);
-    WebResource depiction = generateDepictionByItemId(itemId);
+    WebResource depiction = generateDepictionByItemId(itemId, authentication);
     // if no thumbnail search further 
     if(!depiction.hasThumbnail() && userSet.getItems().size() > 1) {   
       //search in first 10 items
       final int shortListSize = 10;
-      depiction = generateDepictionByItemList(userSet, shortListSize);
+      depiction = generateDepictionByItemList(userSet, shortListSize, authentication);
       
       if(!depiction.hasThumbnail() && userSet.getItems().size() > shortListSize) {
         //search in first 100 items
         final int longListSize = 100;
-        depiction = generateDepictionByItemList(userSet, longListSize);
+        depiction = generateDepictionByItemList(userSet, longListSize, authentication);
       }    
     }
     
@@ -1182,25 +1184,24 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
   }
 
-  private WebResource generateDepictionByItemId(String itemId) throws SearchApiClientException {
+  private WebResource generateDepictionByItemId(String itemId, Authentication authentication) throws SearchApiClientException {
     String url =
         SearchApiUtils.getInstance().buildSearchApiUrlForItem(getConfiguration().getSearchApiUrl(),
-            getConfiguration().getItemDataEndpoint(), itemId, getConfiguration().getSearchApiKey(),
+            getConfiguration().getItemDataEndpoint(), itemId,
             getConfiguration().getSearchApiProfileForItemDescriptions());
 
     WebResource depiction = new WebResource();
-    getSearchApiClient().fillDepiction(url, itemId, depiction);
+    getSearchApiClient().fillDepiction(url, itemId, depiction, getAuthHandler(authentication));
     return depiction;
   }
 
-  private WebResource generateDepictionByItemList(UserSet userSet, int pageSize)
+  private WebResource generateDepictionByItemList(UserSet userSet, int pageSize, Authentication authentication)
       throws SearchApiClientException {
 
     WebResource depiction = new WebResource();
-    String apiKey = getConfiguration().getSearchApiKey();
     String searchApiProfile = getConfiguration().getSearchApiProfileForItemDescriptions();
 
-    String url = getSearchApiUtils().buildSearchApiUrl(userSet, apiKey,
+    String url = getSearchApiUtils().buildSearchApiUrl(userSet,
         getConfiguration().getSearchApiUrl(), searchApiProfile);
 
     //first "pageSize" items
@@ -1212,8 +1213,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     
     try {
       String jsonBody = serializeSearchApiRequest(searchApiRequest);
-      //SearchApiResponse apiResult = getSearchApiClient().searchItems(url, jsonBody, apiKey, true);
-      getSearchApiClient().fillDepiction( url, jsonBody, itemsToSearch, getConfiguration().getItemDataEndpoint(), depiction);
+      getSearchApiClient().fillDepiction( url, jsonBody, itemsToSearch, getConfiguration().getItemDataEndpoint(), depiction,
+              getAuthHandler(authentication));
     } catch (SearchApiClientException | IOException e) {
       if(logger.isInfoEnabled()) {
         logger.info("Cannot retrieve depiction using the first {} items of set with id: {} ", pageSize, userSet.getIdentifier(), e);
@@ -1230,7 +1231,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     // new sets are not yet published
-    validateWebUserSet(userSet, false);
+    validateWebUserSet(userSet, false, authentication);
 
     // store in mongo database
     UserSet updatedUserSet = getMongoPersistence().create(userSet);

@@ -38,9 +38,6 @@ europeana.apikey.jwttoken.siganturekey=
 
 ## Use keycloak (internal route)
 europeana.apikey.serviceurl=
-keycloak.token.endpoint=
-keycloak.token.grant.params=
-
 
 #Keycloak token endpoint
 keycloak.token.endpoint =
@@ -48,12 +45,8 @@ keycloak.token.endpoint =
 #Request parameters to retrieve the token from keycloak
 keycloak.token.grant.params =
 
-#API key used for invocation of search api
-#europeana.search.apikey=
-
-#API key used for invocation of search api
-#europeana.search.url=https://api.europeana.eu/record/v2/search.json?wskey=MY_KEY&query=
-
+#Base url of SR API ( no key information or other param to be added)
+#europeana.search.url=https://api.europeana.eu/record/v2/search.json
 
 # location for the elevation file
 elevation.file.folder=

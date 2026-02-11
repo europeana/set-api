@@ -10,8 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
 import java.util.List;
-
-import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
@@ -21,7 +19,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -44,7 +45,6 @@ import eu.europeana.set.web.model.WebUserSetImpl;
  */
 @SpringBootTest
 public class EntityBestItemsSetIT extends IntegrationTestSetup {
-
 
   @BeforeAll
   static void initTokens() throws SetIntegrationException {
@@ -496,7 +496,11 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item4Existing=existingUserSet.getItems().get(2);
     newItems.add(item4Existing);
     newItems.add(item3);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, -1, existingUserSet);
+    
+    //createAuthentication for updating set
+    Authentication editor2Authentication = createAuthentication(editor2UserToken, Operations.UPDATE);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, -1,
+            existingUserSet,  editor2Authentication);
      
     //check the new items
     assertEquals(0, existingUserSet.getItems().indexOf(item2FullUrl));
@@ -515,7 +519,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.add(item5);
     String item6Existing=existingUserSet.getItems().get(4);
     newItems.add(item6Existing);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, "4", 4, existingUserSet,
+        editor2Authentication);
     
     assertEquals(4, existingUserSet.getPinned());
     //check the new items
@@ -533,7 +538,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.clear();
     String item7="/07/123_unPinnedItem";
     newItems.add(item7);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, null, -1, existingUserSet,
+        editor2Authentication);
     //check the new items
     String item7FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item7);
     assertEquals(6, existingUserSet.getItems().indexOf(item7FullUrl));
@@ -543,7 +549,8 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     newItems.clear();
     String item8="/08/123_unPinnedItem";
     newItems.add(item8);
-    existingUserSet = getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet);
+    existingUserSet = getUserSetService().insertMultipleItems(newItems, "100", 100, existingUserSet,
+        editor2Authentication);
     //check the new items
     String item8FullUrl = UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item8);
     assertEquals(7, existingUserSet.getItems().indexOf(item8FullUrl));
@@ -713,8 +720,12 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String item1="/01/123_pinnedItem";
     String item2="/02/123_pinnedItem";
     newItems.add(item1);
-    newItems.add(item2);    
-    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, 0, userSet);
+    newItems.add(item2);   
+    
+    //createAuthentication for updating set
+    Authentication authentication = createAuthentication(editorUserToken, Operations.UPDATE);
+    getUserSetService().insertMultipleItems(newItems, WebUserSetModelFields.POSITION_PIN, 0, userSet,
+            authentication);
 
     assertEquals(2, userSet.getPinned());
     String identifier = userSet.getIdentifier();

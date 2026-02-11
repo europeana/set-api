@@ -75,9 +75,14 @@ public class UserSetLdSerializer {
    * @return full metric view
    * @throws IOException
    */
-  public String serialize(SetMetric metricData) throws IOException {
-    mapper.registerModule(new JsonldModule());
-    return mapper.writer().writeValueAsString(metricData);
+  public String serialize(SetMetric metricData) throws EuropeanaApiException {
+    try {
+      mapper.registerModule(new JsonldModule());
+      return mapper.writer().writeValueAsString(metricData);
+    } catch (JsonProcessingException e) {
+      throw new EuropeanaApiException("Error serailising the Set metric" +e.getMessage() ,e );
+    }
+
   }
 
   /**

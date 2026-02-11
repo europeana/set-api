@@ -51,6 +51,7 @@ public class WriteLockIT extends IntegrationTestSetup {
     initRegularUserToken();
     initPublisherUserToken();
     initAdminUserToken();
+    initEntitySetTokens();
   }
 
   

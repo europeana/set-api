@@ -1,20 +1,21 @@
 package eu.europeana.set.search.service.impl;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import eu.europeana.set.common.http.HttpConnection;
-import eu.europeana.set.common.http.HttpResponseHandler;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
+import eu.europeana.api.commons_sb3.http.HttpConnection;
+import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -30,21 +31,26 @@ import eu.europeana.set.search.service.SearchApiResponse;
  */
 public class SearchApiClientImpl implements SearchApiClient {
 
-  Logger logger = LogManager.getLogger(getClass().getName());
+  private static final Logger LOGGER = LogManager.getLogger(SearchApiClientImpl.class);
 
-  public HttpConnection createHttpConnection() {
-    return new HttpConnection();
-  }
+  private final HttpConnection httpConnection = new HttpConnection(true);
 
-
+  /**
+   * Fetch items from Search api and return the SearchApiResponse with the items list
+   * @param uri search api url
+   * @param searchPostBody Search post request json body
+   * @param auth authentication to access Search api
+   * @param descriptions if true include item descriptions, otherwise only ids
+   * @return
+   * @throws SearchApiClientException sr api exception
+   */
   @Override
-  public SearchApiResponse searchItems(String uri, String serachPostBody, String apiKey,
+  public SearchApiResponse searchItems(String uri, String searchPostBody, AuthenticationHandler auth,
       boolean descriptions) throws SearchApiClientException {
-    SearchApiResponse searchApiResponse = new SearchApiResponse(apiKey, null);
-    uri = appendApiKey(uri, apiKey);
-    JSONObject jo = searchItems(uri, serachPostBody);
+    SearchApiResponse searchApiResponse = new SearchApiResponse();
+    JSONObject jo = searchItems(uri, searchPostBody, auth);
     List<String> res;
-    if (isSuccessfull(jo)) {
+    if (isSuccessful(jo)) {
       if (descriptions) {
         res = extractItemDescriptions(jo);
       } else {
@@ -54,17 +60,40 @@ public class SearchApiClientImpl implements SearchApiClient {
       searchApiResponse.setItems(res);
       searchApiResponse.setTotal(total);
     }
-
     return searchApiResponse;
   }
 
-  private boolean isSuccessfull(JSONObject jo) {
+  /**
+   * Fetch response from search api
+   * @param uri
+   * @param postBody
+   * @param auth
+   * @return
+   * @throws SearchApiClientException sr api exceptions
+   */
+  @Override
+  public JSONObject searchItems(String uri, String postBody, AuthenticationHandler auth) throws SearchApiClientException {
+    String responseBodyAsString = searchItemDescriptionsAsString(uri, postBody, auth);
+    try {
+      return new JSONObject(responseBodyAsString);
+    }catch (JSONException e) {
+      throw new SearchApiClientException(
+              SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Checks if the SR API response contains "success": true
+   * @param jo jsonObject of Sr api response
+   * @return true if response contains "success": true
+   */
+  private boolean isSuccessful(JSONObject jo) {
     String keySuccess = "success";
     try {
       return jo.has(keySuccess) && jo.getBoolean(keySuccess);
     } catch (JSONException e) {
       // actually it shouldn't happen
-      logger.trace("Invalid Json Object", e);
+      LOGGER.trace("Invalid Json Object", e);
       return false;
     }
   }
@@ -82,18 +111,11 @@ public class SearchApiClientImpl implements SearchApiClient {
     return total;
   }
 
-  private String appendApiKey(String uri, String apiKey) {
-    if (!uri.contains("wskey=")) {
-      uri += ("&wskey=" + apiKey);
-    }
-    return uri;
-  }
-
   /**
    * Get list of IDs from JSONArray
    * 
-   * @param valueObject
-   * @return
+   * @param jo json object of SR api response
+   * @return list of item ids from the items array
    * @throws JSONException
    */
   protected List<String> extractItemIds(JSONObject jo) throws SearchApiClientException {
@@ -108,10 +130,10 @@ public class SearchApiClientImpl implements SearchApiClient {
   }
 
   /**
-   * Get list of IDs from JSONArray
+   * Get list of items from JSONObject
    * 
-   * @param valueObject
-   * @return
+   * @param jo json object of SR api response
+   * @return list of items from the items array
    * @throws JSONException
    */
   protected List<String> extractItemDescriptions(JSONObject jo) throws SearchApiClientException {
@@ -140,7 +162,7 @@ public class SearchApiClientImpl implements SearchApiClient {
    * @param valueObject
    * @return list of values
    * @throws JSONException
-   * @throws SearchApiClientException
+   * @throws SearchApiClientException sr api exception
    */
   protected List<String> extractItemsFromSearchResponse(JSONArray valueObject, String fieldName)
       throws SearchApiClientException {
@@ -166,49 +188,36 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   }
 
-  @Override
-  public JSONObject searchItems(String uri, String postBody) throws SearchApiClientException {
-    String responseBodyAsString = searchItemDescriptionsAsString(uri, postBody);
-    
-    try {
-      return new JSONObject(responseBodyAsString);
-    }catch (JSONException e) {
-      throw new SearchApiClientException(
-          SearchApiClientException.MESSAGE_CANNOT_PARSE_RESPONSE + e.getMessage(), e);
-    }
-  }
-
-
   /**
    * Fires the search request and returns the body
    * @param url the search api URL
    * @param postBody for search request
+   * @param auth authentication handler for SR api
    * @return response body
-   * @throws SearchApiClientException
+   * @throws SearchApiClientException sr api exception
    */
-  public String searchItemDescriptionsAsString(String url, String postBody)
+  public String searchItemDescriptionsAsString(String url, String postBody, AuthenticationHandler auth)
       throws SearchApiClientException {
-    HttpResponseHandler resp;
+    HttpResponseHandler httpResponse;
     try {
       if (postBody != null) {
-        resp = createHttpConnection().post(url, postBody, "application/json", null);
+        httpResponse = httpConnection.post(url, postBody, "application/json", auth);
       } else {
-        resp = createHttpConnection().get(url, "application/json", null);
+        httpResponse = httpConnection.get(url, "application/json", auth);
       }
-      if (resp == null) {
-          // HTTP Error Code
+      if (httpResponse == null) {
           throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
               null);
       }
       
-      if(resp.getStatus() != HttpStatus.SC_OK) {
+      if (httpResponse.getStatus() != HttpStatus.SC_OK) {
         //search request failed
         throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS +
-            " Response status: " + resp.getStatus() + " Response body: " + resp.getResponse(),
+            " Response status: " + httpResponse.getStatus() + " Response body: " + httpResponse.getResponse(),
             null);
       }
       //return response body
-      return resp.getResponse();
+      return httpResponse.getResponse();
     } catch (IOException e) {
       throw new SearchApiClientException(
           SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
@@ -224,20 +233,21 @@ public class SearchApiClientImpl implements SearchApiClient {
    * @see eu.europeana.set.search.service.SearchApiClient#searchItemDescriptions(java. lang.String,
    * java.lang.String)
    */
-  public SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, String apiKey)
+  public SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, AuthenticationHandler auth)
       throws SearchApiClientException {
-    return searchItems(uri, searchPostBody, apiKey, true);
+    return searchItems(uri, searchPostBody, auth, true);
   }
   
   @Override
-  public void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds, String itemDataEndpoint, BaseWebResource depiction)
+  public void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds, String itemDataEndpoint,
+                            BaseWebResource depiction, AuthenticationHandler auth)
       throws SearchApiClientException {
 
     String firstFoundLocalId = null;
     String firstFoundItemlId = null;
     String searchResult = null;
     try {
-      searchResult = searchItemDescriptionsAsString(searchApiFullUrl, searchPostBody);
+      searchResult = searchItemDescriptionsAsString(searchApiFullUrl, searchPostBody, auth);
       JSONArray itemsArray = new JSONObject(searchResult).getJSONArray("items");
       if(itemsArray == null || itemsArray.length() < 1) {
         //no results found
@@ -276,12 +286,11 @@ public class SearchApiClientImpl implements SearchApiClient {
   }
   
   @Override
-  public void fillDepiction(String searchApiFullUrl, String itemId, BaseWebResource depiction)
+  public void fillDepiction(String searchApiFullUrl, String itemId, BaseWebResource depiction, AuthenticationHandler auth)
       throws SearchApiClientException {
-
     JSONObject searchResult = null;
     try {
-      searchResult = searchItems(searchApiFullUrl, null);
+      searchResult = searchItems(searchApiFullUrl, null, auth);
       JSONArray items = searchResult.getJSONArray("items");
       if(items == null || items.length() < 1) {
         return;
@@ -307,13 +316,18 @@ public class SearchApiClientImpl implements SearchApiClient {
 
   private String getResourceId(String thumbnailUrl) throws SearchApiClientException {
     final String queryString = StringUtils.substringAfter(thumbnailUrl, "?");
-    List<NameValuePair> params = URLEncodedUtils.parse(queryString, StandardCharsets.UTF_8);
-    for (NameValuePair param : params) {
-      if ("uri".equals(param.getName())) {
-        return param.getValue();
-      }
+    NameValuePair uriParam;
+    try {
+      uriParam = (new URIBuilder(queryString)).getFirstQueryParam("uri");
+    } catch (URISyntaxException e) {
+      throw new SearchApiClientException(
+          "Invalid thumbnail URL: " + thumbnailUrl, e);
     }
-    throw new SearchApiClientException(
-        "Cannot extract resource id from thumbnail URL: " + thumbnailUrl, null);
+    
+    if(uriParam == null) {
+      throw new SearchApiClientException(
+          "Cannot extract resource id from thumbnail URL: " + thumbnailUrl, null);
+    }
+    return uriParam.getValue();
   }
 }

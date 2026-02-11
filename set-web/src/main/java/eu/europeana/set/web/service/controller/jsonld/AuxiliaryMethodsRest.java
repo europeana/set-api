@@ -34,7 +34,6 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.mongo.model.internal.PersistentUserSet;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.response.UserSetNotFoundException;
-import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.elevation.Doc;
 import eu.europeana.set.web.model.elevation.Elevation;
@@ -42,13 +41,10 @@ import eu.europeana.set.web.model.elevation.Query;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 
 @RestController
-@Tag(name = "Auxiliary Methods")
 public class AuxiliaryMethodsRest extends BaseRest {
 
     /**
@@ -60,7 +56,6 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @throws EuropeanaApiException
      */
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
-    @Operation(description = "Generate Elevation file for best bets", summary = "Generate elevation file")
     public ResponseEntity<String> generateElevationFile(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wsKey,
             HttpServletRequest request) throws EuropeanaApiException {
@@ -72,13 +67,12 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * Method to generate metric for User Set (Galleries)
      *
      * @param request
-     * @return response containing usage statistics details
-     * @throws UserSetServiceException 
+     * @return
+     * @throws EuropeanaApiException exception thrown
      */
     @GetMapping(value = "/set/stats", produces = {CONTENT_TYPE_JSON_UTF8})
-    @Operation(description = SwaggerConstants.SET_USAGE_STATS, summary = "Generate usage statistics")
     public ResponseEntity<String> generateUsageStats(
-            HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
+            HttpServletRequest request) throws EuropeanaApiException {
         return getUsageStats(request);
     }
     
@@ -187,18 +181,22 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @return
      * @throws UserSetServiceException 
      */
-    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws IOException, ApplicationAuthenticationException, UserSetServiceException {
+    private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws EuropeanaApiException {
         // authenticate and generate the new statistics
         verifyReadAccess(request);
         // create metric
         SetMetric metric = new SetMetric();
-        metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
-        getUsageStatsService().getPublicPrivateSetsCount(metric);
-        getUsageStatsService().getTotalItemsLiked(metric);
-        getUsageStatsService().getAverageSetsPerUser(metric);
-        getUsageStatsService().getNumberOfUsersWithLike(metric);
-        getUsageStatsService().getNumberOfEntitySets(metric);
-        getUsageStatsService().getNumberOfItemsInEntitySets(metric);
+        try {
+            metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
+            getUsageStatsService().getPublicPrivateSetsCount(metric);
+            getUsageStatsService().getTotalItemsLiked(metric);
+            getUsageStatsService().getAverageSetsPerUser(metric);
+            getUsageStatsService().getNumberOfUsersWithLike(metric);
+            getUsageStatsService().getNumberOfEntitySets(metric);
+            getUsageStatsService().getNumberOfItemsInEntitySets(metric);
+        } catch (UserSetServiceException e) {
+            throw new EuropeanaApiException(e.getMessage(), e);
+        }
 
         metric.setTimestamp(new Date());
 
@@ -216,7 +214,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
         return new ResponseEntity<>(json, headers, HttpStatus.OK);
     }
 
-    private String serializeMetricView(SetMetric metricData) throws IOException {
+    private String serializeMetricView(SetMetric metricData) throws EuropeanaApiException {
         UserSetLdSerializer serializer = new UserSetLdSerializer();
         return serializer.serialize(metricData);
     }

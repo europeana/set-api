@@ -10,9 +10,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Collections;
+import java.util.Date;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -89,8 +91,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     addToCreatedSets(identifier);
   }
 
- @Test
- public void createGalleryWithDepiction() throws Exception {
+  @Test
+  public void createGalleryWithDepiction() throws Exception {
    String requestJson = getJsonStringInput(USER_SET_GALLERY_DEPICTION);
 
    String result = mockMvc
@@ -121,8 +123,50 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
     .andExpect(status().isBadRequest());
   }
-  
-  @Test
+
+    @Test
+    public void create_UserSet_WithIsDefinedBy_Success() throws Exception {
+        String requestJson = getJsonStringInput(USER_SET_OPEN);
+
+        String result = mockMvc
+                .perform(
+                        post(BASE_URL)
+                                .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+
+        String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
+        assertNotNull(identifier);
+        addToCreatedSets(identifier);
+
+        assertNotNull(result);
+        // check isDefinedBy is present and in without any wskey param
+        assertTrue(containsKeyOrValue(result, WebUserSetModelFields.IS_DEFINED_BY));
+        assertFalse(getvalueOfkey(result, WebUserSetModelFields.IS_DEFINED_BY).contains("wskey="));
+    }
+
+    @Test
+    public void create_UserSet_WithIsDefinedBy_InvalidUrl() throws Exception {
+        String requestJson = getJsonStringInput(USER_SET_OPEN);
+
+        // update the isDefinedBy with different environment value
+       requestJson = requestJson.replace("https://api.europeana.eu",
+               "http://localhost:8080");
+
+        String result = mockMvc
+                .perform(
+                        post(BASE_URL)
+                                .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
+
+        assertNotNull(result);
+        assertTrue(StringUtils.contains(result,
+                "Invalid property value. isDefinedBy :  the access to api endpoint is not allowed"));
+  }
+
+
+    @Test
   public void create_UserSet_Collection_with_isDefinedBy() throws Exception {
     String requestJson = getJsonStringInput(USER_SET_REGULAR);
     JSONObject withIsDefinedBy = new JSONObject(requestJson);
@@ -232,8 +276,9 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), CONTENT_TYPE_JSONLD_UTF8);
     assertNotNull(response.getHeader(HttpHeaders.ETAG));
     // check last Modified
-    assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-    assertEquals(response.getHeader(HttpHeaders.LAST_MODIFIED), DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+      assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
+      assertEquals(new Date(response.getHeader(HttpHeaders.LAST_MODIFIED)),
+              new Date(DateUtils.getRFC_1123_FormatDate(userSet.getModified())));
 
       String result = response.getContentAsString();
     assertNotNull(result);

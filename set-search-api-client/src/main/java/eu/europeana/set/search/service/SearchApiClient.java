@@ -1,10 +1,9 @@
 package eu.europeana.set.search.service;
 
 
-import java.io.IOException;
 import java.util.List;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.search.exception.SearchApiClientException;
 
@@ -12,38 +11,60 @@ import eu.europeana.set.search.exception.SearchApiClientException;
 public interface SearchApiClient {
 
     /**
-     * @param uri
+     * Searches items from SR api
+     * @param uri url
      * @param searchPostBody Search post request json body
-     * @param apiKey
+     * @param auth authentication handler for SR api
      * @param descriptions if true include item descriptions, otherwise only ids
-     * @return
-     * @throws IOException
-     * @throws JSONException
-     * @throws SearchApiClientException 
-     * @throws HttpException
+     * @return sr api response with items
+     * @throws SearchApiClientException SearchApi exceptions
      */
-    public SearchApiResponse searchItems(String uri, String searchPostBody, String apiKey, boolean descriptions)
+    SearchApiResponse searchItems(String uri, String searchPostBody, AuthenticationHandler auth, boolean descriptions)
     		throws SearchApiClientException;
 
     /**
      * This method queries Europeana API by URI retrieves item descriptions
-     * @param uri
+     * @param uri url
      * @param searchPostBody Search post request json body
-     * @param apiKey
-     * @return
-     * @throws IOException
-     * @throws JSONException
-     * @throws SearchApiClientException 
-     * @throws HttpException
+     * @param auth authentication handler for SR api
+     * @return sr api response with items
+     * @throws SearchApiClientException  SearchApi exceptions
      */
-    public SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, String apiKey)
+    SearchApiResponse searchItemDescriptions(String uri, String searchPostBody, AuthenticationHandler auth)
     		throws SearchApiClientException;
 
-    JSONObject searchItems(String uri, String postBody) throws SearchApiClientException;
+    /**
+     * Returns JsonObject of SR api response
+     * @param uri url of sr api
+     * @param postBody body for the request
+     * @param auth authentication handler for SR api
+     * @return json Object of sr api response
+     * @throws SearchApiClientException sr api exception
+     */
+    JSONObject searchItems(String uri, String postBody, AuthenticationHandler auth) throws SearchApiClientException;
 
-    void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction) throws SearchApiClientException;
+    /**
+     * fill depictions
+     * @param searchApiUri sr api url
+     * @param itemId item ids
+     * @param depiction depiction
+     * @param auth authentication handler for SR api
+     * @throws SearchApiClientException sr api exception
+     */
+    void fillDepiction(String searchApiUri, String itemId, BaseWebResource depiction, AuthenticationHandler auth)
+            throws SearchApiClientException;
 
+    /**
+     *
+     * @param searchApiFullUrl sr api url
+     * @param searchPostBody post body
+     * @param itemIds item ids
+     * @param itemDataEndpoint item data endpoint
+     * @param depiction  depiction
+     * @param auth authentication handler for SR api
+     * @throws SearchApiClientException sr api exception
+     */
     void fillDepiction(String searchApiFullUrl, String searchPostBody, List<String> itemIds,
-        String itemDataEndpoint, BaseWebResource depiction) throws SearchApiClientException;
+        String itemDataEndpoint, BaseWebResource depiction, AuthenticationHandler auth) throws SearchApiClientException;
     
 }

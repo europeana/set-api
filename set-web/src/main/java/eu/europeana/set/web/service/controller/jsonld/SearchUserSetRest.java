@@ -4,12 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
-import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,8 +13,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
+import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.search.UserSetFacetQuery;
@@ -31,19 +29,16 @@ import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
-import eu.europeana.set.web.http.SwaggerConstants;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 import eu.europeana.set.web.service.controller.BaseRest;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 
 @RestController
-@Tag(name = "User Set Discovery API")
 public class SearchUserSetRest extends BaseRest {
 
   UserSetQueryBuilder queryBuilder;
@@ -57,7 +52,6 @@ public class SearchUserSetRest extends BaseRest {
 
   @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.SEARCH, summary = "Search user sets")
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
@@ -141,7 +135,6 @@ public class SearchUserSetRest extends BaseRest {
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
-  @Operation(description = SwaggerConstants.SEARCH_ITEMS_IN_SET, summary = "Search items in set")
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -209,7 +202,7 @@ public class SearchUserSetRest extends BaseRest {
       Integer pageItems = WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,  UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
       
       BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecodsResultsPage(identifier,
-          filtered, pageNr, pageItems, profile, request);
+          filtered, pageNr, pageItems, profile, request, authentication);
       
       UserSetLdSerializer serializer = new UserSetLdSerializer();
       String jsonLd = serializer.serialize(resultPage);
