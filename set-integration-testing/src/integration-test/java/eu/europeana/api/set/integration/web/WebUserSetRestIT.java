@@ -272,7 +272,6 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
-    System.out.println(response.getContentAsString());
 
     assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), CONTENT_TYPE_JSONLD_UTF8);
     assertNotNull(response.getHeader(HttpHeaders.ETAG));
@@ -290,7 +289,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
        * check pagination values for set that has items less than 10
        * 'last' page should not exist as only one page exists
        */
-      assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+      assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
       assertEquals(7,
             (new JSONObject(result)).get(WebUserSetFields.TOTAL));
       assertEquals("http://localhost:8080/set/1?page=1&pageSize=10",
