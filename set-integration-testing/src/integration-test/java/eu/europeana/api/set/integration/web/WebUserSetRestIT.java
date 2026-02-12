@@ -491,11 +491,10 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
         .getContentAsString();
 
-    assertTrue(result.contains("limit") && result.contains("reached"));
-
+      assertNotNull(result);
   }
   
   @Test
@@ -511,7 +510,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andReturn().getResponse();
 
-    //insert one item over the limit
+    //insert one item (not limit anymore)
     mockMvc
         .perform(put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_test")
             .queryParam(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
@@ -523,13 +522,11 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     //change type to Gallery
     JSONObject updatedGallery = new JSONObject(updatedRequestJson);
     updatedGallery.put(WebUserSetModelFields.COLLECTION_TYPE, WebUserSetModelFields.TYPE_GALLERY);
-    String response = mockMvc
+    mockMvc
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
             .content(updatedGallery.toString()).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
-        .andReturn().getResponse().getContentAsString();
-    assertTrue(response.contains("items") && response.contains("above") && response.contains("limit"));
+        .andExpect(status().is(HttpStatus.OK.value()));
   }
 
   @Test
