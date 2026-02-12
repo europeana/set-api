@@ -272,8 +272,6 @@ public interface UserSetService {
   UserSet publishUnpublishUserSet(String userSetId, Date issued, Authentication authentication,
       boolean publish) throws EuropeanaApiException;
 
-  void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException;
-
   /**
    * Generate depiction
    * @param userSet
