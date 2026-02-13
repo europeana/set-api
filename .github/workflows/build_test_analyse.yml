@@ -41,9 +41,20 @@ jobs:
         # projectKey should match the <groupId>:<artifactId> of the project (see pom.xml).
         # As jenkins artifactory job will push the project based on <groupId>:<artifactId>
         # and if GitHub actions will push a new project in sonar cloud if they don't match
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.set:set-api
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.set:set-api -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco-aggregate/jacoco.xml 
         env:
           # Needed to get some information about the pull request, if any
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Check existsnce of coverage files
+        run: ls -la set-integration-testing/target/site/jacoco-aggregate/
+        env:
+          #provide the secret to decrypt script
+          SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
+      - name: Check test coverage file
+        run: tail -n 300 ./set-integration-testing/target/site/jacoco-aggregate/jacoco.xml
+        env:
+          #provide the secret to decrypt script
+          SECRET_PROPS_PASSPHRASE: ${{ secrets.SET_API_PROPS_ENCODING_PASS }}
+      
