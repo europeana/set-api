@@ -349,6 +349,9 @@
 					<version>${version.maven-surefire-plugin}</version>
 					<configuration>
         				<argLine>${argLine} ${java.17.addopens}</argLine>
+        				<additionalClasspathElements>                     
+    						<additionalClasspathElement>target/classes</additionalClasspathElement>
+  						</additionalClasspathElements>
     				</configuration>
 				</plugin>
 				<plugin>
@@ -357,6 +360,9 @@
 					<version>${version.maven-failsafe-plugin}</version>
 					<configuration>
         				<argLine>${argLine} ${java.17.addopens}</argLine>
+        				<additionalClasspathElements>                     
+    						<additionalClasspathElement>target/classes</additionalClasspathElement>
+  						</additionalClasspathElements>
     				</configuration>
 				</plugin>
 				
