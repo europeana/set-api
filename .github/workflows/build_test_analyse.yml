@@ -42,7 +42,7 @@ jobs:
         # As jenkins artifactory job will push the project based on <groupId>:<artifactId>
         # and if GitHub actions will push a new project in sonar cloud if they don't match
         # may use - X option for debuging
-        run: mvn -X -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.set:set-api -Dsonar.coverage.jacoco.xmlReportPaths=set-integration-testing/target/site/jacoco-aggregate/jacoco.xml -Dsonar.java.binaries=**/target/classes
+        run: mvn -X -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.set:set-api -Dsonar.coverage.jacoco.xmlReportPaths=set-integration-testing/target/site/jacoco-aggregate/jacoco.xml -Dsonar.java.binaries=set-common/target/classes,set-client/target/classes,set-definitions/target/classes,set-mongo/target/classes,set-web/target/classes
         env:
           # Needed to get some information about the pull request, if any
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
