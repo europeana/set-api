@@ -51,6 +51,6 @@ jobs:
       # used only for debuging
       #- name: Check existence of coverage files
       #  run: ls -la set-integration-testing/target/site/jacoco-aggregate/  
-      #- name: Check test coverage file
-      #  run: tail -n 30 ./set-integration-testing/target/site/jacoco-aggregate/jacoco.xml
+      - name: Check test coverage file
+        run: tail -n 30 ./set-integration-testing/target/site/jacoco-aggregate/jacoco.xml
         

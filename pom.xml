@@ -82,13 +82,12 @@
 		<version.testcontainers>2.0.3</version.testcontainers>
 		
 		<!-- maven plugins -->
-		<!--
 		<version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
 		<version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
-		-->
+		<!--
 		<version.maven-surefire-plugin>3.0.0-M5</version.maven-surefire-plugin>
 		<version.maven-failsafe-plugin>3.0.0-M5</version.maven-failsafe-plugin>
-		
+		-->
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
 		<sonar.organization>europeana</sonar.organization>
