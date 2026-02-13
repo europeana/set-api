@@ -33,30 +33,34 @@
 		<!-- add all modules as dependeny for coverage computation -->
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-definitions</artifactId>
+			<version>0.14-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-web</artifactId>
-			<version>0.14-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-mongo</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-definitions</artifactId>
+			<artifactId>set-web</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-client</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
+		<!-- end modules -->
 		
 		
 		<dependency>
