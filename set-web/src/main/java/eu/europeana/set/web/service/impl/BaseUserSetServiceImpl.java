@@ -1,7 +1,5 @@
 package eu.europeana.set.web.service.impl;
 
-import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_ITEMS_LIMIT_REACHED;
-import static eu.europeana.set.web.config.UserSetI18nConstants.USERSET_NUMBER_OF_ITEMS;
 import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -200,11 +198,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
                       Arrays.asList(WebUserSetModelFields.IS_DEFINED_BY + " (for open sets)")));
     }
     
-    // when we change the type to Gallery, check the items size of the existing set
-    if (webUserSet.isGallery()) {
-      validateGallerySize(persistentUserSet, 0);
-    }
-
     // validate input
     validateWebUserSet(webUserSet, persistentUserSet.isPublished(), authentication);
 
@@ -609,28 +602,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throw new InvalidParamException(Arrays.asList(WebUserSetModelFields.VISIBILITY, "", webUserSet.getVisibility()));
     }
     
-    //validate number of items for the sets of type Gallery
-    if (webUserSet.isGallery()) {
-      validateGallerySize(webUserSet, 0);
-    }
     validateProvider(webUserSet);
     validateBookmarkFolder(webUserSet);
     validateControlledValues(webUserSet);
     validateAndSanitizeIsDefinedBy(webUserSet, authentication);
     validateEntityBestItemsSet(webUserSet);
     validateItems(webUserSet.getItems());
-  }
-
-  @Override
-  public void validateGallerySize(UserSet webUserSet, int newItems) throws ItemValidationException {
-    final int galleryMaxSize = getConfiguration().getGalleryMaxSize();
-    if(webUserSet.getItems()!=null 
-        && webUserSet.getItems().size() + newItems > galleryMaxSize) {
-      String messageKey = (newItems == 0) ? USERSET_NUMBER_OF_ITEMS :  USERSET_ITEMS_LIMIT_REACHED;
-      String error = (newItems == 0) ? "Number of items above the limit" :  "Limit of items was reached";
-      throw new ItemValidationException(null, error, messageKey,
-          Arrays.asList(String.valueOf(galleryMaxSize)));
-    }
   }
   
   void validateProvider(UserSet webUserSet) throws InvalidBodyException {

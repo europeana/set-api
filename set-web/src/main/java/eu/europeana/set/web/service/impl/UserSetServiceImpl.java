@@ -302,11 +302,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     }
 
     addItems(existingUserSet, fullUriItems, itemsPosition, isPinnRequest);
-    if (existingUserSet.isGallery()) {
-      // 7. check that gallery size is smaller than the predefined limit
-      validateGallerySize(existingUserSet, 0);
-    }
-
+    
     // update isShownBy
     updateIsShownBy(existingUserSet, firstItemOld, authentication);
 
@@ -410,11 +406,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     String newItem =
         UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), datasetId, localId);
-
-    // check max number of items for the sets of type Collection
-    if (existingUserSet.isGallery() && !existingUserSet.hasItem(newItem)) {
-      validateGallerySize(existingUserSet, 1);
-    }
 
     // check if the position is "pin" and is a EntityBestItem set then
     // insert the item at the 0 position

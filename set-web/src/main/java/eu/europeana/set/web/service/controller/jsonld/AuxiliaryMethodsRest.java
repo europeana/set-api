@@ -1,5 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW_GET;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSON_UTF8;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,10 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
-import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons_sb3.definitions.statistics.UsageStatsFields;
 import eu.europeana.api.commons_sb3.definitions.statistics.set.SetMetric;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
+import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import eu.europeana.set.definitions.exception.UserSetServiceException;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
@@ -41,8 +40,7 @@ import eu.europeana.set.web.model.elevation.Query;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.controller.BaseRest;
 import eu.europeana.set.web.utils.UserSetXMLSerializer;
-
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class AuxiliaryMethodsRest extends BaseRest {
