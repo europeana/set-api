@@ -25,8 +25,12 @@
 
 	<properties>
 		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
+		<!--
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		-->	
+		<sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+			
 	</properties>
 
 	<dependencies>
