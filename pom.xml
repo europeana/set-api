@@ -82,8 +82,13 @@
 		<version.testcontainers>2.0.3</version.testcontainers>
 		
 		<!-- maven plugins -->
+		<!--
 		<version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
 		<version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
+		-->
+		<version.maven-surefire-plugin>3.0.0-M5</version.maven-surefire-plugin>
+		<version.maven-failsafe-plugin>3.0.0-M5</version.maven-failsafe-plugin>
+		
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 
 		<sonar.organization>europeana</sonar.organization>
@@ -94,7 +99,9 @@
 		<aggregate.report.xml>set-integration-testing/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
 		<!-- this property needs to be overwritten in modules -->
 		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<!--
 		<argLine></argLine>
+		-->
 		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
 		<sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
 		
