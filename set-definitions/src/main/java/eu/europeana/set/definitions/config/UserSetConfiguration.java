@@ -60,6 +60,4 @@ public interface UserSetConfiguration {
   boolean isApiKeyValidationEnabled();
 
   boolean isAuthEnabled();
-  
-  int getGalleryMaxSize();
 }

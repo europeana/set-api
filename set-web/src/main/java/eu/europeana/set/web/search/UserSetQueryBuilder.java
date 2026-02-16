@@ -215,9 +215,8 @@ public class UserSetQueryBuilder extends QueryBuilder {
       List<String> type = (List<String>) searchCriteria.get(WebUserSetModelFields.TYPE);
       for(String el : type) {
         if (!UserSetTypes.isValid(el)) {
-          throw new InvalidParamException(Arrays.asList("type",
-                  "invalid",
-                  el));
+          throw new InvalidParamException(Arrays.asList("type", Arrays.asList(UserSetTypes.values()).toString()
+                  , el));
         }
       }
       searchQuery.setType(type);
@@ -230,8 +229,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
       List<String> collectionType = (List<String>) searchCriteria.get(WebUserSetModelFields.COLLECTION_TYPE);
       for(String el : collectionType) {
         if (!WebUserSetModelFields.TYPE_GALLERY.equals(el)) {
-          throw new InvalidParamException(Arrays.asList("collectionType",
-                  "invalid",
+          throw new InvalidParamException(Arrays.asList("collectionType", WebUserSetModelFields.TYPE_GALLERY ,
                   el));
         }        
       }

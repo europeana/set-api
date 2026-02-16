@@ -144,13 +144,10 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
   protected static String adminUserToken = OAuthUtils.TYPE_BEARER + " " + USER_ADMIN;
   protected static List<PersistentUserSet> createdUserSets = new ArrayList<>();
 
-  protected static AuthenticationHandler searchApiAuth;
   /**
    * can be used to enable AUTH for local environment
    */
   protected static boolean DISABLE_AUTH = false;
-
-  protected static boolean USE_FALLBACK_AUTH = false;
 
   @BeforeAll
   protected void initApplication() {
@@ -159,7 +156,7 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
     }
     
     disableOauth();
-    changeProperiesForTests();
+//    changeProperiesForTests();
   }
 
 
@@ -183,10 +180,10 @@ public abstract class BaseUserSetTestUtils extends MongoContainerStarter{
     }
   }
 
-  private void changeProperiesForTests() {
-    ((UserSetConfigurationImpl) configuration).getSetProperties()
-        .put(UserSetConfigurationImpl.GALLERY_SIZE_MAX, "249");
-  }
+//  private void changeProperiesForTests() {
+//    ((UserSetConfigurationImpl) configuration).getSetProperties()
+//        .put(UserSetConfigurationImpl.GALLERY_SIZE_MAX, "249");
+//  }
 
   public static void initRegularUserToken() throws SetIntegrationException {
     if (DISABLE_AUTH) {

@@ -11,7 +11,6 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
 
   public static final int DEFAULT_ITEMS_PER_PAGE = 10;
   public static final int MIN_ITEMS_PER_PAGE = 0;
-  public static final int DEFAULT_MAX_GALLERY_SIZE = 100;
   public static final int DEFAULT_MAX_ITEMS_TO_PRESENT = 1000;
   public static final int DEFAULT_MAX_ITEMS_TO_DEREF = 100;
 
@@ -41,9 +40,7 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   public static final String KEY_SEARCH_URL = "europeana.search.url";
   public static final String KEY_SEARCH_ITEM_DESCRIPTION_PROFILE = "europeana.search.itemdescription.profile";
   public static final String API_BASE_PATH = "set.api.basePath";
-  
-  public static final String GALLERY_SIZE_MAX = "set.gallery.size.max";
-  
+
   private Properties setProperties;
 
   @Override
@@ -175,11 +172,6 @@ public class UserSetConfigurationImpl implements UserSetConfiguration {
   @Override
   public String getEuropeanaPublisherNickname() {
     return getSetProperties().getProperty(EUROPEANA_PUBLISHER_NICKNAME);
-  }
-  
-  @Override
-  public int getGalleryMaxSize() {
-    return Integer.parseInt(getSetProperties().getProperty(GALLERY_SIZE_MAX, ""+DEFAULT_MAX_GALLERY_SIZE));
   }
 
   @Override

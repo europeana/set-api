@@ -96,13 +96,10 @@ public abstract class BaseUserSetClientTest extends MongoContainerStarter{
       
       clientConfig = new ClientConfiguration();
       clientConfig.put(ClientConfiguration.PROP_SET_SERVICE_URI, "http://localhost:" + port + "/set");
-      
-      //clientConfig.add
-      //mockClientProperties(port)
+      clientConfig.put(ClientConfiguration.CONFIG_TOKEN_ENDPOINT, oauthServiceUri);
+      clientConfig.put(ClientConfiguration.CONFIG_GRANT_PARAMS, oauthRequestParams);
       
     }
-
-
     apiClient = new UserSetApiClient(clientConfig);
   }
 
