@@ -23,14 +23,14 @@
 		</repository>
 	</repositories>	
 
-	<properties>
-		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
-		<sonar.coverage.jacoco.xmlReportPaths>
-			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
-	</properties>
-
 	<dependencies>
 		<!-- add all modules as dependeny for coverage computation -->
+		<dependency>
+			<groupId>eu.europeana.set</groupId>
+			<artifactId>set-definitions</artifactId>
+			<version>0.14-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-common</artifactId>
@@ -39,24 +39,22 @@
 
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-web</artifactId>
-			<version>0.14-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-mongo</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
-			<artifactId>set-definitions</artifactId>
+			<artifactId>set-web</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-client</artifactId>
 			<version>0.14-SNAPSHOT</version>
 		</dependency>
+		<!-- end modules -->
 		
 		
 		<dependency>

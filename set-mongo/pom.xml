@@ -14,12 +14,6 @@
 		<version>0.14-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<!-- Sonar - jacoco xmlReportPaths needs to be defined in each module -->
-		<sonar.coverage.jacoco.xmlReportPaths>
-			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
