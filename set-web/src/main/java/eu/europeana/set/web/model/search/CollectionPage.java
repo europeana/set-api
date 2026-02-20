@@ -14,7 +14,7 @@ public class CollectionPage extends BaseUserSetResultPage<String>{
     this.set = set;
 	this.partOf = partOf;
 	this.startIndex = startIndex;
-	super.setType(CommonLdConstants.COLLECTION_PAGE);
+	super.setType(CommonLdConstants.CollectionPage);
     }
 
     @JsonProperty(WebUserSetFields.START_INDEX)

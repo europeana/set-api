@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -728,7 +730,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
       throws InvalidBodyException {
     if (webUserSet.isOpenSet()) {
       //remove the apikey provided by the user from the isDefinedBy field
-      String sanitisedIsDefinedBy = removeParam(CommonApiConstants.PARAM_WSKEY, webUserSet.getIsDefinedBy());
+      String sanitisedIsDefinedBy = removeParam(OAuthUtils.PARAM_WSKEY, webUserSet.getIsDefinedBy());
       webUserSet.setIsDefinedBy(sanitisedIsDefinedBy);
 
       SearchApiResponse apiResult = retrieveTotalForOpenSets(webUserSet, authentication);

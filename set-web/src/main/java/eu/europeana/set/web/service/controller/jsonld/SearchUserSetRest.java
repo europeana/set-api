@@ -53,7 +53,6 @@ public class SearchUserSetRest extends BaseRest {
   @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchUserSet(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sort,
@@ -137,7 +136,6 @@ public class SearchUserSetRest extends BaseRest {
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true,
           defaultValue = UserSetQueryBuilder.SEARCH_ALL) String query,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QF, required = false) String[] qf,

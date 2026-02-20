@@ -679,7 +679,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // we don't want to add profile in partOf, hence profile is passed null
     // pageId is the same as the baseUrl for pagination
     CollectionOverview ResultList = buildCollectionOverview(resultsPageId, resultsPageId, pageSize,
-        totalInCollection, lastPage, CommonLdConstants.RESULT_LIST, null);
+        totalInCollection, lastPage, CommonLdConstants.ResultList, null);
 
     resPage.setPartOf(ResultList);
     addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
@@ -785,7 +785,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     String setId = buildSetIdUrl(userSet.getIdentifier());
     // we don't want to add profile in partOf, hence profile is passed null
     CollectionOverview partOf = buildCollectionOverview(setId, paginationBaseUrl, pageSize,
-        totalInCollection, lastPage, CommonLdConstants.COLLECTION, profile);
+        totalInCollection, lastPage, CommonLdConstants.Collection, profile);
 
     // build Collection Page object
     CollectionPage page = createCollectionPageWithItems(userSet, profile, pageNr, pageSize,
@@ -942,7 +942,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     // there is no profile param for search items in user set
     final CollectionOverview collectionOverview =
         buildCollectionOverview(collectionUrl, collectionUrl, pageSize, totalnCollection, lastPage,
-            CommonLdConstants.RESULT_LIST, profile);
+            CommonLdConstants.ResultList, profile);
     result.setPartOf(collectionOverview);
 
     // there is no profile param for searching items in user set

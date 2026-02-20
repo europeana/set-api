@@ -284,7 +284,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
       String result = response.getContentAsString();
     assertNotNull(result);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.Collection));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
       /**
        * check pagination values for set that has items less than 10
@@ -302,7 +302,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
       // the default minimal profile is used
     assertFalse(containsKeyOrValue(result, WebUserSetFields.ITEMS));
     // without page in request, it is not a collection page
-    assertFalse(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
+    assertFalse(containsKeyOrValue(result, CommonLdConstants.CollectionPage));
     assertFalse(containsKeyOrValue(result, WebUserSetFields.PART_OF));
     assertEquals(AgentTypes.PERSON.getJsonValue(), ((JSONObject)(new JSONObject(result)).get("creator")).getString("type"));
   }

@@ -646,8 +646,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
     // first page no prev
@@ -673,8 +673,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
@@ -687,8 +687,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     // check ids
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
     // first page no prev
@@ -709,8 +709,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_LIST));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
     // first page no next
@@ -734,8 +734,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     assertTrue(StringUtils.contains(result, searchUri));
     // total should be 0
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.ID));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.id));
 
     // delete item created by test
     // getUserSetService().deleteUserSet(setIdentifier);
@@ -752,8 +752,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     assertTrue(StringUtils.contains(result, searchUri));
     // total should be 0
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.RESULT_PAGE));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.ID));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.id));
 
     // delete item created by test
     // getUserSetService().deleteUserSet(setIdentifier);

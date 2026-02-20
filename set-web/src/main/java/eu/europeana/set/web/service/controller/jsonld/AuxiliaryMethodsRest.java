@@ -55,7 +55,6 @@ public class AuxiliaryMethodsRest extends BaseRest {
      */
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<String> generateElevationFile(
-            @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wsKey,
             HttpServletRequest request) throws EuropeanaApiException {
     verifyReadAccess(request);
     return generateElevation();

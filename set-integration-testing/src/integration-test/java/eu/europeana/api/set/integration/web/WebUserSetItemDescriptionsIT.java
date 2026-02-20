@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -110,7 +111,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     // otherwise the default standard profile was used
     assertFalse(containsKeyOrValue(result, "completeness"));
 
-    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(CommonLdConstants.CollectionPage, getvalueOfkey(result, WebUserSetFields.TYPE));
     
     int idCount = StringUtils.countMatches(result, "\"id\"");
     // as pageSize is not passed in the request, only 10 items will be requested for dereference
@@ -159,7 +160,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     // check the collection url
     String baseUrl = getConfiguration().getSetApiEndpoint()
         .replaceFirst(getConfiguration().getApiBasePath(), "");
-    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(CommonLdConstants.CollectionPage, getvalueOfkey(result, WebUserSetFields.TYPE));
     String requestedPage = baseUrl + response.getRequest().getPathInfo();
     // int pageSize = 100;
     // int page = 2;
@@ -303,7 +304,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     //total in set and total in page
     assertTrue(getvalueOfkey(resultGet, "title").contains("\"en\""));
     assertTrue(getvalueOfkey(resultGet, "description").contains("\"en\""));
-    assertFalse(resultGet.contains(CommonApiConstants.PARAM_WSKEY));
+    assertFalse(resultGet.contains(OAuthUtils.PARAM_WSKEY));
     assertEquals(1, noOfOccurance(resultGet, "total"));
     
   }
@@ -330,7 +331,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
     assertTrue(containsKeyOrValue(result, UserSetUtils
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
     //assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
-    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(CommonLdConstants.CollectionPage, getvalueOfkey(result, WebUserSetFields.TYPE));
     assertEquals("10", getvalueOfkey(result, WebUserSetFields.TOTAL));
     // one of set and one for creator and items = 10 (default pageSize)
     assertEquals(2 + 10, noOfOccurance(result, WebUserSetFields.ID));
@@ -366,7 +367,7 @@ public class WebUserSetItemDescriptionsIT extends IntegrationTestSetup {
         .buildUserSetId(getConfiguration().getSetDataEndpoint(), userSet.getIdentifier())));
 
 //    assertEquals(UserSetTypes.DYNAMICCOLLECTION.getJsonValue(), getvalueOfkey(result, WebUserSetFields.TYPE));
-    assertEquals(CommonLdConstants.COLLECTION_PAGE, getvalueOfkey(result, WebUserSetFields.TYPE));
+    assertEquals(CommonLdConstants.CollectionPage, getvalueOfkey(result, WebUserSetFields.TYPE));
     
     // completeness field is not inclused in the minimal profile, must not be present in the results
     // otherwise the default standard profile was used

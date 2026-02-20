@@ -21,7 +21,7 @@ import java.util.List;
 public class BaseUserSetResultPage<T> extends ResultsPageImpl<T> {
 
   CollectionOverview partOf;
-  String type = CommonLdConstants.RESULT_PAGE;
+  String type = CommonLdConstants.ResultPage;
 
   @JsonProperty(WebUserSetFields.TYPE)
   public String getType() {

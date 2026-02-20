@@ -61,7 +61,7 @@ public class CollectionOverview {
     
 
     public CollectionOverview(String id, Long total, String first, String last) {
-        this(id, total, first, last, CommonLdConstants.RESULT_LIST);
+        this(id, total, first, last, CommonLdConstants.ResultList);
     }
     
     public CollectionOverview(String id, Long total, String first, String last, String type) {

@@ -134,7 +134,6 @@ public class WebUserSetRest extends BaseRest {
   @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> getUserSet(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_SORT, required = false) String sortField,
       @RequestParam(value = PARAM_SORT_ORDER,
@@ -592,7 +591,6 @@ public class WebUserSetRest extends BaseRest {
   @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> isItemInUserSet(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
       @PathVariable(value = PATH_PARAM_DATASET_ID) @Pattern(
           regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
@@ -606,13 +604,12 @@ public class WebUserSetRest extends BaseRest {
     // or if unauthorized respond with HTTP 403
     // check client access (a valid "wskey" must be provided)
     Authentication authentication = verifyReadAccess(request);
-    return isItemInUserSet(wskey, identifier, datasetId, localId, authentication);
+    return isItemInUserSet(identifier, datasetId, localId, authentication);
   }
 
   /**
    * This method validates input values and checks if item is already in a user set.
    * 
-   * @param wsKey The API key
    * @param identifier The identifier of a user set
    * @param datasetId The identifier of the dataset, typically a number
    * @param localId The local identifier within the provider
@@ -620,7 +617,7 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> isItemInUserSet(String wsKey, String identifier,
+  protected ResponseEntity<String> isItemInUserSet(String identifier,
       String datasetId, String localId, Authentication authentication) throws EuropeanaApiException {
 
     try {

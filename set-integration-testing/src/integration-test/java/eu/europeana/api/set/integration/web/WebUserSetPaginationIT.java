@@ -97,8 +97,8 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     
 
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.PART_OF));
-    assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.COLLECTION));
-    assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.COLLECTION_PAGE));
+    assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.Collection));
+    assertTrue(containsKeyOrValue(secondPageJson, CommonLdConstants.CollectionPage));
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.START_INDEX));
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.FIRST));
     assertTrue(containsKeyOrValue(secondPageJson, WebUserSetFields.LAST));
@@ -175,8 +175,8 @@ public class WebUserSetPaginationIT extends IntegrationTestSetup {
     // assertTrue(containsKeyOrValue(result, collectionUrl));
 
     assertTrue(containsKeyOrValue(result, WebUserSetFields.PART_OF));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.COLLECTION_PAGE));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.Collection));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.CollectionPage));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.START_INDEX));
     // for empty collections, isPartOf must not contain first and last
     assertFalse(containsKeyOrValue(result, WebUserSetFields.FIRST));
