@@ -523,9 +523,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     if (existingUserSet.getItems() == null) {
       // empty items list
-      List<String> list = new ArrayList<>();
-      list.add(newItem);
-      existingUserSet.setItems(list);
+      existingUserSet.setItems(List.of(newItem));
     } else if (positionInt == -1) {
       // last position
       existingUserSet.getItems().add(newItem);

@@ -220,13 +220,12 @@ public class SearchUserSetRest extends BaseRest {
   Integer validatePageSize(String pageSize, SetPageProfile profile) throws InvalidParamException {
     int maxPageSize = getConfiguration().getMaxPageSize(profile.getProfileParamValue());
 
-    Integer pageItems = WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,
+    return WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,
         UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
-    return pageItems;
   }
 
   List<String> getItemsInSet(String identifier, List<String> itemIds, Authentication authentication)
-      throws ResourceNotFoundException, RequestValidationException, EuropeanaI18nApiException {
+      throws EuropeanaI18nApiException {
     // retrieve an existing user set based on its identifier
     UserSet existingUserSet = getUserSetService().getUserSetById(identifier);
 

@@ -35,11 +35,13 @@ public class SetProfileHelper {
    */
   public List<SetPageProfile> parseProfiles(List<String> profiles)
       throws UserSetProfileValidationException {
+    
+    final int defaultProfilesSize = 3;
     if(profiles == null || profiles.isEmpty()) {
-      return new ArrayList<>();
+      return new ArrayList<>(defaultProfilesSize);
     }
     
-    List<SetPageProfile> setPageProfiles = new ArrayList<>();
+    List<SetPageProfile> setPageProfiles = new ArrayList<>(defaultProfilesSize);
     for (String profile : profiles) {
       if(isTechnicalProfile(profile)) {
         continue;
