@@ -27,29 +27,62 @@ public class SetProfileHelper {
     return profile.getProfileParamValue().equals(urlParamValue) || hasAlias(profile, urlParamValue);
   }
 
-  public List<SetPageProfile> getSetPageProfiles(String profileStr, String preferHeader) throws UserSetProfileValidationException {
-    List<SetPageProfile> setPageProfiles = new ArrayList<>();
-
-    if (StringUtils.isEmpty(preferHeader) && StringUtils.isEmpty(profileStr)) {
-      //quick return if empty
-      return setPageProfiles;
+  /**
+   * Verifies the list of profile names and returns the identified profiles
+   * @param profiles the list of profile names
+   * @param setPageProfiles identified in the input
+   * @throws UserSetProfileValidationException in case that the input array contains invalid profiles
+   */
+  public List<SetPageProfile> parseProfiles(List<String> profiles)
+      throws UserSetProfileValidationException {
+    if(profiles == null || profiles.isEmpty()) {
+      return new ArrayList<>();
     }
     
+    List<SetPageProfile> setPageProfiles = new ArrayList<>();
+    for (String profile : profiles) {
+      if(isTechnicalProfile(profile)) {
+        continue;
+      }
+      SetPageProfile pageProfile = getByProfileParamOrAlias(profile);
+      if(pageProfile == null) {
+        throw new UserSetProfileValidationException("Invalid profile requsted through request parameter: " + profile);
+      }
+      setPageProfiles.add(pageProfile);
+    }
+    return setPageProfiles;
+  }
+  
+  /**
+   * Extracts the list of SetPageProfiles from the preferHeader if present, otherwise from the profile request param
+   * @param profileStr the coma or spase separated list of profiles
+   * @param preferHeader the value of the prefer header
+   * @return the list of identified SetPageProfiles
+   * @throws UserSetProfileValidationException in case of incorrect profiles
+   */
+  public List<SetPageProfile> getSetPageProfiles(String profileStr, String preferHeader) throws UserSetProfileValidationException {
+    if (StringUtils.isEmpty(preferHeader) && StringUtils.isEmpty(profileStr)) {
+      //quick return if empty
+      return new ArrayList<>();
+    }
+    
+    List<SetPageProfile> setPageProfiles;
     if(StringUtils.isNotEmpty(preferHeader)) {
-      parsePreferHeader(preferHeader, setPageProfiles);
+      setPageProfiles = parsePreferHeader(preferHeader);
     }else {
-      parseProfileParam(profileStr, setPageProfiles);   
+      setPageProfiles = parseProfileParam(profileStr);   
     }
 
     return setPageProfiles;
   }
 
-  private void parsePreferHeader(String preferHeader,  List<SetPageProfile> setPageProfiles)
+  private List<SetPageProfile> parsePreferHeader(String preferHeader)
       throws UserSetProfileValidationException{
     
     if(StringUtils.isEmpty(preferHeader)) {
-      return;
+      return new ArrayList<>();
     }
+    
     // identify profile by prefer header
     // retrieve profile if provided within the "If-Match" HTTP
     String ldProfile = extractProfileValueFromHeader(preferHeader);
@@ -62,7 +95,7 @@ public class SetProfileHelper {
       throw new UserSetProfileValidationException("Invalid profile requested through prefer header: " + ldProfile); 
     }
     
-    setPageProfiles.add(profile);
+    return List.of(profile); 
   }
   
   /**
@@ -88,21 +121,10 @@ public class SetProfileHelper {
       return null;
   }
 
-  private void parseProfileParam(String profileStr, List<SetPageProfile> setPageProfiles) throws UserSetProfileValidationException {
+  private List<SetPageProfile> parseProfileParam(String profileStr) throws UserSetProfileValidationException {
     // multiple profiles can be present separated by comma or space
-    String[] profiles = toStringArray(profileStr);
     // check each param
-    for (String profile : profiles) {
-      if(isTechnicalProfile(profile)) {
-        continue;
-      }
-      SetPageProfile pageProfile = getByProfileParamOrAlias(profile);
-      if(pageProfile == null) {
-        throw new UserSetProfileValidationException("Invalid profile requsted through request parameter: " + profile);
-      }
-      setPageProfiles.add(pageProfile);
-      
-    }
+    return parseProfiles(List.of(toStringArray(profileStr)));
   }
 
   private boolean isTechnicalProfile(String profile) {

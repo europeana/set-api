@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonLdConstants;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.model.UserSet;
@@ -29,7 +31,9 @@ import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
+import eu.europeana.set.web.model.SearchInSetQuery;
 import eu.europeana.set.web.model.search.FacetValue;
+import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 
 @SpringBootTest
@@ -696,6 +700,46 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     assertTrue(!containsKeyOrValue(result, WebUserSetFields.PREV));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
   }
+  
+  @Test
+  public void searchItemsInSet_with_post() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    List<String> items = List.of("/08641/1037479000000476467",
+        "/08641/1037479000000476875", "/11654/_Botany_U_1419207", "/2048128/618580",
+        "/2048128/618580", "/2048128/notexisting", "/2048128/notexisting1");
+    final int secondPageIndex = WebUserSetFields.DEFAULT_PAGE + 1;
+    // using pagesize 2, we get two pages of results (only 4 items found in set)
+    // retrieve last page
+    
+    String result = callSearchItemsInSetWithPost(setIdentifier, items, secondPageIndex, 2, null, regularUserToken);
+    // check ids
+    String searchUri = "/set/" + setIdentifier + "/search";
+    assertTrue(StringUtils.contains(result, searchUri));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
+    // last page no next
+    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
+
+    // retrieve fist page of results
+    result = callSearchItemsInSetWithPost(setIdentifier, items, WebUserSetFields.DEFAULT_PAGE,
+        2, null, regularUserToken);
+    // check ids
+    assertTrue(StringUtils.contains(result, searchUri));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+    // first page no prev
+    assertTrue(!containsKeyOrValue(result, WebUserSetFields.PREV));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
+  }
 
   @Test
   public void searchItemsInSetPrivate() throws Exception {
@@ -760,6 +804,34 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     // getUserSetService().deleteUserSet(setIdentifier);
   }
 
+  private String callSearchItemsInSetWithPost(String setIdentifier, List<String> items, int page,
+      int pageSize, String profile, String regularUserToken)
+      throws Exception {
+
+    MockHttpServletRequestBuilder searchRequest =
+        buildSearchItemsInSetWithPostRequest(setIdentifier, items, page,
+            pageSize, List.of(profile), regularUserToken);
+        
+
+    return mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.OK.value())).andReturn()
+        .getResponse().getContentAsString();
+
+  }
+  
+  private MockHttpServletRequestBuilder buildSearchItemsInSetWithPostRequest(String setIdentifier,
+      List<String> items, int page, int pageSize, List<String> profile, String regularUserToken) throws EuropeanaApiException {
+    
+    MockHttpServletRequestBuilder request = post("/set/" + setIdentifier + "/search");
+    addCommonRequestParams(request, null, null, null, regularUserToken);
+
+    String[] filters = (String[]) items.stream().map(item ->  (WebUserSetFields.ITEM + item)).toArray();
+    SearchInSetQuery query = new SearchInSetQuery(filters, page, pageSize, profile);
+    
+    String body = (new UserSetLdSerializer()).serializeNonLd(query);
+    request.content( body );
+    return request;
+  }
+  
   private String callSearchItemsInSet(String setIdentifier, String[] qf, String page,
       String pageSize, String profile, String regularUserToken)
       throws Exception {
@@ -771,27 +843,14 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         .getResponse().getContentAsString();
 
   }
-
+  
   private MockHttpServletRequestBuilder buildSearchItemsInSetRequest(String setIdentifier,
       String[] qf, String page, String pageSize, String profile, String regularUserToken) {
-    MockHttpServletRequestBuilder getRequest = get("/set/" + setIdentifier + "/search");
-    if (profile != null) {
-      getRequest.param(CommonApiConstants.QUERY_PARAM_PROFILE, profile);
-    }
-    if (regularUserToken != null) {
-      getRequest.header(HttpHeaders.AUTHORIZATION, regularUserToken);
-    }
-
-    if (page != null) {
-      getRequest.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, page);
-    }
-    if (pageSize != null) {
-      getRequest.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize);
-    }
-
-    // apikey will be ignored
+    
+    MockHttpServletRequestBuilder request = get("/set/" + setIdentifier + "/search");
+    
     MockHttpServletRequestBuilder requestBuilder =
-        getRequest.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL);
+        addCommonRequestParams(request, page, pageSize, profile, regularUserToken);
 
     // add qf param
     if (qf != null) {
@@ -799,7 +858,29 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         requestBuilder.queryParam(CommonApiConstants.QUERY_PARAM_QF, qf[i]);
       }
     }
-    return getRequest;
+    return request;
+  }
+
+  MockHttpServletRequestBuilder addCommonRequestParams(MockHttpServletRequestBuilder request,
+      String page, String pageSize, String profile, String regularUserToken) {
+    if (profile != null) {
+      request.param(CommonApiConstants.QUERY_PARAM_PROFILE, profile);
+    }
+    if (regularUserToken != null) {
+      request.header(HttpHeaders.AUTHORIZATION, regularUserToken);
+    }
+
+    if (page != null) {
+      request.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, page);
+    }
+    if (pageSize != null) {
+      request.queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, pageSize);
+    }
+
+    // apikey will be ignored
+    MockHttpServletRequestBuilder requestBuilder =
+        request.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL);
+    return requestBuilder;
   }
 
   @Test

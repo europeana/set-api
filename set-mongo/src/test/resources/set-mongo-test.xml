@@ -12,10 +12,5 @@
 	">
 
 	<!-- TEST BEANS AND PROPERTIES First  -->
-	<!-- TODO - update configuration to set.common and set.user properties 
-	<util:properties id="setProperties" 
-		location="config/set.properties" />
-	 -->	
-	
 	<import resource="set-mongo-context.xml"/>
 </beans>

@@ -3,7 +3,6 @@ package eu.europeana.set.web.search;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons_sb3.definitions.statistics.set.SetMetric;
@@ -52,6 +51,21 @@ public class UserSetLdSerializer {
     }
   }
 
+  /**
+   * This method provides full serialization of a user set
+   * 
+   * @param userSet
+   * @return full user set view
+   * @throws IOException
+   */
+  public String serializeNonLd(Object obj) throws EuropeanaApiException {
+    try {
+      return mapper.writer().writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+      throw new EuropeanaApiException("Error serialising object", e);
+    }
+  }
+  
   /**
    * This method provides full serialization of a result page (search results)
    * 

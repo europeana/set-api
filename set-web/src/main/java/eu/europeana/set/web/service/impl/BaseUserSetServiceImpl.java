@@ -471,13 +471,25 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
+  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles, SetPageProfile defaultPageProfile) {
+    SetPageProfile ret = null;
     for (SetPageProfile profile : profiles) {
       if (SetPageProfile.FACETS != profile) {
-        return profile;
+        return ret = profile;
       }
     }
-    return null;
+    
+    if (ret == null && defaultPageProfile != null) {
+      // if only technical profiles included in request, append the default profile
+      ret = defaultPageProfile;
+      profiles.add(defaultPageProfile);
+    }
+    return ret;
+  }
+  
+  @Override
+  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
+    return getProfileForPagination(profiles, null);
   }
 
   /**
