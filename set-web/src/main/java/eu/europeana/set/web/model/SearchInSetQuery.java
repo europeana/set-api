@@ -17,16 +17,16 @@ public class SearchInSetQuery extends QueryImpl {
   
   public SearchInSetQuery(String[] filters, int page, int pageSize, List<String> profile) {
     super();
+    this.profile  = profile;
     this.setFilters(filters);
     this.setPageNr(page);
     this.setPageSize(pageSize);
-    this.profile  = profile;
-    
+     
   }
-
+  
   @JsonProperty("qf")
   @Override
-  public void setFilters(String[] filters) {
+  public final void setFilters(String[] filters) {
     super.setFilters(filters);
   }
 
@@ -59,7 +59,7 @@ public class SearchInSetQuery extends QueryImpl {
   
   @JsonProperty("page")
   @Override
-  public void setPageNr(int pageNr) {
+  public final void setPageNr(int pageNr) {
     super.setPageNr(pageNr);
   }
   
@@ -68,6 +68,13 @@ public class SearchInSetQuery extends QueryImpl {
   public void setFacetFields(String[] facetFields) {
     super.setFacetFields(facetFields);
   }
+  
+  @JsonProperty("pageSize")
+  @Override
+  public final void setPageSize(int pageSize) {
+      super.setPageSize(pageSize);
+  }
+
   
   
 }
