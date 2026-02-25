@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
@@ -808,9 +809,10 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
       int pageSize, String profile, String regularUserToken)
       throws Exception {
 
+    List<String> profiles = (profile == null)? null: List.of(profile);
     MockHttpServletRequestBuilder searchRequest =
         buildSearchItemsInSetWithPostRequest(setIdentifier, items, page,
-            pageSize, List.of(profile), regularUserToken);
+            pageSize, profiles, regularUserToken);
         
 
     return mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.OK.value())).andReturn()
@@ -822,13 +824,14 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
       List<String> items, int page, int pageSize, List<String> profile, String regularUserToken) throws EuropeanaApiException {
     
     MockHttpServletRequestBuilder request = post("/set/" + setIdentifier + "/search");
-    addCommonRequestParams(request, null, null, null, regularUserToken);
-
-    String[] filters = (String[]) items.stream().map(item ->  (WebUserSetFields.ITEM + item)).toArray();
+    addAuthorizationHeader(request, regularUserToken);
+    //add item:
+    String[] filters = (String[]) items.stream().map(item ->  (WebUserSetFields.ITEM +":"+ item)).toArray(String[]::new);
     SearchInSetQuery query = new SearchInSetQuery(filters, page, pageSize, profile);
     
     String body = (new UserSetLdSerializer()).serializeNonLd(query);
     request.content( body );
+    request.contentType(MediaType.APPLICATION_JSON);
     return request;
   }
   
@@ -866,9 +869,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     if (profile != null) {
       request.param(CommonApiConstants.QUERY_PARAM_PROFILE, profile);
     }
-    if (regularUserToken != null) {
-      request.header(HttpHeaders.AUTHORIZATION, regularUserToken);
-    }
+    addAuthorizationHeader(request, regularUserToken);
 
     if (page != null) {
       request.queryParam(CommonApiConstants.QUERY_PARAM_PAGE, page);
@@ -881,6 +882,12 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     MockHttpServletRequestBuilder requestBuilder =
         request.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL);
     return requestBuilder;
+  }
+
+  void addAuthorizationHeader(MockHttpServletRequestBuilder request, String regularUserToken) {
+    if (regularUserToken != null) {
+      request.header(HttpHeaders.AUTHORIZATION, regularUserToken);
+    }
   }
 
   @Test
