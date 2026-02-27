@@ -426,10 +426,10 @@ class SearchUserSetRestIT extends IntegrationTestSetup {
   void searchSetMultipleCriteriaWithOutTextQuery() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
-    // String contributor = (String) getAuthentication(editorUserToken).getPrincipal();
+    String creator = (String) getAuthentication(editorUserToken).getPrincipal();
     // subject in json file: http://data.europeana.eu/concept/base/114
     final String title = set.getTitle().get("en");
-    String query = "visibility:item:/08641/1037479000000476703";
+    String query = "visibility:public item:/08641/1037479000000476703 creator:" + creator;
     String result =
         mockMvc
             .perform(get(SEARCH_URL)
@@ -449,9 +449,6 @@ class SearchUserSetRestIT extends IntegrationTestSetup {
 
     // check subject
     assertTrue(containsKeyOrValue(result, title));
-
-    // delete item created by test
-    // getUserSetService().deleteUserSet(set.getIdentifier());
   }
 
 

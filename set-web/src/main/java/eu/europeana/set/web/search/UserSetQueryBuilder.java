@@ -321,14 +321,15 @@ public class UserSetQueryBuilder extends QueryBuilder {
                   "valid formatting of search query for field" + field,
                    value));
         }
-        // extract correct search value for current field
-        value = StringUtils.substringBeforeLast(toParse, space);
-        // remove processed value from query string
+        // extract correct search value for current field (up to next criterion separated by space)
+        value = StringUtils.substringBefore(toParse, space);
+        // remove processed value
         toParse = StringUtils.removeStart(toParse, value);
       }
 
       if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
         // invalid seearch value
+        System.out.println("why?");
         throw new InvalidParamException(Arrays.asList(field,
                 "valid formatting of search query for field" + field,
                 value));
