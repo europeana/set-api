@@ -329,7 +329,6 @@ public class UserSetQueryBuilder extends QueryBuilder {
 
       if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
         // invalid seearch value
-        System.out.println("why?");
         throw new InvalidParamException(Arrays.asList(field,
                 "valid formatting of search query for field" + field,
                 value));
