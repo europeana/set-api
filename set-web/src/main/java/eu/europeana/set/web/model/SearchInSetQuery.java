@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.europeana.api.commons_sb3.definitions.search.impl.QueryImpl;
 
 @JsonInclude(Include.NON_NULL)
+/**
+ * Class for modeling the input for Set in search using post method
+ */
 public class SearchInSetQuery extends QueryImpl {
 
   private List<String> profile;
@@ -15,6 +18,13 @@ public class SearchInSetQuery extends QueryImpl {
     super();
   }
   
+  /**
+   * Constructor for typically used fields in the query
+   * @param filters list of item:<record_id> tupples
+   * @param page page to retrieve
+   * @param pageSize nr of items per page
+   * @param profile the requested profiles
+   */
   public SearchInSetQuery(String[] filters, int page, int pageSize, List<String> profile) {
     super();
     this.profile  = profile;

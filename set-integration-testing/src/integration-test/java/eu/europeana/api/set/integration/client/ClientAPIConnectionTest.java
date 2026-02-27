@@ -10,8 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClientAPIConnectionTest {
     private static final String SERVICE_URI     = "testUri";
-    private static final String API_KEY_1       = "api_key";
-
+    
     private BaseApiConnection baseApiConnection;
 
     @BeforeEach

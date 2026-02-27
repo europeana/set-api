@@ -65,7 +65,7 @@ public class WebUserSetRequestUtils {
    * @param maxPageSize maximum pageSize value (depends on requested profile)
    * @param defaultItemsPerPage default value to return if the param value is empty 
    * @return the value parsed from the param or the default
-   * @throws InvalidParamException if ti is out of range
+   * @throws InvalidParamException if pageSize is out of range
    */
   public static Integer getPageSizeOrDefault(String pageSize, int maxPageSize,
       final int defaultItemsPerPage) throws InvalidParamException {

@@ -163,7 +163,7 @@ public interface UserSetService {
       List<SetPageProfile> profile, Authentication authentication);
 
   /**
-   * build results page based on the original request and the search resulty
+   * build results page based on the original request and the search results
    * @param searchQuery the search query used to find the results
    * @param results the results found
    * @param requestUrl the URL used for service invocation  
@@ -179,9 +179,31 @@ public interface UserSetService {
       SetPageProfile serializationProfile,
       List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException;
 
+  /**
+   * build record results page based on the original request and the search results
+   * @param setId the id of the user set
+   * @param itemIds the list of item ids to search for recrd description
+   * @param page the page number
+   * @param pageSize the number of records to include
+   * @param profile the requested profiels 
+   * @param request the original http request
+   * @param authentication the user authentication
+   * @return result page
+   * @throws EuropeanaApiException in case of serialization or record access failures or invalid params
+   */
   BaseUserSetResultPage<String> buildRecordsResultsPage(String setId, List<String> itemIds, int page,
       int pageSize, SetPageProfile profile, HttpServletRequest request, Authentication authentication) throws EuropeanaApiException;
 
+  /**
+   * build a collection page for http response
+   * @param userSet the set to containing the items
+   * @param profile the requested profiles 
+   * @param pageNr the requested page
+   * @param pageSize the number of items per page
+   * @param request the original http request
+   * @return the constructed collection page
+   * @throws EuropeanaApiException in case of serialization failures or invalid params
+   */
   CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr,
       int pageSize, HttpServletRequest request) throws EuropeanaApiException;
 
@@ -191,7 +213,7 @@ public interface UserSetService {
    * @param userSet user set
    * @param authentication authentication sent by user
    * @return userSet object
-   * @throws EuropeanaI18nApiException
+   * @throws EuropeanaI18nApiException in case of authorization failures
    */
   UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication,
       boolean includeEntitySetMsg) throws EuropeanaI18nApiException;

@@ -28,7 +28,6 @@ import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
-import eu.europeana.api.commons_sb3.error.exceptions.ResourceNotFoundException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -37,6 +36,7 @@ import eu.europeana.set.definitions.model.search.UserSetQuery;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
 import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
+import eu.europeana.set.definitions.model.vocabulary.UserSetProfile;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.web.config.UserSetI18nConstants;
 import eu.europeana.set.web.exception.request.RequestValidationException;
@@ -217,7 +217,14 @@ public class SearchUserSetRest extends BaseRest {
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
 
-  Integer validatePageSize(String pageSize, SetPageProfile profile) throws InvalidParamException {
+  /**
+   * verification of the page size
+   * @param pageSize the requested page size
+   * @param profile the serialization profile (SetPageProfile) 
+   * @return valid page size, or default if pageSize is not provided
+   * @throws InvalidParamException if requested pare is out of range
+   */
+  Integer validatePageSize(String pageSize, UserSetProfile profile) throws InvalidParamException {
     int maxPageSize = getConfiguration().getMaxPageSize(profile.getProfileParamValue());
 
     return WebUserSetRequestUtils.getPageSizeOrDefault(pageSize, maxPageSize,
@@ -254,6 +261,14 @@ public class SearchUserSetRest extends BaseRest {
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
+  /**
+   * Search items in set using post method
+   * @param identifier set id
+   * @param inSetQuery the search query
+   * @param request the original http request
+   * @return a Set page response
+   * @throws EuropeanaApiException in case of authentication or processing failures
+   */
   public ResponseEntity<String> searchInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestBody SearchInSetQuery inSetQuery,
@@ -313,7 +328,7 @@ public class SearchUserSetRest extends BaseRest {
    */
   private List<String> buildItemIdsList(SearchInSetQuery inSetQuery) throws InvalidParamException {
     if (inSetQuery == null || inSetQuery.getFilters() == null || inSetQuery.getFilters().length == 0) {
-      return null;
+      return Collections.emptyList();
     }
     
     List<String> itemIds = buildItemIdsList(inSetQuery.getFilters());

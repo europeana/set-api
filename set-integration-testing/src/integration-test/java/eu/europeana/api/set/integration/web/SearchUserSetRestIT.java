@@ -29,6 +29,7 @@ import eu.europeana.api.set.integration.connection.http.EuropeanaOauthClient;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.ProfileConstants;
+import eu.europeana.set.definitions.model.vocabulary.SetPageProfile;
 import eu.europeana.set.definitions.model.vocabulary.UserSetTypes;
 import eu.europeana.set.definitions.model.vocabulary.VisibilityTypes;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -714,7 +715,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     // using pagesize 2, we get two pages of results (only 4 items found in set)
     // retrieve last page
     
-    String result = callSearchItemsInSetWithPost(setIdentifier, items, secondPageIndex, 2, null, regularUserToken);
+    String result = callSearchItemsInSetWithPost(setIdentifier, null, items, secondPageIndex, 2, null, regularUserToken, null);
     // check ids
     String searchUri = "/set/" + setIdentifier + "/search";
     assertTrue(StringUtils.contains(result, searchUri));
@@ -728,8 +729,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
 
     // retrieve fist page of results
-    result = callSearchItemsInSetWithPost(setIdentifier, items, WebUserSetFields.DEFAULT_PAGE,
-        2, null, regularUserToken);
+    result = callSearchItemsInSetWithPost(setIdentifier, "*", items, WebUserSetFields.DEFAULT_PAGE,
+        2, SetPageProfile.ITEMS.getProfileParamValue(), regularUserToken, HttpStatus.OK);
     // check ids
     assertTrue(StringUtils.contains(result, searchUri));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
@@ -742,6 +743,36 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
   }
 
+
+  @Test
+  public void searchItemsInSet_with_post_wrong_query() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    List<String> items = List.of("/08641/1037479000000476467",
+        "/08641/1037479000000476875", "/11654/_Botany_U_1419207", "/2048128/618580",
+        "/2048128/618580", "/2048128/notexisting", "/2048128/notexisting1");
+    final int secondPageIndex = WebUserSetFields.DEFAULT_PAGE;
+    // using pagesize 2, we get two pages of results (only 4 items found in set)
+    // retrieve last page
+    
+    String result = callSearchItemsInSetWithPost(setIdentifier, "query:wrong", items, secondPageIndex, 2, null, regularUserToken, HttpStatus.BAD_REQUEST);
+    // check ids
+    String searchUri = "/set/" + setIdentifier + "/search";
+    assertTrue(StringUtils.contains(result, searchUri));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
+    // last page no next
+    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
+    
+  }
+
+  
+  
   @Test
   public void searchItemsInSetPrivate() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
@@ -805,8 +836,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     // getUserSetService().deleteUserSet(setIdentifier);
   }
 
-  private String callSearchItemsInSetWithPost(String setIdentifier, List<String> items, int page,
-      int pageSize, String profile, String regularUserToken)
+  private String callSearchItemsInSetWithPost(String setIdentifier, String query, List<String> items, int page,
+      int pageSize, String profile, String regularUserToken, HttpStatus expectedStatus)
       throws Exception {
 
     List<String> profiles = (profile == null)? null: List.of(profile);
@@ -814,8 +845,11 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
         buildSearchItemsInSetWithPostRequest(setIdentifier, items, page,
             pageSize, profiles, regularUserToken);
         
-
-    return mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.OK.value())).andReturn()
+    if(expectedStatus == null){
+      expectedStatus =  HttpStatus.OK;
+    }
+    
+    return mockMvc.perform(searchRequest).andExpect(status().is(expectedStatus.value())).andReturn()
         .getResponse().getContentAsString();
 
   }

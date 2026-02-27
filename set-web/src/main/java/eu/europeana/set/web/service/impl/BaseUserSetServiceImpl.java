@@ -81,16 +81,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return mongoPersistance;
   }
 
-  public void setMongoPersistance(PersistentUserSetService mongoPersistance) {
-    this.mongoPersistance = mongoPersistance;
-  }
-
   public Logger getLogger() {
     return logger;
-  }
-
-  public void setLogger(Logger logger) {
-    this.logger = logger;
   }
 
   public PersistentUserSetService getMongoPersistance() {
@@ -340,46 +332,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return builder.toString();
   }
 
-  public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
-    // remove out of scope parameters
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
-    // facets are not part of items pagination. Facets are displayed separately
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_FACET, queryString);
-
-    // avoid duplication of query parameters
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
-
-    // add mandatory parameters
-    if (StringUtils.isNotBlank(searchProfile)) {
-      if (!queryString.isEmpty()) {
-        queryString += '&';
-      }
-      queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + '=' + searchProfile);
-
-    }
-
-    // TODO: verify if base URL should be used instead
-    if (!queryString.isEmpty()) {
-      return requestUrl + "?" + queryString;
-    }
-    return requestUrl;
-  }
-
-
-
-  protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize,
-      long totalInCollection, int lastPage, String type, SetPageProfile profile) {
-    String first = null;
-    String last = null;
-
-    if (totalInCollection > 0) {
-      first = buildPageUrl(collectionUrl, WebUserSetFields.DEFAULT_PAGE, pageSize, profile);
-      last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
-    }
-    return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
-  }
-
   protected void setDefaults(UserSet newUserSet, Authentication authentication) {
     Agent user = new WebUser();
     /**
@@ -475,7 +427,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     SetPageProfile ret = null;
     for (SetPageProfile profile : profiles) {
       if (SetPageProfile.FACETS != profile) {
-        return ret = profile;
+        ret = profile;
+        break;
       }
     }
     

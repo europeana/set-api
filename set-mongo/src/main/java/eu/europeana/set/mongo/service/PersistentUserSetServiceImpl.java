@@ -484,7 +484,6 @@ public class PersistentUserSetServiceImpl extends
     return searchQuery;
   }
 
-  @SuppressWarnings("external_fbcontrib:CE_CLASS_ENVY")
   private Query<PersistentUserSet> buildUserConditionsQuery(UserSetQuery query) {
     Query<PersistentUserSet> mongoQuery = getUserSetDao().createQuery();
     mongoQuery.disableValidation();

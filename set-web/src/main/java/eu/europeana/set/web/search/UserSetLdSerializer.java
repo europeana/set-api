@@ -9,7 +9,6 @@ import eu.europeana.api.commons_sb3.definitions.statistics.set.SetMetric;
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.set.definitions.model.UserSet;
-import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 import eu.europeana.set.search.SearchApiRequest;
 import eu.europeana.set.web.model.search.BaseUserSetResultPage;
@@ -20,15 +19,10 @@ import ioinformarics.oss.jackson.module.jsonld.JsonldResourceBuilder;
 
 public class UserSetLdSerializer {
 
-  UserSetUtils userSetUtils = new UserSetUtils();
   ObjectMapper mapper = new ObjectMapper();
   JsonldResourceBuilder<UserSet> userSetResourceBuilder;
   JsonldResourceBuilder<BaseUserSetResultPage<?>> resultPageResourceBuilder;
   JsonldResourceBuilder<CollectionPage> collectionPageResourceBuilder;
-
-  public UserSetUtils getUserSetUtils() {
-    return userSetUtils;
-  }
 
   public UserSetLdSerializer() {
     SimpleDateFormat df = new SimpleDateFormat(DateUtils.DATE_FORMAT, Locale.ENGLISH);
@@ -38,9 +32,9 @@ public class UserSetLdSerializer {
   /**
    * This method provides full serialization of a user set
    * 
-   * @param userSet
+   * @param userSet to serialize
    * @return full user set view
-   * @throws IOException
+   * @throws EuropeanaApiException if serialization fails
    */
   public String serialize(UserSet userSet) throws EuropeanaApiException {
     try {
@@ -54,9 +48,9 @@ public class UserSetLdSerializer {
   /**
    * This method provides full serialization of a user set
    * 
-   * @param userSet
+   * @param obj the domain object to serialize
    * @return full user set view
-   * @throws IOException
+   * @throws EuropeanaApiException if serialization fails
    */
   public String serializeNonLd(Object obj) throws EuropeanaApiException {
     try {
@@ -69,9 +63,9 @@ public class UserSetLdSerializer {
   /**
    * This method provides full serialization of a result page (search results)
    * 
-   * @param resultsPage
+   * @param resultsPage to serialize
    * @return full user set view
-   * @throws IOException
+   * @throws EuropeanaApiException if serialization fails
    */
   public String serialize(BaseUserSetResultPage<?> resultsPage) throws EuropeanaApiException {
     try {
@@ -87,7 +81,7 @@ public class UserSetLdSerializer {
    *
    * @param metricData
    * @return full metric view
-   * @throws IOException
+   * @throws EuropeanaApiException if serialization fails
    */
   public String serialize(SetMetric metricData) throws EuropeanaApiException {
     try {
@@ -102,9 +96,9 @@ public class UserSetLdSerializer {
   /**
    * This method provides full serialization of a searchApiRequest
    *
-   * @param searchApiRequest
+   * @param searchApiRequest request to serialize
    * @return json String of searchApiRequest
-   * @throws IOException
+   * @throws IOException if serialization fails
    */
   public String serialize(SearchApiRequest searchApiRequest) throws IOException {
     mapper.registerModule(new JsonldModule());
@@ -114,9 +108,9 @@ public class UserSetLdSerializer {
   /**
    * This method provides full serialization of a CollectionPage
    * 
-   * @param itemPage
+   * @param itemPage the page to serialize
    * @return full user set view
-   * @throws IOException
+   * @throws IOException if serialization fails
    */
   public String serialize(CollectionPage itemPage) throws IOException {
 

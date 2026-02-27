@@ -31,6 +31,7 @@ public class SetProfileHelper {
    * Verifies the list of profile names and returns the identified profiles
    * @param profiles the list of profile names
    * @param setPageProfiles identified in the input
+   * @return the extracted list of SetPageProfiles
    * @throws UserSetProfileValidationException in case that the input array contains invalid profiles
    */
   public List<SetPageProfile> parseProfiles(List<String> profiles)

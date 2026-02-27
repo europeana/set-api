@@ -665,8 +665,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     long totalInCollection = results.getResultSize();
 
     int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
-    // get profile for pagination urls and item Page
-    //SetPageProfile profile = getProfileForPagination(profiles);
 
     String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search";
     // 'id' field of the page Url
