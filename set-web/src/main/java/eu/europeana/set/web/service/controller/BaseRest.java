@@ -7,6 +7,7 @@ import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFERENCE_APPLIED;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.FORMAT_JSONLD;
+import static eu.europeana.set.web.http.UserSetHttpHeaders.*;
 import static jakarta.ws.rs.core.HttpHeaders.ACCEPT;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
@@ -271,25 +272,41 @@ public class BaseRest extends BaseRestController {
     // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
     headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(storedUserSet.getModified()));
 
+    //EA-4464 add cache control
+    addCacheControl(headers, storedUserSet);
     return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, responseStatus);
   }
 
-
+  /**
+   * Add cache control
+   *   When a set is non-dynamic and has been published (type != DynamicCollection and “visibility“ == “published“)
+   *      Cache-Control: public, max-age=86400
+   *   otherwise : Cache-Control: public, max-age=0
+   * @param headers
+   * @param storedUserSet
+   */
+  private void addCacheControl(MultiValueMap<String, String> headers, UserSet storedUserSet) {
+    if (!storedUserSet.isOpenSet() && storedUserSet.isPublished()) {
+      headers.add(CACHE_CONTROL, CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET);
+    } else {
+      headers.add(CACHE_CONTROL, CACHE_VALUE_DYNAMIC_SET);
+    }
+  }
 
   /**
    * Builds the Set Paginated response
    * @param setPage collection page
-   * @param modified userSet.getModified() date
+   * @param storedUserSet stored userSet
    * @param profile profile requested
    * @param request http request
    * @return
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, Date modified,
+  protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, UserSet storedUserSet,
       SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
-    String etag = generateETag(modified, FORMAT_JSONLD, getApiVersion());
+    String etag = generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
     // build response
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
@@ -302,7 +319,10 @@ public class BaseRest extends BaseRestController {
     // generate “ETag”;
     headers.add(ETAG, etag);
     // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
-    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(modified));
+    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(storedUserSet.getModified()));
+
+    //EA-4464 add cache control
+    addCacheControl(headers, storedUserSet);
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }
 

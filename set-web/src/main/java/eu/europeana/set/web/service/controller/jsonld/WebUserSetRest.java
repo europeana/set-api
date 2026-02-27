@@ -116,12 +116,9 @@ public class WebUserSetRest extends BaseRest {
 
       doPostRetrieveProcessing(storedUserSet, authentication);
 
-      // add specific headers
-      Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
-          UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
       // only one profile used as default, no validation required
       return buildResponseEntity(storedUserSet, SetResourceProfile.META, HttpStatus.CREATED,
-          specificHeaders, request);
+          null, request);
     } catch ( UserSetValidationException | UserSetAttributeInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           Arrays.asList(e.getMessage()), e);
@@ -238,7 +235,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet.getModified(), profile, request);
+      return buildSetPageResponse(itemPage, userSet, profile, request);
   }
 
   private boolean mustFetchItems(UserSet userSet, SetPageProfile profile) {

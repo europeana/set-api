@@ -20,6 +20,9 @@ public class UserSetHttpHeaders {
 
     //other constants
     public static final String VALUE_NO_CAHCHE_STORE_REVALIDATE = "no-cache, no-store, must-revalidate";
+    public static final String CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET = "public, max-age=86400";
+    public static final String CACHE_VALUE_DYNAMIC_SET               = "public, max-age=0";
+
     public static final String VALUE_LDP_CONTAINER              = "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"\n " +
             "<http://www.w3.org/TR/annotation-protocol/constraints>;\n" +
             "rel=\"http://www.w3.org/ns/ldp#constrainedBy\"";
