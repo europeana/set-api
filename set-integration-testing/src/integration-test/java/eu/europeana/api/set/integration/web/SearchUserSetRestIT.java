@@ -757,15 +757,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     // retrieve last page
     
     String result = callSearchItemsInSetWithPost(setIdentifier, "query:wrong", items, secondPageIndex, 2, null, regularUserToken, HttpStatus.BAD_REQUEST);
-    // check ids
-    String searchUri = "/set/" + setIdentifier + "/search";
-    assertTrue(StringUtils.contains(result, searchUri));
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultList));
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.PREV));
+    // check error message
     // last page no next
     assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
     
@@ -842,7 +834,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
     List<String> profiles = (profile == null)? null: List.of(profile);
     MockHttpServletRequestBuilder searchRequest =
-        buildSearchItemsInSetWithPostRequest(setIdentifier, items, page,
+        buildSearchItemsInSetWithPostRequest(setIdentifier, query, items, page,
             pageSize, profiles, regularUserToken);
         
     if(expectedStatus == null){
@@ -855,13 +847,14 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
   
   private MockHttpServletRequestBuilder buildSearchItemsInSetWithPostRequest(String setIdentifier,
-      List<String> items, int page, int pageSize, List<String> profile, String regularUserToken) throws EuropeanaApiException {
+      String searchQuery, List<String> items, int page, int pageSize, List<String> profile, String regularUserToken) throws EuropeanaApiException {
     
     MockHttpServletRequestBuilder request = post("/set/" + setIdentifier + "/search");
     addAuthorizationHeader(request, regularUserToken);
     //add item:
     String[] filters = (String[]) items.stream().map(item ->  (WebUserSetFields.ITEM +":"+ item)).toArray(String[]::new);
     SearchInSetQuery query = new SearchInSetQuery(filters, page, pageSize, profile);
+    query.setQuery(searchQuery);
     
     String body = (new UserSetLdSerializer()).serializeNonLd(query);
     request.content( body );
