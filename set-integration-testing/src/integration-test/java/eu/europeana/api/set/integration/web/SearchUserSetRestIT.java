@@ -39,7 +39,7 @@ import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.search.UserSetQueryBuilder;
 
 @SpringBootTest
-public class SearchUserSetRestIT extends IntegrationTestSetup {
+class SearchUserSetRestIT extends IntegrationTestSetup {
 
   private static final String SEARCH_URL = "/set/search";
   private static final String SEARCH_SET_ID = WebUserSetFields.SET_ID + ":";
@@ -78,7 +78,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchEmptyApiKey() throws Exception {
+  void searchEmptyApiKey() throws Exception {
     // UserSet set = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
     mockMvc
         .perform(get(SEARCH_URL)
@@ -90,7 +90,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchInvalidApiKey() throws Exception {
+  void searchInvalidApiKey() throws Exception {
 
     if (getConfiguration().isApiKeyValidationEnabled()) {
       mockMvc
@@ -107,7 +107,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithoutApiKey() throws Exception {
+  void searchWithoutApiKey() throws Exception {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
@@ -117,7 +117,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithValidSetId() throws Exception {
+  void searchWithValidSetId() throws Exception {
     UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     mockMvc
         .perform(get(SEARCH_URL)
@@ -132,7 +132,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithInvalidSetId() throws Exception {
+  void searchWithInvalidSetId() throws Exception {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
@@ -143,7 +143,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchTitleLang() throws Exception {
+  void searchTitleLang() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
@@ -158,7 +158,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithPublicVisibility() throws Exception {
+  void searchWithPublicVisibility() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
@@ -174,7 +174,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchEntitySet() throws Exception {
+  void searchEntitySet() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
     String query = SEARCH_ENTITY_SET;
@@ -199,7 +199,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchEntitySetByContributor() throws Exception {
+  void searchEntitySetByContributor() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
     String contributor = (String) getAuthentication(editorUserToken).getPrincipal();
@@ -225,7 +225,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchEntitySetByContributorUri() throws Exception {
+  void searchEntitySetByContributorUri() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
     String contributor = (String) getAuthentication(editorUserToken).getPrincipal();
@@ -258,7 +258,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByEmptyTextQuery() throws Exception {
+  void searchSetByEmptyTextQuery() throws Exception {
     // subject in json file: http://data.europeana.eu/concept/base/114
     String query = ":";
     mockMvc
@@ -271,7 +271,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByTitleQuery() throws Exception {
+  void searchSetByTitleQuery() throws Exception {
     // subject in json file: http://data.europeana.eu/concept/base/114
     String query = "title:test";
     mockMvc
@@ -284,7 +284,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByTextQuery() throws Exception {
+  void searchSetByTextQuery() throws Exception {
     String query = ":sportswear golf";
     mockMvc
         .perform(get(SEARCH_URL)
@@ -297,7 +297,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetWithoutTextQueryWithScoreSort() throws Exception {
+  void searchSetWithoutTextQueryWithScoreSort() throws Exception {
     // subject in json file: http://data.europeana.eu/concept/base/114
     String query = "visibility:public";
     mockMvc
@@ -311,7 +311,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByTextQueryDefault() throws Exception {
+  void searchSetByTextQueryDefault() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
     // subject in json file: http://data.europeana.eu/concept/base/114
@@ -344,7 +344,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithScoreSortInAscOrder() throws Exception {
+  void searchWithScoreSortInAscOrder() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
     // subject in json file: http://data.europeana.eu/concept/base/114
@@ -362,7 +362,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByTextQueryWithMultipleCriteria1() throws Exception {
+  void searchSetByTextQueryWithMultipleCriteria1() throws Exception {
     String query = "sportswear golf visibility:public";
     mockMvc
         .perform(get(SEARCH_URL)
@@ -375,9 +375,9 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByTextWithMultipleCriteria2() throws Exception {
-    // query parsing for combination like "visibility:public sportswear golf"; is invalid
-    String query = "visibility:public :sportswear golf";
+  void searchSetByTextWithMultipleCriteria2() throws Exception {
+    // query parsing for combination like "visibility:sportswear golf"; is invalid
+    String query = "visibility::sportswear golf";
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
@@ -388,7 +388,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchSetByTextWithVisibilityFilter() throws Exception {
+  void searchSetByTextWithVisibilityFilter() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
     // String contributor = (String) getAuthentication(editorUserToken).getPrincipal();
@@ -423,13 +423,13 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
 
   @Test
-  public void searchSetMultipleCriteriaWithOutTextQuery() throws Exception {
+  void searchSetMultipleCriteriaWithOutTextQuery() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
     // String contributor = (String) getAuthentication(editorUserToken).getPrincipal();
     // subject in json file: http://data.europeana.eu/concept/base/114
     final String title = set.getTitle().get("en");
-    String query = "visibility:public item:/08641/1037479000000476703";
+    String query = "visibility:item:/08641/1037479000000476703";
     String result =
         mockMvc
             .perform(get(SEARCH_URL)
@@ -456,7 +456,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
 
   @Test
-  public void searchEntitySetBySubject() throws Exception {
+  void searchEntitySetBySubject() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_BEST_ITEMS, editorUserToken);
     // String contributor = (String) getAuthentication(editorUserToken).getPrincipal();
@@ -488,7 +488,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithPublicVisibility_ItemsDescription() throws Exception {
+  void searchWithPublicVisibility_ItemsDescription() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
@@ -504,7 +504,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithOpenUserSet_SetsMeta() throws Exception {
+  void searchWithOpenUserSet_SetsMeta() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -537,7 +537,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithPrivateVisibility() throws Exception {
+  void searchWithPrivateVisibility() throws Exception {
     deleteBookmarkFolder(regularUserToken);
     UserSet set1 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
     UserSet set2 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
@@ -557,7 +557,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithPublishedVisibility() throws Exception {
+  void searchWithPublishedVisibility() throws Exception {
     UserSet set = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     // publish a user set
     mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + set.getIdentifier() + "/publish")
@@ -576,7 +576,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchWithMultipleQfParams() throws Exception {
+  void searchWithMultipleQfParams() throws Exception {
     deleteBookmarkFolder(regularUserToken);
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     UserSet set2 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
@@ -637,7 +637,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchItemsInSet_ItemsMeta() throws Exception {
+  void searchItemsInSet_ItemsMeta() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -665,7 +665,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchItemsInSet() throws Exception {
+  void searchItemsInSet() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -704,7 +704,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
   
   @Test
-  public void searchItemsInSet_with_post() throws Exception {
+  void searchItemsInSet_with_post() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -745,7 +745,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
 
   @Test
-  public void searchItemsInSet_with_post_wrong_query() throws Exception {
+  void searchItemsInSet_with_post_wrong_query() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -766,7 +766,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   
   
   @Test
-  public void searchItemsInSetPrivate() throws Exception {
+  void searchItemsInSetPrivate() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -792,7 +792,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchItemsInSet_empty_response() throws Exception {
+  void searchItemsInSet_empty_response() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -811,7 +811,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchItemsInSet_No_QF_Param() throws Exception {
+  void searchItemsInSet_No_QF_Param() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     String setIdentifier = set1.getIdentifier();
 
@@ -906,9 +906,8 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     }
 
     // apikey will be ignored
-    MockHttpServletRequestBuilder requestBuilder =
+    return
         request.queryParam(CommonApiConstants.QUERY_PARAM_QUERY, UserSetQueryBuilder.SEARCH_ALL);
-    return requestBuilder;
   }
 
   void addAuthorizationHeader(MockHttpServletRequestBuilder request, String regularUserToken) {
@@ -918,7 +917,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchGalleries() throws Exception {
+  void searchGalleries() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_GALLERY, regularUserToken);
     assertNotNull(set1);
     String result = mockMvc
@@ -937,7 +936,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchByWrongCollectionType() throws Exception {
+  void searchByWrongCollectionType() throws Exception {
     final String wrongCollectionType = "wrongCollectionType";
     final String query = WebUserSetFields.COLLECTION_TYPE + ":" + wrongCollectionType;
     String result = mockMvc
@@ -954,7 +953,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
 
   @Test
-  public void searchTypeCollection() throws Exception {
+  void searchTypeCollection() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
     UserSet set2 = createTestUserSet(USER_SET_MANDATORY, regularUserToken);
     mockMvc
@@ -972,7 +971,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
   // Facet validation
   @Test
-  public void searchFacetsNoFacetValidationTest() throws Exception {
+  void searchFacetsNoFacetValidationTest() throws Exception {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
@@ -983,7 +982,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsInvalidFacetValidationTest() throws Exception {
+  void searchFacetsInvalidFacetValidationTest() throws Exception {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
@@ -995,7 +994,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsEmptyFacetValidationTest() throws Exception {
+  void searchFacetsEmptyFacetValidationTest() throws Exception {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
@@ -1007,7 +1006,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsMultipleFacetValidationTest() throws Exception {
+  void searchFacetsMultipleFacetValidationTest() throws Exception {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
@@ -1020,7 +1019,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
 
   // Multiple profile validation
   @Test
-  public void searchFacetsMultipleProfileInvalid() throws Exception {
+  void searchFacetsMultipleProfileInvalid() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_FACETS + "," + "test";
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
@@ -1032,7 +1031,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsMultipleProfileWithoutFacets() throws Exception {
+  void searchFacetsMultipleProfileWithoutFacets() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_META + "," + ProfileConstants.VALUE_PARAM_ITEMS;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
@@ -1044,7 +1043,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsMultipleInvalidProfileWithFacets() throws Exception {
+  void searchFacetsMultipleInvalidProfileWithFacets() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_MINIMAL + ","
         + ProfileConstants.VALUE_PARAM_FACETS + "," + ProfileConstants.VALUE_PARAM_STANDARD;
     mockMvc
@@ -1057,7 +1056,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsMultipleValidProfileWithFacets() throws Exception {
+  void searchFacetsMultipleValidProfileWithFacets() throws Exception {
     createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
     String profile = ProfileConstants.VALUE_PARAM_META + "," + ProfileConstants.VALUE_PARAM_FACETS;
     mockMvc
@@ -1070,7 +1069,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsMultipleValidProfileWithFacets_Debug() throws Exception {
+  void searchFacetsMultipleValidProfileWithFacets_Debug() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_DEBUG + "," + ProfileConstants.VALUE_PARAM_FACETS;
     mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
@@ -1082,7 +1081,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsMultipleValidProfileWithFacetsDebug() throws Exception {
+  void searchFacetsMultipleValidProfileWithFacetsDebug() throws Exception {
     // profiles can also be space separated
     String profile = ProfileConstants.VALUE_PARAM_DEBUG + " " + ProfileConstants.VALUE_PARAM_FACETS
         + "  " + ProfileConstants.VALUE_PARAM_META;
@@ -1096,7 +1095,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacetsValidFacetTest() throws Exception {
+  void searchFacetsValidFacetTest() throws Exception {
     // delete the bookmarkFolder already if exists
     deleteBookmarkFolder(regularUserToken);
     deleteBookmarkFolder(editorUserToken);
@@ -1128,7 +1127,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
   }
 
   @Test
-  public void searchFacet0PageSizeTest() throws Exception {
+  void searchFacet0PageSizeTest() throws Exception {
     // delete the bookmarkFolder already if exists
     deleteBookmarkFolder(regularUserToken);
     deleteBookmarkFolder(editorUserToken);

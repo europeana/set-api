@@ -1,11 +1,6 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW_GET;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSON_UTF8;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -257,10 +252,7 @@ public class SearchUserSetRest extends BaseRest {
     return filtered;
   }
 
-  @PostMapping(
-      value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
-          "/set/{identifier}/search.jsonld"},
-      produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
+  
   /**
    * Search items in set using post method
    * @param identifier set id
@@ -269,6 +261,10 @@ public class SearchUserSetRest extends BaseRest {
    * @return a Set page response
    * @throws EuropeanaApiException in case of authentication or processing failures
    */
+  @PostMapping(
+      value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
+          "/set/{identifier}/search.jsonld"},
+      produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
       @RequestBody SearchInSetQuery inSetQuery,

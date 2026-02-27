@@ -6,14 +6,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.europeana.api.commons_sb3.definitions.search.impl.QueryImpl;
 
-@JsonInclude(Include.NON_NULL)
 /**
  * Class for modeling the input for Set in search using post method
  */
+@JsonInclude(Include.NON_NULL)
 public class SearchInSetQuery extends QueryImpl {
 
   private List<String> profile;
   
+  /**
+   * default constructor
+   */
   public SearchInSetQuery() {
     super();
   }
@@ -27,7 +30,10 @@ public class SearchInSetQuery extends QueryImpl {
    */
   public SearchInSetQuery(String[] filters, int page, int pageSize, List<String> profile) {
     super();
-    this.profile  = profile;
+    if(profile != null) {
+      this.profile = List.copyOf(profile);  
+    }
+    
     this.setFilters(filters);
     this.setPageNr(page);
     this.setPageSize(pageSize);
@@ -52,7 +58,7 @@ public class SearchInSetQuery extends QueryImpl {
 
   @JsonProperty("profile")
   public void setProfile(List<String> profile) {
-    this.profile = profile;
+    this.profile = List.copyOf(profile);
   }
 
   @JsonProperty("fl")
