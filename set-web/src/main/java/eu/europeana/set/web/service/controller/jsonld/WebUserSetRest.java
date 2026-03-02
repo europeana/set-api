@@ -7,6 +7,8 @@ import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFERENCE_APPLIED;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.*;
+
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -902,9 +904,8 @@ public class WebUserSetRest extends BaseRest {
       // if creator is passed, verify if the user is admin.
       // Owner/User can not perform this action
       if (!getUserSetService().isAdmin(authentication)) {
-        throw new ApplicationAuthenticationException(null, ErrorConfig.OPERATION_NOT_AUTHORIZED,
-            Arrays.asList("Only admins are authorized to perform this operation."),
-            HttpStatus.FORBIDDEN);
+        getLogger().error("Only admins are authorized to perform this operation.");
+        throw new ApplicationAuthenticationException(ErrorMessage.USER_NOT_AUTHORISED_403,Arrays.asList("Only admins are authorized to perform this operation."),HttpStatus.FORBIDDEN);
       }
       if (!StringUtils.startsWith(creatorId, "http")) {
         return UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), creatorId);
@@ -925,7 +926,7 @@ public class WebUserSetRest extends BaseRest {
       // verify if the user sets are associated with the creatorId
       for (UserSet userset : userSets) {
         if (!StringUtils.equals(creatorId, userset.getCreator().getHttpUrl())) {
-          throw new ApplicationAuthenticationException(null, ErrorConfig.OPERATION_NOT_AUTHORIZED,
+          throw new ApplicationAuthenticationException(ErrorMessage.USER_NOT_AUTHORISED_403,
                   Arrays.asList("Only user associated sets can be deleted"),
                   HttpStatus.FORBIDDEN);
         }
