@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Date;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -461,13 +463,19 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
                 .andExpect(status().isOk());
 
         // IF_MATCH with wrong etag - 412 response
-        mockMvc
+        MockHttpServletResponse errorResponse = mockMvc
                 .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
                         .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_MATCH, "test"))
-                .andExpect(status().isPreconditionFailed());
-    }
+                        .header(HttpHeaders.IF_MATCH, "test")).andReturn().getResponse();
+
+        assertEquals(HttpStatus.PRECONDITION_FAILED.value(), errorResponse.getStatus());
+        String content = errorResponse.getContentAsString();
+        // check response body
+        assertFalse(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getError()));
+        assertFalse(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getCode()));
+
+  }
 
   @Test
   public void updateUserSet_Success() throws Exception {
