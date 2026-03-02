@@ -34,11 +34,14 @@ public class WebUserSetRequestUtils {
       try {
         Integer value = Integer.valueOf(paramValue);
         if ((maxValue > 0 && value > maxValue) || value < minValue) {
-          throw new InvalidParamException(Arrays.asList(paramName, "value in range", paramValue));
+          throw new InvalidParamException(Arrays.asList(
+                  paramName,
+                  "value should be in range of " +minValue + "-" + maxValue,
+                  paramValue));
         }
         return value;
       } catch (NumberFormatException e) {
-        throw new InvalidParamException(Arrays.asList(paramName, "integer value", paramValue), e);
+        throw new InvalidParamException(Arrays.asList(paramName, "should be an integer value", paramValue), e);
       }
     }
     return null;

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -277,8 +279,10 @@ public class SearchUserSetRest extends BaseRest {
       inSetQuery.setQuery(UserSetQueryBuilder.SEARCH_ALL);
     }else if (!UserSetQueryBuilder.isSearchAllQuery(inSetQuery.getQuery())) {
       throw new InvalidBodyException(Collections.singletonMap(
-          UserSetI18nConstants.USERSET_VALIDATION_PROPERTY_VALUE, Arrays.asList("query", inSetQuery.getQuery()
-              + " Currently only * is supported as query, use qf for provinding the items list.")));
+              ErrorConfig.INVALID_PARAM,
+              Arrays.asList("query",
+                      "Currently only * is supported as query, use qf for providing the items list.",
+                      inSetQuery.getQuery())));
     }
 
     SetPageProfile profile;
