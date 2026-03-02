@@ -472,8 +472,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         assertEquals(HttpStatus.PRECONDITION_FAILED.value(), errorResponse.getStatus());
         String content = errorResponse.getContentAsString();
         // check response body
-        assertFalse(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getError()));
-        assertFalse(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getCode()));
+        assertTrue(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getError()));
+        assertTrue(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getCode()));
 
   }
 
