@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
@@ -50,7 +47,8 @@ public class SearchUserSetRest extends BaseRest {
     return queryBuilder;
   }
 
-  @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
+  @RequestMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
+          method = {RequestMethod.GET, RequestMethod.HEAD},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
@@ -130,9 +128,10 @@ public class SearchUserSetRest extends BaseRest {
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
 
-  @GetMapping(
+  @RequestMapping(
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
+          method = {RequestMethod.GET, RequestMethod.HEAD},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,

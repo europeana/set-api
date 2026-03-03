@@ -2,6 +2,7 @@ package eu.europeana.set.web.config;
 
 import eu.europeana.api.commons_sb3.auth.AuthenticationBuilder;
 import eu.europeana.api.commons_sb3.auth.AuthenticationConfig;
+import eu.europeana.api.commons_sb3.error.AbstractRequestPathMethodService;
 import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.i18n.I18nService;
 import eu.europeana.api.commons_sb3.error.i18n.I18nServiceImpl;
@@ -69,4 +70,8 @@ public class UserSetAutoConfig{
     return new WriteLockAuthorizationService(apiWriteLockService);
   }
 
+  @Bean
+  public AbstractRequestPathMethodService getAbstractRequestPathMethodService(){
+    return  new AbstractRequestPathMethodService();
+  }
 }

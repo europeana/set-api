@@ -15,12 +15,13 @@ import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+
+import eu.europeana.api.commons_sb3.error.AbstractRequestPathMethodService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +55,6 @@ import eu.europeana.set.web.config.BuildInfo;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
-import eu.europeana.set.web.service.RequestPathMethodService;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
@@ -84,7 +84,7 @@ public class BaseRest extends BaseRestController {
   protected BuildInfo buildInfo;
 
   @Resource
-  private RequestPathMethodService requestMethodService;
+  private AbstractRequestPathMethodService requestMethodService;
 
   SetProfileHelper profileHelper = new SetProfileHelper();
 
@@ -278,7 +278,8 @@ public class BaseRest extends BaseRestController {
   }
 
   /**
-   * Add cache control
+   * If headers already contain the cache-control, no need to add.
+   * if not, Add cache control
    *   When a set is non-dynamic and has been published (type != DynamicCollection and “visibility“ == “published“)
    *      Cache-Control: public, max-age=86400
    *   otherwise : Cache-Control: public, max-age=0
@@ -286,6 +287,8 @@ public class BaseRest extends BaseRestController {
    * @param storedUserSet
    */
   private void addCacheControl(MultiValueMap<String, String> headers, UserSet storedUserSet) {
+    if (headers.containsKey(CACHE_CONTROL)) return;
+
     if (!storedUserSet.isOpenSet() && storedUserSet.isPublished()) {
       headers.add(CACHE_CONTROL, CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET);
     } else {
