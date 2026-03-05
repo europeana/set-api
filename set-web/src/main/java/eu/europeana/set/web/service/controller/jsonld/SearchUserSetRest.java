@@ -358,7 +358,7 @@ public class SearchUserSetRest extends BaseRest {
     String recordId;
     for (int i = 0; i < qf.length; i++) {
       if (!qf[i].contains(ITEM_PREFIX)) {
-        throw new InvalidParamException(Arrays.asList("qf", "invalid value", qf[i]));
+        throw new InvalidParamException(Arrays.asList("qf", "entries with format 'item:<identifier>'", qf[i]));
       }
       recordId = qf[i].replace(ITEM_PREFIX, "").trim();
       itemIds.add(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), recordId));

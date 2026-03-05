@@ -1,5 +1,6 @@
 package eu.europeana.api.set.integration.web;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,6 +19,8 @@ import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
 
 @SpringBootTest
 class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
+
+  private static final String ERROR_MSG_QF_MANDATORY = "The mandatory parameter qf was not found in the request";
 
   @Test
   void searchEmptyApiKey() throws Exception {
@@ -214,7 +217,7 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
     String result = callSearchItemsInSetWithPost(setIdentifier, "{}", regularUserToken, HttpStatus.BAD_REQUEST);
     // check error message
     assertTrue(containsKeyOrValue(result, "ErrorResponse"));
-    assertTrue(result.contains("The mandatory parameter qf was not found in the request"));    
+    assertTrue(result.contains(ERROR_MSG_QF_MANDATORY));    
   }
   
   @Test
@@ -223,11 +226,47 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
 
     String setIdentifier = set1.getIdentifier();
     
-    String result = callSearchItemsInSetWithPost(setIdentifier, "{\"query\":\"'*\"}", regularUserToken, HttpStatus.BAD_REQUEST);
+    String inSetQuery = "{\"query\":\"*\"}";
+    String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery, regularUserToken, HttpStatus.BAD_REQUEST);
     // check error message
-    // last page no next
-    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT)); 
+    assertTrue(result.contains(ERROR_MSG_QF_MANDATORY));
+    
   }
+  
+  @Test
+  void searchItemsInSet_withPost_noItemPrefix() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    String inSetQuery = "{\"query\":\"*\",\"qf\":[\"/000000/\"],\"profile\":[\"items\"]}"; 
+    
+    String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery, regularUserToken, HttpStatus.BAD_REQUEST);
+    // check error message
+    assertTrue(result.contains("The parameter qf sent in the request is invalid, expected : entries with format 'item:<identifier>', found : /000000/")); 
+  }
+  
+  @Test
+  void searchItemsInSet_withPost_ItemsProfile() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    String inSetQuery = "{\"query\":\"*\",\"qf\":[\"item:/000000/\"],\"profile\":[\"items\"]}"; 
+    String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery , regularUserToken, null);
+    // check ids
+    String searchUri = "/set/" + setIdentifier + "/search";
+    assertTrue(StringUtils.contains(result, searchUri));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    //expect empty page
+    assertFalse(containsKeyOrValue(result, CommonLdConstants.ResultList));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.FIRST));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.PREV));
+    // last page no next
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.NEXT));
+  }
+  
+  
 
   @Test
   void searchItemsInSet_No_QF_Param() throws Exception {
