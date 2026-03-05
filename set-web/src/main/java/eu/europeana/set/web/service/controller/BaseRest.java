@@ -15,12 +15,7 @@ import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
 
 import eu.europeana.api.commons_sb3.error.ApiRequestPathMethodService;
 import org.apache.commons.lang3.StringUtils;
@@ -250,50 +245,52 @@ public class BaseRest extends BaseRestController {
     return buildInfo.getAppVersion();
   }
 
-  protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
-      final SetResourceProfile profile, final HttpStatusCode responseStatus,
-      Map<String, String> additionalHeaders, HttpServletRequest request) throws EuropeanaApiException {
-    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
-
-    String etag = generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
-
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+  /**
+   * Creates basic response headers needed
+   *
+   * NOTE :
+   *    1. The last Modified date has to be of RFC 1123 format,
+   *       or else it would be emitted from the response
+   *    2. CACHE_CONTROL :  When a set is non-dynamic and has been published
+   *                       (type != DynamicCollection and “visibility“ == “published“) - Cache-Control: public, max-age=86400
+   *                       otherwise : Cache-Control: public, max-age=0
+   * @param request http request
+   * @param userSet userSet values are used  for generating etag, last-modified and cache control headers
+   * @param cacheControlValue if value present add that or else determined
+   *                          based on the if the user set is dynamic or not
+   * @return map with response headers
+   *
+   */
+  protected MultiValueMap<String, String> createResponseHeaders(UserSet userSet,
+                                                                String cacheControlValue,
+                                                                HttpServletRequest request) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
     headers.add(ALLOW, createAllowHeader(request));
-    if (additionalHeaders != null) {
-      for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
-        headers.add(entry.getKey(), entry.getValue());
+    headers.add(UserSetHttpHeaders.ETAG, generateETag(userSet.getModified(), FORMAT_JSONLD, getApiVersion()));
+    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+
+    if (StringUtils.isNotEmpty(cacheControlValue)) {
+      headers.add(CACHE_CONTROL, cacheControlValue);
+    } else {
+      if (!userSet.isOpenSet() && userSet.isPublished()) {
+        headers.add(CACHE_CONTROL, CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET);
+      } else {
+        headers.add(CACHE_CONTROL, CACHE_VALUE_DYNAMIC_SET);
       }
     }
 
-    // generate “ETag”;
-    headers.add(UserSetHttpHeaders.ETAG, etag);
-    // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
-    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(storedUserSet.getModified()));
-
-    //EA-4464 add cache control
-    addCacheControl(headers, storedUserSet);
-    return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, responseStatus);
+    return headers;
   }
 
-  /**
-   * If headers already contain the cache-control, no need to add.
-   * if not, Add cache control
-   *   When a set is non-dynamic and has been published (type != DynamicCollection and “visibility“ == “published“)
-   *      Cache-Control: public, max-age=86400
-   *   otherwise : Cache-Control: public, max-age=0
-   * @param headers
-   * @param storedUserSet
-   */
-  private void addCacheControl(MultiValueMap<String, String> headers, UserSet storedUserSet) {
-    if (headers.containsKey(CACHE_CONTROL)) return;
-
-    if (!storedUserSet.isOpenSet() && storedUserSet.isPublished()) {
-      headers.add(CACHE_CONTROL, CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET);
-    } else {
-      headers.add(CACHE_CONTROL, CACHE_VALUE_DYNAMIC_SET);
-    }
+  protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
+      final SetResourceProfile profile, final HttpStatusCode responseStatus,
+       String defaultCacheControl, HttpServletRequest request) throws EuropeanaApiException {
+    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
+    return new ResponseEntity<>(serializedUserSetJsonLdStr,
+            createResponseHeaders(storedUserSet, defaultCacheControl, request),
+            responseStatus);
   }
 
   /**
@@ -309,23 +306,11 @@ public class BaseRest extends BaseRestController {
       SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
-    String etag = generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
 
     // build response
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-    // headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-    headers.add(ALLOW, createAllowHeader(request));
+    MultiValueMap<String, String> headers = createResponseHeaders(storedUserSet, VALUE_NO_CAHCHE_STORE_REVALIDATE, request);
     headers.add(VARY, PREFER);
     headers.add(PREFERENCE_APPLIED, profile.getPreferenceApplied());
-    // generate “ETag”;
-    headers.add(ETAG, etag);
-    // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
-    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(storedUserSet.getModified()));
-
-    //EA-4464 add cache control
-    addCacheControl(headers, storedUserSet);
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }
 

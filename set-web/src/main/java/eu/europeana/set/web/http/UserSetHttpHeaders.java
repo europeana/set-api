@@ -8,16 +8,6 @@ public class UserSetHttpHeaders {
 		//private constructor to hide implicit one
 	}
 
-	// method constants
-    public static final String ALLOW_GPDOH = "GET,PUT,DELETE,OPTIONS,HEAD";
-    public static final String ALLOW_GPPD  = "GET,POST,PUT,DELETE";
-    public static final String ALLOW_GPD   = "GET,PUT,DELETE";
-    public static final String ALLOW_PPGHD = "POST,PUT,GET,HEAD,DELETE";
-    public static final String ALLOW_PG    = "POST,GET";
-    public static final String ALLOW_PUT    = "PUT";
-    public static final String ALLOW_PGD = "POST,GET,DELETE";
-    
-
     //other constants
     public static final String VALUE_NO_CAHCHE_STORE_REVALIDATE = "no-cache, no-store, must-revalidate";
     public static final String CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET = "public, max-age=86400";
@@ -36,8 +26,5 @@ public class UserSetHttpHeaders {
     public static final String VARY               = "Vary";
     public static final String ETAG               = "ETag";
     public static final String CACHE_CONTROL      = "Cache-Control";
-
-     // Authorization constants
-    public static final String BEARER = "Bearer";
 
 }
