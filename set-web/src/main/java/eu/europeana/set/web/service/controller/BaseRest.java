@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 
-import eu.europeana.api.commons_sb3.error.AbstractRequestPathMethodService;
+import eu.europeana.api.commons_sb3.error.ApiRequestPathMethodService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,7 +84,7 @@ public class BaseRest extends BaseRestController {
   protected BuildInfo buildInfo;
 
   @Resource
-  private AbstractRequestPathMethodService requestMethodService;
+  private ApiRequestPathMethodService requestMethodService;
 
   SetProfileHelper profileHelper = new SetProfileHelper();
 
@@ -260,7 +260,6 @@ public class BaseRest extends BaseRestController {
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
     headers.add(ALLOW, createAllowHeader(request));
-    // headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
     if (additionalHeaders != null) {
       for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
         headers.add(entry.getKey(), entry.getValue());

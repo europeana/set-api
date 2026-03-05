@@ -48,7 +48,7 @@ public class SearchUserSetRest extends BaseRest {
   }
 
   @RequestMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
-          method = {RequestMethod.GET, RequestMethod.HEAD},
+          method = {RequestMethod.GET},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
@@ -109,7 +109,7 @@ public class SearchUserSetRest extends BaseRest {
           request.getQueryString(), profiles, authentication);
 
       String jsonLd = serializeResultsPage(resultsPage);
-      return buildSearchResponse(jsonLd);
+      return buildSearchResponse(jsonLd, request);
   }
 
   @SuppressWarnings("rawtypes")
@@ -118,12 +118,12 @@ public class SearchUserSetRest extends BaseRest {
     return serializer.serialize(resultsPage);
   }
 
-  private ResponseEntity<String> buildSearchResponse(String jsonLd) {
+  private ResponseEntity<String> buildSearchResponse(String jsonLd, HttpServletRequest request) {
     // build response
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
     headers.add(UserSetHttpHeaders.VARY, AcceptUtils.ACCEPT);
     headers.add(UserSetHttpHeaders.VARY, PREFER);
-    headers.add(ALLOW, ALLOW_GET);
+    headers.add(ALLOW, createAllowHeader(request));
 
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
@@ -208,7 +208,7 @@ public class SearchUserSetRest extends BaseRest {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
       headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(ALLOW, ALLOW_GET);
+      headers.add(ALLOW, createAllowHeader(request));
 
       return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
 

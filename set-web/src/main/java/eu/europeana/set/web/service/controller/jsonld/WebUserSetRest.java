@@ -693,7 +693,7 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-    return deleteItemFromUserSet(request, authentication, identifier, datasetId, localId);
+    return deleteItemFromUserSet(authentication, identifier, datasetId, localId, request);
   }
 
   /**
@@ -706,8 +706,8 @@ public class WebUserSetRest extends BaseRest {
    * @return response entity that comprises response body, headers and status code
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> deleteItemFromUserSet(HttpServletRequest request,
-           Authentication authentication, String identifier, String datasetId, String localId) throws EuropeanaApiException {
+  protected ResponseEntity<String> deleteItemFromUserSet(Authentication authentication,
+                     String identifier, String datasetId, String localId, HttpServletRequest request) throws EuropeanaApiException {
     try {
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
@@ -763,11 +763,11 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-    return deleteMultipleItemsFromUserSet(request, authentication, identifier, items);
+    return deleteMultipleItemsFromUserSet(authentication, identifier, items, request);
   }
 
-  protected ResponseEntity<String> deleteMultipleItemsFromUserSet(HttpServletRequest request, Authentication authentication,
-      String identifier, List<String> items) throws EuropeanaApiException {
+  protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication,
+      String identifier, List<String> items, HttpServletRequest request) throws EuropeanaApiException {
     try {
       // 3. check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
