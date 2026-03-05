@@ -407,7 +407,7 @@ public class WebUserSetPublishingIT extends IntegrationTestSetup {
         .perform(MockMvcRequestBuilders.put(BASE_URL + userSet1.getIdentifier() + "/publish")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
   }
 
 }

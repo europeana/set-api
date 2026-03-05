@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.List;
 
-import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -77,7 +76,6 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-            .queryParam(OAuthUtils.PARAM_WSKEY, "")
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -90,7 +88,6 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
       mockMvc
           .perform(get(SEARCH_URL)
               .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
-              .queryParam(OAuthUtils.PARAM_WSKEY, "invalid_api_key")
               .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
               .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
           .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
