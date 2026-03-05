@@ -176,7 +176,7 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
   }
 
   @Test
-  void searchItemsInSet_with_post_wrong_query() throws Exception {
+  void searchItemsInSet_withPost_wrongQuery() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -190,8 +190,43 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
     String result = callSearchItemsInSetWithPost(setIdentifier, "query:wrong", items, secondPageIndex, 2, null, regularUserToken, HttpStatus.BAD_REQUEST);
     // check error message
     // last page no next
-    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT));
+    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT)); 
+  }
+
+  @Test
+  void searchItemsInSet_withPost_noBody() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
     
+    String result = callSearchItemsInSetWithPost(setIdentifier, null, regularUserToken, HttpStatus.BAD_REQUEST);
+    // check error response
+    assertTrue(containsKeyOrValue(result, "ErrorResponse"));
+    assertTrue(result.contains("Required request body is missing"));
+  }
+  
+  @Test
+  void searchItemsInSet_withPost_emptyBody() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    
+    String result = callSearchItemsInSetWithPost(setIdentifier, "{}", regularUserToken, HttpStatus.BAD_REQUEST);
+    // check error message
+    assertTrue(containsKeyOrValue(result, "ErrorResponse"));
+    assertTrue(result.contains("The mandatory parameter qf was not found in the request"));    
+  }
+  
+  @Test
+  void searchItemsInSet_withPost_noQf() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    
+    String result = callSearchItemsInSetWithPost(setIdentifier, "{\"query\":\"'*\"}", regularUserToken, HttpStatus.BAD_REQUEST);
+    // check error message
+    // last page no next
+    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT)); 
   }
 
   @Test

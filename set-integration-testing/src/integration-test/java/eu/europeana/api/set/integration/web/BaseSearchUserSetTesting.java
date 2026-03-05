@@ -102,7 +102,9 @@ public class BaseSearchUserSetTesting  extends IntegrationTestSetup{
         
         MockHttpServletRequestBuilder request = post("/set/" + setIdentifier + "/search");
         addAuthorizationHeader(request, regularUserToken);
-        request.content( body );
+        if(body != null) {
+          request.content( body );
+        }
         request.contentType(MediaType.APPLICATION_JSON);
         return request;
       }

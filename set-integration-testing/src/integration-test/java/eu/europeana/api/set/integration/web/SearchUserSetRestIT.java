@@ -470,7 +470,7 @@ class SearchUserSetRestIT extends BaseSearchUserSetTesting{
   }
   
   @Test
-  void searchItemsInSet_with_post() throws Exception {
+  void searchItemsInSet_withPost() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
     String setIdentifier = set1.getIdentifier();
@@ -505,8 +505,29 @@ class SearchUserSetRestIT extends BaseSearchUserSetTesting{
     assertTrue(containsKeyOrValue(result, WebUserSetFields.FIRST));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.LAST));
     // first page no prev
-    assertTrue(!containsKeyOrValue(result, WebUserSetFields.PREV));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.PREV));
     assertTrue(containsKeyOrValue(result, WebUserSetFields.NEXT));
+  }
+  
+  @Test
+  void searchItemsInSet_withPost_ItemsProfile() throws Exception {
+    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
+
+    String setIdentifier = set1.getIdentifier();
+    String inSetQuery = "{\"query\":\"*\",\"qf\":[\"item:/000000/\"],\"profile\":[\"items\"]}"; 
+    String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery , regularUserToken, null);
+    // check ids
+    String searchUri = "/set/" + setIdentifier + "/search";
+    assertTrue(StringUtils.contains(result, searchUri));
+    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
+    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
+    //expect empty page
+    assertFalse(containsKeyOrValue(result, CommonLdConstants.ResultList));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.FIRST));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.PREV));
+    // last page no next
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.NEXT));
   }
   
   @Test

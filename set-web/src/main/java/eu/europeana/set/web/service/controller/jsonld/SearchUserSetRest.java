@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,8 +22,10 @@ import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
+import eu.europeana.api.commons_sb3.error.exceptions.MissingParamException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import eu.europeana.set.definitions.exception.UserSetProfileValidationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -285,6 +286,11 @@ public class SearchUserSetRest extends BaseRest {
                       inSetQuery.getQuery())));
     }
 
+    // parses and validates items
+    List<String> itemIds = buildItemIdsList(inSetQuery);
+    List<String> filtered = getItemsInSet(identifier, itemIds, authentication);
+
+    
     SetPageProfile profile;
     if(inSetQuery.getProfile() == null) {
       profile = SetPageProfile.ITEMS;
@@ -303,13 +309,15 @@ public class SearchUserSetRest extends BaseRest {
       profile = getUserSetService().getProfileForPagination(profiles, SetPageProfile.ITEMS);   
     }
     
-    // parses and validates items
-    List<String> itemIds = buildItemIdsList(inSetQuery);
-    List<String> filtered = getItemsInSet(identifier, itemIds, authentication);
-
     Integer pageNr = inSetQuery.getPageNr() > WebUserSetFields.DEFAULT_PAGE ?
         inSetQuery.getPageNr() : WebUserSetFields.DEFAULT_PAGE;
-
+    
+    //set default pageSize if not provided in request
+    final int noPageSize = -1;
+    if(noPageSize == inSetQuery.getPageSize()) {
+      inSetQuery.setPageSize( UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+    }
+      
     Integer pageItems = validatePageSize(""+ inSetQuery.getPageSize(), profile);
 
     BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
@@ -324,11 +332,12 @@ public class SearchUserSetRest extends BaseRest {
    * build the list of Item Ids based on the record ids included query 
    * @param inSetQuery containing list of record ids
    * @return list of userset item ids
-   * @throws InvalidParamException if one of the filters is does not contain "item" as field name  
+   * @throws InvalidParamException if one of the filters is does not contain "item" as field name, or MissingParamException if "qf" is not present in the request   
    */
-  private List<String> buildItemIdsList(SearchInSetQuery inSetQuery) throws InvalidParamException {
-    if (inSetQuery == null || inSetQuery.getFilters() == null || inSetQuery.getFilters().length == 0) {
-      return Collections.emptyList();
+  private List<String> buildItemIdsList(@NonNull SearchInSetQuery inSetQuery) throws EuropeanaApiException {
+    if (inSetQuery.getFilters() == null || inSetQuery.getFilters().length == 0) {
+      //qf is mandatory for search in set
+      throw new MissingParamException(List.of("qf"));
     }
     
     List<String> itemIds = buildItemIdsList(inSetQuery.getFilters());
@@ -349,7 +358,7 @@ public class SearchUserSetRest extends BaseRest {
     String recordId;
     for (int i = 0; i < qf.length; i++) {
       if (!qf[i].contains(ITEM_PREFIX)) {
-        throw new InvalidParamException(Arrays.asList("qf", "valid value", qf[i]));
+        throw new InvalidParamException(Arrays.asList("qf", "invalid value", qf[i]));
       }
       recordId = qf[i].replace(ITEM_PREFIX, "").trim();
       itemIds.add(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), recordId));

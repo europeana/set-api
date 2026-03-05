@@ -60,7 +60,7 @@ public class SearchInSetQuery extends QueryImpl {
   public void setProfile(List<String> profile) {
     this.profile = List.copyOf(profile);
   }
-
+  
   @JsonProperty("fl")
   @Override
   public void setViewFields(String[] viewFields) {
