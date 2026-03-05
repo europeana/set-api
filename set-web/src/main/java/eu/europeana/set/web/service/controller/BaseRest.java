@@ -13,6 +13,7 @@ import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
 import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -372,9 +373,8 @@ public class BaseRest extends BaseRestController {
       auth = ((UserSetAuthorizationServiceImpl) getAuthorizationService()).checkPermissions(auth,
           operation);
     } catch (AuthorizationExtractionException e) {
-      throw new ApplicationAuthenticationException("Authentication error: " + e.getMessage(),
-          ErrorConfig.OPERATION_NOT_AUTHORIZED, Arrays.asList(operation), HttpStatus.UNAUTHORIZED,
-          e);
+      throw new ApplicationAuthenticationException(ErrorMessage.TOKEN_INVALID_401, null,
+          HttpStatus.UNAUTHORIZED, e);
     }
     return auth;
   }

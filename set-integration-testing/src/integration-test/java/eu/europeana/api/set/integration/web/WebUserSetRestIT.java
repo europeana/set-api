@@ -543,7 +543,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .perform(delete(BASE_URL).queryParam(WebUserSetFields.PATH_PARAM_CREATOR_ID, "creatorID")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+        .andExpect(status().is(HttpStatus.FORBIDDEN.value()));
   }
 
   @Test

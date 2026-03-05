@@ -7,9 +7,8 @@ import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFERENCE_APPLIED;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.*;
-import static eu.europeana.set.web.http.UserSetHttpHeaders.CACHE_CONTROL;
-import static eu.europeana.set.web.http.UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE;
 
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -119,14 +118,12 @@ public class WebUserSetRest extends BaseRest {
 
       doPostRetrieveProcessing(storedUserSet, authentication);
 
+      // add specific headers
+      Map<String, String> specificHeaders = Map.of(UserSetHttpHeaders.CACHE_CONTROL,
+          UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
       // only one profile used as default, no validation required
-      return buildResponseEntity(storedUserSet,
-              SetResourceProfile.META,
-              HttpStatus.CREATED,
-              // Cache-Control: no-cache, no-store, must-revalidate
-              // (could be changed to “private” once user sets can be private)
-              Collections.singletonMap(CACHE_CONTROL, VALUE_NO_CAHCHE_STORE_REVALIDATE),
-              request);
+      return buildResponseEntity(storedUserSet, SetResourceProfile.META, HttpStatus.CREATED,
+          specificHeaders, request);
     } catch ( UserSetValidationException | UserSetAttributeInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           Arrays.asList(e.getMessage()), e);
@@ -136,8 +133,7 @@ public class WebUserSetRest extends BaseRest {
 
   }
 
-  @RequestMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
-          method = {RequestMethod.GET, RequestMethod.HEAD},
+  @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> getUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
@@ -244,7 +240,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet, profile, request);
+      return buildSetPageResponse(itemPage, userSet.getModified(), profile, request);
   }
 
   private boolean mustFetchItems(UserSet userSet, SetPageProfile profile) {
@@ -309,12 +305,8 @@ public class WebUserSetRest extends BaseRest {
       UserSet updatedUserSet =
           getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet, authentication);
 
-      // no cache control headers in the response
-      return buildResponseEntity(updatedUserSet,
-              SetResourceProfile.META,
-              HttpStatus.OK,
-              Collections.singletonMap(CACHE_CONTROL, null),
-              request);
+      return buildResponseEntity(updatedUserSet, SetResourceProfile.META, HttpStatus.OK, null,
+          request);
 
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY, Arrays.asList(e.getMessage()), e);
@@ -382,9 +374,8 @@ public class WebUserSetRest extends BaseRest {
       UserSet updatedUserSet =
           getUserSetService().publishUnpublishUserSet(identifier, issued, authentication, publish);
 
-      // build response entity with headers ( no cacahe header)
-      return buildResponseEntity(updatedUserSet, SetResourceProfile.META, HttpStatus.OK,
-              Collections.singletonMap(CACHE_CONTROL, null),
+      // build response entity with headers
+      return buildResponseEntity(updatedUserSet, SetResourceProfile.META, HttpStatus.OK, null,
           request);
   }
 
@@ -471,7 +462,7 @@ public class WebUserSetRest extends BaseRest {
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-      headers.add(ALLOW, createAllowHeader(request));
+      headers.add(ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(UserSetHttpHeaders.VARY, PREFER);
       headers.add(PREFERENCE_APPLIED,
           SetPageProfile.META.getPreferenceApplied());
@@ -549,7 +540,7 @@ public class WebUserSetRest extends BaseRest {
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-      headers.add(ALLOW, createAllowHeader(request));
+      headers.add(ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(UserSetHttpHeaders.VARY, PREFER);
       headers.add(PREFERENCE_APPLIED,
           SetPageProfile.META.getPreferenceApplied());
@@ -599,8 +590,7 @@ public class WebUserSetRest extends BaseRest {
     return positionFinal;
   }
 
-  @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
-          method = {RequestMethod.GET, RequestMethod.HEAD},
+  @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> isItemInUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
@@ -616,7 +606,7 @@ public class WebUserSetRest extends BaseRest {
     // or if unauthorized respond with HTTP 403
     // check client access (a valid "wskey" must be provided)
     Authentication authentication = verifyReadAccess(request);
-    return isItemInUserSet(identifier, datasetId, localId, authentication, request);
+    return isItemInUserSet(identifier, datasetId, localId, authentication);
   }
 
   /**
@@ -630,7 +620,7 @@ public class WebUserSetRest extends BaseRest {
    * @throws EuropeanaApiException
    */
   protected ResponseEntity<String> isItemInUserSet(String identifier,
-      String datasetId, String localId, Authentication authentication, HttpServletRequest request) throws EuropeanaApiException {
+      String datasetId, String localId, Authentication authentication) throws EuropeanaApiException {
 
     try {
       // check if the Set exists, if not respond with HTTP 404
@@ -668,7 +658,7 @@ public class WebUserSetRest extends BaseRest {
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(ALLOW, createAllowHeader(request));
+      headers.add(ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
 
       return new ResponseEntity<>("", headers, httpStatus);
     } catch (UserSetValidationException | UserSetInstantiationException e) {
@@ -693,7 +683,7 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-    return deleteItemFromUserSet(authentication, identifier, datasetId, localId, request);
+    return deleteItemFromUserSet(authentication, identifier, datasetId, localId);
   }
 
   /**
@@ -707,7 +697,7 @@ public class WebUserSetRest extends BaseRest {
    * @throws EuropeanaApiException
    */
   protected ResponseEntity<String> deleteItemFromUserSet(Authentication authentication,
-                     String identifier, String datasetId, String localId, HttpServletRequest request) throws EuropeanaApiException {
+      String identifier, String datasetId, String localId) throws EuropeanaApiException {
     try {
       // check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
@@ -744,7 +734,7 @@ public class WebUserSetRest extends BaseRest {
       // (if not indicated assume the default, ie. minimal)
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(ALLOW, createAllowHeader(request));
+      headers.add(ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(PREFERENCE_APPLIED,
           SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
@@ -763,11 +753,11 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-    return deleteMultipleItemsFromUserSet(authentication, identifier, items, request);
+    return deleteMultipleItemsFromUserSet(authentication, identifier, items);
   }
 
   protected ResponseEntity<String> deleteMultipleItemsFromUserSet(Authentication authentication,
-      String identifier, List<String> items, HttpServletRequest request) throws EuropeanaApiException {
+      String identifier, List<String> items) throws EuropeanaApiException {
     try {
       // 3. check if the Set exists, if not respond with HTTP 404
       // retrieve an existing user set based on its identifier
@@ -799,7 +789,7 @@ public class WebUserSetRest extends BaseRest {
       // (if not indicated assume the default, ie. minimal)
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(ALLOW, createAllowHeader(request));
+      headers.add(ALLOW, UserSetHttpHeaders.ALLOW_PPGHD);
       headers.add(PREFERENCE_APPLIED,
           SetPageProfile.META.getPreferenceApplied());
       headers.add(UserSetHttpHeaders.ETAG, etag);
@@ -888,7 +878,7 @@ public class WebUserSetRest extends BaseRest {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
     Authentication authentication = verifyWriteAccess(Operations.DELETE, request);
-    return deleteUserAssociatedSets(getCreatorId(authentication, creator), request);
+    return deleteUserAssociatedSets(getCreatorId(authentication, creator));
   }
 
   /**
@@ -914,9 +904,8 @@ public class WebUserSetRest extends BaseRest {
       // if creator is passed, verify if the user is admin.
       // Owner/User can not perform this action
       if (!getUserSetService().isAdmin(authentication)) {
-        throw new ApplicationAuthenticationException(null, ErrorConfig.OPERATION_NOT_AUTHORIZED,
-            Arrays.asList("Only admins are authorized to perform this operation."),
-            HttpStatus.FORBIDDEN);
+        getLogger().error("Only admins are authorized to perform this operation.");
+        throw new ApplicationAuthenticationException(ErrorMessage.USER_NOT_AUTHORISED_403,Arrays.asList("Only admins are authorized to perform this operation."),HttpStatus.FORBIDDEN);
       }
       if (!StringUtils.startsWith(creatorId, "http")) {
         return UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), creatorId);
@@ -931,14 +920,13 @@ public class WebUserSetRest extends BaseRest {
    * @param creatorId
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> deleteUserAssociatedSets(String creatorId, HttpServletRequest request)
-          throws EuropeanaApiException {
+  protected ResponseEntity<String> deleteUserAssociatedSets(String creatorId) throws EuropeanaApiException {
       List<PersistentUserSet> userSets = getUserSetService().getUserSetByCreatorId(creatorId);
 
       // verify if the user sets are associated with the creatorId
       for (UserSet userset : userSets) {
         if (!StringUtils.equals(creatorId, userset.getCreator().getHttpUrl())) {
-          throw new ApplicationAuthenticationException(null, ErrorConfig.OPERATION_NOT_AUTHORIZED,
+          throw new ApplicationAuthenticationException(ErrorMessage.USER_NOT_AUTHORISED_403,
                   Arrays.asList("Only user associated sets can be deleted"),
                   HttpStatus.FORBIDDEN);
         }
@@ -953,9 +941,11 @@ public class WebUserSetRest extends BaseRest {
 
       // build response entity with headers
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-      headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(ALLOW, createAllowHeader(request));
+
+      headers.add(ALLOW, UserSetHttpHeaders.ALLOW_PGD);
+      headers.add(UserSetHttpHeaders.CACHE_CONTROL,
+              UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
+
       return new ResponseEntity<>(headers, httpStatus);
   }
 
