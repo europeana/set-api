@@ -1,6 +1,8 @@
 package eu.europeana.set.web.service.impl;
 
 import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
+
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1010,9 +1012,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
             message.append(
                 "Only the creators of the user set or admins are authorized to perform this operation.");
           }
-          throw new ApplicationAuthenticationException(null,
-                  ErrorConfig.OPERATION_NOT_AUTHORIZED,
-                  Arrays.asList(message.toString()),
+          throw new ApplicationAuthenticationException(
+              ErrorMessage.USER_NOT_AUTHORISED_403,
+              Arrays.asList(message.toString()),
                   HttpStatus.FORBIDDEN);
         }
       }
