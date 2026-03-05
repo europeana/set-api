@@ -240,7 +240,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet.getModified(), profile, request);
+      return buildSetPageResponse(itemPage, userSet, profile, request);
   }
 
   private boolean mustFetchItems(UserSet userSet, SetPageProfile profile) {
@@ -905,7 +905,9 @@ public class WebUserSetRest extends BaseRest {
       // Owner/User can not perform this action
       if (!getUserSetService().isAdmin(authentication)) {
         getLogger().error("Only admins are authorized to perform this operation.");
-        throw new ApplicationAuthenticationException(ErrorMessage.USER_NOT_AUTHORISED_403,Arrays.asList("Only admins are authorized to perform this operation."),HttpStatus.FORBIDDEN);
+        throw new ApplicationAuthenticationException(ErrorMessage.USER_NOT_AUTHORISED_403,
+                Arrays.asList("Only admins are authorized to perform this operation."),
+                HttpStatus.FORBIDDEN);
       }
       if (!StringUtils.startsWith(creatorId, "http")) {
         return UserSetUtils.buildUserUri(getConfiguration().getUserDataEndpoint(), creatorId);
