@@ -1,8 +1,6 @@
 package eu.europeana.set.web.service.impl;
 
 import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
-
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +9,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,11 +19,12 @@ import eu.europeana.api.commons_sb3.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.api.commons_sb3.oauth2.model.ApiCredentials;
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;

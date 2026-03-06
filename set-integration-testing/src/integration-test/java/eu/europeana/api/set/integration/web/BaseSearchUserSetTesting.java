@@ -1,10 +1,10 @@
 package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,8 +58,16 @@ public class BaseSearchUserSetTesting  extends IntegrationTestSetup{
   }
 
   @AfterEach
+  @Override
   protected void deleteCreatedSets() {
     super.deleteCreatedSets();
+  }
+  
+  
+  protected void verifyCommonErrorFields(String result) {
+    assertTrue(containsKeyOrValue(result, "ErrorResponse"));
+    assertTrue(containsKeyOrValue(result, "error"));
+    assertTrue(containsKeyOrValue(result, "message"));
   }
   
   protected String callSearchItemsInSetWithPost(String setIdentifier, String query, List<String> items, int page,
@@ -73,7 +81,7 @@ public class BaseSearchUserSetTesting  extends IntegrationTestSetup{
       }
 
   String callSearchItemsInSetWithPost(String setIdentifier, String body, String regularUserToken, HttpStatus expectedStatus)
-      throws EuropeanaApiException, UnsupportedEncodingException, Exception {
+      throws Exception {
         MockHttpServletRequestBuilder searchRequest =
             buildSearchItemsInSetWithPostRequest(setIdentifier, body, regularUserToken);
             
@@ -97,8 +105,7 @@ public class BaseSearchUserSetTesting  extends IntegrationTestSetup{
 
   }
   
-  MockHttpServletRequestBuilder buildSearchItemsInSetWithPostRequest(String setIdentifier, String body, String regularUserToken)
-      throws EuropeanaApiException {
+  MockHttpServletRequestBuilder buildSearchItemsInSetWithPostRequest(String setIdentifier, String body, String regularUserToken){
         
         MockHttpServletRequestBuilder request = post("/set/" + setIdentifier + "/search");
         addAuthorizationHeader(request, regularUserToken);
@@ -117,8 +124,7 @@ public class BaseSearchUserSetTesting  extends IntegrationTestSetup{
         SearchInSetQuery query = new SearchInSetQuery(filters, page, pageSize, profile);
         query.setQuery(searchQuery);
         
-        String body = (new UserSetLdSerializer()).serializeNonLd(query);
-        return body;
+        return (new UserSetLdSerializer()).serializeNonLd(query);
       }
 
   protected MockHttpServletRequestBuilder buildSearchItemsInSetRequest(String setIdentifier, String[] qf, String page, String pageSize,

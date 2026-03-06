@@ -9,14 +9,10 @@ public class ItemValidationException extends EuropeanaI18nApiException {
   private static final long serialVersionUID = -7048717251116426084L;
 
   public ItemValidationException(String i18nKey, List<String> params){
-      super(null, null, "Items have invalid format", HttpStatus.BAD_REQUEST, i18nKey, params);
+      this(i18nKey, params, null);
   }
 
-    public ItemValidationException(String code, String error, String i18nKey, List<String> params){
-        super(null, code, error, HttpStatus.BAD_REQUEST, i18nKey, params);
-  }
-  
   public ItemValidationException(String i18nKey, List<String> params, Throwable th){
-	super(null, null, null, HttpStatus.BAD_REQUEST, i18nKey, params, th);
+	super(null, "400_param_invalid", "An invalid parameter was sent in the request", HttpStatus.BAD_REQUEST, i18nKey, params, th);
   }
 }

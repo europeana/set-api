@@ -288,8 +288,6 @@ public class SearchUserSetRest extends BaseRest {
 
     // parses and validates items
     List<String> itemIds = buildItemIdsList(inSetQuery);
-    List<String> filtered = getItemsInSet(identifier, itemIds, authentication);
-
     
     SetPageProfile profile;
     if(inSetQuery.getProfile() == null) {
@@ -320,6 +318,8 @@ public class SearchUserSetRest extends BaseRest {
       
     Integer pageItems = validatePageSize(""+ inSetQuery.getPageSize(), profile);
 
+    //verify items in set
+    List<String> filtered = getItemsInSet(identifier, itemIds, authentication);
     BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
         identifier, filtered, pageNr, pageItems, profile, request, authentication);
 
@@ -332,7 +332,8 @@ public class SearchUserSetRest extends BaseRest {
    * build the list of Item Ids based on the record ids included query 
    * @param inSetQuery containing list of record ids
    * @return list of userset item ids
-   * @throws InvalidParamException if one of the filters is does not contain "item" as field name, or MissingParamException if "qf" is not present in the request   
+   * @throws InvalidParamException if one of the filters is does not contain "item" as field name, 
+   * or MissingParamException if "qf" is not present in the request   
    */
   private List<String> buildItemIdsList(@NonNull SearchInSetQuery inSetQuery) throws EuropeanaApiException {
     if (inSetQuery.getFilters() == null || inSetQuery.getFilters().length == 0) {

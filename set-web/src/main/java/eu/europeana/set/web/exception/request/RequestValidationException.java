@@ -13,6 +13,6 @@ public class RequestValidationException extends EuropeanaI18nApiException {
 	}
 	
 	public RequestValidationException(String i18nKey, List<String> params, Throwable th){
-		super(null, null, null, HttpStatus.BAD_REQUEST,  i18nKey, params,th);
+		super(null, "400_param_invalid", "An invalid parameter was sent in the request", HttpStatus.BAD_REQUEST,  i18nKey, params, th);
 	}
 }

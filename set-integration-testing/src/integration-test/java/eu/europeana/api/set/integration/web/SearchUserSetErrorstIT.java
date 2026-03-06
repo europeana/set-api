@@ -24,27 +24,33 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
 
   @Test
   void searchEmptyApiKey() throws Exception {
-    // UserSet set = createTestUserSet(USER_SET_BOOKMARK_FOLDER, regularUserToken);
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
             .queryParam(OAuthUtils.PARAM_WSKEY, "")
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    
   }
 
   @Test
   void searchInvalidApiKey() throws Exception {
 
     if (getConfiguration().isApiKeyValidationEnabled()) {
-      mockMvc
+      String result = mockMvc
           .perform(get(SEARCH_URL)
               .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
               .queryParam(OAuthUtils.PARAM_WSKEY, "invalid_api_key")
               .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
               .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-          .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+          .andExpect(status().is(HttpStatus.UNAUTHORIZED.value())).andReturn().getResponse()
+          .getContentAsString();
+      // check error response
+      verifyCommonErrorFields(result);
     } else {
       System.out.println("skipped apikey validation test!");
     }
@@ -53,24 +59,30 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
 
   @Test
   void searchWithoutApiKey() throws Exception {
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
 
   @Test
   void searchWithInvalidSetId() throws Exception {
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_META)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, SEARCH_INVALID_SET_ID)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
 
@@ -78,33 +90,7 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
   void searchSetByEmptyTextQuery() throws Exception {
     // subject in json file: http://data.europeana.eu/concept/base/114
     String query = ":";
-    mockMvc
-        .perform(get(SEARCH_URL)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-  }
-
-  @Test
-  //TODO: why error?
-  void searchSetByTitleQuery() throws Exception {
-    // subject in json file: http://data.europeana.eu/concept/base/114
-    String query = "title:test";
-    mockMvc
-        .perform(get(SEARCH_URL)
-            .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
-                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
-            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-  }
-
-  @Test
-  void searchSetByTextQuery_WrongQuery() throws Exception {
-    String query = ":sportswear golf";
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -112,49 +98,90 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
         .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("The parameter  sent in the request is invalid, expected : valid field name in search query, found : "));
+    
+  }
+
+  @Test
+  void searchSetByNotSupportedField_Title() throws Exception {
+    // subject in json file: http://data.europeana.eu/concept/base/114
+    String query = "title:test";
+    String result = mockMvc
+        .perform(get(SEARCH_URL)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("expected : valid field name in search query, found : title"));
+  }
+
+  @Test
+  void searchSetByTextQuery_WrongQuery() throws Exception {
+    String query = ":sportswear golf";
+    String result = mockMvc
+        .perform(get(SEARCH_URL)
+            .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
+                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+            .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
+            .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("The parameter  sent in the request is invalid, expected : valid field name in search query, found : "));
   }
   
   @Test
-  //TODO: why error?
-  void searchSetWithoutTextQueryWithScoreSort() throws Exception {
+  void searchSetWithWrongSort_Score() throws Exception {
     // subject in json file: http://data.europeana.eu/concept/base/114
     String query = "visibility:public";
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("The parameter sort sent in the request is invalid, expected : it cannot contain 'score' if the search is not on the text field, found : score"));
   }
-  
 
 
   @Test
-//TODO: why error?
-  void searchWithScoreSortInAscOrder() throws Exception {
+  void searchSetWithWrongSort_ScoreAsc() throws Exception {
     // create object in database
     UserSet set = createTestUserSet(USER_SET_REGULAR_PUBLIC, editorUserToken);
     // subject in json file: http://data.europeana.eu/concept/base/114
     final String title = set.getTitle().get("en");
-    // String query = "sportswear golf";
     String query = title;
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE).queryParam(
                 CommonApiConstants.QUERY_PARAM_SORT, WebUserSetFields.TEXT_SCORE_SORT + " asc"))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("The parameter sort sent in the request is invalid, expected : it cannot contain 'score asc' since only the descending order is supported, found : score asc"));
   }
 
   @Test
-//TODO: why error?
-  void searchSetByTextQueryWithMultipleCriteria1() throws Exception {
+  void searchSetByTextQueryAndVisibility_WrongFormat() throws Exception {
     String query = "sportswear golf visibility:public";
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
@@ -162,20 +189,26 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
         .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("The parameter sportswear golf visibility sent in the request is invalid, expected : valid field name in search query, found : sportswear golf visibility"));
   }
 
   @Test
-//TODO: why error?
-  void searchSetByTextWithMultipleCriteria2() throws Exception {
+  void searchSetByTextWithMultipleCriteria_WrongFormat() throws Exception {
     // query parsing for combination like "visibility:sportswear golf"; is invalid
     String query = "visibility::sportswear golf";
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_ITEMS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
+    assertTrue(result.contains("The parameter visibility sent in the request is invalid, expected : valid formatting of search query for field 'visibility', found : "));
   }
 
   @Test
@@ -193,42 +226,42 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
     String result = callSearchItemsInSetWithPost(setIdentifier, "query:wrong", items, secondPageIndex, 2, null, regularUserToken, HttpStatus.BAD_REQUEST);
     // check error message
     // last page no next
-    assertTrue(!containsKeyOrValue(result, WebUserSetFields.NEXT)); 
+    // check error response
+    verifyCommonErrorFields(result);
+    assertFalse(containsKeyOrValue(result, WebUserSetFields.NEXT)); 
   }
 
   @Test
   void searchItemsInSet_withPost_noBody() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
-
     String setIdentifier = set1.getIdentifier();
     
     String result = callSearchItemsInSetWithPost(setIdentifier, null, regularUserToken, HttpStatus.BAD_REQUEST);
     // check error response
-    assertTrue(containsKeyOrValue(result, "ErrorResponse"));
+    verifyCommonErrorFields(result);
     assertTrue(result.contains("Required request body is missing"));
   }
   
   @Test
   void searchItemsInSet_withPost_emptyBody() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
-
     String setIdentifier = set1.getIdentifier();
     
     String result = callSearchItemsInSetWithPost(setIdentifier, "{}", regularUserToken, HttpStatus.BAD_REQUEST);
-    // check error message
-    assertTrue(containsKeyOrValue(result, "ErrorResponse"));
+    // check error response
+    verifyCommonErrorFields(result);
     assertTrue(result.contains(ERROR_MSG_QF_MANDATORY));    
   }
   
   @Test
   void searchItemsInSet_withPost_noQf() throws Exception {
     UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
-
     String setIdentifier = set1.getIdentifier();
     
     String inSetQuery = "{\"query\":\"*\"}";
     String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery, regularUserToken, HttpStatus.BAD_REQUEST);
-    // check error message
+    // check error response
+    verifyCommonErrorFields(result);
     assertTrue(result.contains(ERROR_MSG_QF_MANDATORY));
     
   }
@@ -241,47 +274,12 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
     String inSetQuery = "{\"query\":\"*\",\"qf\":[\"/000000/\"],\"profile\":[\"items\"]}"; 
     
     String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery, regularUserToken, HttpStatus.BAD_REQUEST);
+    // check error response
+    verifyCommonErrorFields(result);
     // check error message
     assertTrue(result.contains("The parameter qf sent in the request is invalid, expected : entries with format 'item:<identifier>', found : /000000/")); 
   }
-  
-  @Test
-  void searchItemsInSet_withPost_ItemsProfile() throws Exception {
-    UserSet set1 = createTestUserSet(USER_SET_REGULAR_PUBLIC, regularUserToken);
 
-    String setIdentifier = set1.getIdentifier();
-    String inSetQuery = "{\"query\":\"*\",\"qf\":[\"item:/000000/\"],\"profile\":[\"items\"]}"; 
-    String result = callSearchItemsInSetWithPost(setIdentifier, inSetQuery , regularUserToken, null);
-    // check ids
-    String searchUri = "/set/" + setIdentifier + "/search";
-    assertTrue(StringUtils.contains(result, searchUri));
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
-    //expect empty page
-    assertFalse(containsKeyOrValue(result, CommonLdConstants.ResultList));
-    assertFalse(containsKeyOrValue(result, WebUserSetFields.FIRST));
-    assertFalse(containsKeyOrValue(result, WebUserSetFields.LAST));
-    assertFalse(containsKeyOrValue(result, WebUserSetFields.PREV));
-    // last page no next
-    assertFalse(containsKeyOrValue(result, WebUserSetFields.NEXT));
-  }
-  
-  
-
-  @Test
-  void searchItemsInSet_No_QF_Param() throws Exception {
-    UserSet set1 = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-    String setIdentifier = set1.getIdentifier();
-
-    String result = callSearchItemsInSet(setIdentifier, null, null, null, null, regularUserToken);
-    // check ids
-    String searchUri = "/set/" + setIdentifier + "/search";
-    assertTrue(StringUtils.contains(result, searchUri));
-    // total should be 0
-    assertTrue(containsKeyOrValue(result, WebUserSetFields.TOTAL));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.ResultPage));
-    assertTrue(containsKeyOrValue(result, CommonLdConstants.id));
-  }
 
   @Test
   void searchByWrongCollectionType() throws Exception {
@@ -296,93 +294,116 @@ class SearchUserSetErrorstIT extends BaseSearchUserSetTesting{
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
         .getContentAsString();
 
+    // check error response
+    verifyCommonErrorFields(result);
     assertTrue(result.contains(wrongCollectionType));
   }
 
   // Facet validation
   @Test
   void searchFacetsNoFacetValidationTest() throws Exception {
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
   @Test
   void searchFacetsInvalidFacetValidationTest() throws Exception {
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "test"))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
   @Test
   void searchFacetsEmptyFacetValidationTest() throws Exception {
-    mockMvc
+    String result =  mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, ""))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
   @Test
   void searchFacetsMultipleFacetValidationTest() throws Exception {
-    mockMvc
+    String result =  mockMvc
         .perform(get(SEARCH_URL)
             .param(CommonApiConstants.QUERY_PARAM_PROFILE, ProfileConstants.VALUE_PARAM_FACETS)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "item,visibility"))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
   // Multiple profile validation
   @Test
   void searchFacetsMultipleProfileInvalid() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_FACETS + "," + "test";
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
   @Test
   void searchFacetsMultipleProfileWithoutFacets() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_META + "," + ProfileConstants.VALUE_PARAM_ITEMS;
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
   @Test
   void searchFacetsMultipleInvalidProfileWithFacets() throws Exception {
     String profile = ProfileConstants.VALUE_PARAM_MINIMAL + ","
         + ProfileConstants.VALUE_PARAM_FACETS + "," + ProfileConstants.VALUE_PARAM_STANDARD;
-    mockMvc
+    String result = mockMvc
         .perform(get(SEARCH_URL).param(CommonApiConstants.QUERY_PARAM_PROFILE, profile)
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, "*")
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE)
             .queryParam(CommonApiConstants.QUERY_PARAM_FACET, "visibility"))
-        .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
+        .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
+        .getContentAsString();
+    // check error response
+    verifyCommonErrorFields(result);
   }
 
 }

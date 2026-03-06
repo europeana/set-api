@@ -318,7 +318,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
         if (!value.contains(space)) {
           // invalid query format, there must be a space before next field in the query
           throw new InvalidParamException(Arrays.asList(field,
-                  "valid formatting of search query for field" + field,
+                  "valid formatting of search query for field '" + field+ "'",
                    value));
         }
         // extract correct search value for current field (up to next criterion separated by space)
@@ -330,7 +330,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
       if (StringUtils.isBlank(value) || (!value.startsWith("http") && value.contains(separator))) {
         // invalid seearch value
         throw new InvalidParamException(Arrays.asList(field,
-                "valid formatting of search query for field" + field,
+                "valid formatting of search query for field '" + field+"'",
                 value));
       }
       

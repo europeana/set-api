@@ -1,14 +1,7 @@
 package eu.europeana.set.web.service.controller.jsonld;
 
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.ALLOW;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.CONTENT_TYPE_JSON_UTF8;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
-import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFERENCE_APPLIED;
+import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.*;
-
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -36,7 +29,7 @@ import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
