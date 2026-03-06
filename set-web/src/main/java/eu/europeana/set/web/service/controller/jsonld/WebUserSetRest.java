@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
@@ -37,7 +35,6 @@ import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
@@ -130,8 +127,7 @@ public class WebUserSetRest extends BaseRest {
 
   }
 
-  @RequestMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
-          method ={RequestMethod.GET, RequestMethod.HEAD} ,
+  @GetMapping(value = {"/set/{identifier}", "/set/{identifier}.json", "/set/{identifier}.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> getUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
@@ -588,7 +584,7 @@ public class WebUserSetRest extends BaseRest {
     return positionFinal;
   }
 
-  @RequestMapping(value = {"/set/{identifier}/{datasetId}/{localId}"}, method = {RequestMethod.GET},
+  @GetMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> isItemInUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,

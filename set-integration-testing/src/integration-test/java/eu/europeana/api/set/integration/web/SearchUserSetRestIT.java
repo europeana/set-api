@@ -177,7 +177,7 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
         .andExpect(status().is(HttpStatus.OK.value())).
-            andExpect(header().stringValues(HttpHeaders.ALLOW, "GET" )).
+            andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,GET" )).
             andReturn().getResponse()
         .getContentAsString();
 

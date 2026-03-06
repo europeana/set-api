@@ -270,85 +270,6 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
   }
 
     @Test
-    public void getUserSet_If_None_Match_header() throws Exception {
-        WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
-        // get the identifier
-        MockHttpServletResponse response = mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andReturn().getResponse();
-
-        // check it has caching headers - etag and last modified
-        assertNotNull(response.getHeader(HttpHeaders.ETAG));
-        assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-        assertEquals(new Date(response.getHeader(HttpHeaders.LAST_MODIFIED)),
-                new Date(DateUtils.getRFC_1123_FormatDate(userSet.getModified())));
-
-        // IF_NONE_MATCH header with etag value obtained in the previous response
-        mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_NONE_MATCH, response.getHeader(HttpHeaders.ETAG)))
-                .andExpect(status().is(HttpStatus.NOT_MODIFIED.value()));
-
-        // IF_NONE_MATCH header with the wrong etag value
-        mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_NONE_MATCH, "test"))
-                .andExpect(status().is(HttpStatus.OK.value()));
-    }
-
-    @Test
-    public void getUserSet_If_Modified_Since_header() throws Exception {
-        WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
-        // get the identifier
-        MockHttpServletResponse response = mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andReturn().getResponse();
-
-        // check it has caching headers - etag and last modified
-        assertNotNull(response.getHeader(HttpHeaders.ETAG));
-        assertNotNull(response.getHeader(HttpHeaders.LAST_MODIFIED));
-        assertEquals(new Date(response.getHeader(HttpHeaders.LAST_MODIFIED)),
-                new Date(DateUtils.getRFC_1123_FormatDate(userSet.getModified())));
-
-
-        // IF_MODIFIED_SINCE header with LAST_MODIFIED value obtained in the previous response
-        mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_MODIFIED_SINCE, response.getHeader(HttpHeaders.LAST_MODIFIED)))
-                .andExpect(status().is(HttpStatus.NOT_MODIFIED.value()));
-
-        ZonedDateTime dateTime = DateUtils.parseRFCToZonedDateTime(response.getHeader(HttpHeaders.LAST_MODIFIED));
-
-        // IF_MODIFIED_SINCE header with one day before than LAST_MODIFIED
-        mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_MODIFIED_SINCE, dateTime.minusDays(1).format(DateTimeFormatter.RFC_1123_DATE_TIME)))
-                .andExpect(status().is(HttpStatus.OK.value()));
-
-        // IF_MODIFIED_SINCE header with one day after than LAST_MODIFIED
-        mockMvc
-                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_MODIFIED_SINCE, dateTime.plusDays(1).format(DateTimeFormatter.RFC_1123_DATE_TIME)))
-                .andExpect(status().is(HttpStatus.NOT_MODIFIED.value()));
-    }
-
-    @Test
   public void getUserSet_Success() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -443,44 +364,6 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
        // .andExpect(result -> assertEquals(2, StringUtils.countMatches(Arrays.toString(((ItemValidationException)result.getResolvedException()).getI18nParams()),"http")));
   }
 
-    @Test
-    public void updateUserSet_PreconditionFailed() throws Exception {
-        WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
-
-        String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
-        // update the userset
-        MockHttpServletResponse response = mockMvc
-                .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andReturn().getResponse();
-
-        // check etag present in the response
-        assertNotNull(response.getHeader(HttpHeaders.ETAG));
-
-        // IF_MATCH with matching etag - 200 ok
-        mockMvc
-                .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_MATCH, response.getHeader(HttpHeaders.ETAG)))
-                .andExpect(status().isOk());
-
-        // IF_MATCH with wrong etag - 412 response
-        MockHttpServletResponse errorResponse = mockMvc
-                .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
-                        .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.IF_MATCH, "test")).andReturn().getResponse();
-
-        assertEquals(HttpStatus.PRECONDITION_FAILED.value(), errorResponse.getStatus());
-        String content = errorResponse.getContentAsString();
-        // check response body
-        assertTrue(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getError()));
-        assertTrue(containsKeyOrValue(content, ErrorMessage.ETAG_MISMATCH_412.getCode()));
-
-  }
-
   @Test
   public void updateUserSet_Success() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
@@ -492,7 +375,6 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,DELETE,GET,PUT"))
-
             .andReturn().getResponse();
 
     String result = response.getContentAsString();

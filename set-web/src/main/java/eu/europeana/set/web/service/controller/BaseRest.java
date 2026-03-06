@@ -402,6 +402,10 @@ public class BaseRest extends BaseRestController {
       allowHeaderValue = methodsForRequestPattern.get();
     }
 
+    // Add HEAD for the allow Header values which contain GET
+    if (allowHeaderValue.contains("GET") && !allowHeaderValue.contains("HEAD")) {
+      return "HEAD," + allowHeaderValue;
+    }
     return allowHeaderValue;
   }
 

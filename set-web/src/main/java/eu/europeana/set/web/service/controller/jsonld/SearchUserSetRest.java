@@ -47,8 +47,7 @@ public class SearchUserSetRest extends BaseRest {
     return queryBuilder;
   }
 
-  @RequestMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
-          method = {RequestMethod.GET},
+  @GetMapping(value = {"/set/search", "/set/search.json", "/set/search.jsonld"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchUserSet(
       @RequestParam(value = CommonApiConstants.QUERY_PARAM_QUERY, required = true) String query,
@@ -128,10 +127,9 @@ public class SearchUserSetRest extends BaseRest {
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
 
-  @RequestMapping(
+  @GetMapping(
       value = {"/set/{identifier}/search", "/set/{identifier}/search.json",
           "/set/{identifier}/search.jsonld"},
-          method = {RequestMethod.GET, RequestMethod.HEAD},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> searchItemsInSet(
       @PathVariable(value = WebUserSetFields.PATH_PARAM_SET_ID) String identifier,
