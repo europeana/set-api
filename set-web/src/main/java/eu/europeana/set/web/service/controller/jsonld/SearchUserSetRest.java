@@ -289,6 +289,35 @@ public class SearchUserSetRest extends BaseRest {
     // parses and validates items
     List<String> itemIds = buildItemIdsList(inSetQuery);
     
+    SetPageProfile profile = validateProfile(inSetQuery);
+    
+    Integer pageNr = inSetQuery.getPageNr() > WebUserSetFields.DEFAULT_PAGE ?
+        inSetQuery.getPageNr() : WebUserSetFields.DEFAULT_PAGE;
+    
+    validatePageSize(inSetQuery);
+      
+    Integer pageItems = validatePageSize(""+ inSetQuery.getPageSize(), profile);
+
+    //verify items in set
+    List<String> filtered = getItemsInSet(identifier, itemIds, authentication);
+    BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
+        identifier, filtered, pageNr, pageItems, profile, request, authentication);
+
+    return buildSetPageResponse(resultPage);
+
+ 
+  }
+
+  void validatePageSize(SearchInSetQuery inSetQuery) {
+    //set default pageSize if not provided in request
+    final int noPageSize = -1;
+    if(noPageSize == inSetQuery.getPageSize()) {
+      inSetQuery.setPageSize( UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
+    }
+  }
+
+  SetPageProfile validateProfile(SearchInSetQuery inSetQuery)
+      throws InvalidParamException, EuropeanaI18nApiException {
     SetPageProfile profile;
     if(inSetQuery.getProfile() == null) {
       profile = SetPageProfile.ITEMS;
@@ -306,26 +335,7 @@ public class SearchUserSetRest extends BaseRest {
       // when profile param contains only technical profiles, use items as default 
       profile = getUserSetService().getProfileForPagination(profiles, SetPageProfile.ITEMS);   
     }
-    
-    Integer pageNr = inSetQuery.getPageNr() > WebUserSetFields.DEFAULT_PAGE ?
-        inSetQuery.getPageNr() : WebUserSetFields.DEFAULT_PAGE;
-    
-    //set default pageSize if not provided in request
-    final int noPageSize = -1;
-    if(noPageSize == inSetQuery.getPageSize()) {
-      inSetQuery.setPageSize( UserSetConfigurationImpl.DEFAULT_ITEMS_PER_PAGE);
-    }
-      
-    Integer pageItems = validatePageSize(""+ inSetQuery.getPageSize(), profile);
-
-    //verify items in set
-    List<String> filtered = getItemsInSet(identifier, itemIds, authentication);
-    BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
-        identifier, filtered, pageNr, pageItems, profile, request, authentication);
-
-    return buildSetPageResponse(resultPage);
-
- 
+    return profile;
   }
    
   /**
