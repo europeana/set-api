@@ -10,15 +10,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 
 import eu.europeana.api.commons_sb3.definitions.utils.DateUtils;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import org.apache.commons.lang3.StringUtils;

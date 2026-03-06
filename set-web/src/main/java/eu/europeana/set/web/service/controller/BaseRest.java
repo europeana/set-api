@@ -265,10 +265,10 @@ public class BaseRest extends BaseRestController {
                                                                 String cacheControlValue,
                                                                 HttpServletRequest request) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+    headers.add(LINK, VALUE_BASIC_CONTAINER);
+    headers.add(LINK, VALUE_BASIC_RESOURCE);
     headers.add(ALLOW, createAllowHeader(request));
-    headers.add(UserSetHttpHeaders.ETAG, generateETag(userSet.getModified(), FORMAT_JSONLD, getApiVersion()));
+    headers.add(ETAG, generateETag(userSet.getModified(), FORMAT_JSONLD, getApiVersion()));
     headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
 
     if (StringUtils.isNotEmpty(cacheControlValue)) {

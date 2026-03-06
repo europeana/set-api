@@ -5,6 +5,7 @@ import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.web.model.WebUserSetImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-public class HeadersTestIT extends IntegrationTestSetup {
+class HeadersTestIT extends IntegrationTestSetup {
 
     @BeforeAll
     static void initTokens() throws SetIntegrationException {
@@ -38,13 +39,31 @@ public class HeadersTestIT extends IntegrationTestSetup {
     }
 
 
+    @Override
     @AfterEach
     protected void deleteCreatedSets() {
         super.deleteCreatedSets();
     }
 
     @Test
-    public void getUserSet_SuccessHeaders() throws Exception {
+    void getUserSet_SuccessWithCaseSensitiveToken() throws Exception {
+        WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+        String caseSensitiveToken = StringUtils.replace(regularUserToken, "Bearer", "bearer");
+        mockMvc
+                .perform(get(BASE_URL + "{identifier}", userSet.getIdentifier())
+                        .header(HttpHeaders.AUTHORIZATION, caseSensitiveToken)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,DELETE,GET,PUT"))
+                .andExpect(header().exists(HttpHeaders.CONTENT_TYPE))
+                .andExpect(header().stringValues(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSONLD_UTF8))
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andReturn().getResponse();
+    }
+
+    @Test
+    void getUserSet_SuccessHeaders() throws Exception {
         WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
         MockHttpServletResponse response = mockMvc
@@ -65,7 +84,7 @@ public class HeadersTestIT extends IntegrationTestSetup {
 
 
     @Test
-    public void getUserSet_If_None_Match_header() throws Exception {
+    void getUserSet_If_None_Match_header() throws Exception {
         WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
         //  // check it has caching headers - etag and last modified
@@ -99,7 +118,7 @@ public class HeadersTestIT extends IntegrationTestSetup {
     }
 
     @Test
-    public void getUserSet_If_Modified_Since_header() throws Exception {
+    void getUserSet_If_Modified_Since_header() throws Exception {
         WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
         // check it has caching headers - etag and last modified
@@ -144,7 +163,7 @@ public class HeadersTestIT extends IntegrationTestSetup {
     }
 
     @Test
-    public void updateUserSet_PreconditionFailed() throws Exception {
+    void updateUserSet_PreconditionFailed() throws Exception {
         WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
         String updatedRequestJson = getJsonStringInput(UPDATED_USER_SET_CONTENT);
