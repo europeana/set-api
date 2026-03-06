@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
+import eu.europeana.api.commons_sb3.definitions.search.Query;
 import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
@@ -308,7 +309,7 @@ public class SearchUserSetRest extends BaseRest {
  
   }
 
-  void validatePageSize(SearchInSetQuery inSetQuery) {
+  void validatePageSize(Query inSetQuery) {
     //set default pageSize if not provided in request
     final int noPageSize = -1;
     if(noPageSize == inSetQuery.getPageSize()) {
@@ -317,7 +318,7 @@ public class SearchUserSetRest extends BaseRest {
   }
 
   SetPageProfile validateProfile(SearchInSetQuery inSetQuery)
-      throws InvalidParamException, EuropeanaI18nApiException {
+      throws EuropeanaI18nApiException {
     SetPageProfile profile;
     if(inSetQuery.getProfile() == null) {
       profile = SetPageProfile.ITEMS;
