@@ -324,8 +324,10 @@ public class SearchUserSetRest extends BaseRest {
       try {
         profiles = getProfileHelper().parseProfiles(inSetQuery.getProfile());
       } catch (UserSetProfileValidationException e) {
-        List<String> params = List.of(CommonApiConstants.QUERY_PARAM_PROFILE, inSetQuery.getProfile().toString()); 
-        throw new InvalidParamException( params, e);
+        List<String> params = List.of(CommonApiConstants.QUERY_PARAM_PROFILE,
+                Arrays.asList(SetPageProfile.values()).toString(),
+                inSetQuery.getProfile().toString());
+        throw new InvalidParamException(params, e);
       }
       validateMultipleProfiles(profiles, inSetQuery.getProfile().toString());
       // get profile for pagination urls and item Page
