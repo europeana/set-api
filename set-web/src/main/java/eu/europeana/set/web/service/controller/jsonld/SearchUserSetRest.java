@@ -325,7 +325,7 @@ public class SearchUserSetRest extends BaseRest {
         profiles = getProfileHelper().parseProfiles(inSetQuery.getProfile());
       } catch (UserSetProfileValidationException e) {
         List<String> params = List.of(CommonApiConstants.QUERY_PARAM_PROFILE,
-                Arrays.asList(SetPageProfile.values()).toString(),
+                "meta, items, items.meta OR facets",
                 inSetQuery.getProfile().toString());
         throw new InvalidParamException(params, e);
       }
