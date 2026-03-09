@@ -350,7 +350,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return counter;
   }
 
-  @SuppressWarnings("external_fbcontrib:CE_CLASS_ENVY")
   private void addItems(UserSet existingUserSet, List<String> items, int position,
       boolean isPinnRequest) {
     // init items list if needed
@@ -523,9 +522,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
 
     if (existingUserSet.getItems() == null) {
       // empty items list
-      List<String> list = new ArrayList<>();
-      list.add(newItem);
-      existingUserSet.setItems(list);
+      existingUserSet.setItems(List.of(newItem));
     } else if (positionInt == -1) {
       // last position
       existingUserSet.getItems().add(newItem);
@@ -657,7 +654,8 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
   @Override
   public BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery,
       ResultSet<? extends UserSet> results, String requestUrl, String reqParams,
-      List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException {
+      @NonNull SetPageProfile serializationProfile,
+      @NonNull List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException {
 
     BaseUserSetResultPage<?> resPage = null;
     int resultPageSize = results.getResults().size();
@@ -666,15 +664,13 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     long totalInCollection = results.getResultSize();
 
     int lastPage = validateLastPage(totalInCollection, pageSize, currentPage);
-    // get profile for pagination urls and item Page
-    SetPageProfile profile = getProfileForPagination(profiles);
 
     String apiEndpointUrl = getConfiguration().getSetApiEndpoint() + "search";
     // 'id' field of the page Url
     String resultsPageId =
-        buildResultsPageUrl(apiEndpointUrl, reqParams, profile.getProfileParamValue());
+        buildResultsPageUrl(apiEndpointUrl, reqParams, serializationProfile.getProfileParamValue());
 
-    resPage = createResultPageWithItems(results, resultPageSize, profile, profiles, authentication);
+    resPage = createResultPageWithItems(results, resultPageSize, serializationProfile, profiles, authentication);
 
     // we don't want to add profile in partOf, hence profile is passed null
     // pageId is the same as the baseUrl for pagination
@@ -682,7 +678,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         totalInCollection, lastPage, CommonLdConstants.ResultList, null);
 
     resPage.setPartOf(ResultList);
-    addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, profile);
+    addPagination(resPage, resultsPageId, currentPage, pageSize, lastPage, serializationProfile);
     return resPage;
   }
 
@@ -877,7 +873,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return page;
   }
 
-  public BaseUserSetResultPage<String> buildRecodsResultsPage(String setIdentifier,
+  public BaseUserSetResultPage<String> buildRecordsResultsPage(String setIdentifier,
       List<String> itemIds, int page, int pageSize, SetPageProfile profile,
       HttpServletRequest request, Authentication authentication) throws EuropeanaApiException {
     // new ResultsPageImpl<T>()

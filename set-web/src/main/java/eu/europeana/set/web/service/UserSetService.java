@@ -133,6 +133,12 @@ public interface UserSetService {
   UserSet insertMultipleItems(List<String> items, String position, int itemsPosition,
       UserSet existingUserSet, Authentication authentication) throws ItemValidationException;
 
+  /**
+   * delete the given item from set
+   * @param item item to delete
+   * @param existingUserSet the set
+   * @return the reference to the set
+   */
   UserSet deleteItem(String item, UserSet existingUserSet);
 
   /**
@@ -156,13 +162,48 @@ public interface UserSetService {
   ResultSet<? extends UserSet> search(UserSetQuery searchQuery, UserSetFacetQuery facetQuery,
       List<SetPageProfile> profile, Authentication authentication);
 
+  /**
+   * build results page based on the original request and the search results
+   * @param searchQuery the search query used to find the results
+   * @param results the results found
+   * @param requestUrl the URL used for service invocation  
+   * @param reqParams the request params used for service invocation
+   * @param serializationProfile the profile used for result serialization
+   * @param profiles all profiles requested
+   * @param authentication the user authentication 
+   * @return the results page
+   * @throws EuropeanaApiException in case of invalid params found in the request
+   */
   BaseUserSetResultPage<?> buildResultsPage(UserSetQuery searchQuery,
       ResultSet<? extends UserSet> results, String requestUrl, String reqParams,
+      SetPageProfile serializationProfile,
       List<SetPageProfile> profiles, Authentication authentication) throws EuropeanaApiException;
 
-  BaseUserSetResultPage<String> buildRecodsResultsPage(String setId, List<String> itemIds, int page,
+  /**
+   * build record results page based on the original request and the search results
+   * @param setId the id of the user set
+   * @param itemIds the list of item ids to search for recrd description
+   * @param page the page number
+   * @param pageSize the number of records to include
+   * @param profile the requested profiels 
+   * @param request the original http request
+   * @param authentication the user authentication
+   * @return result page
+   * @throws EuropeanaApiException in case of serialization or record access failures or invalid params
+   */
+  BaseUserSetResultPage<String> buildRecordsResultsPage(String setId, List<String> itemIds, int page,
       int pageSize, SetPageProfile profile, HttpServletRequest request, Authentication authentication) throws EuropeanaApiException;
 
+  /**
+   * build a collection page for http response
+   * @param userSet the set to containing the items
+   * @param profile the requested profiles 
+   * @param pageNr the requested page
+   * @param pageSize the number of items per page
+   * @param request the original http request
+   * @return the constructed collection page
+   * @throws EuropeanaApiException in case of serialization failures or invalid params
+   */
   CollectionPage buildCollectionPage(UserSet userSet, UserSetProfile profile, int pageNr,
       int pageSize, HttpServletRequest request) throws EuropeanaApiException;
 
@@ -172,7 +213,7 @@ public interface UserSetService {
    * @param userSet user set
    * @param authentication authentication sent by user
    * @return userSet object
-   * @throws EuropeanaI18nApiException
+   * @throws EuropeanaI18nApiException in case of authorization failures
    */
   UserSet verifyOwnerOrAdmin(UserSet userSet, Authentication authentication,
       boolean includeEntitySetMsg) throws EuropeanaI18nApiException;
@@ -241,6 +282,17 @@ public interface UserSetService {
    * @return the profile to be applied for generating the pagination
    */
   SetPageProfile getProfileForPagination(List<SetPageProfile> profiles);
+  
+  /**
+   * Gets the profile for pagination urls and item page. Basically gets the profile valid for
+   * collection page from the list of profiles passed during search request.
+   * If none is appropriate the defaultPageProfile is added to the list of profiles and returned by the method
+   *
+   * @param profiles list of candidate profiles
+   * @param defaultPageProfile the default to return if no appropriate was found 
+   * @return the profile to be applied for generating the pagination
+   */
+  SetPageProfile getProfileForPagination(List<SetPageProfile> profiles, SetPageProfile defaultPageProfile);
 
   /**
    * Return the List of entity sets with items, subject and type value

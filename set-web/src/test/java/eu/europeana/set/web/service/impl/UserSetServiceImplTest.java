@@ -96,7 +96,7 @@ public class UserSetServiceImplTest {
 	String curr = userSetService.buildPageUrl(requestUrl, userSetQuery.getPageNr(),
 		userSetQuery.getPageSize(), profile);
 
-	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, requestUrl, "",
+	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, requestUrl, "", profile,
 			Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
@@ -128,7 +128,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, requestUrl, "",
-			Collections.singletonList(profile), authentication);
+			profile, Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -156,7 +156,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, requestUrl, "",
-			Collections.singletonList(profile), authentication);
+			profile, Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));
@@ -187,7 +187,7 @@ public class UserSetServiceImplTest {
 		userSetQuery.getPageSize(), profile);
 
 	BaseUserSetResultPage<?> result = userSetService.buildResultsPage(userSetQuery, resultSet, requestUrl, "",
-			Collections.singletonList(profile), authentication);
+			profile, Collections.singletonList(profile), authentication);
 
 	assertTrue(StringUtils.equals(first, result.getPartOf().getFirst()));
 	assertTrue(StringUtils.equals(last, result.getPartOf().getLast()));

@@ -1,8 +1,6 @@
 package eu.europeana.set.web.service.impl;
 
 import static eu.europeana.set.web.service.authorization.UserSetAuthorizationUtils.getAuthHandler;
-
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +9,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,11 +19,12 @@ import eu.europeana.api.commons_sb3.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons_sb3.error.EuropeanaApiException;
 import eu.europeana.api.commons_sb3.error.EuropeanaI18nApiException;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.commons_sb3.error.exceptions.ApplicationAuthenticationException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidBodyException;
 import eu.europeana.api.commons_sb3.error.exceptions.InvalidParamException;
 import eu.europeana.api.commons_sb3.oauth2.model.ApiCredentials;
+import eu.europeana.api.commons_sb3.oauth2.utils.OAuthUtils;
 import eu.europeana.set.definitions.config.UserSetConfiguration;
 import eu.europeana.set.definitions.model.UserSet;
 import eu.europeana.set.definitions.model.agent.Agent;
@@ -83,16 +80,8 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return mongoPersistance;
   }
 
-  public void setMongoPersistance(PersistentUserSetService mongoPersistance) {
-    this.mongoPersistance = mongoPersistance;
-  }
-
   public Logger getLogger() {
     return logger;
-  }
-
-  public void setLogger(Logger logger) {
-    this.logger = logger;
   }
 
   public PersistentUserSetService getMongoPersistance() {
@@ -342,46 +331,6 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     return builder.toString();
   }
 
-  public String buildCollectionUrl(String searchProfile, String requestUrl, String queryString) {
-    // remove out of scope parameters
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE, queryString);
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, queryString);
-    // facets are not part of items pagination. Facets are displayed separately
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_FACET, queryString);
-
-    // avoid duplication of query parameters
-    queryString = removeParam(CommonApiConstants.QUERY_PARAM_PROFILE, queryString);
-
-    // add mandatory parameters
-    if (StringUtils.isNotBlank(searchProfile)) {
-      if (!queryString.isEmpty()) {
-        queryString += '&';
-      }
-      queryString += (CommonApiConstants.QUERY_PARAM_PROFILE + '=' + searchProfile);
-
-    }
-
-    // TODO: verify if base URL should be used instead
-    if (!queryString.isEmpty()) {
-      return requestUrl + "?" + queryString;
-    }
-    return requestUrl;
-  }
-
-
-
-  protected CollectionOverview buildCollectionOverview(String collectionUrl, int pageSize,
-      long totalInCollection, int lastPage, String type, SetPageProfile profile) {
-    String first = null;
-    String last = null;
-
-    if (totalInCollection > 0) {
-      first = buildPageUrl(collectionUrl, WebUserSetFields.DEFAULT_PAGE, pageSize, profile);
-      last = buildPageUrl(collectionUrl, lastPage, pageSize, profile);
-    }
-    return new CollectionOverview(collectionUrl, totalInCollection, first, last, type);
-  }
-
   protected void setDefaults(UserSet newUserSet, Authentication authentication) {
     Agent user = new WebUser();
     /**
@@ -473,13 +422,26 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   @Override
-  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
+  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles, SetPageProfile defaultPageProfile) {
+    SetPageProfile ret = null;
     for (SetPageProfile profile : profiles) {
       if (SetPageProfile.FACETS != profile) {
-        return profile;
+        ret = profile;
+        break;
       }
     }
-    return null;
+    
+    if (ret == null && defaultPageProfile != null) {
+      // if only technical profiles included in request, append the default profile
+      ret = defaultPageProfile;
+      profiles.add(defaultPageProfile);
+    }
+    return ret;
+  }
+  
+  @Override
+  public SetPageProfile getProfileForPagination(List<SetPageProfile> profiles) {
+    return getProfileForPagination(profiles, null);
   }
 
   /**
