@@ -350,7 +350,6 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     return counter;
   }
 
-  @SuppressWarnings("external_fbcontrib:CE_CLASS_ENVY")
   private void addItems(UserSet existingUserSet, List<String> items, int position,
       boolean isPinnRequest) {
     // init items list if needed

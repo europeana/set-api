@@ -11,12 +11,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.definitions.search.Query;
@@ -109,7 +103,7 @@ public class SearchUserSetRest extends BaseRest {
         request.getQueryString(), serializationProfile, profiles, authentication);
 
     String jsonLd = serializeResultsPage(resultsPage);
-    return buildSearchResponse(jsonLd);
+    return buildSearchResponse(jsonLd, request);
   }
 
   SetPageProfile getSerializationProfile(List<SetPageProfile> profiles) {

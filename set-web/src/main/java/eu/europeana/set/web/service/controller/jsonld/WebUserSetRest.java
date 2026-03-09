@@ -3,7 +3,6 @@ package eu.europeana.set.web.service.controller.jsonld;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.*;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.*;
 import static eu.europeana.set.web.http.UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE;
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -922,28 +921,4 @@ public class WebUserSetRest extends BaseRest {
       getUserSetService().deleteUserSets(creatorId, userSets);
       return ResponseEntity.noContent().header(ALLOW, createAllowHeader(request)).build();
   }
-
-
-  @Deprecated
-  /**
-   * SG: we might need to add back the verification of page size for dereference profile
-   * 
-   * @deprecated need to verify specs to see if the page for items dereferencing stays the same as
-   *             the size for standard profile
-   * @param userSet
-   * @param pageSize
-   * @return
-   */
-  private int getDerefItemsCount(UserSet userSet, int pageSize) {
-    if (userSet.isOpenSet()) {
-      // limit to max deref items
-      return Math.min(pageSize, getConfiguration().getMaxRetrieveDereferencedItems());
-    } else {
-      // for closed set dereference all items
-      // limit to max deref items
-      return Math.min(userSet.getTotal(), getConfiguration().getMaxRetrieveDereferencedItems());
-    }
-  }
-
-
 }
