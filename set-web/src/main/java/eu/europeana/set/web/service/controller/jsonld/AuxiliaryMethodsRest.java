@@ -48,7 +48,6 @@ public class AuxiliaryMethodsRest extends BaseRest {
     /**
      * Generate Elevation File
      *
-     * @param wsKey
      * @param request
      * @return
      * @throws EuropeanaApiException

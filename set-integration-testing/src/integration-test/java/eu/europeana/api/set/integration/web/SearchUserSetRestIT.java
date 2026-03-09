@@ -2,6 +2,7 @@ package eu.europeana.api.set.integration.web;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -79,7 +80,9 @@ class SearchUserSetRestIT extends BaseSearchUserSetTesting{
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
+        .andExpect(status().is(HttpStatus.OK.value())).
+            andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,GET" )).
+            andReturn().getResponse()
         .getContentAsString();
 
     assertNotNull(result);

@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Collections;
 import java.util.Date;
@@ -86,7 +87,9 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             post(BASE_URL)
                 .content(requestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        .andExpect(status().isCreated()).
+            andExpect(header().stringValues(HttpHeaders.ALLOW, "DELETE,POST")).
+            andReturn().getResponse().getContentAsString();
     String identifier = getSetIdentifier(getConfiguration().getSetDataEndpoint(), result);
     assertNotNull(identifier);
     addToCreatedSets(identifier);
@@ -261,7 +264,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
   }
 
-  @Test
+    @Test
   public void getUserSet_Success() throws Exception {
     WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
 
@@ -272,6 +275,7 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
             // .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, "10")
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,DELETE,GET,PUT"))
         .andReturn().getResponse();
 
     assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), CONTENT_TYPE_JSONLD_UTF8);
@@ -365,7 +369,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .perform(put(BASE_URL + "{identifier}", userSet.getIdentifier())
             .content(updatedRequestJson).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andReturn().getResponse();
+            .andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,DELETE,GET,PUT"))
+            .andReturn().getResponse();
 
     String result = response.getContentAsString();
     assertNotNull(result);
@@ -389,7 +394,9 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     mockMvc
         .perform(delete(BASE_URL).header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+        .andExpect(status().is(HttpStatus.NO_CONTENT.value()))
+        .andExpect(header().stringValues(HttpHeaders.ALLOW, "DELETE,POST"));
+
     // TODO: use search by user to verify that all usersets were deleted
     String creator = (String) getAuthentication(regularUserToken).getPrincipal();
     UserSetQuery searchQuery = (new UserSetQueryBuilder()).buildUserSetQuery("creator:" + creator,
@@ -478,7 +485,8 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
         .perform(delete(BASE_URL + "{identifier}", userSet.getIdentifier())
             .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+        .andExpect(status().is(HttpStatus.NO_CONTENT.value()))
+       .andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,DELETE,GET,PUT"));
   }
   
   @Test
