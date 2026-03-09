@@ -45,6 +45,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 public class SearchUserSetRest extends BaseRest {
 
+  private static final int EXPECTED_HEADERS_SIZE = 5;
   UserSetQueryBuilder queryBuilder;
 
   public synchronized UserSetQueryBuilder getQueryBuilder() {
@@ -189,29 +190,24 @@ public class SearchUserSetRest extends BaseRest {
     Integer pageNr = WebUserSetRequestUtils.parsePageNumber(page, -1);
 
     Integer pageItems = validatePageSize(pageSize, profile);
-      // build response
-      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-      headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-      headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(ALLOW, createAllowHeader(request));
-
+     
     BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
         identifier, filtered, pageNr, pageItems, profile, request, authentication);
 
-    return buildSetPageResponse(resultPage);
+    return buildSetPageResponse(resultPage, request);
 
   }
 
-  ResponseEntity<String> buildSetPageResponse(BaseUserSetResultPage<String> resultPage)
+  ResponseEntity<String> buildSetPageResponse(BaseUserSetResultPage<String> resultPage, HttpServletRequest request)
       throws EuropeanaApiException {
     UserSetLdSerializer serializer = new UserSetLdSerializer();
     String jsonLd = serializer.serialize(resultPage);
 
     // build response
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(EXPECTED_HEADERS_SIZE);
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-    headers.add(ALLOW, ALLOW_GET);
+    headers.add(ALLOW, createAllowHeader(request));
 
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
@@ -304,7 +300,7 @@ public class SearchUserSetRest extends BaseRest {
     BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
         identifier, filtered, pageNr, pageItems, profile, request, authentication);
 
-    return buildSetPageResponse(resultPage);
+    return buildSetPageResponse(resultPage, request);
 
  
   }
