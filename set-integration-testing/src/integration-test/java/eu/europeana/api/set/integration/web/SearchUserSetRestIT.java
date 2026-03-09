@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.List;
 
@@ -175,7 +176,9 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
                 .header(HttpHeaders.AUTHORIZATION, regularUserToken)
             .queryParam(CommonApiConstants.QUERY_PARAM_QUERY, query)
             .queryParam(CommonApiConstants.QUERY_PARAM_PAGE_SIZE, PAGE_SIZE))
-        .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse()
+        .andExpect(status().is(HttpStatus.OK.value())).
+            andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,GET" )).
+            andReturn().getResponse()
         .getContentAsString();
 
     assertNotNull(result);
@@ -764,7 +767,10 @@ public class SearchUserSetRestIT extends IntegrationTestSetup {
     MockHttpServletRequestBuilder searchRequest =
         buildSearchItemsInSetRequest(setIdentifier, qf, page, pageSize, profile, regularUserToken);
 
-    return mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.OK.value())).andReturn()
+    return mockMvc.perform(searchRequest).andExpect(status().is(HttpStatus.OK.value())).
+            // TODO add POST once EA-4206 is done
+            andExpect(header().stringValues(HttpHeaders.ALLOW, "HEAD,GET")).
+            andReturn()
         .getResponse().getContentAsString();
 
   }

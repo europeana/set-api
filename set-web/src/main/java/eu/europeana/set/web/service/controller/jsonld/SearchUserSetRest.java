@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import eu.europeana.api.commons_sb3.definitions.iiif.AcceptUtils;
 import eu.europeana.api.commons_sb3.definitions.search.ResultSet;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
@@ -111,7 +108,7 @@ public class SearchUserSetRest extends BaseRest {
           request.getQueryString(), profiles, authentication);
 
       String jsonLd = serializeResultsPage(resultsPage);
-      return buildSearchResponse(jsonLd);
+      return buildSearchResponse(jsonLd, request);
   }
 
   @SuppressWarnings("rawtypes")
@@ -120,12 +117,12 @@ public class SearchUserSetRest extends BaseRest {
     return serializer.serialize(resultsPage);
   }
 
-  private ResponseEntity<String> buildSearchResponse(String jsonLd) {
+  private ResponseEntity<String> buildSearchResponse(String jsonLd, HttpServletRequest request) {
     // build response
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
     headers.add(UserSetHttpHeaders.VARY, AcceptUtils.ACCEPT);
     headers.add(UserSetHttpHeaders.VARY, PREFER);
-    headers.add(ALLOW, ALLOW_GET);
+    headers.add(ALLOW, createAllowHeader(request));
 
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
@@ -209,7 +206,7 @@ public class SearchUserSetRest extends BaseRest {
       MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
       headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
       headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-      headers.add(ALLOW, ALLOW_GET);
+      headers.add(ALLOW, createAllowHeader(request));
 
       return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
 

@@ -157,11 +157,9 @@ public class BaseApiConnection {
             }
             if (StringUtils.equals(h.getName(), CachingHeaders.LAST_MODIFIED)) {
                 apiCaching.setLastModified(DateUtils.parseRFCToZonedDateTime(h.getValue()));
-
-
-            } if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
+            }
+            if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
                 apiCaching.setCacheControl(h.getValue());
-
             }
         }
     }

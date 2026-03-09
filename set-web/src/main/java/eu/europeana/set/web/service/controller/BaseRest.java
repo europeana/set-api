@@ -7,6 +7,7 @@ import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.LINK;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFER;
 import static eu.europeana.api.commons_sb3.definitions.http.HttpHeaders.PREFERENCE_APPLIED;
 import static eu.europeana.set.definitions.model.vocabulary.WebUserSetFields.FORMAT_JSONLD;
+import static eu.europeana.set.web.http.UserSetHttpHeaders.*;
 import static jakarta.ws.rs.core.HttpHeaders.ACCEPT;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
@@ -14,13 +15,9 @@ import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
 import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
+
+import eu.europeana.api.commons_sb3.error.ApiRequestPathMethodService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +51,6 @@ import eu.europeana.set.web.config.BuildInfo;
 import eu.europeana.set.web.http.UserSetHttpHeaders;
 import eu.europeana.set.web.model.search.CollectionPage;
 import eu.europeana.set.web.search.UserSetLdSerializer;
-import eu.europeana.set.web.service.RequestPathMethodService;
 import eu.europeana.set.web.service.UserSetService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationService;
 import eu.europeana.set.web.service.authorization.UserSetAuthorizationServiceImpl;
@@ -84,7 +80,7 @@ public class BaseRest extends BaseRestController {
   protected BuildInfo buildInfo;
 
   @Resource
-  private RequestPathMethodService requestMethodService;
+  private ApiRequestPathMethodService requestMethodService;
 
   SetProfileHelper profileHelper = new SetProfileHelper();
 
@@ -249,61 +245,72 @@ public class BaseRest extends BaseRestController {
     return buildInfo.getAppVersion();
   }
 
-  protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
-      final SetResourceProfile profile, final HttpStatusCode responseStatus,
-      Map<String, String> additionalHeaders, HttpServletRequest request) throws EuropeanaApiException {
-    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
-
-    String etag = generateETag(storedUserSet.getModified(), FORMAT_JSONLD, getApiVersion());
-
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
+  /**
+   * Creates basic response headers needed
+   *
+   * NOTE :
+   *    1. The last Modified date has to be of RFC 1123 format,
+   *       or else it would be emitted from the response
+   *    2. CACHE_CONTROL :  When a set is non-dynamic and has been published
+   *                       (type != DynamicCollection and “visibility“ == “published“) - Cache-Control: public, max-age=86400
+   *                       otherwise : Cache-Control: public, max-age=0
+   * @param request http request
+   * @param userSet userSet values are used  for generating etag, last-modified and cache control headers
+   * @param cacheControlValue if value present add that or else determined
+   *                          based on the if the user set is dynamic or not
+   * @return map with response headers
+   *
+   */
+  protected MultiValueMap<String, String> createResponseHeaders(UserSet userSet,
+                                                                String cacheControlValue,
+                                                                HttpServletRequest request) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
+    headers.add(LINK, VALUE_BASIC_CONTAINER);
+    headers.add(LINK, VALUE_BASIC_RESOURCE);
     headers.add(ALLOW, createAllowHeader(request));
-    // headers.add(HttpHeaders.ALLOW, UserSetHttpHeaders.ALLOW_PG);
-    if (additionalHeaders != null) {
-      for (Map.Entry<String, String> entry : additionalHeaders.entrySet()) {
-        headers.add(entry.getKey(), entry.getValue());
+    headers.add(ETAG, generateETag(userSet.getModified(), FORMAT_JSONLD, getApiVersion()));
+    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+
+    if (StringUtils.isNotEmpty(cacheControlValue)) {
+      headers.add(CACHE_CONTROL, cacheControlValue);
+    } else {
+      if (!userSet.isOpenSet() && userSet.isPublished()) {
+        headers.add(CACHE_CONTROL, CACHE_VALUE_NON_DYNAMIC_PUBLISHED_SET);
+      } else {
+        headers.add(CACHE_CONTROL, CACHE_VALUE_DYNAMIC_SET);
       }
     }
 
-    // generate “ETag”;
-    headers.add(UserSetHttpHeaders.ETAG, etag);
-    // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
-    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(storedUserSet.getModified()));
-
-    return new ResponseEntity<>(serializedUserSetJsonLdStr, headers, responseStatus);
+    return headers;
   }
 
-
+  protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
+      final SetResourceProfile profile, final HttpStatusCode responseStatus,
+       String defaultCacheControl, HttpServletRequest request) throws EuropeanaApiException {
+    String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
+    return new ResponseEntity<>(serializedUserSetJsonLdStr,
+            createResponseHeaders(storedUserSet, defaultCacheControl, request),
+            responseStatus);
+  }
 
   /**
    * Builds the Set Paginated response
    * @param setPage collection page
-   * @param modified userSet.getModified() date
+   * @param storedUserSet stored userSet
    * @param profile profile requested
    * @param request http request
    * @return
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, Date modified,
+  protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, UserSet storedUserSet,
       SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
-    String etag = generateETag(modified, FORMAT_JSONLD, getApiVersion());
 
     // build response
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
-    headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
-    // headers.add(ALLOW, UserSetHttpHeaders.ALLOW_GPD);
-    headers.add(ALLOW, createAllowHeader(request));
+    MultiValueMap<String, String> headers = createResponseHeaders(storedUserSet, VALUE_NO_CAHCHE_STORE_REVALIDATE, request);
     headers.add(VARY, PREFER);
     headers.add(PREFERENCE_APPLIED, profile.getPreferenceApplied());
-    // generate “ETag”;
-    headers.add(ETAG, etag);
-    // Last Modified date has to be of RFC 1123 format or else it would be emitted from the response
-    headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(modified));
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }
 
@@ -395,6 +402,10 @@ public class BaseRest extends BaseRestController {
       allowHeaderValue = methodsForRequestPattern.get();
     }
 
+    // Add HEAD for the allow Header values which contain GET
+    if (allowHeaderValue.contains("GET") && !allowHeaderValue.contains("HEAD")) {
+      return "HEAD," + allowHeaderValue;
+    }
     return allowHeaderValue;
   }
 
