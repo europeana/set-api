@@ -10,6 +10,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
+import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
@@ -162,7 +167,10 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value())).andReturn().getResponse()
         .getContentAsString();
 
-    assertTrue(result.contains("duplicate"));
+    assertTrue(result.contains(ErrorMessage.DUPLICATE_CLASS_400.getCode()));
+    assertTrue(result.contains(String.format(ErrorMessage.DUPLICATE_CLASS_400.getError(), UserSet.class.getSimpleName())));
+    assertTrue(result.contains("Another UserSet already exists"));
+
 
   }
 

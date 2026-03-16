@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import eu.europeana.api.commons_sb3.error.exceptions.DuplicateClassFound;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +53,6 @@ import eu.europeana.set.web.model.search.SearchApiUtils;
 import eu.europeana.set.web.model.vocabulary.Roles;
 import eu.europeana.set.web.search.UserSetLdSerializer;
 import eu.europeana.set.web.service.UserSetService;
-import eu.europeana.set.web.service.controller.exception.SetUniquenessValidationException;
 import  jakarta.annotation.Resource;
 
 public abstract class BaseUserSetServiceImpl implements UserSetService {
@@ -783,7 +784,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
    * @throws RequestBodyValidationException
    * @throws SetUniquenessValidationException
    */
-  void validateEntityBestItemsSet(UserSet webUserSet) throws InvalidBodyException, SetUniquenessValidationException {
+  void validateEntityBestItemsSet(UserSet webUserSet) throws InvalidBodyException, DuplicateClassFound {
     if (!webUserSet.isEntityBestItemsSet()) {
       return;
     }
@@ -828,15 +829,12 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
     checkDuplicateUserSets(webUserSet);
   }
 
-  void checkDuplicateUserSets(UserSet userSet) throws SetUniquenessValidationException {
+  void checkDuplicateUserSets(UserSet userSet) throws DuplicateClassFound {
     // check the set uniqueness only for the EntityBestItemsSet type
     if (UserSetTypes.ENTITYBESTITEMSSET.getJsonValue().equals(userSet.getType())) {
       List<String> duplicateSetsIds = getMongoPersistence().getDuplicateUserSetsIds(userSet);
       if (duplicateSetsIds != null) {
-        String[] i18nParamsSetDuplicates = new String[1];
-        i18nParamsSetDuplicates[0] = String.join(",", duplicateSetsIds);
-        throw new SetUniquenessValidationException(null, UserSetI18nConstants.USERSET_DUPLICATION,
-           Arrays.asList(i18nParamsSetDuplicates));
+        throw new DuplicateClassFound(UserSet.class, Arrays.asList("values. Duplicate user set ids : "+ duplicateSetsIds));
       }
     }
   }
