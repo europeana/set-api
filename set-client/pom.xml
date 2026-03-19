@@ -6,7 +6,7 @@
 		<groupId>eu.europeana.set</groupId>
 		<artifactId>set-api</artifactId>
 		<relativePath>../pom.xml</relativePath>
-		<version>0.14</version>		
+		<version>0.15-SNAPSHOT</version>		
 	</parent>
 	<artifactId>set-client</artifactId>
 	<packaging>jar</packaging>
@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>eu.europeana.set</groupId>
 			<artifactId>set-definitions</artifactId>
-			<version>0.14</version>
+			<version>0.15-SNAPSHOT</version>
 		</dependency>
 
     <!--Client is using api-commons-sb3 for caching classes -->
