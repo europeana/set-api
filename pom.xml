@@ -4,7 +4,7 @@
 
 	<groupId>eu.europeana.set</groupId>
 	<artifactId>set-api</artifactId>
-	<version>0.14-SNAPSHOT</version>
+	<version>0.14</version>
 	<packaging>pom</packaging>
 	<name>User sets API</name>
 	<description>User Sets API - API for curating collections by end users</description>
