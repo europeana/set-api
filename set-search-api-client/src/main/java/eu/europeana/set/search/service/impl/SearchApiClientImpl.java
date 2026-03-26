@@ -315,10 +315,9 @@ public class SearchApiClientImpl implements SearchApiClient {
 
 
   private String getResourceId(String thumbnailUrl) throws SearchApiClientException {
-    final String queryString = StringUtils.substringAfter(thumbnailUrl, "?");
     NameValuePair uriParam;
     try {
-      uriParam = (new URIBuilder(queryString)).getFirstQueryParam("uri");
+      uriParam = (new URIBuilder(thumbnailUrl)).getFirstQueryParam("uri");
     } catch (URISyntaxException e) {
       throw new SearchApiClientException(
           "Invalid thumbnail URL: " + thumbnailUrl, e);
