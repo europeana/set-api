@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
@@ -315,10 +314,9 @@ public class SearchApiClientImpl implements SearchApiClient {
 
 
   private String getResourceId(String thumbnailUrl) throws SearchApiClientException {
-    final String queryString = StringUtils.substringAfter(thumbnailUrl, "?");
     NameValuePair uriParam;
     try {
-      uriParam = (new URIBuilder(queryString)).getFirstQueryParam("uri");
+      uriParam = (new URIBuilder(thumbnailUrl)).getFirstQueryParam("uri");
     } catch (URISyntaxException e) {
       throw new SearchApiClientException(
           "Invalid thumbnail URL: " + thumbnailUrl, e);
