@@ -19,10 +19,7 @@ import eu.europeana.set.definitions.config.UserSetConfigurationImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -577,7 +574,35 @@ public class WebUserSetRestIT extends IntegrationTestSetup {
     assertFalse(updatedUserSet.getItems().contains(item1));
     assertFalse(updatedUserSet.getItems().contains(item2FullUrl));
   }
-  
 
+
+    @Test
+    void insertExistingItem_GenerateDepiction() throws Exception {
+        WebUserSetImpl userSet = createTestUserSet(USER_SET_REGULAR, regularUserToken);
+
+        Assertions.assertNull(userSet.getIsShownBy());
+
+        //inserting existing item now ";
+        String item1="/08641/1037479000000476703"; // has Edmprview
+        JSONArray newItemsJson = new JSONArray();
+        newItemsJson.put(item1);
+
+        mockMvc.perform(
+                        put(BASE_URL + "{identifier}/items", userSet.getIdentifier())
+                                .content(newItemsJson.toString())
+                                .header(HttpHeaders.AUTHORIZATION, regularUserToken)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andReturn().getResponse()
+                .getContentAsString();
+
+        UserSet updatedUserSet = getUserSetService().getUserSetById(userSet.getIdentifier());
+        //check for the new items
+        assertTrue(updatedUserSet.getItems().contains(UserSetUtils.buildItemUrl(getConfiguration().getItemDataEndpoint(), item1)));
+
+        // check isShownBy now generated
+        assertNotNull(updatedUserSet.getIsShownBy());
+        assertNotNull(updatedUserSet.getIsShownBy().getThumbnail());
+    }
 
 }

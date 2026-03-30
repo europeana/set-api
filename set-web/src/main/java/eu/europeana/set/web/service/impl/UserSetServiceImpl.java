@@ -221,7 +221,7 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
     if (userSet.getItems() != null && !userSet.getItems().isEmpty()) {
       firstItemNew = userSet.getItems().get(0);
     }
-    if (!StringUtils.equals(firstItemOld, firstItemNew)) {
+    if (updateIsShownByRequired(userSet, firstItemOld, firstItemNew)) {
       try {
         final WebResource isShownBy = generateDepiction(userSet, authentication);
         userSet.setIsShownBy(isShownBy);
@@ -232,6 +232,17 @@ public class UserSetServiceImpl extends BaseUserSetServiceImpl {
         }
       }
     }
+  }
+
+    /**
+     * EA-4482 Fix to update isShownBY for the usersets which do not have isShownBy
+     * @param userset updated userset
+     * @param firstItemOld first item before updating the userset
+     * @param firstItemNew first item after updating the user set
+     * @return true if userset doesn't have isShownBy OR firstItemOld and firstItemNew do not match
+     */
+  public boolean updateIsShownByRequired(UserSet userset, String firstItemOld, String firstItemNew) {
+      return userset.getIsShownBy() == null || (!StringUtils.equals(firstItemOld, firstItemNew));
   }
 
   public UserSet deleteMultipleItems(List<String> items, UserSet existingUserSet, Authentication authentication)
