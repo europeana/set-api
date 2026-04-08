@@ -5,7 +5,7 @@
 		<artifactId>set-api</artifactId>
 		<groupId>eu.europeana.set</groupId>
 		<relativePath>../pom.xml</relativePath>
-		<version>0.15-SNAPSHOT</version>
+		<version>0.14.1</version>
 	</parent>
 
 	<artifactId>set-definitions</artifactId>
