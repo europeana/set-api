@@ -4,6 +4,7 @@ public class SetApiClientException extends Exception {
 
     private static final long serialVersionUID = 8281933808897246375L;
     private final int remoteStatusCode;
+    public static final  int UNAVAILABLE_STATUS_CODE = -1; 
 
     /**
      * Constructor for exception to indicate that an error occurred during invocation of the remote
@@ -16,6 +17,17 @@ public class SetApiClientException extends Exception {
     public SetApiClientException(String msg, int remoteStatusCode, Throwable t) {
         super(msg, t);
         this.remoteStatusCode = remoteStatusCode;
+    }
+    
+    /**
+     * Constructor for exception to indicate that an error occurred during invocation of the remote
+     * service or parsing of service response
+     *
+     * @param msg the error message
+     * @param t eventual exception thrown when extracting information from the remote service response
+     */
+    public SetApiClientException(String msg, Throwable t) {
+        this(msg, UNAVAILABLE_STATUS_CODE, t);
     }
 
     /**
@@ -37,7 +49,7 @@ public class SetApiClientException extends Exception {
      * @param msg the error message
      */
     public SetApiClientException(String msg) {
-        this(msg, -1);
+        this(msg, UNAVAILABLE_STATUS_CODE);
     }
 
     public int getRemoteStatusCode() {

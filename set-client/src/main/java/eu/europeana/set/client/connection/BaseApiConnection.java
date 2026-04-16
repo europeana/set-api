@@ -330,7 +330,7 @@ public class BaseApiConnection {
 
   Map<String, String> buildContentTypeHeaders() {
     Map<String, String> headers = new HashMap<>();
-    headers.put(ERROR_MESSAGE, DELETE_URL_RESPONSE);
+    headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
     return headers;
   }
 

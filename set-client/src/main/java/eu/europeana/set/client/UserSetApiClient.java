@@ -3,6 +3,7 @@ package eu.europeana.set.client;
 import java.util.List;
 import java.util.Optional;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.set.client.config.ClientConfiguration;
@@ -80,14 +81,22 @@ public class UserSetApiClient extends BaseUserSetApi {
         @Override
         public UserSet addItems(String identifier, List<String> items, String position, String profile)
             throws SetApiClientException {
-          String requestBody = (new JSONArray(items)).toString();
+          String requestBody = serializeToJson(items);
           return getApiConnection().addItems(identifier, requestBody, position, profile);
+        }
+
+        String serializeToJson(List<String> items) throws SetApiClientException{
+          try {
+            return (new JSONArray(items)).toString();
+          } catch (JSONException e) {
+            throw new SetApiClientException("Cannot serilize list to Json!",  e);
+          }
         }
         
         @Override
         public UserSet removeItems(String identifier, List<String> items, String profile)
             throws SetApiClientException {
-          String requestBody = (new JSONArray(items)).toString();
+          String requestBody = serializeToJson(items);
           return getApiConnection().removeItems(identifier, requestBody, profile);
         }
         
