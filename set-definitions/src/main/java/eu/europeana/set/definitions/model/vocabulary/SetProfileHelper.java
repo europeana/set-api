@@ -146,9 +146,9 @@ public class SetProfileHelper {
 
   private String[] toStringArray(String profileStr) {
     char separator;
-    if (profileStr.indexOf(WebUserSetFields.COMMA) > 0) {
+    if (profileStr.indexOf(WebUserSetFields.COMMA) >= 0) {
       separator = WebUserSetFields.COMMA;
-    } else if (profileStr.indexOf(WebUserSetFields.SPACE) > 0) {
+    } else if (profileStr.indexOf(WebUserSetFields.SPACE) >= 0) {
       separator = WebUserSetFields.SPACE;
     } else {
       // no separator convert to array

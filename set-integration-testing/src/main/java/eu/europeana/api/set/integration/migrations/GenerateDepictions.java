@@ -25,11 +25,12 @@ public class GenerateDepictions {
 
   /**
    * Main method
+   * 
    * @param args not used
    */
   public static void main(String[] args) {
 
-    
+
     WebUserSetApi webUserSetApi;
     try {
       ClientConfiguration clientConfig = new ClientConfiguration();
@@ -60,21 +61,22 @@ public class GenerateDepictions {
   }
 
   static List<String> getSetIdsNoDepiction() throws JSONException, IOException {
-    InputStream idsStream =
-        GenerateDepictions.class.getResourceAsStream("/migration/set_no_depiction_prod.txt");
-    String content = new String(idsStream.readAllBytes(), StandardCharsets.UTF_8);
-    JSONArray objs = new JSONArray(content);
-    List<String> ids = new ArrayList<>(objs.length());
-    for (int ix = 0; ix < objs.length(); ix++) {
-      ids.add(objs.getJSONObject(ix).getString("identifier"));
+
+    try (InputStream idsStream =
+        GenerateDepictions.class.getResourceAsStream("/migration/set_no_depiction_prod.txt")) {
+      String content = new String(idsStream.readAllBytes(), StandardCharsets.UTF_8);
+      JSONArray objs = new JSONArray(content);
+      List<String> ids = new ArrayList<>(objs.length());
+      for (int ix = 0; ix < objs.length(); ix++) {
+        ids.add(objs.getJSONObject(ix).getString("identifier"));
+      }
+      return ids;
     }
-    return ids;
   }
 
   static void updateDepiction(WebUserSetApi webUserSetApi, String setIdentifier)
       throws SetApiClientException {
-    Optional<UserSet> setOptional =
-        webUserSetApi.getUserSet(setIdentifier, null, null);
+    Optional<UserSet> setOptional = webUserSetApi.getUserSet(setIdentifier, null, null);
     if (setOptional.isEmpty()) {
       LOG.error("Cannot fetch userset:  {}", setIdentifier);
 

@@ -30,7 +30,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @param set The UserSet body
    * @param profile profile requested
    * @return response entity that comprises response body, headers and status code.
-   * @throws IOException
+   * @throws SetApiClientException if invocation fails
    */
   public UserSet createUserSet(String set, String profile) 
          throws SetApiClientException {
@@ -53,8 +53,8 @@ public class UserSetApiConnection extends BaseApiConnection {
      * @param identifier set id
      * @param profile profile requested
      * @param caching  if present caching headers are set in the http request.
-     * @throws IOException
-     * @return userset
+     * @throws SetApiClientException if invocation fails
+     * @return the user set
      */
     public Optional<UserSet> getUserSet(String identifier, String profile, ResourceCaching caching)
             throws SetApiClientException {
@@ -74,7 +74,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @param updateUserSet The update UserSet body in JSON format
    * @param profile
    * @return response entity that comprises response body, headers and status code.
-   * @throws IOException
+   * @throws SetApiClientException if invocation fails
    */
   public UserSet updateUserSet(String identifier, String updateUserSet, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
@@ -127,9 +127,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    */
   public UserSet removeItems(String identifier, String itemsJson, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(identifier);
-    urlBuilder.append("/items");
-    urlBuilder.append(WebUserSetFields.PAR_CHAR);
+    urlBuilder.append(identifier).append("/items").append(WebUserSetFields.PAR_CHAR);
     if (StringUtils.isNotEmpty(profile)) {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
@@ -150,9 +148,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    */
   public boolean checkItems(String setIdentifier, String itemId) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(setIdentifier);
-    urlBuilder.append(itemId);
-    urlBuilder.append(WebUserSetFields.PAR_CHAR);
+    urlBuilder.append(setIdentifier).append(itemId).append(WebUserSetFields.PAR_CHAR);
    
     try (CloseableHttpResponse response = getHttpConnection().get(urlBuilder.toString(), null, getAuthenticationHandler())) {
 
