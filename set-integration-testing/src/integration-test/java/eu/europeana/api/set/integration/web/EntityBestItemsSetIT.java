@@ -370,7 +370,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(
             put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinnedItem")
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
+                .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION,
                     WebUserSetModelFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -479,7 +479,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(
             put(BASE_URL + "{identifier}/items", identifier)
                 .content(newItemsJson.toString())
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
+                .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION,
                     WebUserSetModelFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -602,7 +602,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     mockMvc.perform(
         put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinUnpinItem")
-            .queryParam(WebUserSetFields.PATH_PARAM_POSITION, "3")
+            .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION, "3")
             .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
@@ -638,7 +638,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     mockMvc.perform(
         put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "04", "123_pinUnpinItem")
-            .queryParam(WebUserSetFields.PATH_PARAM_POSITION, "5")
+            .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION, "5")
             .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
@@ -679,7 +679,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     mockMvc
         .perform(
             put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02", "normal_item")
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION, WebUserSetFields.POSITION_PIN)
+                .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION, WebUserSetFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();

@@ -377,7 +377,7 @@ public class WebUserSetRest extends BaseRest {
       @PathVariable(value = PATH_PARAM_LOCAL_ID) @Pattern(
           regexp = UserSetUtils.EUROPEANA_ID_FIELD_REGEX,
           message = INVALID_RECORD_ID_MESSAGE) String localId,
-      @RequestParam(value = PATH_PARAM_POSITION, required = false) String position,
+      @RequestParam(value = REQUEST_PARAM_POSITION, required = false) String position,
       HttpServletRequest request) throws EuropeanaApiException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
@@ -389,7 +389,7 @@ public class WebUserSetRest extends BaseRest {
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> insertMultipleItemsIntoUserSet(
       @PathVariable(value = PATH_PARAM_SET_ID) String identifier,
-      @RequestParam(value = PATH_PARAM_POSITION, required = false) String position,
+      @RequestParam(value = REQUEST_PARAM_POSITION, required = false) String position,
       @RequestBody List<String> items, HttpServletRequest request) throws EuropeanaApiException {
     // check user credentials, if invalid respond with HTTP 401,
     // or if unauthorized respond with HTTP 403
@@ -568,10 +568,10 @@ public class WebUserSetRest extends BaseRest {
       try {
         positionFinal = Integer.parseInt(position);
         if (positionFinal < 0) {
-          throw new InvalidParamException(Arrays.asList(PATH_PARAM_POSITION, "", position));
+          throw new InvalidParamException(Arrays.asList(REQUEST_PARAM_POSITION, "", position));
         }
       } catch (RuntimeException e) {
-        throw new InvalidParamException(Arrays.asList(PATH_PARAM_POSITION, "", position), e);
+        throw new InvalidParamException(Arrays.asList(REQUEST_PARAM_POSITION, "", position), e);
       }
     }
     return positionFinal;
@@ -624,10 +624,8 @@ public class WebUserSetRest extends BaseRest {
         }
       }
 
-      // for entity user sets, add users with 'editor' role as contributors
-      addContributorForEntitySet(existingUserSet, authentication);
-
-
+//      // for entity user sets, add users with 'editor' role as contributors
+//      addContributorForEntitySet(existingUserSet, authentication);
       // check if the Set is disabled, respond with HTTP 410
       HttpStatus httpStatus = null;
 

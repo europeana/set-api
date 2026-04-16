@@ -3,10 +3,11 @@ package eu.europeana.set.client.connection;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
-import org.apache.commons.lang3.StringUtils;
 import eu.europeana.api.commons_sb3.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.model.result.RecordPreview;
@@ -86,6 +87,91 @@ public class UserSetApiConnection extends BaseApiConnection {
     return getUpdateUserSetResponse(urlBuilder.toString(), updateUserSet);
   }
 
+  /**
+   * This method updates the UserSet with the given identifier by adding the provided items. Example HTTP request:
+   * PUT http://localhost:8080/set/{identifier}/items?profile=standard&position=1 where identifier is: 496 and the
+   * update JSON string is: ["http://data.europeana.eu/item/2022608/TFM_SVB_FTTF_SCH_ALF_G_01_02"]
+   *
+   * @param identifier The identifier of the user set to be updated
+   * @param itemsJson The request body, item ids in JSON array format 
+   * @param position optional, the position to start with (>= 0) when inserting items, otherwise appended to the end
+   * @param profile the requested profile
+   * @return response entity that comprises response body, headers and status code.
+   * @throws IOException if api invocation fails
+   */
+  public UserSet addItems(String identifier, String itemsJson, String position, String profile) throws SetApiClientException {
+    StringBuilder urlBuilder = getUserSetServiceUri();
+    urlBuilder.append(identifier);
+    urlBuilder.append("/items");
+    urlBuilder.append(WebUserSetFields.PAR_CHAR);
+    if (StringUtils.isNotEmpty(profile)) {
+      urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
+          .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
+    }
+    if(StringUtils.isNotEmpty(position)) {
+      urlBuilder.append(WebUserSetFields.AND);
+      urlBuilder.append(WebUserSetFields.REQUEST_PARAM_POSITION)
+          .append(WebUserSetFields.EQUALS_PARAMETER).append(position);
+    }
+    return getUpdateUserSetResponse(urlBuilder.toString(), itemsJson);
+  }
+  
+  /**
+   * This method updates the UserSet with the given identifier by removing the indicated items. Example HTTP request:
+   * http://localhost:8080/set/{identifier}.jsonld?profile=standard where identifier is: 496 and the
+   * update JSON string is: { "title": {"en":"Sport"},"description": {"en":"Best sport"} }
+   *
+   * @param identifier The identifier that comprise set ID
+   * @param itemsJson The update UserSet body in JSON format
+   * @param profile the requested profile
+   * @return response entity that comprises response body, headers and status code.
+   * @throws IOException if api invocation fails
+   */
+  public UserSet removeItems(String identifier, String itemsJson, String profile) throws SetApiClientException {
+    StringBuilder urlBuilder = getUserSetServiceUri();
+    urlBuilder.append(identifier);
+    urlBuilder.append("/items");
+    urlBuilder.append(WebUserSetFields.PAR_CHAR);
+    if (StringUtils.isNotEmpty(profile)) {
+      urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
+          .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
+    }
+    
+    return getUpdateUserSetResponse(urlBuilder.toString(), itemsJson, true);
+  }
+  
+  /**
+   * This method verifies if the UserSet with the given identifier contains a given item. Example HTTP request:
+   * GET http://localhost:8080/set/{identifier}/{item_dataset}/{item_localId}?profile=standard where identifier is: 496 and the
+   * update JSON string is: { "title": {"en":"Sport"},"description": {"en":"Best sport"} }
+   *
+   * @param setIdentifier The identifier that comprise set ID
+   * @param itemId  using format /{item_dataset}/{item_localId}
+   * @return response entity that comprises response body, headers and status code.
+   * @throws IOException if api invocation fails
+   */
+  public boolean checkItems(String setIdentifier, String itemId) throws SetApiClientException {
+    StringBuilder urlBuilder = getUserSetServiceUri();
+    urlBuilder.append(setIdentifier);
+    urlBuilder.append(itemId);
+    urlBuilder.append(WebUserSetFields.PAR_CHAR);
+   
+    try (CloseableHttpResponse response = getHttpConnection().get(urlBuilder.toString(), null, getAuthenticationHandler())) {
+
+      if (HttpStatus.SC_OK == response.getCode() || HttpStatus.SC_NO_CONTENT == response.getCode())  {
+        return true;
+      } else if (HttpStatus.SC_NOT_FOUND == response.getCode()) {
+        return false;
+      } 
+        throw new SetApiClientException("Cannot interpret API status code:" + response.getCode(), 
+            response.getCode());
+      } catch (IOException e) {
+        int unknownStatusCode = -1;
+        throw new SetApiClientException("API invocation failed!", unknownStatusCode, e);
+      }
+    } 
+  
+  
   /**
    * This method deletes UserSet object by the passed identifier. Example HTTP request:
    * http://localhost:8080/set/{identifier}.jsonld?profile=minimal where identifier is: 494

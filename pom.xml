@@ -43,7 +43,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 
- 		<version.commons.api.sb3>0.1.6</version.commons.api.sb3>
+ 		<version.commons.api.sb3>0.1.7-SNAPSHOT</version.commons.api.sb3>
 
 		<!-- Spring Boot 3 is based on Spring Framework 6.0 and Jakarta EE 9.-->
 		<spring-framework.version>6.0.11</spring-framework.version>

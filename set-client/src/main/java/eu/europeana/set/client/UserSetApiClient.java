@@ -2,7 +2,7 @@ package eu.europeana.set.client;
 
 import java.util.List;
 import java.util.Optional;
-
+import org.codehaus.jettison.json.JSONArray;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.definitions.caching.ResourceCaching;
 import eu.europeana.set.client.config.ClientConfiguration;
@@ -76,6 +76,26 @@ public class UserSetApiClient extends BaseUserSetApi {
         public List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
             return getApiConnection().getPaginationUserSet(identifier, sort, sortOrder, page, pageSize, profile);
         }
+
+        @Override
+        public UserSet addItems(String identifier, List<String> items, String position, String profile)
+            throws SetApiClientException {
+          String requestBody = (new JSONArray(items)).toString();
+          return getApiConnection().addItems(identifier, requestBody, position, profile);
+        }
+        
+        @Override
+        public UserSet removeItems(String identifier, List<String> items, String profile)
+            throws SetApiClientException {
+          String requestBody = (new JSONArray(items)).toString();
+          return getApiConnection().removeItems(identifier, requestBody, profile);
+        }
+        
+        @Override
+        public boolean isItemInSet(String identifier, String itemId, String profile)
+            throws SetApiClientException {
+          return getApiConnection().checkItems(identifier, itemId);
+        }      
     }
 
     private class SearchUserSetClient implements SearchUserSetApi {

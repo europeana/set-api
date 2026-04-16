@@ -50,7 +50,38 @@ public interface WebUserSetApi {
 	 */
 	UserSet updateUserSet(String identifier, String requestBody, String profile) throws SetApiClientException;
 
+	
 	/**
+     * This method updates the user set with the items provided in the request body
+     * @param identifier of the user set
+     * @param items  items to append
+     * @param position optional, the position to start with (>= 0) when inserting items, otherwise appended to the end
+     * @param profile requested profile for results
+     * @return response entity containing body, headers and status code.
+     */
+    UserSet addItems(String identifier, List<String> items, String position, String profile) throws SetApiClientException;
+
+    /**
+     * This method updates the user set by removing the items provided in the request body
+     * @param identifier of the user set
+     * @param items  items to remove
+     * @param profile requested profile for results
+     * @return response entity containing body, headers and status code.
+     */
+    UserSet removeItems(String identifier, List<String> items, String profile) throws SetApiClientException;
+
+    
+    /**
+     * This method verifies id the provided items are available in the given set
+     * @param identifier of the user set
+     * @param itemId id of the item in /datasetId/localId format
+     * @param profile requested profile for results
+     * @return response entity containing body, headers and status code.
+     */
+    boolean isItemInSet(String identifier, String itemId, String profile)
+        throws SetApiClientException;
+      
+    /**
 	 * This method fetches the user set pagination request
 	 * @param identifier set id
 	 * @param sort sort fields
@@ -62,4 +93,5 @@ public interface WebUserSetApi {
 	 * @throws SetApiClientException
 	 */
 	List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, String page, String pageSize, String profile) throws SetApiClientException;
+	
 }

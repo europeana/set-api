@@ -1,9 +1,13 @@
 package eu.europeana.set.search.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
@@ -14,7 +18,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import eu.europeana.api.commons_sb3.auth.AuthenticationHandler;
 import eu.europeana.api.commons_sb3.http.HttpConnection;
-import eu.europeana.api.commons_sb3.http.HttpResponseHandler;
 import eu.europeana.set.definitions.model.BaseWebResource;
 import eu.europeana.set.definitions.model.utils.UserSetUtils;
 import eu.europeana.set.definitions.model.vocabulary.WebUserSetFields;
@@ -197,26 +200,31 @@ public class SearchApiClientImpl implements SearchApiClient {
    */
   public String searchItemDescriptionsAsString(String url, String postBody, AuthenticationHandler auth)
       throws SearchApiClientException {
-    HttpResponseHandler httpResponse;
+    
+    Map<String, String> headers = Map.of(HttpHeaders.CONTENT_TYPE, "application/json");
+    CloseableHttpResponse httpResponse;
     try {
       if (postBody != null) {
-        httpResponse = httpConnection.post(url, postBody, "application/json", auth);
-      } else {
-        httpResponse = httpConnection.get(url, "application/json", auth);
-      }
-      if (httpResponse == null) {
-          throw new SearchApiClientException(SearchApiClientException.MESSAGE_INVALID_ISDEFINEDNBY,
-              null);
-      }
-      
-      if (httpResponse.getStatus() != HttpStatus.SC_OK) {
+        httpResponse = httpConnection.post(url, postBody, headers, auth);
+        } else {
+          httpResponse = httpConnection.get(url, headers, auth);
+        } 
+    } catch (IOException e) {
+          throw new SearchApiClientException(
+              SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
+     }
+
+    try (httpResponse){
+      InputStream content = httpResponse.getEntity().getContent();
+      String body = new String(content.readAllBytes());
+      if (httpResponse.getCode() != HttpStatus.SC_OK) {
         //search request failed
         throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS +
-            " Response status: " + httpResponse.getStatus() + " Response body: " + httpResponse.getResponse(),
+            " Response status: " + httpResponse.getCode() + " Response body: " + body,
             null);
       }
       //return response body
-      return httpResponse.getResponse();
+      return body;
     } catch (IOException e) {
       throw new SearchApiClientException(
           SearchApiClientException.MESSAGE_CANNOT_ACCESS_API + e.getMessage(), e);
