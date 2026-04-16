@@ -17,8 +17,9 @@ public interface WebUserSetApi {
 	/**
 	 * This method creates user set describing it in body JSON string.
 	 * @param requestBody Contains the body JSON string
-	 * @param profile
+	 * @param profile serialization profile
 	 * @return response entity containing body, headers and status code.
+	 * @throws SetApiClientException if invocation fails
 	 */
 	UserSet createUserSet(String requestBody, String profile) throws SetApiClientException;
 	
@@ -30,24 +31,27 @@ public interface WebUserSetApi {
 	 * @param caching Resource caching object for the caching responses.
 	 *                If null/empty will return the normal response with any caching headers being set
 	 * @return response entity that contains response body, headers and status code.
-	 */
-	Optional<UserSet> getUserSet(String identifier, Optional<String> profile, Optional<ResourceCaching> caching) throws SetApiClientException;
+	 * @throws SetApiClientException if invocation fails
+     */
+	Optional<UserSet> getUserSet(String identifier, String profile, ResourceCaching caching) throws SetApiClientException;
 	
 	/**
 	 * This method deletes user set by the given identifier
-	 * @param identifier
+	 * @param identifier set identifier
 	 * @return response entity containing headers and status code.
-	 */
+	 * @throws SetApiClientException if invocation fails
+     */
 	String deleteUserSet(
 			String identifier) throws SetApiClientException;
 	
 	/**
 	 * This method updates user set by the given update string in JSON format
-	 * @param identifier 
-	 * @param requestBody
-	 * @param profile
+	 * @param identifier  set identifier
+	 * @param requestBody body
+	 * @param profile serialization profile
 	 * @return response entity containing body, headers and status code.
-	 */
+	 * throws SetApiClientException if invocation fails
+     */
 	UserSet updateUserSet(String identifier, String requestBody, String profile) throws SetApiClientException;
 
 	
@@ -58,6 +62,7 @@ public interface WebUserSetApi {
      * @param position optional, the position to start with (>= 0) when inserting items, otherwise appended to the end
      * @param profile requested profile for results
      * @return response entity containing body, headers and status code.
+     * @throws SetApiClientException if invocation fails
      */
     UserSet addItems(String identifier, List<String> items, String position, String profile) throws SetApiClientException;
 
@@ -67,6 +72,7 @@ public interface WebUserSetApi {
      * @param items  items to remove
      * @param profile requested profile for results
      * @return response entity containing body, headers and status code.
+     * @throws SetApiClientException if invocation fails
      */
     UserSet removeItems(String identifier, List<String> items, String profile) throws SetApiClientException;
 
@@ -77,6 +83,7 @@ public interface WebUserSetApi {
      * @param itemId id of the item in /datasetId/localId format
      * @param profile requested profile for results
      * @return response entity containing body, headers and status code.
+     * @throws SetApiClientException if invocation fails
      */
     boolean isItemInSet(String identifier, String itemId, String profile)
         throws SetApiClientException;
@@ -89,9 +96,9 @@ public interface WebUserSetApi {
 	 * @param page page number
 	 * @param pageSize size of the page
 	 * @param profile profile requested
-	 * @return
-	 * @throws SetApiClientException
-	 */
+	 * @return list of record previews
+	 * @throws SetApiClientException if invocation fails
+     */
 	List<RecordPreview> getPaginationUserSet(String identifier, String sort, String sortOrder, String page, String pageSize, String profile) throws SetApiClientException;
 	
 }

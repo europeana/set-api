@@ -77,7 +77,7 @@ public class UserSetClientExceptionsTest extends BaseUserSetClientTest {
     @Test
     public void getUserSetWithWrongIdentifier() {
         try {
-            apiClient.getWebUserSetApi().getUserSet(WRONG_GENERATED_IDENTIFIER, Optional.empty(), Optional.empty());
+            apiClient.getWebUserSetApi().getUserSet(WRONG_GENERATED_IDENTIFIER, null, null);
         } catch (SetApiClientException e) {
             assertEquals(HttpStatus.SC_NOT_FOUND, e.getRemoteStatusCode());
         }

@@ -63,7 +63,7 @@ public class UserSetApiClient extends BaseUserSetApi {
         }
 
         @Override
-        public Optional<UserSet> getUserSet(String identifier, Optional<String> profile, Optional<ResourceCaching> caching) throws SetApiClientException {
+        public Optional<UserSet> getUserSet(String identifier, String profile, ResourceCaching caching) throws SetApiClientException {
             return getApiConnection().getUserSet(identifier, profile, caching);
 
         }

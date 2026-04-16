@@ -2,6 +2,7 @@ package eu.europeana.api.set.integration.connection.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -61,7 +62,7 @@ public class EuropeanaOauthClient {
 
       if (HttpStatus.SC_OK == response.getCode()) {
         InputStream content = response.getEntity().getContent();
-        String body = new String(content.readAllBytes());
+        String body = new String(content.readAllBytes(), StandardCharsets.UTF_8);
         JSONObject json = new JSONObject(body);
         if (json.has(accessToken)) {
           return "Bearer " + json.getString(accessToken);

@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -181,7 +180,7 @@ public abstract class BaseUserSetClientTest extends MongoContainerStarter{
 
   protected UserSet getUserSet(UserSet set) throws SetApiClientException {
     return apiClient.getWebUserSetApi()
-        .getUserSet(set.getIdentifier(), Optional.empty(), Optional.empty()).get();
+        .getUserSet(set.getIdentifier(), null, null).get();
   }
 
 

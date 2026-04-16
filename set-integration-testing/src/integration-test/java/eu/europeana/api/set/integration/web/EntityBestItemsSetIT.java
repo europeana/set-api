@@ -1,20 +1,12 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.model.UserSet;

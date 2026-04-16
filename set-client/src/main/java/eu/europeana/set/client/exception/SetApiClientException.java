@@ -3,8 +3,9 @@ package eu.europeana.set.client.exception;
 public class SetApiClientException extends Exception {
 
     private static final long serialVersionUID = 8281933808897246375L;
+    public static final  int UNAVAILABLE_STATUS_CODE = -1;
     private final int remoteStatusCode;
-    public static final  int UNAVAILABLE_STATUS_CODE = -1; 
+    
 
     /**
      * Constructor for exception to indicate that an error occurred during invocation of the remote

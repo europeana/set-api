@@ -9,10 +9,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -110,7 +110,7 @@ public class BaseApiConnection {
    * @return
    * @throws SetApiClientException
    */
-  protected Optional<UserSet> getUserSetResponse(String url, Optional<ResourceCaching> caching)
+  protected Optional<UserSet> getUserSetResponse(String url, ResourceCaching caching)
       throws SetApiClientException {
 
     LOGGER.trace("Call to Get UserSet API (GET) : {}.", url);
@@ -141,15 +141,14 @@ public class BaseApiConnection {
   }
 
   private void setCachingHeaders(Map<String, String> headers,
-      Optional<ResourceCaching> cachingOptional) {
-    if (cachingOptional.isPresent()) {
-      ResourceCaching apiCaching = cachingOptional.get();
-      if (apiCaching.getETag() != null) {
-        headers.put(HttpHeaders.IF_NONE_MATCH, apiCaching.getETag().getValue());
+      ResourceCaching caching) {
+    if (caching != null) {
+      if (caching.getETag() != null) {
+        headers.put(HttpHeaders.IF_NONE_MATCH, caching.getETag().getValue());
       }
-      if (apiCaching.getLastModified() != null) {
+      if (caching.getLastModified() != null) {
         headers.put(HttpHeaders.IF_MODIFIED_SINCE,
-            apiCaching.getLastModified().format(DateTimeFormatter.RFC_1123_DATE_TIME));
+            caching.getLastModified().format(DateTimeFormatter.RFC_1123_DATE_TIME));
       }
     }
   }
@@ -159,20 +158,20 @@ public class BaseApiConnection {
    * @param cachingHeaders Http response caching headers
    * @param apiCaching resource caching
    */
-  private void updateResourceCaching(Header[] cachingHeaders,  Optional<ResourceCaching> apiCaching) {
-      if(apiCaching == null || apiCaching.isEmpty()) {
+  private void updateResourceCaching(Header[] cachingHeaders,  ResourceCaching apiCaching) {
+      if(apiCaching == null) {
         return;
       }
       
       for (Header h: cachingHeaders) {
           if (StringUtils.equals(h.getName(), CachingHeaders.ETAG)) {
-              apiCaching.get().setETag(CachingUtils.parseETag(new WeakETag(h.getValue()).format()));
+              apiCaching.setETag(CachingUtils.parseETag(new WeakETag(h.getValue()).format()));
           }
           if (StringUtils.equals(h.getName(), CachingHeaders.LAST_MODIFIED)) {
-              apiCaching.get().setLastModified(DateUtils.parseRFCToZonedDateTime(h.getValue()));
+              apiCaching.setLastModified(DateUtils.parseRFCToZonedDateTime(h.getValue()));
           }
           if (StringUtils.equals(h.getName(), CachingHeaders.CACHE_CONTROL)) {
-              apiCaching.get().setCacheControl(h.getValue());
+              apiCaching.setCacheControl(h.getValue());
           }
       }
   }
@@ -285,7 +284,7 @@ public class BaseApiConnection {
       }
 
     } catch (UnsupportedOperationException | IOException e) {
-      throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), response.getCode());
+      throw new SetApiClientException(ERROR_MESSAGE + e.getMessage(), response.getCode(), e);
     }
   }
 
@@ -300,7 +299,7 @@ public class BaseApiConnection {
    * @return
    * @throws SetApiClientException
    */
-  protected List<RecordPreview> getUserSetPaginatedResponse(String url, String profile)
+  protected List<RecordPreview> getUserSetPaginatedResponse(String url)
       throws SetApiClientException {
 
     LOGGER.trace("Call to Get UserSet API (Paginated): {} ", url);
@@ -329,7 +328,7 @@ public class BaseApiConnection {
   }
 
   Map<String, String> buildContentTypeHeaders() {
-    Map<String, String> headers = new HashMap<>();
+    Map<String, String> headers = new ConcurrentHashMap<>();
     headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
     return headers;
   }
@@ -342,7 +341,7 @@ public class BaseApiConnection {
    * @return
    * @throws SetApiClientException
    */
-  protected List<? extends UserSet> getSearchUserSetResponse(String url, String profile)
+  protected List<UserSet> getSearchUserSetResponse(String url, String profile)
       throws SetApiClientException {
 
     LOGGER.trace("Call to UserSet API (SEARCH): {} ", url);
@@ -415,13 +414,14 @@ public class BaseApiConnection {
   /**
    * Build paginated user set get url
    * 
-   * @param path
-   * @param sort
-   * @param sortOrder
-   * @param page
-   * @param pageSize
-   * @param profile
-   * @return
+   * @param path endpoint to call
+   * @param sort sort field
+   * @param sortOrder sort order
+   * @param page page to retrieve
+   * @param pageSize size of retrieved page
+   * @param profile to be used in request
+   * @return the built URI
+   * @throws SetApiClientException if the URI cannot be built
    */
   public static URI buildPaginatedGetUrls(String path, String sort, String sortOrder, String page,
       String pageSize, String profile) throws SetApiClientException {

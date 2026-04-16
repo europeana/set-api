@@ -48,7 +48,7 @@ public class UserSetClientTest extends BaseUserSetClientTest {
 		String testSetId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
-		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, Optional.empty(), Optional.empty()).get();
+		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, null, null).get();
 		assertNotNull(userSet);
 		assertEquals(testSetId, userSet.getIdentifier());
 		deleteCreatedSets();

@@ -56,11 +56,11 @@ public class UserSetApiConnection extends BaseApiConnection {
      * @throws IOException
      * @return userset
      */
-    public Optional<UserSet> getUserSet(String identifier, Optional<String> profile, Optional<ResourceCaching> caching)
+    public Optional<UserSet> getUserSet(String identifier, String profile, ResourceCaching caching)
             throws SetApiClientException {
         StringBuilder urlBuilder = getUserSetServiceUri().append(buildGetUrls(
                 identifier + WebUserSetFields.JSON_LD_REST,
-                profile.isPresent() ? profile.get() : null));
+                profile));
         return getUserSetResponse(urlBuilder.toString(), caching);
     }
 
@@ -97,20 +97,18 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @param position optional, the position to start with (>= 0) when inserting items, otherwise appended to the end
    * @param profile the requested profile
    * @return response entity that comprises response body, headers and status code.
-   * @throws IOException if api invocation fails
+   * @throws SetApiClientException if api invocation fails
    */
   public UserSet addItems(String identifier, String itemsJson, String position, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
-    urlBuilder.append(identifier);
-    urlBuilder.append("/items");
-    urlBuilder.append(WebUserSetFields.PAR_CHAR);
+    urlBuilder.append(identifier).append("/items").append(WebUserSetFields.PAR_CHAR);
     if (StringUtils.isNotEmpty(profile)) {
       urlBuilder.append(CommonApiConstants.QUERY_PARAM_PROFILE)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(profile);
     }
     if(StringUtils.isNotEmpty(position)) {
-      urlBuilder.append(WebUserSetFields.AND);
-      urlBuilder.append(WebUserSetFields.REQUEST_PARAM_POSITION)
+      urlBuilder.append(WebUserSetFields.AND)
+          .append(WebUserSetFields.REQUEST_PARAM_POSITION)
           .append(WebUserSetFields.EQUALS_PARAMETER).append(position);
     }
     return getUpdateUserSetResponse(urlBuilder.toString(), itemsJson);
@@ -125,7 +123,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @param itemsJson The update UserSet body in JSON format
    * @param profile the requested profile
    * @return response entity that comprises response body, headers and status code.
-   * @throws IOException if api invocation fails
+   * @throws SetApiClientException if api invocation fails
    */
   public UserSet removeItems(String identifier, String itemsJson, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
@@ -148,7 +146,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    * @param setIdentifier The identifier that comprise set ID
    * @param itemId  using format /{item_dataset}/{item_localId}
    * @return response entity that comprises response body, headers and status code.
-   * @throws IOException if api invocation fails
+   * @throws SetApiClientException if api invocation fails
    */
   public boolean checkItems(String setIdentifier, String itemId) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
@@ -178,7 +176,7 @@ public class UserSetApiConnection extends BaseApiConnection {
    *
    * @param identifier The identifier that comprise set ID
    * @return response entity that comprises response headers and status code.
-   * @throws IOException
+   * @throws SetApiClientException if invocation fails
    */
   public String deleteUserSet(String identifier) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri();
@@ -188,37 +186,37 @@ public class UserSetApiConnection extends BaseApiConnection {
 
   /**
    * This method fetches the get user set pagination results
-   * @param identifier
-   * @param sort
-   * @param sortOrder
-   * @param page
-   * @param pageSize
-   * @param profile
-   * @return
-   * @throws SetApiClientException
+   * @param identifier set identifier
+   * @param sort sort field
+   * @param sortOrder sort order
+   * @param page page to retrieve
+   * @param pageSize size of retrieved page
+   * @param profile serialization profile
+   * @return the list with record previews
+   * @throws SetApiClientException if invocation fails
    */
   public List<RecordPreview> getPaginationUserSet(String identifier, String sort,
                                                   String sortOrder, String page, String pageSize, String profile) throws SetApiClientException {
     StringBuilder urlBuilder = getUserSetServiceUri().append(
             buildPaginatedGetUrls(identifier + WebUserSetFields.JSON_LD_REST, sort, sortOrder, page, pageSize, profile));
-    return getUserSetPaginatedResponse(urlBuilder.toString(), profile);
+    return getUserSetPaginatedResponse(urlBuilder.toString());
 
   }
   /**
    * This method searches usersets for the given queries and params
    * Example : /set/search?query=visibility:published&pageSize=1000
-   * @param query
-   * @param qf
-   * @param sort
-   * @param page
-   * @param pageSize
-   * @param facet
-   * @param facetLimit
-   * @param profile
-   * @return
-   * @throws IOException
+   * @param query the search query
+   * @param qf query filtering 
+   * @param sort sort field 
+   * @param page page to retrieve
+   * @param pageSize size of retrieved page
+   * @param facet facet to retrieve
+   * @param facetLimit numer of retrieved facets
+   * @param profile serialization profile 
+   * @return list of sets
+   * @throws SetApiClientException if invocation fails
    */
-  public List<? extends UserSet> searchUserSet(String query, String[] qf
+  public List<UserSet> searchUserSet(String query, String[] qf
                                              , String sort
                                              , String page, String pageSize
                                              , String facet, int facetLimit

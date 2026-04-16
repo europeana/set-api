@@ -2,6 +2,7 @@ package eu.europeana.api.set.integration.migrations;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,23 +16,45 @@ import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.client.web.WebUserSetApi;
 import eu.europeana.set.definitions.model.UserSet;
 
+/**
+ * Utility class for generating depictions
+ */
 public class GenerateDepictions {
 
   private static final Logger LOG = LogManager.getLogger(GenerateDepictions.class);
 
-  public static void main(String args[]) throws Exception {
+  /**
+   * Main method
+   * @param args not used
+   */
+  public static void main(String[] args) {
 
-    ClientConfiguration clientConfig = new ClientConfiguration();
-    UserSetApiClient apiClient = new UserSetApiClient(clientConfig);
-    WebUserSetApi webUserSetApi = apiClient.getWebUserSetApi();
+    
+    WebUserSetApi webUserSetApi;
+    try {
+      ClientConfiguration clientConfig = new ClientConfiguration();
+      UserSetApiClient apiClient = new UserSetApiClient(clientConfig);
 
-    List<String> ids = getSetIdsNoDepiction();
+      webUserSetApi = apiClient.getWebUserSetApi();
+    } catch (SetApiClientException e) {
+      LOG.error("Cannot instnatiate client:", e);
+      return;
+    }
+
+    List<String> ids;
+    try {
+      ids = getSetIdsNoDepiction();
+    } catch (JSONException | IOException e) {
+      LOG.error("Cannot ret set ids to update:", e);
+      return;
+    }
 
     for (String id : ids) {
       try {
         updateDepiction(webUserSetApi, id);
       } catch (SetApiClientException e) {
-        LOG.error("Cannot update depiction for userset:  {}, error: {}", id, e.getMessage());
+        String message = e.getMessage();
+        LOG.error("Cannot update depiction for userset:  {}, error: {}", id, message);
       }
     }
   }
@@ -39,9 +62,9 @@ public class GenerateDepictions {
   static List<String> getSetIdsNoDepiction() throws JSONException, IOException {
     InputStream idsStream =
         GenerateDepictions.class.getResourceAsStream("/migration/set_no_depiction_prod.txt");
-    String content = new String(idsStream.readAllBytes());
+    String content = new String(idsStream.readAllBytes(), StandardCharsets.UTF_8);
     JSONArray objs = new JSONArray(content);
-    List<String> ids = new ArrayList<String>(objs.length());
+    List<String> ids = new ArrayList<>(objs.length());
     for (int ix = 0; ix < objs.length(); ix++) {
       ids.add(objs.getJSONObject(ix).getString("identifier"));
     }
@@ -51,16 +74,16 @@ public class GenerateDepictions {
   static void updateDepiction(WebUserSetApi webUserSetApi, String setIdentifier)
       throws SetApiClientException {
     Optional<UserSet> setOptional =
-        webUserSetApi.getUserSet(setIdentifier, Optional.empty(), Optional.empty());
+        webUserSetApi.getUserSet(setIdentifier, null, null);
     if (setOptional.isEmpty()) {
       LOG.error("Cannot fetch userset:  {}", setIdentifier);
-      
+
       return;
     }
 
     if (setOptional.get().getIsShownBy() != null) {
       String depiction = setOptional.get().getIsShownBy().getThumbnail();
-      LOG.error("The set allready has a depiction: {} - {}", depiction);
+      LOG.error("The set allready has a depiction: {} - {}", setIdentifier, depiction);
     }
 
     List<String> items = List.of("http://data.europeana.eu/item/2020737/object_KUAS_2720630");

@@ -10,9 +10,9 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String USER_SET_APPLICATION_NAME  = "webuserset";
     public static final char SLASH                      = '/';
     public static final char PAR_CHAR                   = '?';
-    public static final String AND                        = "&";
-    public static final String COMMA                      = ",";
-    public static final String SPACE                      = " ";
+    public static final char AND                        = '&';
+    public static final char COMMA                      = ',';
+    public static final char SPACE                      = ' ';
     public static final char EQUALS_PARAMETER           = '=';
     public static final String JSON_LD_REST               = ".jsonld";
     public static final String FORMAT_JSONLD              = "jsonld";
@@ -67,7 +67,7 @@ public class WebUserSetFields extends WebUserSetModelFields {
     public static final String START_INDEX = "startIndex";
    
     // Serialization Constants
-    public static final String SEPARATOR_SEMICOLON        = ":";
+    public static final char SEPARATOR_SEMICOLON        = ':';
 
     // Entity user set and Elevation Constants
     public static final String ELEVATION_FILENAME        = "elevate.xml";

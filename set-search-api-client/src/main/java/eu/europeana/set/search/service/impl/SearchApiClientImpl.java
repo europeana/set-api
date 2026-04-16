@@ -3,6 +3,7 @@ package eu.europeana.set.search.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -216,7 +217,7 @@ public class SearchApiClientImpl implements SearchApiClient {
 
     try (httpResponse){
       InputStream content = httpResponse.getEntity().getContent();
-      String body = new String(content.readAllBytes());
+      String body = new String(content.readAllBytes(), StandardCharsets.UTF_8);
       if (httpResponse.getCode() != HttpStatus.SC_OK) {
         //search request failed
         throw new SearchApiClientException(SearchApiClientException.MESSAGE_CANNOT_RETRIEVE_ITEMS +
