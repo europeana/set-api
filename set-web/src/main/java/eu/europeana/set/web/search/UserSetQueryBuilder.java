@@ -282,7 +282,7 @@ public class UserSetQueryBuilder extends QueryBuilder {
   private void parseCriterion(Map<String, Object> criteria, String criterion)
       throws InvalidParamException {
     String toParse = criterion;
-    String separator = WebUserSetFields.SEPARATOR_SEMICOLON;
+    String separator = ""+WebUserSetFields.SEPARATOR_SEMICOLON;
     String space = " ";
     String field;
     String value;

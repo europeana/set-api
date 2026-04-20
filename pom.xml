@@ -43,14 +43,14 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 
- 		<version.commons.api.sb3>0.1.6</version.commons.api.sb3>
+ 		<version.commons.api.sb3>0.1.7-SNAPSHOT</version.commons.api.sb3>
 
 		<!-- Spring Boot 3 is based on Spring Framework 6.0 and Jakarta EE 9.-->
-		<spring-framework.version>6.0.11</spring-framework.version>
+		<spring-framework.version>6.2.17</spring-framework.version>
+		<version.springBoot>3.5.12</version.springBoot>
 		<swagger.version>3.0.0</swagger.version>
- 		<version.springBoot>3.3.5</version.springBoot>
-		<springdoc.version>2.3.0</springdoc.version>
-
+ 		<springdoc.version>2.3.0</springdoc.version>
+ 		
 		<!--To have custom date time format for the build info-->
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -60,13 +60,13 @@
 		<version.morphia>1.6.1</version.morphia>
 		
 
-		<version.httpClient5>5.4.1</version.httpClient5>
-		<version.jakarta.annotation>2.1.1</version.jakarta.annotation>
+		<version.httpClient5>5.5.2</version.httpClient5>
+		<version.jakarta.annotation>3.0.0</version.jakarta.annotation>
 		<version.jakarta-ws.rs>4.0.0</version.jakarta-ws.rs>
-		<version.jettison>1.3</version.jettison>
- 		<version.junit>5.7.2</version.junit>
-		<version.commonsIO>2.8.0</version.commonsIO>
-		<jackson.version>2.18.3</jackson.version>
+		<version.jettison>1.5.4</version.jettison>
+ 		<version.junit>6.0.1</version.junit>
+		<version.commonsIO>2.20.0</version.commonsIO>
+		<jackson.version>2.19.4</jackson.version>
 		<!-- java version properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

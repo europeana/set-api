@@ -1,20 +1,12 @@
 package eu.europeana.api.set.integration.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.api.commons_sb3.error.EuropeanaApiErrorResponse;
-import eu.europeana.api.commons_sb3.error.config.ErrorConfig;
-import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import eu.europeana.api.commons_sb3.definitions.oauth.Operations;
+import eu.europeana.api.commons_sb3.error.config.ErrorMessage;
 import eu.europeana.api.set.integration.IntegrationTestSetup;
 import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.definitions.model.UserSet;
@@ -370,7 +363,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     String result = mockMvc
         .perform(
             put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinnedItem")
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
+                .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION,
                     WebUserSetModelFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -479,7 +472,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
         .perform(
             put(BASE_URL + "{identifier}/items", identifier)
                 .content(newItemsJson.toString())
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION,
+                .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION,
                     WebUserSetModelFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
@@ -602,7 +595,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     mockMvc.perform(
         put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "01", "123_pinUnpinItem")
-            .queryParam(WebUserSetFields.PATH_PARAM_POSITION, "3")
+            .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION, "3")
             .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
@@ -638,7 +631,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
 
     mockMvc.perform(
         put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "04", "123_pinUnpinItem")
-            .queryParam(WebUserSetFields.PATH_PARAM_POSITION, "5")
+            .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION, "5")
             .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();
@@ -679,7 +672,7 @@ public class EntityBestItemsSetIT extends IntegrationTestSetup {
     mockMvc
         .perform(
             put(BASE_URL + "{identifier}/{datasetId}/{localId}", identifier, "02", "normal_item")
-                .queryParam(WebUserSetFields.PATH_PARAM_POSITION, WebUserSetFields.POSITION_PIN)
+                .queryParam(WebUserSetFields.REQUEST_PARAM_POSITION, WebUserSetFields.POSITION_PIN)
                 .header(HttpHeaders.AUTHORIZATION, editor2UserToken)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().is(HttpStatus.OK.value())).andReturn().getResponse();

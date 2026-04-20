@@ -3,15 +3,13 @@ package eu.europeana.api.set.integration.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
-import java.util.Optional;
-
-import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import eu.europeana.api.set.integration.exception.SetIntegrationException;
 import eu.europeana.set.client.exception.SetApiClientException;
 import eu.europeana.set.definitions.model.UserSet;
 
@@ -48,7 +46,7 @@ public class UserSetClientTest extends BaseUserSetClientTest {
 		String testSetId = storeTestUserSet(BaseUserSetClientTest.USER_SET_CONTENT, null);
 		assertNotNull(testSetId);
 		// get user set by ID and user identifier
-		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, Optional.empty(), Optional.empty()).get();
+		UserSet userSet = apiClient.getWebUserSetApi().getUserSet(testSetId, null, null).get();
 		assertNotNull(userSet);
 		assertEquals(testSetId, userSet.getIdentifier());
 		deleteCreatedSets();

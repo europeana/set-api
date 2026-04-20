@@ -1,0 +1,1 @@
+db.getCollection('userset').find({type:"Collection", items: { $exists : true},  isShownBy : { $exists : false}}, {identifier:1}).sort({identifier: 1}).limit(2000)

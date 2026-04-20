@@ -145,10 +145,10 @@ public class SetProfileHelper {
   }
 
   private String[] toStringArray(String profileStr) {
-    String separator;
-    if (profileStr.contains(WebUserSetFields.COMMA)) {
+    char separator;
+    if (profileStr.indexOf(WebUserSetFields.COMMA) >= 0) {
       separator = WebUserSetFields.COMMA;
-    } else if (profileStr.contains(WebUserSetFields.SPACE)) {
+    } else if (profileStr.indexOf(WebUserSetFields.SPACE) >= 0) {
       separator = WebUserSetFields.SPACE;
     } else {
       // no separator convert to array
