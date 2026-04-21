@@ -624,8 +624,6 @@ public class WebUserSetRest extends BaseRest {
         }
       }
 
-//      // for entity user sets, add users with 'editor' role as contributors
-//      addContributorForEntitySet(existingUserSet, authentication);
       // check if the Set is disabled, respond with HTTP 410
       HttpStatus httpStatus = null;
 
