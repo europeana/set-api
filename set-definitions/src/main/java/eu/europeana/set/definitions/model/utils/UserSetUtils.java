@@ -175,9 +175,10 @@ public class UserSetUtils {
   }
 
   /**
-   * extract item local id from data.europeana URI
+   * extract item local id from the full record URI, when the base endpoint is given
    * 
-   * @param dataEuropeanaUri
+   * @param dataEuropeanaUri the full Record URI
+   * @param the base item endpoint
    * @return
    */
   public static String extractItemIdentifier(String dataEuropeanaUri, String itemDataEndpoint) {
@@ -192,10 +193,10 @@ public class UserSetUtils {
   }
 
   /**
-   * extract item local id from data.europeana URI
+   * extract item local id from full record URI
    * 
-   * @param dataEuropeanaUri
-   * @return
+   * @param dataEuropeanaUri the full Record URI
+   * @return the local identifies i.e. /dataset_id/local_id
    */
   public static String extractItemIdentifier(String dataEuropeanaItemUri) {
     String[] parts = StringUtils.split(dataEuropeanaItemUri, WebUserSetFields.SLASH);

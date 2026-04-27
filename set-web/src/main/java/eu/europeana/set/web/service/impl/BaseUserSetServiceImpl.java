@@ -67,7 +67,7 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
 
   SearchApiUtils userSetSearchApiUtils = SearchApiUtils.getInstance();
 
-  private SearchApiClient searchApiClient = new SearchApiClientImpl();
+  private SearchApiClient searchApiClient;
 
   Logger logger = LogManager.getLogger(getClass());
   
@@ -94,6 +94,9 @@ public abstract class BaseUserSetServiceImpl implements UserSetService {
   }
 
   public SearchApiClient getSearchApiClient() {
+    if(searchApiClient == null) {
+      searchApiClient = new SearchApiClientImpl(getConfiguration().getItemDataEndpoint());
+    }
     return searchApiClient;
   }
 

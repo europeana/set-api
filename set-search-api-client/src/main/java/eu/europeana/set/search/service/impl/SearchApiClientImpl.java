@@ -34,10 +34,24 @@ import eu.europeana.set.search.service.SearchApiResponse;
  */
 public class SearchApiClientImpl implements SearchApiClient {
 
+  public static final String EDM_PREVIEW = "edmPreview";
+  public static final String EDM_ID = "id";
+  public static final String PARAM_URI = "uri";
+  
   private static final Logger LOGGER = LogManager.getLogger(SearchApiClientImpl.class);
-
+  
+  private final String dataEndoint;
   private final HttpConnection httpConnection = new HttpConnection(true);
-
+   
+  /**
+   * Constructor setting the data endpoint
+   * @param dataEndoint the data endpoint to be used for building item endpoints
+   */
+  public SearchApiClientImpl(String dataEndoint) {
+    this.dataEndoint = dataEndoint;
+  }
+  
+  
   /**
    * Fetch items from Search api and return the SearchApiResponse with the items list
    * @param uri search api url
@@ -251,8 +265,6 @@ public class SearchApiClientImpl implements SearchApiClient {
                             BaseWebResource depiction, AuthenticationHandler auth)
       throws SearchApiClientException {
 
-    String firstFoundLocalId = null;
-    String firstFoundItemlId = null;
     String searchResult = null;
     try {
       searchResult = searchItemDescriptionsAsString(searchApiFullUrl, searchPostBody, auth);
@@ -261,31 +273,19 @@ public class SearchApiClientImpl implements SearchApiClient {
         //no results found
         return;
       }
-      //search the first found itemId in the search results
-      for (String itemId : itemIds) {
-        String localId =
-            UserSetUtils.extractItemIdentifier(itemId, itemDataEndpoint);
-        String recordIdJsonString = UserSetUtils.buildRecordIdJsonString(localId, false, false);
-        if(searchResult.contains(recordIdJsonString)) {
-          firstFoundLocalId = localId;
-          firstFoundItemlId = itemId;
-          break;
-        }
-      }
       
-      if(firstFoundLocalId == null) {
-        //none found
-        return;
-      }
-      
+      //select item with depiction
       //find the json node of the first found item and fill depiction
       for (int i = 0; i < itemsArray.length(); i++) {
         JSONObject recordJsonObject = itemsArray.getJSONObject(i);
-        //process
-        if(firstFoundLocalId.equals(recordJsonObject.getString("id"))) { 
-          fillDepictionFromRecord(firstFoundItemlId, recordJsonObject, depiction);
-          break;
+        if(!recordJsonObject.has(EDM_PREVIEW)) {
+          //no preview
+          continue;
         }
+        
+        //not guaranteed to be the first set's item with depiction, but for the fallback we keep it simple 
+        fillDepictionFromRecord(recordJsonObject, depiction);
+          break;  
       }
      } catch (JSONException e) {
       throw new SearchApiClientException(
@@ -303,7 +303,7 @@ public class SearchApiClientImpl implements SearchApiClient {
       if(items == null || items.length() < 1) {
         return;
       }
-      fillDepictionFromRecord(itemId, items.getJSONObject(0), depiction);
+      fillDepictionFromRecord(items.getJSONObject(0), depiction);
     } catch (JSONException e) {
       throw new SearchApiClientException(
           "Cannot extract depiction data from search Api response: " + searchResult, null);
@@ -311,21 +311,29 @@ public class SearchApiClientImpl implements SearchApiClient {
   }
 
 
-  private void fillDepictionFromRecord(String itemId, final JSONObject recordJsonObject,
+  private void fillDepictionFromRecord(final JSONObject recordJsonObject,
       BaseWebResource depiction) throws JSONException, SearchApiClientException {
-    String thumbnail = recordJsonObject.getJSONArray("edmPreview").getString(0);
+    
+    if(recordJsonObject.has(EDM_PREVIEW)) {  
+      String thumbnail = recordJsonObject.getJSONArray(EDM_PREVIEW).getString(0);
+      //id is the IMAGE url
       String resourceId = getResourceId(thumbnail);
-
       depiction.setId(resourceId);
-      depiction.setSource(itemId);
+      
+      //source is the identifier of the EDM record
+      String localID = recordJsonObject.getString(EDM_ID);
+      String fullItemId = UserSetUtils.buildItemUrl(getDataEndoint(), localID);
+      depiction.setSource(fullItemId);
+      //full thumbnail URL
       depiction.setThumbnail(thumbnail);
+     }
   }
 
 
   private String getResourceId(String thumbnailUrl) throws SearchApiClientException {
     NameValuePair uriParam;
     try {
-      uriParam = (new URIBuilder(thumbnailUrl)).getFirstQueryParam("uri");
+      uriParam = (new URIBuilder(thumbnailUrl)).getFirstQueryParam(PARAM_URI);
     } catch (URISyntaxException e) {
       throw new SearchApiClientException(
           "Invalid thumbnail URL: " + thumbnailUrl, e);
@@ -336,5 +344,10 @@ public class SearchApiClientImpl implements SearchApiClient {
           "Cannot extract resource id from thumbnail URL: " + thumbnailUrl, null);
     }
     return uriParam.getValue();
+  }
+
+
+  public String getDataEndoint() {
+    return dataEndoint;
   }
 }
