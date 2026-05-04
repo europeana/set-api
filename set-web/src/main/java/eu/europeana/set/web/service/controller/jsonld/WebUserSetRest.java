@@ -366,7 +366,7 @@ public class WebUserSetRest extends BaseRest {
     return ResponseEntity.ok().header(ALLOW, createAllowHeader(request)).body(serializedUserSetJsonLdStr);
   }
 
-  @Deprecated
+  @Deprecated(since = "V0.13",  forRemoval = true)
   @PutMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> insertItemIntoUserSet(
@@ -577,6 +577,7 @@ public class WebUserSetRest extends BaseRest {
     return positionFinal;
   }
 
+  @Deprecated(since = "V0.14",  forRemoval = true)
   @GetMapping(value = {"/set/{identifier}/{datasetId}/{localId}"},
       produces = {CONTENT_TYPE_JSONLD_UTF8, CONTENT_TYPE_JSON_UTF8})
   public ResponseEntity<String> isItemInUserSet(
