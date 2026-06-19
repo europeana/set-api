@@ -11,6 +11,7 @@ import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
 import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -303,7 +304,7 @@ public class BaseRest extends BaseRestController {
    * @return
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, UserSet storedUserSet,
+  protected ResponseEntity<String> buildSetPageResponse( Authentication authentication,CollectionPage setPage, UserSet storedUserSet,
       SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
@@ -312,6 +313,7 @@ public class BaseRest extends BaseRestController {
     MultiValueMap<String, String> headers = createResponseHeaders(storedUserSet, VALUE_NO_CAHCHE_STORE_REVALIDATE, request);
     headers.add(VARY, PREFER);
     headers.add(PREFERENCE_APPLIED, profile.getPreferenceApplied());
+    addRateLimitHeaders(headers,authentication);
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }
 
@@ -413,6 +415,5 @@ public class BaseRest extends BaseRestController {
   protected SetProfileHelper getProfileHelper() {
     return profileHelper;
   }
-
 
 }

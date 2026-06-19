@@ -227,7 +227,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet, profile, request);
+      return buildSetPageResponse(authentication,itemPage, userSet, profile, request);
   }
 
   private boolean mustFetchItems(UserSet userSet, SetPageProfile profile) {
@@ -640,9 +640,11 @@ public class WebUserSetRest extends BaseRest {
         httpStatus = HttpStatus.NOT_FOUND;
       }
 
-      return ResponseEntity.status(httpStatus).
-              header(ALLOW, createAllowHeader(request)).
-              body("");
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+      headers.add(ALLOW, createAllowHeader(request));
+      addRateLimitHeaders(headers,authentication);
+      return  new ResponseEntity<>("", headers, httpStatus);
+
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY, Arrays.asList(e.getMessage()), e);
     }
