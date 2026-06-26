@@ -110,7 +110,7 @@ public class WebUserSetRest extends BaseRest {
       doPostRetrieveProcessing(storedUserSet, authentication);
 
       // only one profile used as default, no validation required
-      return buildResponseEntity(storedUserSet, SetResourceProfile.META, HttpStatus.CREATED, VALUE_NO_CAHCHE_STORE_REVALIDATE, request);
+      return buildResponseEntity(authentication,storedUserSet, SetResourceProfile.META, HttpStatus.CREATED, VALUE_NO_CAHCHE_STORE_REVALIDATE, request);
     } catch ( UserSetValidationException | UserSetAttributeInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY,
           Arrays.asList(e.getMessage()), e);
@@ -182,7 +182,7 @@ public class WebUserSetRest extends BaseRest {
     // if the Set is disabled respond with HTTP 410
       UserSet userSet = getSetAndVerifyAccess(identifier, authentication);
       doPostRetrieveProcessing(userSet, authentication);
-      return buildResponseEntity(userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
+      return buildResponseEntity(authentication,userSet, SetResourceProfile.META, HttpStatus.OK, null, request);
   }
 
   private void doPostRetrieveProcessing(UserSet userSet, Authentication authentication) throws  EuropeanaApiException{
@@ -227,7 +227,7 @@ public class WebUserSetRest extends BaseRest {
       CollectionPage itemPage =
           getUserSetService().buildCollectionPage(userSet, profile, pageNr, pageSize, request);
 
-      return buildSetPageResponse(itemPage, userSet, profile, request);
+      return buildSetPageResponse(authentication,itemPage, userSet, profile, request);
   }
 
   private boolean mustFetchItems(UserSet userSet, SetPageProfile profile) {
@@ -292,7 +292,7 @@ public class WebUserSetRest extends BaseRest {
       UserSet updatedUserSet =
           getUserSetService().updateUserSet((PersistentUserSet) existingUserSet, newUserSet, authentication);
 
-      return buildResponseEntity(updatedUserSet, SetResourceProfile.META,
+      return buildResponseEntity(authentication,updatedUserSet, SetResourceProfile.META,
               HttpStatus.OK, null, request);
 
 
@@ -640,9 +640,11 @@ public class WebUserSetRest extends BaseRest {
         httpStatus = HttpStatus.NOT_FOUND;
       }
 
-      return ResponseEntity.status(httpStatus).
-              header(ALLOW, createAllowHeader(request)).
-              body("");
+      MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+      headers.add(ALLOW, createAllowHeader(request));
+      addRateLimitHeaders(headers,authentication);
+      return  new ResponseEntity<>("", headers, httpStatus);
+
     } catch (UserSetValidationException | UserSetInstantiationException e) {
       throw new RequestBodyValidationException(UserSetI18nConstants.USERSET_CANT_PARSE_BODY, Arrays.asList(e.getMessage()), e);
     }

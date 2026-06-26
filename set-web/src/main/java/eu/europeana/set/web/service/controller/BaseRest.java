@@ -11,6 +11,7 @@ import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.HttpHeaders.ETAG;
 import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static jakarta.ws.rs.core.HttpHeaders.VARY;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -263,14 +264,16 @@ public class BaseRest extends BaseRestController {
    *
    */
   protected MultiValueMap<String, String> createResponseHeaders(UserSet userSet,
-                                                                String cacheControlValue,
-                                                                HttpServletRequest request) {
+                                                             String cacheControlValue,
+                                                                HttpServletRequest request,
+                                                                Authentication auth) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(7);
     headers.add(LINK, VALUE_BASIC_CONTAINER);
     headers.add(LINK, VALUE_BASIC_RESOURCE);
     headers.add(ALLOW, createAllowHeader(request));
     headers.add(ETAG, generateETag(userSet.getModified(), FORMAT_JSONLD, getApiVersion()));
     headers.add(LAST_MODIFIED, DateUtils.getRFC_1123_FormatDate(userSet.getModified()));
+    addRateLimitHeaders(headers,auth);
 
     if (StringUtils.isNotEmpty(cacheControlValue)) {
       headers.add(CACHE_CONTROL, cacheControlValue);
@@ -285,12 +288,12 @@ public class BaseRest extends BaseRestController {
     return headers;
   }
 
-  protected ResponseEntity<String> buildResponseEntity(UserSet storedUserSet,
+  protected ResponseEntity<String> buildResponseEntity(Authentication auth,UserSet storedUserSet,
       final SetResourceProfile profile, final HttpStatusCode responseStatus,
        String defaultCacheControl, HttpServletRequest request) throws EuropeanaApiException {
     String serializedUserSetJsonLdStr = serializeUserSet(profile, storedUserSet);
     return new ResponseEntity<>(serializedUserSetJsonLdStr,
-            createResponseHeaders(storedUserSet, defaultCacheControl, request),
+            createResponseHeaders(storedUserSet, defaultCacheControl, request,auth),
             responseStatus);
   }
 
@@ -303,15 +306,16 @@ public class BaseRest extends BaseRestController {
    * @return
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> buildSetPageResponse(CollectionPage setPage, UserSet storedUserSet,
+  protected ResponseEntity<String> buildSetPageResponse( Authentication authentication,CollectionPage setPage, UserSet storedUserSet,
       SetPageProfile profile,HttpServletRequest request) throws EuropeanaApiException {
     String jsonBody = "";
     jsonBody = serializeCollectionPage(setPage);
 
     // build response
-    MultiValueMap<String, String> headers = createResponseHeaders(storedUserSet, VALUE_NO_CAHCHE_STORE_REVALIDATE, request);
+    MultiValueMap<String, String> headers = createResponseHeaders(storedUserSet, VALUE_NO_CAHCHE_STORE_REVALIDATE, request,authentication);
     headers.add(VARY, PREFER);
     headers.add(PREFERENCE_APPLIED, profile.getPreferenceApplied());
+    addRateLimitHeaders(headers,authentication);
     return new ResponseEntity<>(jsonBody, headers, HttpStatus.OK);
   }
 
@@ -413,6 +417,5 @@ public class BaseRest extends BaseRestController {
   protected SetProfileHelper getProfileHelper() {
     return profileHelper;
   }
-
 
 }

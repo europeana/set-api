@@ -104,7 +104,7 @@ public class SearchUserSetRest extends BaseRest {
         request.getQueryString(), serializationProfile, profiles, authentication);
 
     String jsonLd = serializeResultsPage(resultsPage);
-    return buildSearchResponse(jsonLd, request);
+    return buildSearchResponse(jsonLd, request,authentication);
   }
 
   SetPageProfile getSerializationProfile(List<SetPageProfile> profiles) {
@@ -139,13 +139,13 @@ public class SearchUserSetRest extends BaseRest {
     return serializer.serialize(resultsPage);
   }
 
-  private ResponseEntity<String> buildSearchResponse(String jsonLd, HttpServletRequest request) {
+  private ResponseEntity<String> buildSearchResponse(String jsonLd, HttpServletRequest request,Authentication authentication) {
     // build response
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
     headers.add(UserSetHttpHeaders.VARY, AcceptUtils.ACCEPT);
     headers.add(UserSetHttpHeaders.VARY, PREFER);
     headers.add(ALLOW, createAllowHeader(request));
-
+    addRateLimitHeaders(headers,authentication);
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
 
@@ -194,11 +194,11 @@ public class SearchUserSetRest extends BaseRest {
     BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
         identifier, filtered, pageNr, pageItems, profile, request, authentication);
 
-    return buildSetPageResponse(resultPage, request);
+    return buildSetPageResponse(resultPage, request,authentication);
 
   }
 
-  ResponseEntity<String> buildSetPageResponse(BaseUserSetResultPage<String> resultPage, HttpServletRequest request)
+  ResponseEntity<String> buildSetPageResponse(BaseUserSetResultPage<String> resultPage, HttpServletRequest request,Authentication auth)
       throws EuropeanaApiException {
     UserSetLdSerializer serializer = new UserSetLdSerializer();
     String jsonLd = serializer.serialize(resultPage);
@@ -208,6 +208,7 @@ public class SearchUserSetRest extends BaseRest {
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_CONTAINER);
     headers.add(LINK, UserSetHttpHeaders.VALUE_BASIC_RESOURCE);
     headers.add(ALLOW, createAllowHeader(request));
+    addRateLimitHeaders(headers,auth);
 
     return new ResponseEntity<>(jsonLd, headers, HttpStatus.OK);
   }
@@ -300,7 +301,7 @@ public class SearchUserSetRest extends BaseRest {
     BaseUserSetResultPage<String> resultPage = getUserSetService().buildRecordsResultsPage(
         identifier, filtered, pageNr, pageItems, profile, request, authentication);
 
-    return buildSetPageResponse(resultPage, request);
+    return buildSetPageResponse(resultPage, request,authentication);
 
  
   }

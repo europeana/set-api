@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,8 +54,8 @@ public class AuxiliaryMethodsRest extends BaseRest {
     @GetMapping(value = { "/set/elevation" }, produces = {MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<String> generateElevationFile(
             HttpServletRequest request) throws EuropeanaApiException {
-    verifyReadAccess(request);
-    return generateElevation();
+    Authentication auth = verifyReadAccess(request);
+    return generateElevation(auth);
     }
 
     /**
@@ -75,7 +76,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      * @return
      * @throws EuropeanaApiException
      */
-    private ResponseEntity<String> generateElevation() throws EuropeanaApiException {
+    private ResponseEntity<String> generateElevation( Authentication auth) throws EuropeanaApiException {
         List<PersistentUserSet> usersets = getUserSetService().getEntitySetBestBetsItems(
                 getUsageStatsService().buildUserSetQuery(null, UserSetTypes.ENTITYBESTITEMSSET.getJsonValue(), null));
         Elevation elevation = buildElevation(usersets);
@@ -87,9 +88,12 @@ public class AuxiliaryMethodsRest extends BaseRest {
 //            writeElevation(getConfiguration().getElevationFileLocation(), xml);
             // returning the elevation response
             //TODO - remove the body, once we know how elevation file will be used
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8")
-                    .body(xml);
+
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+            headers.add(HttpHeaders.CONTENT_TYPE,MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8");
+            addRateLimitHeaders(headers,auth);
+            return  new ResponseEntity<>(xml, headers, HttpStatus.OK);
+
         } else {
             throw new UserSetNotFoundException(UserSetI18nConstants.ELEVATION_NOT_GENERATED, Collections.emptyList());
         }
@@ -177,7 +181,7 @@ public class AuxiliaryMethodsRest extends BaseRest {
      */
     private ResponseEntity<String> getUsageStats(HttpServletRequest request) throws EuropeanaApiException {
         // authenticate and generate the new statistics
-        verifyReadAccess(request);
+        Authentication auth  = verifyReadAccess(request);
         // create metric
         SetMetric metric = new SetMetric();
         try {
@@ -196,15 +200,15 @@ public class AuxiliaryMethodsRest extends BaseRest {
 
         String json = serializeMetricView(metric);
 
-        return buildUsageStatsResponse(json);
+        return buildUsageStatsResponse(json,auth);
     }
 
-    private ResponseEntity<String> buildUsageStatsResponse(String json) {
+    private ResponseEntity<String> buildUsageStatsResponse(String json,Authentication auth) {
         // build response
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(5);
         headers.add(UserSetHttpHeaders.CACHE_CONTROL, UserSetHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
         headers.add(HttpHeaders.ALLOW, ALLOW_GET);
-
+        addRateLimitHeaders(headers,auth);
         return new ResponseEntity<>(json, headers, HttpStatus.OK);
     }
 
